@@ -1,0 +1,25 @@
+{
+  "editor.formatOnSave": true,
+
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "always"
+  },
+
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  "dotenv.enableAutocloaking": false,
+  "grok.voiceApiKey": "xai-y1OuS234PJAwQM6qSb34bXpdJTVswsZORHaVYSPYoFXs2pNA8D1SNDwNCkrL8hQFMBAtdD0v2XEUK1B1"
+}

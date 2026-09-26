@@ -1,0 +1,170 @@
+import { IdLogicModule } from '@easysofts/id-logic';
+import { Module } from '@nestjs/common';
+import {
+  ConfigModule,
+  ConfigService,
+} from '@nestjs/config';
+import {
+  APP_GUARD,
+  APP_INTERCEPTOR,
+} from '@nestjs/core';
+import {
+  ThrottlerGuard,
+  ThrottlerModule,
+} from '@nestjs/throttler';
+import * as path from 'path';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { AuthLoggingInterceptor } from './common/interceptors/auth-logging.interceptor';
+import { ErrorTransformInterceptor } from './common/interceptors/error-transform.interceptor';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import { CacheModule } from './common/services/cache.module';
+import {
+  getRealIP,
+  isLocalhost,
+} from './common/utils/ip.util';
+import appConfig from './config/app.config';
+import databaseConfig from './config/database.config';
+import {
+  fileConfig,
+  minioConfig,
+} from './config/file.config';
+import mailConfig from './config/mail.config';
+import redisConfig from './config/redis.config';
+import securityConfig from './config/security.config';
+import { DatabaseModule } from './database/database.module';
+import { RedisModule } from './database/redis.module';
+import { HealthController } from './modules/engine/health/health.controller';
+import { S3minioModule } from './modules/engine/s3minio/s3minio.module';
+import { AuthModule } from './modules/engine/user-management/auth/auth.module';
+import { MobileUserModule } from './modules/engine/user-management/mobile-user/mobile-user.module';
+import { UsersModule } from './modules/engine/user-management/users/users.module';
+import { SysOfficeModule } from './modules/system/sys-office/sys-office.module';
+import { NotificationModule } from './modules/notifications/notifications.module';
+import { SysDivisionModule } from './modules/system/sys-division/sys-division.module';
+import { SysOfficeTypeModule } from './modules/system/hrm_office_type/hrm_office_type.module';
+import { JobLogModule } from './modules/system/job-log/job-log.module';
+import { CompanyModule } from './modules/system/sys-company/sys-company.module';
+import { HmacAuthModule } from './modules/engine/hmac-auth/hmac-auth.module';
+import { BullBoardModule } from './modules/engine/queue-dashboard/bull-board.module';
+
+import { HrmMobileAuthFaceModule } from './modules/user-management/hrm-mobile-auth-face/hrm-mobile-auth-face.module';
+import { FeaturesModule } from './modules/user-management/features/feature.module';
+import { RolesModule } from './modules/user-management/roles/roles.module';
+import { PermissionsModule } from './modules/user-management/permissions/permissions.module';
+import { EmailModule } from './modules/email/email.module';
+import { ModulesModule } from './modules/modules/modules.module';
+import { MenuModule } from './modules/menu/menu.module';
+import { ModuleUserModule } from './modules/module-user/module-user.module';
+import { ApprovalsModule } from './modules/approvals/approvals.module';
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [
+        appConfig,
+        securityConfig,
+        databaseConfig,
+        redisConfig,
+        fileConfig,
+        minioConfig,
+        mailConfig,
+      ],
+      envFilePath: path.resolve(
+        __dirname,
+        '../.env',
+      ),
+    }),
+    ThrottlerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        throttlers: [
+          {
+            name: 'default',
+            ttl:
+              config.get(
+                'security.rateLimit.windowMs',
+              ) ?? 15 * 60 * 1000,
+            limit:
+              config.get(
+                'security.rateLimit.max',
+              ) ?? 100,
+          },
+        ],
+        generateKey: (context) => {
+          const request = context
+            .switchToHttp()
+            .getRequest();
+          return getRealIP(request);
+        },
+        skipIf: (context) => {
+          const request = context
+            .switchToHttp()
+            .getRequest();
+          const nodeEnv =
+            process.env.NODE_ENV || 'development';
+          if (nodeEnv !== 'development')
+            return false;
+          const realIP = getRealIP(request);
+          return isLocalhost(realIP);
+        },
+        errorMessage:
+          'Too many requests from this IP, please try again later.',
+      }),
+    }),
+    IdLogicModule.register(),
+    HrmMobileAuthFaceModule,
+    MobileUserModule,
+
+    DatabaseModule,
+    RedisModule,
+    CacheModule,
+    AuthModule,
+    CompanyModule,
+    ModulesModule,
+    FeaturesModule,
+    PermissionsModule,
+    RolesModule,
+    UsersModule,
+    MenuModule,
+    ModuleUserModule,
+    ApprovalsModule,
+    NotificationModule,
+    EmailModule,
+
+    UsersModule,
+
+    // Hrms Report
+    SysDivisionModule,
+    SysOfficeTypeModule,
+    CompanyModule,
+    SysOfficeModule,
+    S3minioModule,
+    SysDivisionModule,
+    JobLogModule,
+    HmacAuthModule,
+    BullBoardModule,
+  ],
+  controllers: [AppController, HealthController],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: AuthLoggingInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TransformInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ErrorTransformInterceptor,
+    },
+  ],
+})
+export class AppModule {}
