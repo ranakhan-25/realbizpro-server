@@ -20,6 +20,6 @@
     "typescript",
     "typescriptreact"
   ],
-  // "dotenv.enableAutocloaking": false,
-  // "grok.voiceApiKey": "xai-y1OuS234PJAwQM6qSb34bXpdJTVswsZORHaVYSPYoFXs2pNA8D1SNDwNCkrL8hQFMBAtdD0v2XEUK1B1"
+  "dotenv.enableAutocloaking": false,
+  "grok.voiceApiKey": "xai-y1OuS234PJAwQM6qSb34bXpdJTVswsZORHaVYSPYoFXs2pNA8D1SNDwNCkrL8hQFMBAtdD0v2XEUK1B1"
 }
