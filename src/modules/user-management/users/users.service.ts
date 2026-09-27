@@ -28,8 +28,45 @@ import { QueryUserDto } from './dto/filterList.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { SysUserCompany } from '../../../database/models/system/sys_user_company.model';
 import { UserTypeEnum } from '../../../database/models/system/sys_user.model';
+import type { SysUserAttributes } from '../../../database/types/sysuser.types';
 
 const DEFAULT_EMPLOYEE_USER_PASSWORD = '123456';
+
+type UserJson = SysUserAttributes & {
+  userOffices?: Array<{
+    office?: {
+      id: number;
+      name: string;
+      slug: string;
+      officeType?: {
+        id: number;
+        name: string;
+        slug: string;
+      } | null;
+    } | null;
+    officeType?: {
+      id: number;
+      name: string;
+      slug: string;
+    } | null;
+  }>;
+  officeIds?: Array<{
+    id: number;
+    name: string;
+    slug: string;
+    officeType?: {
+      id: number;
+      name: string;
+      slug: string;
+    } | null;
+  }>;
+  officeTypeIds?: Array<{
+    id: number;
+    name: string;
+    slug: string;
+  }>;
+  companyIds?: number[];
+};
 
 @Injectable()
 export class UsersService {
@@ -1413,7 +1450,7 @@ export class UsersService {
       return null;
     }
 
-    const userJson = user.toJSON();
+    const userJson: UserJson = user.toJSON();
 
     const userOffices =
       userJson.userOffices || [];
@@ -2021,7 +2058,7 @@ export class UsersService {
       });
 
     const formattedRows = rows.map((user) => {
-      const userJson = user.toJSON();
+      const userJson: UserJson = user.toJSON();
 
       const userOffices =
         userJson.userOffices || [];
