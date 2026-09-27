@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "src",
+  "compilerOptions": {
+    "deleteOutDir": false,
+    "tsConfigPath": "tsconfig.build.json",
+    "assets": [
+      "firebase-service-account.json",
+      {
+        "include": "modules/engine/email/templates/**/*",
+        "outDir": "dist/templates"
+      },
+      {
+        "include": "modules/report/templates/**/*",
+        "outDir": "dist/modules/report/templates"
+      }
+    ],
+    "builder": "tsc",
+    "plugins": ["@nestjs/swagger"]
+  }
+}
