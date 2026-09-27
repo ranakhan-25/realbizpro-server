@@ -1450,7 +1450,7 @@ export class UsersService {
       return null;
     }
 
-    const userJson = user.toJSON() as UserJson;
+    const userJson = user.toJSON() as any;
 
     const userOffices =
       userJson.userOffices || [];
@@ -2058,7 +2058,7 @@ export class UsersService {
       });
 
     const formattedRows = rows.map((user) => {
-      const userJson = user.toJSON() as UserJson;
+      const userJson = user.toJSON() as any;
 
       const userOffices =
         userJson.userOffices || [];
