@@ -973,7 +973,7 @@ export interface ${className}WithRelations extends ${className}Attributes {${
 
 // Configuration
 const config = {
-  modelPath: 'src/database/models/**/*.model.ts',
+  modelPath: ['src/database/models/**/*.model.ts', 'src/database/models/**/*.ts'],
   outputPath: 'src/database/types',
 };
 
