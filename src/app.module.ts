@@ -57,6 +57,8 @@ import { ModulesModule } from './modules/modules/modules.module';
 import { MenuModule } from './modules/menu/menu.module';
 import { ModuleUserModule } from './modules/module-user/module-user.module';
 import { ApprovalsModule } from './modules/approvals/approvals.module';
+import { ProjectTypeModule } from './modules/projects/project-type/project-type.module';
+import { ProjectSiteModule } from './modules/projects/project-site/project-site.module';
 
 @Module({
   imports: [
@@ -145,6 +147,8 @@ import { ApprovalsModule } from './modules/approvals/approvals.module';
     JobLogModule,
     HmacAuthModule,
     BullBoardModule,
+    ProjectTypeModule,
+    ProjectSiteModule,
   ],
   controllers: [AppController, HealthController],
   providers: [
