@@ -99,5 +99,6 @@ export class Project
     allowNull: false,
     defaultValue: ProjectStatusEnum.ONGOING,
   })
+  // declare status: ProjectStatusEnum | string;
   declare status: ProjectStatusEnum | string;
 }
