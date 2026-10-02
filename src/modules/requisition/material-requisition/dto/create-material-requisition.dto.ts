@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {
   ApiProperty,
   ApiPropertyOptional,
@@ -14,16 +15,22 @@ import {
   IsString,
   MaxLength,
 } from 'class-validator';
-import { ApprovalStatusEnum, RequisitionStatusEnum } from 'src/database/models/Requisition/re_material_requisition_model';
- // path adjust করো
+import {
+  ApprovalStatusEnum,
+  RequisitionStatusEnum,
+} from 'src/database/models/Requisition/re_material_requisition_model';
+// path adjust করো
 
 export class CreateMaterialRequisitionDto {
   @ApiProperty({
-    description: 'Unique requisition number (shown as code in UI)',
+    description:
+      'Unique requisition number (shown as code in UI)',
     example: 'taiz00017',
   })
   @IsString()
-  @IsNotEmpty({ message: 'Requisition number is required' })
+  @IsNotEmpty({
+    message: 'Requisition number is required',
+  })
   @MaxLength(100)
   requisitionNo: string;
 
@@ -33,7 +40,9 @@ export class CreateMaterialRequisitionDto {
   })
   @IsOptional()
   @IsString()
-  @Transform(({ value }) => (value === '' ? null : value))
+  @Transform(({ value }) =>
+    value === '' ? null : value,
+  )
   referenceNo?: string;
 
   @ApiPropertyOptional({
@@ -42,7 +51,10 @@ export class CreateMaterialRequisitionDto {
   })
   @IsOptional()
   @Type(() => Date)
-  @IsDate({ message: 'requisitionDate must be a valid date' })
+  @IsDate({
+    message:
+      'requisitionDate must be a valid date',
+  })
   requisitionDate?: Date;
 
   @ApiPropertyOptional({
@@ -51,7 +63,9 @@ export class CreateMaterialRequisitionDto {
   })
   @IsOptional()
   @Type(() => Date)
-  @IsDate({ message: 'demandDate must be a valid date' })
+  @IsDate({
+    message: 'demandDate must be a valid date',
+  })
   demandDate?: Date;
 
   @ApiPropertyOptional({
@@ -60,7 +74,9 @@ export class CreateMaterialRequisitionDto {
   })
   @IsOptional()
   @IsString()
-  @Transform(({ value }) => (value === '' ? null : value))
+  @Transform(({ value }) =>
+    value === '' ? null : value,
+  )
   companyId?: string;
 
   @ApiProperty({
@@ -68,7 +84,9 @@ export class CreateMaterialRequisitionDto {
     example: 'project-uuid',
   })
   @IsString()
-  @IsNotEmpty({ message: 'Project ID is required' })
+  @IsNotEmpty({
+    message: 'Project ID is required',
+  })
   projectId: string;
 
   @ApiProperty({
@@ -76,7 +94,9 @@ export class CreateMaterialRequisitionDto {
     example: 'Foundation Work',
   })
   @IsString()
-  @IsNotEmpty({ message: 'Title of work is required' })
+  @IsNotEmpty({
+    message: 'Title of work is required',
+  })
   @MaxLength(255)
   titleOfWork: string;
 
@@ -86,7 +106,9 @@ export class CreateMaterialRequisitionDto {
   })
   @IsOptional()
   @IsString()
-  @Transform(({ value }) => (value === '' ? null : value))
+  @Transform(({ value }) =>
+    value === '' ? null : value,
+  )
   department?: string;
 
   @ApiPropertyOptional({
@@ -95,7 +117,9 @@ export class CreateMaterialRequisitionDto {
   })
   @IsOptional()
   @IsString()
-  @Transform(({ value }) => (value === '' ? null : value))
+  @Transform(({ value }) =>
+    value === '' ? null : value,
+  )
   addedById?: string;
 
   @ApiPropertyOptional({
@@ -116,7 +140,9 @@ export class CreateMaterialRequisitionDto {
   })
   @IsOptional()
   @IsString()
-  @Transform(({ value }) => (value === '' ? null : value))
+  @Transform(({ value }) =>
+    value === '' ? null : value,
+  )
   attachmentUrl?: string;
 
   @ApiPropertyOptional({
@@ -137,6 +163,8 @@ export class CreateMaterialRequisitionDto {
   })
   @IsOptional()
   @IsString()
-  @Transform(({ value }) => (value === '' ? null : value))
+  @Transform(({ value }) =>
+    value === '' ? null : value,
+  )
   remarks?: string;
 }
