@@ -59,6 +59,9 @@ import { MenuModule } from './modules/menu/menu.module';
 import { ModuleUserModule } from './modules/module-user/module-user.module';
 import { ApprovalsModule } from './modules/approvals/approvals.module';
 import { ProjectTypeModule } from './modules/projects/project-type/project-type.module';
+
+import { RequisitionModule } from './modules/requisition/material-requisition/material-requisition.module';
+import { ProjectModule } from './modules/projects/project/project.module';
 import { ProjectSiteModule } from './modules/projects/project-site/project-site.module';
 import { RequisitionModule } from './modules/requisition/material-requisition/material-requisition.module';
 

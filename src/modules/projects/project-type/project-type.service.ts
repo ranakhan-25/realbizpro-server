@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
-import { Project } from 'src/database/models/projects/pr_project_types_model';
+import { ProjectType } from 'src/database/models/projects/pr_project_types_model';
 import type { CreateProjectDto } from './dto/create-project-type.dto';
 import type { QueryProjectDto } from './dto/query-project-type.dto';
 import type { UpdateProjectDto } from './dto/update-project-type.dto';
@@ -13,13 +13,13 @@ import type { UpdateProjectDto } from './dto/update-project-type.dto';
 @Injectable()
 export class ProjectTypeService {
   constructor(
-    @InjectModel(Project)
-    private readonly projectModel: typeof Project,
+    @InjectModel(ProjectType)
+    private readonly projectModel: typeof ProjectType,
   ) {}
 
   async create(
     dto: CreateProjectDto,
-  ): Promise<Project> {
+  ): Promise<ProjectType> {
     const existing =
       await this.projectModel.findOne({
         where: { code: dto.code },
@@ -96,7 +96,7 @@ export class ProjectTypeService {
 
   async findOne(
     id: string | number,
-  ): Promise<Project> {
+  ): Promise<ProjectType> {
     const project =
       await this.projectModel.findByPk(id);
 
@@ -111,7 +111,7 @@ export class ProjectTypeService {
   async update(
     id: string | number,
     dto: UpdateProjectDto,
-  ): Promise<Project> {
+  ): Promise<ProjectType> {
     const project =
       await this.projectModel.findByPk(id);
     if (!project) {
@@ -154,7 +154,7 @@ export class ProjectTypeService {
 
   async restore(
     id: string | number,
-  ): Promise<Project> {
+  ): Promise<ProjectType> {
     const project =
       await this.projectModel.findByPk(id, {
         paranoid: false,
