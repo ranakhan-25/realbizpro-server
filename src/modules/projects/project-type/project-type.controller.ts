@@ -9,79 +9,40 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
-import { ProjectTypeService } from './project-type.service'; // ← type নয়, সাধারণ import
-import { CreateProjectDto } from './dto/create-project-type.dto';
-import { QueryProjectDto } from './dto/query-project-type.dto';
-import { UpdateProjectDto } from './dto/update-project-type.dto';
+import { ProjectTypeService } from './project-type.service';
+import { CreateProjectTypeDto } from './dto/create-project-type.dto';
+import { UpdateProjectTypeDto } from './dto/update-project-type.dto';
+import { QueryProjectTypeDto } from './dto/query-project-type.dto';
 
-@ApiTags('Project Types')
-@ApiBearerAuth()
-@Controller('project-types')
+@Controller('project-type')
 export class ProjectTypeController {
-  constructor(
-    private readonly projectTypeService: ProjectTypeService,
-  ) {}
+  constructor(private readonly projectTypeService: ProjectTypeService) {}
 
   @Post()
-  @ApiOperation({
-    summary: 'Create a new project type',
-  })
-  create(
-    @Body() createProjectDto: CreateProjectDto,
-  ) {
-    return this.projectTypeService.create(
-      createProjectDto,
-    );
+  create(@Body() dto: CreateProjectTypeDto) {
+    return this.projectTypeService.create(dto);
   }
 
   @Get()
-  @ApiOperation({
-    summary: 'Get all project types (paginated)',
-  })
-  findAll(@Query() query: QueryProjectDto) {
+  findAll(@Query() query: QueryProjectTypeDto) {
     return this.projectTypeService.findAll(query);
   }
 
   @Get(':id')
-  @ApiOperation({
-    summary: 'Get project type by ID',
-  })
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.projectTypeService.findOne(id);
   }
 
   @Patch(':id')
-  @ApiOperation({
-    summary: 'Update project type',
-  })
   update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateProjectDto: UpdateProjectDto,
+    @Body() dto: UpdateProjectTypeDto,
   ) {
-    return this.projectTypeService.update(
-      id,
-      updateProjectDto,
-    );
+    return this.projectTypeService.update(id, dto);
   }
 
   @Delete(':id')
-  @ApiOperation({
-    summary: 'Soft delete project type',
-  })
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.projectTypeService.remove(id);
-  }
-
-  @Patch(':id/restore')
-  @ApiOperation({
-    summary: 'Restore soft-deleted project type',
-  })
-  restore(@Param('id', ParseIntPipe) id: number) {
-    return this.projectTypeService.restore(id);
   }
 }
