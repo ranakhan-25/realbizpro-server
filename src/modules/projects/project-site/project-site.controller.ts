@@ -1,15 +1,31 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+/* eslint-disable prettier/prettier */
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { ProjectSiteService } from './project-site.service';
 import { CreateProjectSiteDto } from './dto/create-project-site.dto';
 import { UpdateProjectSiteDto } from './dto/update-project-site.dto';
 
 @Controller('project-site')
 export class ProjectSiteController {
-  constructor(private readonly projectSiteService: ProjectSiteService) {}
+  constructor(
+    private readonly projectSiteService: ProjectSiteService,
+  ) {}
 
   @Post()
-  create(@Body() createProjectSiteDto: CreateProjectSiteDto) {
-    return this.projectSiteService.create(createProjectSiteDto);
+  create(
+    @Body()
+    createProjectSiteDto: CreateProjectSiteDto,
+  ) {
+    return this.projectSiteService.create(
+      createProjectSiteDto,
+    );
   }
 
   @Get()
@@ -23,8 +39,15 @@ export class ProjectSiteController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProjectSiteDto: UpdateProjectSiteDto) {
-    return this.projectSiteService.update(+id, updateProjectSiteDto);
+  update(
+    @Param('id') id: string,
+    @Body()
+    updateProjectSiteDto: UpdateProjectSiteDto,
+  ) {
+    return this.projectSiteService.update(
+      +id,
+      updateProjectSiteDto,
+    );
   }
 
   @Delete(':id')
