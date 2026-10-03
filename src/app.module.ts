@@ -18,7 +18,7 @@ import { AppService } from './app.service';
 import { AuthLoggingInterceptor } from './common/interceptors/auth-logging.interceptor';
 import { ErrorTransformInterceptor } from './common/interceptors/error-transform.interceptor';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
-import { CacheModule } from './common/services/cache.module'; 
+import { CacheModule } from './common/services/cache.module';
 
 import {
   getRealIP,
@@ -59,8 +59,10 @@ import { MenuModule } from './modules/menu/menu.module';
 import { ModuleUserModule } from './modules/module-user/module-user.module';
 import { ApprovalsModule } from './modules/approvals/approvals.module';
 import { ProjectTypeModule } from './modules/projects/project-type/project-type.module';
+
+import { RequisitionModule } from './modules/requisition/material-requisition/material-requisition.module';
+import { ProjectModule } from './modules/projects/project/project.module';
 import { ProjectSiteModule } from './modules/projects/project-site/project-site.module';
-import {  RequisitionModule } from './modules/requisition/material-requisition/material-requisition.module';
 
 @Module({
   imports: [
@@ -150,8 +152,8 @@ import {  RequisitionModule } from './modules/requisition/material-requisition/m
     HmacAuthModule,
     BullBoardModule,
     ProjectTypeModule,
+    ProjectModule,
     ProjectSiteModule,
-
   ],
   controllers: [AppController, HealthController],
   providers: [

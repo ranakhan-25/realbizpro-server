@@ -4,7 +4,9 @@ import {
   Model,
   ModelCtor,
   Sequelize,
-} from 'sequelize-typescript';
+} from 'sequelize-typescript'; 
+export * from './projects/pr_project_model';
+export * from './projects/pr_site.model';
 
 /**
  * A specific type alias for a class that extends Sequelize's Model.

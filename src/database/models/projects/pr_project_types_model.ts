@@ -5,9 +5,9 @@ import {
 } from 'sequelize-typescript';
 import { BaseModel } from '../../base.model';
 import type {
-  ProjectAttributes,
-  ProjectCreationAttributes,
-} from 'src/database/types/project.types';
+  ProjectTypeAttributes,
+  ProjectTypeCreationAttributes,
+} from 'src/database/types/projecttype.types';
 
 export enum ProjectStatusEnum {
   ONGOING = 'ONGOING',
@@ -36,12 +36,12 @@ export enum ProjectStatusEnum {
     },
   ],
 })
-export class Project
+export class ProjectType
   extends BaseModel<
-    ProjectAttributes,
-    ProjectCreationAttributes
+    ProjectTypeAttributes,
+    ProjectTypeCreationAttributes
   >
-  implements ProjectAttributes
+  implements ProjectTypeAttributes
 {
   // ★★★ BaseModel-এর number id কে override করা হচ্ছে ★★★
 

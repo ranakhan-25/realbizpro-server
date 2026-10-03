@@ -1,34 +1,67 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ProjectSiteService } from './project-site.service';
 import { CreateProjectSiteDto } from './dto/create-project-site.dto';
-import { UpdateProjectSiteDto } from './dto/update-project-site.dto';
 
-@Controller('project-site')
+import { UpdateProjectSiteDto } from './dto/update-project-site.dto';
+import { QueryProjectSiteDto } from './dto/query-site.dto';
+
+@ApiTags('Project Sites')
+@ApiBearerAuth()
+@Controller('project-sites')
 export class ProjectSiteController {
   constructor(private readonly projectSiteService: ProjectSiteService) {}
 
   @Post()
-  create(@Body() createProjectSiteDto: CreateProjectSiteDto) {
-    return this.projectSiteService.create(createProjectSiteDto);
+  @ApiOperation({ summary: 'Create a new site' })
+  create(@Body() dto: CreateProjectSiteDto) {
+    return this.projectSiteService.create(dto);
   }
 
   @Get()
-  findAll() {
-    return this.projectSiteService.findAll();
+  @ApiOperation({ summary: 'Get all sites (paginated)' })
+  findAll(@Query() query: QueryProjectSiteDto) {
+    return this.projectSiteService.findAll(query);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.projectSiteService.findOne(+id);
+  @ApiOperation({ summary: 'Get site by ID' })
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.projectSiteService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProjectSiteDto: UpdateProjectSiteDto) {
-    return this.projectSiteService.update(+id, updateProjectSiteDto);
+  @ApiOperation({ summary: 'Update site' })
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateProjectSiteDto,
+  ) {
+    return this.projectSiteService.update(id, dto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.projectSiteService.remove(+id);
+  @ApiOperation({ summary: 'Soft delete site' })
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.projectSiteService.remove(id);
+  }
+
+  @Patch(':id/restore')
+  @ApiOperation({ summary: 'Restore soft-deleted site' })
+  restore(@Param('id', ParseIntPipe) id: number) {
+    return this.projectSiteService.restore(id);
   }
 }
