@@ -18,7 +18,7 @@ import { AppService } from './app.service';
 import { AuthLoggingInterceptor } from './common/interceptors/auth-logging.interceptor';
 import { ErrorTransformInterceptor } from './common/interceptors/error-transform.interceptor';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
-import { CacheModule } from './common/services/cache.module'; 
+import { CacheModule } from './common/services/cache.module';
 
 import {
   getRealIP,
@@ -60,7 +60,12 @@ import { ModuleUserModule } from './modules/module-user/module-user.module';
 import { ApprovalsModule } from './modules/approvals/approvals.module';
 import { ProjectTypeModule } from './modules/projects/project-type/project-type.module';
 import { ProjectSiteModule } from './modules/projects/project-site/project-site.module';
-import {  RequisitionModule } from './modules/requisition/material-requisition/material-requisition.module';
+import { RequisitionModule } from './modules/requisition/material-requisition/material-requisition.module';
+
+import { CustomerAccountModule } from './modules/contract/customer-accounts/customer-accounts.module';
+
+import { SupplierAccountsModule } from './modules/contract/supplier-accounts/supplier-accounts.module';
+import { LabourWorkBankModule } from './modules/contract/labour-work-bank/labour-work-bank.module';
 
 @Module({
   imports: [
@@ -137,6 +142,8 @@ import {  RequisitionModule } from './modules/requisition/material-requisition/m
     NotificationModule,
     EmailModule,
     RequisitionModule,
+    ProjectTypeModule,
+    ProjectSiteModule,
     UsersModule,
 
     // Hrms Report
@@ -149,9 +156,9 @@ import {  RequisitionModule } from './modules/requisition/material-requisition/m
     JobLogModule,
     HmacAuthModule,
     BullBoardModule,
-    ProjectTypeModule,
-    ProjectSiteModule,
-
+    CustomerAccountModule,
+    SupplierAccountsModule,
+    LabourWorkBankModule,
   ],
   controllers: [AppController, HealthController],
   providers: [
