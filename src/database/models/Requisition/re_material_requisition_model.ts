@@ -7,6 +7,7 @@ import { BaseModel } from '../../base.model';
 import type {
   RequisitionAttributes,
   RequisitionCreationAttributes,
+  RequisitionUpdateAttributes,
 } from 'src/database/types/requisition.types';
 
 export enum ApprovalStatusEnum {
@@ -48,7 +49,10 @@ export enum RequisitionStatusEnum {
   ],
 })
 export class Requisition
-  extends BaseModel<RequisitionAttributes, RequisitionCreationAttributes>
+  extends BaseModel<
+    RequisitionUpdateAttributes,
+    RequisitionCreationAttributes
+  >
   implements RequisitionAttributes
 {
   @Column({
@@ -112,7 +116,8 @@ export class Requisition
     allowNull: false,
     defaultValue: ApprovalStatusEnum.PENDING,
   })
-  declare approvalStatus: ApprovalStatusEnum | string;
+  declare approvalStatus:
+    ApprovalStatusEnum | string;
 
   @Column({
     type: DataType.STRING,

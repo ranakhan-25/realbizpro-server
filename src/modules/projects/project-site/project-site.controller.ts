@@ -1,19 +1,13 @@
+/* eslint-disable prettier/prettier */
 import {
-  Body,
   Controller,
-  Delete,
   Get,
-  Param,
-  ParseIntPipe,
-  Patch,
   Post,
-  Query,
+  Body,
+  Patch,
+  Param,
+  Delete,
 } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
 import { ProjectSiteService } from './project-site.service';
 import { CreateProjectSiteDto } from './dto/create-project-site.dto';
 
@@ -24,12 +18,18 @@ import { QueryProjectSiteDto } from './dto/query-site.dto';
 @ApiBearerAuth()
 @Controller('project-sites')
 export class ProjectSiteController {
-  constructor(private readonly projectSiteService: ProjectSiteService) {}
+  constructor(
+    private readonly projectSiteService: ProjectSiteService,
+  ) {}
 
   @Post()
-  @ApiOperation({ summary: 'Create a new site' })
-  create(@Body() dto: CreateProjectSiteDto) {
-    return this.projectSiteService.create(dto);
+  create(
+    @Body()
+    createProjectSiteDto: CreateProjectSiteDto,
+  ) {
+    return this.projectSiteService.create(
+      createProjectSiteDto,
+    );
   }
 
   @Get()
@@ -45,12 +45,15 @@ export class ProjectSiteController {
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Update site' })
   update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: UpdateProjectSiteDto,
+    @Param('id') id: string,
+    @Body()
+    updateProjectSiteDto: UpdateProjectSiteDto,
   ) {
-    return this.projectSiteService.update(id, dto);
+    return this.projectSiteService.update(
+      +id,
+      updateProjectSiteDto,
+    );
   }
 
   @Delete(':id')

@@ -63,6 +63,12 @@ import { ProjectTypeModule } from './modules/projects/project-type/project-type.
 import { RequisitionModule } from './modules/requisition/material-requisition/material-requisition.module';
 import { ProjectModule } from './modules/projects/project/project.module';
 import { ProjectSiteModule } from './modules/projects/project-site/project-site.module';
+import { RequisitionModule } from './modules/requisition/material-requisition/material-requisition.module';
+
+import { CustomerAccountModule } from './modules/contract/customer-accounts/customer-accounts.module';
+
+import { SupplierAccountsModule } from './modules/contract/supplier-accounts/supplier-accounts.module';
+import { LabourWorkBankModule } from './modules/contract/labour-work-bank/labour-work-bank.module';
 
 @Module({
   imports: [
@@ -139,6 +145,8 @@ import { ProjectSiteModule } from './modules/projects/project-site/project-site.
     NotificationModule,
     EmailModule,
     RequisitionModule,
+    ProjectTypeModule,
+    ProjectSiteModule,
     UsersModule,
 
     // Hrms Report
@@ -151,9 +159,9 @@ import { ProjectSiteModule } from './modules/projects/project-site/project-site.
     JobLogModule,
     HmacAuthModule,
     BullBoardModule,
-    ProjectTypeModule,
-    ProjectModule,
-    ProjectSiteModule,
+    CustomerAccountModule,
+    SupplierAccountsModule,
+    LabourWorkBankModule,
   ],
   controllers: [AppController, HealthController],
   providers: [
