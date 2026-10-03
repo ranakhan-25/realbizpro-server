@@ -1,7 +1,7 @@
 // Auto-generated types for Project
-// Source: src\database\models\projects\pr_project_types_model.ts
+// Source: src\database\models\projects\pr_project_model.ts
 
-import { ProjectStatusEnum } from '../models/projects/pr_project_types_model';
+import { ProjectStatusEnum } from '../models/projects/pr_project_model';
 
 export interface ProjectAttributes {
   id: number;
@@ -9,26 +9,42 @@ export interface ProjectAttributes {
   createdAt: Date;
   updatedAt: Date;
   deletedAt?: Date;
-  areaId?: string | null;
   code: string;
   name: string;
   projectType?: string | null;
+  areaCategory?: string | null;
   location?: string | null;
-  description?: string | null;
+  totalBudget?: number | null;
+  contactPersonName?: string | null;
+  contactPhone?: string | null;
+  clientEmail?: string | null;
+  contractorCompany?: string | null;
+  projectManager?: string | null;
+  numberOfStoreys?: number | null;
   startDate?: Date | null;
   endDate?: Date | null;
+  progressPercentage?: number | null;
+  description?: string | null;
   status: ProjectStatusEnum | string;
 }
 
 export interface ProjectCreationAttributes {
-  areaId?: string | null;
   code: string;
   name: string;
   projectType?: string | null;
+  areaCategory?: string | null;
   location?: string | null;
-  description?: string | null;
+  totalBudget?: number | null;
+  contactPersonName?: string | null;
+  contactPhone?: string | null;
+  clientEmail?: string | null;
+  contractorCompany?: string | null;
+  projectManager?: string | null;
+  numberOfStoreys?: number | null;
   startDate?: Date | null;
   endDate?: Date | null;
+  progressPercentage?: number | null;
+  description?: string | null;
   status?: ProjectStatusEnum | string; // Has default value
 }
 
