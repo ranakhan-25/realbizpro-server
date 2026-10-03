@@ -1,31 +1,13 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  Transform,
-  Type,
-} from 'class-transformer';
-import {
-  IsBoolean,
-  IsEnum,
-  IsInt,
-  IsOptional,
-  IsString,
-  Max,
-  Min,
-} from 'class-validator';
-import { ProjectStatusEnum } from 'src/database/models/projects/pr_project_types_model';
+import { Type } from 'class-transformer';
+import { IsIn, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 
-export class QueryProjectDto {
-  @ApiPropertyOptional({ example: 1, default: 1 })
+export class QueryProjectTypeDto {
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
   page?: number = 1;
 
-  @ApiPropertyOptional({
-    example: 10,
-    default: 10,
-  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
@@ -33,55 +15,17 @@ export class QueryProjectDto {
   @Max(100)
   limit?: number = 10;
 
-  @ApiPropertyOptional({ example: 'metro' })
+  // Search box: code ba name diye search
   @IsOptional()
   @IsString()
   search?: string;
 
-  @ApiPropertyOptional({
-    enum: ProjectStatusEnum,
-  })
+  // Table header sort (ID, CODE, NAME)
   @IsOptional()
-  @IsEnum(ProjectStatusEnum)
-  status?: ProjectStatusEnum;
+  @IsIn(['id', 'code', 'name'])
+  sortBy?: 'id' | 'code' | 'name' = 'id';
 
-  @ApiPropertyOptional({
-    example: 'Infrastructure',
-  })
   @IsOptional()
-  @IsString()
-  projectType?: string;
-
-  @ApiPropertyOptional({ example: 'area-123' })
-  @IsOptional()
-  @IsString()
-  areaId?: string;
-
-  @ApiPropertyOptional({
-    example: 'createdAt',
-    default: 'createdAt',
-  })
-  @IsOptional()
-  @IsString()
-  sortBy?: string = 'createdAt';
-
-  @ApiPropertyOptional({
-    example: 'DESC',
-    default: 'DESC',
-  })
-  @IsOptional()
-  @IsString()
-  sortOrder?: 'ASC' | 'DESC' = 'DESC';
-
-  @ApiPropertyOptional({
-    description: 'Include soft-deleted projects',
-    default: false,
-  })
-  @IsOptional()
-  @Transform(
-    ({ value }) =>
-      value === 'true' || value === true,
-  )
-  @IsBoolean()
-  withDeleted?: boolean = false;
+  @IsIn(['ASC', 'DESC'])
+  sortOrder?: 'ASC' | 'DESC' = 'ASC';
 }
