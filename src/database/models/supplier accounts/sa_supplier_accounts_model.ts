@@ -11,8 +11,15 @@ import type {
   SupplierAccountsUpdateAttributes,
 } from 'src/database/types/supplieraccounts.types';
 
+export enum SupplierAccountsStatus {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+  PENDING = 'pending',
+  BLOCKED = 'blocked',
+}
+
 @Table({
-  tableName: 'SupplierAccounts',
+  tableName: 'supplier_accounts',
   timestamps: true,
   paranoid: true,
   underscored: false,
@@ -104,4 +111,31 @@ export class SupplierAccounts
     allowNull: true,
   })
   declare addedById?: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  declare createdBy?: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  declare updatedBy?: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  declare deletedBy?: string;
+
+  @Column({
+    type: DataType.ENUM(
+      ...Object.values(SupplierAccountsStatus),
+    ),
+    allowNull: false,
+    defaultValue: SupplierAccountsStatus.ACTIVE,
+  })
+  declare status: SupplierAccountsStatus;
 }

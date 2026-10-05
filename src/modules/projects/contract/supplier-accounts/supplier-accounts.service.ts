@@ -13,7 +13,10 @@ import { Op } from 'sequelize';
 import { CreateSupplierAccountDto } from './dto/create-supplier-account.dto';
 import { QuerySupplierAccountDto } from './dto/query-supplier-account.dto';
 import { UpdateSupplierAccountDto } from './dto/update-supplier-account.dto';
-import { SupplierAccounts } from 'src/database/models/supplier accounts/sa_supplier_accounts_model';
+import {
+  SupplierAccounts,
+  SupplierAccountsStatus,
+} from 'src/database/models/supplier accounts/sa_supplier_accounts_model';
 
 @Injectable()
 export class SupplierAccountsService {
@@ -22,7 +25,6 @@ export class SupplierAccountsService {
     private readonly supplierAccountsModel: typeof SupplierAccounts,
   ) {}
 
-  // CREATE
   async create(
     dto: CreateSupplierAccountDto,
   ): Promise<SupplierAccounts> {
@@ -44,25 +46,34 @@ export class SupplierAccountsService {
     const supplierAccount =
       await this.supplierAccountsModel.create({
         ...supplierData,
+        status:
+          dto.status ??
+          SupplierAccountsStatus.ACTIVE,
         ...(dueDate
           ? { dueDate: new Date(dueDate) }
           : {}),
       });
 
-    return this.findOne(supplierAccount.id);
+    return this.findOne(supplierAccount.uuid);
   }
 
-  // FIND ALL
   async findAll(query: QuerySupplierAccountDto) {
     const {
       page = 1,
       limit = 10,
+      skip,
       search,
       underGroup,
+      status,
       sortBy = 'createdAt',
       sortOrder = 'DESC',
       withDeleted = false,
     } = query;
+
+    const offset =
+      skip !== undefined && skip !== null
+        ? skip
+        : (page - 1) * limit;
 
     const where: any = {};
 
@@ -83,20 +94,10 @@ export class SupplierAccountsService {
             [Op.iLike]: `%${search}%`,
           },
         },
+        { email: { [Op.iLike]: `%${search}%` } },
+        { phone: { [Op.iLike]: `%${search}%` } },
         {
-          email: {
-            [Op.iLike]: `%${search}%`,
-          },
-        },
-        {
-          phone: {
-            [Op.iLike]: `%${search}%`,
-          },
-        },
-        {
-          address: {
-            [Op.iLike]: `%${search}%`,
-          },
+          address: { [Op.iLike]: `%${search}%` },
         },
         {
           underGroup: {
@@ -110,59 +111,80 @@ export class SupplierAccountsService {
       where.underGroup = underGroup;
     }
 
+    if (status) {
+      where.status = status;
+    }
+
     const { rows, count } =
       await this.supplierAccountsModel.findAndCountAll(
         {
           where,
           limit,
-          offset: (page - 1) * limit,
+          offset,
           order: [[sortBy, sortOrder]],
           paranoid: !withDeleted,
         },
       );
 
+    const totalPages =
+      Math.ceil(count / limit) || 1;
+    const currentPage =
+      skip !== undefined && skip !== null
+        ? Math.floor(skip / limit) + 1
+        : page;
+
+    const nextPage =
+      currentPage < totalPages
+        ? currentPage + 1
+        : null;
+
+    const previousPage =
+      currentPage > 1 ? currentPage - 1 : null;
+
     return {
       data: rows,
       meta: {
-        total: count,
-        page,
+        page: currentPage,
+        pageNo: currentPage,
+        nextPage,
+        previousPage,
         limit,
-        totalPages: Math.ceil(count / limit),
+        skip: offset,
+        total: count,
+        totalPages,
       },
     };
   }
 
-  // FIND ONE
   async findOne(
-    id: string | number,
+    uuid: string,
   ): Promise<SupplierAccounts> {
     const supplierAccount =
-      await this.supplierAccountsModel.findByPk(
-        id,
-      );
+      await this.supplierAccountsModel.findOne({
+        where: { uuid } as any,
+      });
 
     if (!supplierAccount) {
       throw new NotFoundException(
-        `Supplier account #${id} not found`,
+        `Supplier account #${uuid} not found`,
       );
     }
 
     return supplierAccount;
   }
 
-  // UPDATE
   async update(
-    id: string | number,
+    uuid: string,
     dto: UpdateSupplierAccountDto,
   ): Promise<SupplierAccounts> {
     const supplierAccount =
-      await this.supplierAccountsModel.findByPk(
-        id,
-      );
+      await this.supplierAccountsModel.findOne({
+        where: { uuid } as any,
+      });
 
     if (!supplierAccount) {
       throw new NotFoundException(
-        `Supplier account #${id} not found`,
+        `Supplier account #${uuid} not found`,
       );
     }
 
@@ -194,57 +216,62 @@ export class SupplierAccountsService {
         : {}),
     });
 
-    return this.findOne(id);
+    return this.findOne(uuid);
   }
 
-  // REMOVE
   async remove(
-    id: string | number,
+    uuid: string,
   ): Promise<{ message: string }> {
     const supplierAccount =
-      await this.supplierAccountsModel.findByPk(
-        id,
-      );
+      await this.supplierAccountsModel.findOne({
+        where: { uuid } as any,
+      });
 
     if (!supplierAccount) {
       throw new NotFoundException(
-        `Supplier account #${id} not found`,
+        `Supplier account #${uuid} not found`,
       );
     }
+
+    // status → inactive + soft delete
+    await supplierAccount.update({
+      status: SupplierAccountsStatus.INACTIVE,
+    });
 
     await supplierAccount.destroy();
 
     return {
-      message: `Supplier account #${id} deleted successfully`,
+      message: `Supplier account #${uuid} deleted successfully`,
     };
   }
 
-  // RESTORE
   async restore(
-    id: string | number,
+    uuid: string,
   ): Promise<SupplierAccounts> {
     const supplierAccount =
-      await this.supplierAccountsModel.findByPk(
-        id,
-        {
-          paranoid: false,
-        },
-      );
+      await this.supplierAccountsModel.findOne({
+        where: { uuid } as any,
+        paranoid: false,
+      });
 
     if (!supplierAccount) {
       throw new NotFoundException(
-        `Supplier account #${id} not found`,
+        `Supplier account #${uuid} not found`,
       );
     }
 
     if (!supplierAccount.deletedAt) {
       throw new BadRequestException(
-        `Supplier account #${id} is not deleted`,
+        `Supplier account #${uuid} is not deleted`,
       );
     }
 
+    // status → active + restore
     await supplierAccount.restore();
+    await supplierAccount.update({
+      status: SupplierAccountsStatus.ACTIVE,
+    });
 
-    return this.findOne(id);
+    return this.findOne(uuid);
   }
 }

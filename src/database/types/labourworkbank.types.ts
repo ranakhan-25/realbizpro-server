@@ -1,6 +1,8 @@
 // Auto-generated types for LabourWorkBank
 // Source: src\database\models\labour work bank\lb_labour_work_bank_model.ts
 
+import { LabourWorkBankStatus } from '../models/labour work bank/lb_labour_work_bank_model';
+
 export interface LabourWorkBankAttributes {
   id: number;
   uuid: string;
@@ -17,6 +19,10 @@ export interface LabourWorkBankAttributes {
   dueDate?: Date | null;
   underGroup?: string | null;
   addedById?: string | null;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+  deletedBy?: string | null;
+  status: LabourWorkBankStatus;
 }
 
 export interface LabourWorkBankCreationAttributes {
@@ -30,6 +36,10 @@ export interface LabourWorkBankCreationAttributes {
   dueDate?: Date | null;
   underGroup?: string | null;
   addedById?: string | null;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+  deletedBy?: string | null;
+  status?: LabourWorkBankStatus; // Has default value
 }
 
 export type LabourWorkBankUpdateAttributes = Partial<LabourWorkBankCreationAttributes>;

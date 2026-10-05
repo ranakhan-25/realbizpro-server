@@ -9,11 +9,13 @@ import { Transform } from 'class-transformer';
 
 import {
   IsEmail,
+  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
-  MaxLength,
 } from 'class-validator';
+
+import { CustomerAccountStatus } from 'src/database/models/customer account/ca_customer_accounts_model';
 
 export class CreateCustomerAccountDto {
   @ApiProperty({
@@ -24,7 +26,6 @@ export class CreateCustomerAccountDto {
   @IsNotEmpty({
     message: 'Customer account code is required',
   })
-  @MaxLength(100)
   customerCode: string;
 
   @ApiProperty({
@@ -35,7 +36,6 @@ export class CreateCustomerAccountDto {
   @IsNotEmpty({
     message: 'Customer account name is required',
   })
-  @MaxLength(255)
   customerName: string;
 
   @ApiProperty({
@@ -113,4 +113,13 @@ export class CreateCustomerAccountDto {
     value === '' ? null : value,
   )
   addedById?: string;
+
+  @ApiPropertyOptional({
+    description: 'Customer account status',
+    enum: CustomerAccountStatus,
+    default: CustomerAccountStatus.ACTIVE,
+  })
+  @IsOptional()
+  @IsEnum(CustomerAccountStatus)
+  status?: CustomerAccountStatus;
 }

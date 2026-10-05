@@ -1,6 +1,8 @@
 // Auto-generated types for SupplierAccounts
 // Source: src\database\models\supplier accounts\sa_supplier_accounts_model.ts
 
+import { SupplierAccountsStatus } from '../models/supplier accounts/sa_supplier_accounts_model';
+
 export interface SupplierAccountsAttributes {
   id: number;
   uuid: string;
@@ -17,6 +19,10 @@ export interface SupplierAccountsAttributes {
   dueDate?: Date | null;
   underGroup?: string | null;
   addedById?: string | null;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+  deletedBy?: string | null;
+  status: SupplierAccountsStatus;
 }
 
 export interface SupplierAccountsCreationAttributes {
@@ -30,6 +36,10 @@ export interface SupplierAccountsCreationAttributes {
   dueDate?: Date | null;
   underGroup?: string | null;
   addedById?: string | null;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+  deletedBy?: string | null;
+  status?: SupplierAccountsStatus; // Has default value
 }
 
 export type SupplierAccountsUpdateAttributes = Partial<SupplierAccountsCreationAttributes>;

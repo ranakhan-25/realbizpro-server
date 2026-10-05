@@ -13,14 +13,15 @@ import {
 import {
   IsDateString,
   IsEmail,
+  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
-  Max,
-  MaxLength,
   Min,
 } from 'class-validator';
+
+import { SupplierAccountsStatus } from 'src/database/models/supplier accounts/sa_supplier_accounts_model';
 
 export class CreateSupplierAccountDto {
   @ApiProperty({
@@ -31,7 +32,6 @@ export class CreateSupplierAccountDto {
   @IsNotEmpty({
     message: 'Supplier account code is required',
   })
-  @MaxLength(100)
   supplierCode: string;
 
   @ApiProperty({
@@ -42,7 +42,6 @@ export class CreateSupplierAccountDto {
   @IsNotEmpty({
     message: 'Supplier account name is required',
   })
-  @MaxLength(255)
   supplierName: string;
 
   @ApiPropertyOptional({
@@ -96,7 +95,6 @@ export class CreateSupplierAccountDto {
   @Type(() => Number)
   @IsNumber()
   @Min(0)
-  @Max(999999999999)
   creditLimit?: number;
 
   @ApiPropertyOptional({
@@ -138,4 +136,13 @@ export class CreateSupplierAccountDto {
     value === '' ? null : value,
   )
   addedById?: string;
+
+  @ApiPropertyOptional({
+    description: 'Supplier account status',
+    enum: SupplierAccountsStatus,
+    default: SupplierAccountsStatus.ACTIVE,
+  })
+  @IsOptional()
+  @IsEnum(SupplierAccountsStatus)
+  status?: SupplierAccountsStatus;
 }

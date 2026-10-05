@@ -11,8 +11,15 @@ import type {
   LabourWorkBankUpdateAttributes,
 } from 'src/database/types/labourworkbank.types';
 
+export enum LabourWorkBankStatus {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+  PENDING = 'pending',
+  BLOCKED = 'blocked',
+}
+
 @Table({
-  tableName: 'LabourWorkBank',
+  tableName: 'labour_work_bank',
   timestamps: true,
   paranoid: true,
   underscored: false,
@@ -104,4 +111,31 @@ export class LabourWorkBank
     allowNull: true,
   })
   declare addedById?: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  declare createdBy?: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  declare updatedBy?: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  declare deletedBy?: string;
+
+  @Column({
+    type: DataType.ENUM(
+      ...Object.values(LabourWorkBankStatus),
+    ),
+    allowNull: false,
+    defaultValue: LabourWorkBankStatus.ACTIVE,
+  })
+  declare status: LabourWorkBankStatus;
 }

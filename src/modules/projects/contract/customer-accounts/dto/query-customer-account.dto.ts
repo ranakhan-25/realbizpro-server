@@ -9,6 +9,7 @@ import {
 
 import {
   IsBoolean,
+  IsEnum,
   IsInt,
   IsOptional,
   IsString,
@@ -16,10 +17,13 @@ import {
   Min,
 } from 'class-validator';
 
-export class QueryLabourWorkBankDto {
+import { CustomerAccountStatus } from 'src/database/models/customer account/ca_customer_accounts_model';
+
+export class QueryCustomerAccountDto {
   @ApiPropertyOptional({
     example: 1,
     default: 1,
+    description: 'Current page number',
   })
   @IsOptional()
   @Type(() => Number)
@@ -30,6 +34,7 @@ export class QueryLabourWorkBankDto {
   @ApiPropertyOptional({
     example: 10,
     default: 10,
+    description: 'Items per page',
   })
   @IsOptional()
   @Type(() => Number)
@@ -39,18 +44,37 @@ export class QueryLabourWorkBankDto {
   limit?: number = 10;
 
   @ApiPropertyOptional({
-    example: 'Karim',
+    example: 0,
+    description:
+      'Number of records to skip (alternative to page)',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  skip?: number;
+
+  @ApiPropertyOptional({
+    example: 'Hasibul',
   })
   @IsOptional()
   @IsString()
   search?: string;
 
   @ApiPropertyOptional({
-    example: 'Labour',
+    example: 'Corporate',
   })
   @IsOptional()
   @IsString()
   underGroup?: string;
+
+  @ApiPropertyOptional({
+    enum: CustomerAccountStatus,
+    example: CustomerAccountStatus.ACTIVE,
+  })
+  @IsOptional()
+  @IsEnum(CustomerAccountStatus)
+  status?: CustomerAccountStatus;
 
   @ApiPropertyOptional({
     example: 'createdAt',
@@ -70,7 +94,7 @@ export class QueryLabourWorkBankDto {
 
   @ApiPropertyOptional({
     description:
-      'Include soft-deleted labour work banks',
+      'Include soft-deleted customer accounts',
     default: false,
   })
   @IsOptional()
