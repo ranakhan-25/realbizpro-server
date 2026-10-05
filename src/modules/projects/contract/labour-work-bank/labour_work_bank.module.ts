@@ -1,13 +1,11 @@
-/* eslint-disable prettier/prettier */
-
 import { Module } from '@nestjs/common';
 
 import { SequelizeModule } from '@nestjs/sequelize';
 
-import { LabourWorkBankController } from './labour-work-bank.controller';
+import { LabourWorkBankController } from './labour_work_bank.controller';
 
-import { LabourWorkBankService } from './labour-work-bank.service';
-import { LabourWorkBank } from 'src/database/models/labour work bank/lb_labour_work_bank_model';
+import { LabourWorkBankService } from './labour_work_bank.service';
+import { LabourWorkBank } from 'src/database/models/contract/pr_labour_work_bank_model';
 
 @Module({
   imports: [

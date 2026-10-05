@@ -1,13 +1,11 @@
-/* eslint-disable prettier/prettier */
-
 import { Module } from '@nestjs/common';
 
 import { SequelizeModule } from '@nestjs/sequelize';
 
-import { SupplierAccountsController } from './supplier-accounts.controller';
+import { SupplierAccountsController } from './supplier_accounts.controller';
 
-import { SupplierAccountsService } from './supplier-accounts.service';
-import { SupplierAccounts } from 'src/database/models/supplier accounts/sa_supplier_accounts_model';
+import { SupplierAccountsService } from './supplier_accounts.service';
+import { SupplierAccounts } from 'src/database/models/contract/pr_supplier_accounts_model';
 
 @Module({
   imports: [

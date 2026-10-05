@@ -16,10 +16,9 @@ import {
   Max,
   Min,
 } from 'class-validator';
+import { CustomerAccountStatus } from 'src/database/models/contract/pr_customer_accounts_model';
 
-import { SupplierAccountsStatus } from 'src/database/models/supplier accounts/sa_supplier_accounts_model';
-
-export class QuerySupplierAccountDto {
+export class QueryCustomerAccountDto {
   @ApiPropertyOptional({
     example: 1,
     default: 1,
@@ -55,26 +54,26 @@ export class QuerySupplierAccountDto {
   skip?: number;
 
   @ApiPropertyOptional({
-    example: 'Rahim',
+    example: 'Hasibul',
   })
   @IsOptional()
   @IsString()
   search?: string;
 
   @ApiPropertyOptional({
-    example: 'Local Supplier',
+    example: 'Corporate',
   })
   @IsOptional()
   @IsString()
   underGroup?: string;
 
   @ApiPropertyOptional({
-    enum: SupplierAccountsStatus,
-    example: SupplierAccountsStatus.ACTIVE,
+    enum: CustomerAccountStatus,
+    example: CustomerAccountStatus.ACTIVE,
   })
   @IsOptional()
-  @IsEnum(SupplierAccountsStatus)
-  status?: SupplierAccountsStatus;
+  @IsEnum(CustomerAccountStatus)
+  status?: CustomerAccountStatus;
 
   @ApiPropertyOptional({
     example: 'createdAt',
@@ -94,7 +93,7 @@ export class QuerySupplierAccountDto {
 
   @ApiPropertyOptional({
     description:
-      'Include soft-deleted supplier accounts',
+      'Include soft-deleted customer accounts',
     default: false,
   })
   @IsOptional()

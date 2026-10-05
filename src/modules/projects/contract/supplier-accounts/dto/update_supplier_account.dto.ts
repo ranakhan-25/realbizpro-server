@@ -2,7 +2,7 @@
 
 import { PartialType } from '@nestjs/swagger';
 
-import { CreateSupplierAccountDto } from './create-supplier-account.dto';
+import { CreateSupplierAccountDto } from './create_supplier_account.dto';
 
 export class UpdateSupplierAccountDto extends PartialType(
   CreateSupplierAccountDto,

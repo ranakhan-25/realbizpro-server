@@ -1,7 +1,7 @@
 // Auto-generated types for CustomerAccount
-// Source: src\database\models\customer account\ca_customer_accounts_model.ts
+// Source: src\database\models\contract\pr_customer_accounts_model.ts
 
-import { CustomerAccountStatus } from '../models/customer account/ca_customer_accounts_model';
+import { CustomerAccountStatus } from '../models/contract/pr_customer_accounts_model';
 
 export interface CustomerAccountAttributes {
   id: number;

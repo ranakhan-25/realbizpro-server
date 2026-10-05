@@ -2,7 +2,7 @@
 
 import { PartialType } from '@nestjs/swagger';
 
-import { CreateLabourWorkBankDto } from './create-labour-work-bank.dto';
+import { CreateLabourWorkBankDto } from './create_labour_work_bank.dto';
 
 export class UpdateLabourWorkBankDto extends PartialType(
   CreateLabourWorkBankDto,

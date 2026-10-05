@@ -17,10 +17,10 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
-import { CreateLabourWorkBankDto } from './dto/create-labour-work-bank.dto';
-import { QueryLabourWorkBankDto } from './dto/query-labour-work-bank.dto';
-import { UpdateLabourWorkBankDto } from './dto/update-labour-work-bank.dto';
-import { LabourWorkBankService } from './labour-work-bank.service';
+import { CreateLabourWorkBankDto } from './dto/create_labour_work_bank.dto';
+import { QueryLabourWorkBankDto } from './dto/query_labour_work_bank.dto';
+import { UpdateLabourWorkBankDto } from './dto/update_labour_work_bank.dto';
+import { LabourWorkBankService } from './labour_work_bank.service';
 
 @ApiTags('Labour Work Bank')
 @ApiBearerAuth()

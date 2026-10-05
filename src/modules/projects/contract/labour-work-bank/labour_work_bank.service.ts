@@ -10,13 +10,13 @@ import { InjectModel } from '@nestjs/sequelize';
 
 import { Op } from 'sequelize';
 
-import { CreateLabourWorkBankDto } from './dto/create-labour-work-bank.dto';
-import { QueryLabourWorkBankDto } from './dto/query-labour-work-bank.dto';
-import { UpdateLabourWorkBankDto } from './dto/update-labour-work-bank.dto';
+import { CreateLabourWorkBankDto } from './dto/create_labour_work_bank.dto';
+import { QueryLabourWorkBankDto } from './dto/query_labour_work_bank.dto';
+import { UpdateLabourWorkBankDto } from './dto/update_labour_work_bank.dto';
 import {
   LabourWorkBank,
   LabourWorkBankStatus,
-} from 'src/database/models/labour work bank/lb_labour_work_bank_model';
+} from 'src/database/models/contract/pr_labour_work_bank_model';
 
 @Injectable()
 export class LabourWorkBankService {
