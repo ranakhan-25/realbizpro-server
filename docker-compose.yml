@@ -1,0 +1,45 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: realbiz_pro_api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_HOST=${DATABASE_HOST:-host.docker.internal}
+    ports:
+      - "${PORT:-5002}:${PORT:-5002}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - realbiz_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: realbiz_pro_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - realbiz_network
+
+volumes:
+  redis_data:
+
+networks:
+  realbiz_network:
+    driver: bridge
