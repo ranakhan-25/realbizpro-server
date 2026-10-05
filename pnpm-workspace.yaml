@@ -1,6 +1,3 @@
-packages:
-  - '.'
-
 allowBuilds:
   '@firebase/util': false
   '@nestjs/core': true
