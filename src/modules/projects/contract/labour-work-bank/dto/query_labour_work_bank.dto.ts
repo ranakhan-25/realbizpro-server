@@ -16,8 +16,7 @@ import {
   Max,
   Min,
 } from 'class-validator';
-
-import { LabourWorkBankStatus } from 'src/database/models/labour work bank/lb_labour_work_bank_model';
+import { LabourWorkBankStatus } from 'src/database/models/contract/pr_labour_work_bank_model';
 
 export class QueryLabourWorkBankDto {
   @ApiPropertyOptional({

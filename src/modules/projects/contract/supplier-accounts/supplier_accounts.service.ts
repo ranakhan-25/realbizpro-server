@@ -1,5 +1,3 @@
-/* eslint-disable prettier/prettier */
-
 import {
   BadRequestException,
   Injectable,
@@ -10,49 +8,54 @@ import { InjectModel } from '@nestjs/sequelize';
 
 import { Op } from 'sequelize';
 
-import { CreateCustomerAccountDto } from './dto/create-customer-account.dto';
-import { QueryCustomerAccountDto } from './dto/query-customer-account.dto';
-import { UpdateCustomerAccountDto } from './dto/update-customer-account.dto';
+import { CreateSupplierAccountDto } from './dto/create_supplier_account.dto';
+import { QuerySupplierAccountDto } from './dto/query_supplier_account.dto';
+import { UpdateSupplierAccountDto } from './dto/update_supplier_account.dto';
 import {
-  CustomerAccount,
-  CustomerAccountStatus,
-} from 'src/database/models/customer account/ca_customer_accounts_model';
+  SupplierAccounts,
+  SupplierAccountsStatus,
+} from 'src/database/models/contract/pr_supplier_accounts_model';
 
 @Injectable()
-export class CustomerAccountService {
+export class SupplierAccountsService {
   constructor(
-    @InjectModel(CustomerAccount)
-    private readonly customerAccountModel: typeof CustomerAccount,
+    @InjectModel(SupplierAccounts)
+    private readonly supplierAccountsModel: typeof SupplierAccounts,
   ) {}
 
   async create(
-    dto: CreateCustomerAccountDto,
-  ): Promise<CustomerAccount> {
+    dto: CreateSupplierAccountDto,
+  ): Promise<SupplierAccounts> {
     const existing =
-      await this.customerAccountModel.findOne({
+      await this.supplierAccountsModel.findOne({
         where: {
-          customerCode: dto.customerCode,
+          supplierCode: dto.supplierCode,
         },
       });
 
     if (existing) {
       throw new BadRequestException(
-        `Customer account code "${dto.customerCode}" already exists`,
+        `Supplier account code "${dto.supplierCode}" already exists`,
       );
     }
 
-    const customerAccount =
-      await this.customerAccountModel.create({
-        ...dto,
+    const { dueDate, ...supplierData } = dto;
+
+    const supplierAccount =
+      await this.supplierAccountsModel.create({
+        ...supplierData,
         status:
           dto.status ??
-          CustomerAccountStatus.ACTIVE,
+          SupplierAccountsStatus.ACTIVE,
+        ...(dueDate
+          ? { dueDate: new Date(dueDate) }
+          : {}),
       });
 
-    return this.findOne(customerAccount.uuid);
+    return this.findOne(supplierAccount.uuid);
   }
 
-  async findAll(query: QueryCustomerAccountDto) {
+  async findAll(query: QuerySupplierAccountDto) {
     const {
       page = 1,
       limit = 10,
@@ -75,36 +78,29 @@ export class CustomerAccountService {
     if (search) {
       where[Op.or] = [
         {
-          customerCode: {
+          supplierCode: {
             [Op.iLike]: `%${search}%`,
           },
         },
         {
-          customerName: {
+          supplierName: {
             [Op.iLike]: `%${search}%`,
           },
         },
-        {
-          mobileNo: { [Op.iLike]: `%${search}%` },
-        },
-        { email: { [Op.iLike]: `%${search}%` } },
         {
           businessName: {
             [Op.iLike]: `%${search}%`,
           },
         },
+        { email: { [Op.iLike]: `%${search}%` } },
+        { phone: { [Op.iLike]: `%${search}%` } },
         {
-          nidOrPassport: {
-            [Op.iLike]: `%${search}%`,
-          },
+          address: { [Op.iLike]: `%${search}%` },
         },
         {
           underGroup: {
             [Op.iLike]: `%${search}%`,
           },
-        },
-        {
-          address: { [Op.iLike]: `%${search}%` },
         },
       ];
     }
@@ -118,7 +114,7 @@ export class CustomerAccountService {
     }
 
     const { rows, count } =
-      await this.customerAccountModel.findAndCountAll(
+      await this.supplierAccountsModel.findAndCountAll(
         {
           where,
           limit,
@@ -160,56 +156,63 @@ export class CustomerAccountService {
 
   async findOne(
     uuid: string,
-  ): Promise<CustomerAccount> {
-    const customerAccount =
-      await this.customerAccountModel.findOne({
+  ): Promise<SupplierAccounts> {
+    const supplierAccount =
+      await this.supplierAccountsModel.findOne({
         where: { uuid } as any,
       });
 
-    if (!customerAccount) {
+    if (!supplierAccount) {
       throw new NotFoundException(
-        `Customer account #${uuid} not found`,
+        `Supplier account #${uuid} not found`,
       );
     }
 
-    return customerAccount;
+    return supplierAccount;
   }
 
   async update(
     uuid: string,
-    dto: UpdateCustomerAccountDto,
-  ): Promise<CustomerAccount> {
-    const customerAccount =
-      await this.customerAccountModel.findOne({
+    dto: UpdateSupplierAccountDto,
+  ): Promise<SupplierAccounts> {
+    const supplierAccount =
+      await this.supplierAccountsModel.findOne({
         where: { uuid } as any,
       });
 
-    if (!customerAccount) {
+    if (!supplierAccount) {
       throw new NotFoundException(
-        `Customer account #${uuid} not found`,
+        `Supplier account #${uuid} not found`,
       );
     }
 
     if (
-      dto.customerCode &&
-      dto.customerCode !==
-        customerAccount.customerCode
+      dto.supplierCode &&
+      dto.supplierCode !==
+        supplierAccount.supplierCode
     ) {
       const exists =
-        await this.customerAccountModel.findOne({
+        await this.supplierAccountsModel.findOne({
           where: {
-            customerCode: dto.customerCode,
+            supplierCode: dto.supplierCode,
           },
         });
 
       if (exists) {
         throw new BadRequestException(
-          `Customer account code "${dto.customerCode}" already exists`,
+          `Supplier account code "${dto.supplierCode}" already exists`,
         );
       }
     }
 
-    await customerAccount.update(dto);
+    const { dueDate, ...supplierData } = dto;
+
+    await supplierAccount.update({
+      ...supplierData,
+      ...(dueDate
+        ? { dueDate: new Date(dueDate) }
+        : {}),
+    });
 
     return this.findOne(uuid);
   }
@@ -217,54 +220,54 @@ export class CustomerAccountService {
   async remove(
     uuid: string,
   ): Promise<{ message: string }> {
-    const customerAccount =
-      await this.customerAccountModel.findOne({
+    const supplierAccount =
+      await this.supplierAccountsModel.findOne({
         where: { uuid } as any,
       });
 
-    if (!customerAccount) {
+    if (!supplierAccount) {
       throw new NotFoundException(
-        `Customer account #${uuid} not found`,
+        `Supplier account #${uuid} not found`,
       );
     }
 
     // status → inactive + soft delete
-    await customerAccount.update({
-      status: CustomerAccountStatus.INACTIVE,
+    await supplierAccount.update({
+      status: SupplierAccountsStatus.INACTIVE,
     });
 
-    await customerAccount.destroy();
+    await supplierAccount.destroy();
 
     return {
-      message: `Customer account #${uuid} deleted successfully`,
+      message: `Supplier account #${uuid} deleted successfully`,
     };
   }
 
   async restore(
     uuid: string,
-  ): Promise<CustomerAccount> {
-    const customerAccount =
-      await this.customerAccountModel.findOne({
+  ): Promise<SupplierAccounts> {
+    const supplierAccount =
+      await this.supplierAccountsModel.findOne({
         where: { uuid } as any,
         paranoid: false,
       });
 
-    if (!customerAccount) {
+    if (!supplierAccount) {
       throw new NotFoundException(
-        `Customer account #${uuid} not found`,
+        `Supplier account #${uuid} not found`,
       );
     }
 
-    if (!customerAccount.deletedAt) {
+    if (!supplierAccount.deletedAt) {
       throw new BadRequestException(
-        `Customer account #${uuid} is not deleted`,
+        `Supplier account #${uuid} is not deleted`,
       );
     }
 
     // status → active + restore
-    await customerAccount.restore();
-    await customerAccount.update({
-      status: CustomerAccountStatus.ACTIVE,
+    await supplierAccount.restore();
+    await supplierAccount.update({
+      status: SupplierAccountsStatus.ACTIVE,
     });
 
     return this.findOne(uuid);

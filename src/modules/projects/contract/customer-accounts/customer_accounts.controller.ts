@@ -1,5 +1,3 @@
-/* eslint-disable prettier/prettier */
-
 import {
   Body,
   Controller,
@@ -17,10 +15,10 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
-import { CreateCustomerAccountDto } from './dto/create-customer-account.dto';
-import { QueryCustomerAccountDto } from './dto/query-customer-account.dto';
-import { UpdateCustomerAccountDto } from './dto/update-customer-account.dto';
-import { CustomerAccountService } from './customer-accounts.service';
+import { CreateCustomerAccountDto } from './dto/create_customer_account.dto';
+import { QueryCustomerAccountDto } from './dto/query_customer_account.dto';
+import { UpdateCustomerAccountDto } from './dto/update_customer_account.dto';
+import { CustomerAccountService } from './customer_accounts.service';
 
 @ApiTags('Customer Account')
 @ApiBearerAuth()
