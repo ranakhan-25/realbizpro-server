@@ -12,17 +12,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     g++ \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy dependency manifests
-COPY package.json pnpm-workspace.yaml* ./
+# Copy all source files first so npm "prepare" script can find scripts/generate-model-types.js
+COPY . .
 
 # Install all dependencies (including devDependencies required for compilation)
 RUN npm install --legacy-peer-deps
 
-# Copy application source code and scripts
-COPY . .
-
-# Generate Sequelize model types and build NestJS
-RUN npm run generate-types
+# Build NestJS (prebuild will also run generate-types automatically)
 RUN npm run build
 
 # Remove development dependencies
