@@ -14,8 +14,15 @@ import {
   CustomerAccountUpdateAttributes,
 } from 'src/database/types/customeraccount.types';
 
+export enum CustomerAccountStatus {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+  PENDING = 'pending',
+  BLOCKED = 'blocked',
+}
+
 @Table({
-  tableName: 'customer-account',
+  tableName: 'customer_account',
   timestamps: true,
   paranoid: true,
   underscored: false,
@@ -81,4 +88,31 @@ export class CustomerAccount
     allowNull: true,
   })
   declare addedById?: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  declare createdBy?: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  declare updatedBy?: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  declare deletedBy?: string;
+
+  @Column({
+    type: DataType.ENUM(
+      ...Object.values(CustomerAccountStatus),
+    ),
+    allowNull: false,
+    defaultValue: CustomerAccountStatus.ACTIVE,
+  })
+  declare status: CustomerAccountStatus;
 }

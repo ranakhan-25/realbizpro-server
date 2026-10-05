@@ -9,6 +9,7 @@ import {
 
 import {
   IsBoolean,
+  IsEnum,
   IsInt,
   IsOptional,
   IsString,
@@ -16,10 +17,13 @@ import {
   Min,
 } from 'class-validator';
 
-export class QueryCustomerAccountDto {
+import { SupplierAccountsStatus } from 'src/database/models/supplier accounts/sa_supplier_accounts_model';
+
+export class QuerySupplierAccountDto {
   @ApiPropertyOptional({
     example: 1,
     default: 1,
+    description: 'Current page number',
   })
   @IsOptional()
   @Type(() => Number)
@@ -30,6 +34,7 @@ export class QueryCustomerAccountDto {
   @ApiPropertyOptional({
     example: 10,
     default: 10,
+    description: 'Items per page',
   })
   @IsOptional()
   @Type(() => Number)
@@ -39,18 +44,37 @@ export class QueryCustomerAccountDto {
   limit?: number = 10;
 
   @ApiPropertyOptional({
-    example: 'Hasibul',
+    example: 0,
+    description:
+      'Number of records to skip (alternative to page)',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  skip?: number;
+
+  @ApiPropertyOptional({
+    example: 'Rahim',
   })
   @IsOptional()
   @IsString()
   search?: string;
 
   @ApiPropertyOptional({
-    example: 'Corporate',
+    example: 'Local Supplier',
   })
   @IsOptional()
   @IsString()
   underGroup?: string;
+
+  @ApiPropertyOptional({
+    enum: SupplierAccountsStatus,
+    example: SupplierAccountsStatus.ACTIVE,
+  })
+  @IsOptional()
+  @IsEnum(SupplierAccountsStatus)
+  status?: SupplierAccountsStatus;
 
   @ApiPropertyOptional({
     example: 'createdAt',
@@ -70,7 +94,7 @@ export class QueryCustomerAccountDto {
 
   @ApiPropertyOptional({
     description:
-      'Include soft-deleted customer accounts',
+      'Include soft-deleted supplier accounts',
     default: false,
   })
   @IsOptional()

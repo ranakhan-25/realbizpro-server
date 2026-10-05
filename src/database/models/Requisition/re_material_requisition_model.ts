@@ -112,12 +112,13 @@ export class Requisition
   declare addedById?: string;
 
   @Column({
-    type: DataType.STRING,
+    type: DataType.ENUM(
+      ...Object.values(ApprovalStatusEnum),
+    ),
     allowNull: false,
     defaultValue: ApprovalStatusEnum.PENDING,
   })
-  declare approvalStatus:
-    ApprovalStatusEnum | string;
+  declare approvalStatus: ApprovalStatusEnum;
 
   @Column({
     type: DataType.STRING,
@@ -126,15 +127,35 @@ export class Requisition
   declare attachmentUrl?: string;
 
   @Column({
-    type: DataType.STRING,
+    type: DataType.ENUM(
+      ...Object.values(RequisitionStatusEnum),
+    ),
     allowNull: false,
     defaultValue: RequisitionStatusEnum.DRAFT,
   })
-  declare status: RequisitionStatusEnum | string;
+  declare status: RequisitionStatusEnum;
 
   @Column({
     type: DataType.TEXT,
     allowNull: true,
   })
   declare remarks?: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  declare createdBy?: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  declare updatedBy?: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  declare deletedBy?: string;
 }

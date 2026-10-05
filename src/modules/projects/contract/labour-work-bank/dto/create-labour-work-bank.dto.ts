@@ -13,14 +13,15 @@ import {
 import {
   IsDateString,
   IsEmail,
+  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
-  Max,
-  MaxLength,
   Min,
 } from 'class-validator';
+
+import { LabourWorkBankStatus } from 'src/database/models/labour work bank/lb_labour_work_bank_model';
 
 export class CreateLabourWorkBankDto {
   @ApiProperty({
@@ -31,7 +32,6 @@ export class CreateLabourWorkBankDto {
   @IsNotEmpty({
     message: 'Labour work bank code is required',
   })
-  @MaxLength(100)
   code: string;
 
   @ApiProperty({
@@ -42,7 +42,6 @@ export class CreateLabourWorkBankDto {
   @IsNotEmpty({
     message: 'Labour work bank name is required',
   })
-  @MaxLength(255)
   name: string;
 
   @ApiPropertyOptional({
@@ -96,7 +95,6 @@ export class CreateLabourWorkBankDto {
   @Type(() => Number)
   @IsNumber()
   @Min(0)
-  @Max(999999999999)
   creditLimit?: number;
 
   @ApiPropertyOptional({
@@ -138,4 +136,13 @@ export class CreateLabourWorkBankDto {
     value === '' ? null : value,
   )
   addedById?: string;
+
+  @ApiPropertyOptional({
+    description: 'Labour work bank status',
+    enum: LabourWorkBankStatus,
+    default: LabourWorkBankStatus.ACTIVE,
+  })
+  @IsOptional()
+  @IsEnum(LabourWorkBankStatus)
+  status?: LabourWorkBankStatus;
 }

@@ -6,7 +6,6 @@ import {
   Delete,
   Get,
   Param,
-  ParseIntPipe,
   Patch,
   Post,
   Query,
@@ -21,7 +20,6 @@ import {
 import { CreateSupplierAccountDto } from './dto/create-supplier-account.dto';
 import { QuerySupplierAccountDto } from './dto/query-supplier-account.dto';
 import { UpdateSupplierAccountDto } from './dto/update-supplier-account.dto';
-
 import { SupplierAccountsService } from './supplier-accounts.service';
 
 @ApiTags('Supplier Accounts')
@@ -59,60 +57,50 @@ export class SupplierAccountsController {
     );
   }
 
-  @Get(':id')
+  @Get(':uuid')
   @ApiOperation({
-    summary: 'Get supplier account by ID',
+    summary: 'Get supplier account by UUID',
   })
-  findOne(
-    @Param('id', ParseIntPipe)
-    id: number,
-  ) {
+  findOne(@Param('uuid') uuid: string) {
     return this.supplierAccountsService.findOne(
-      id,
+      uuid,
     );
   }
 
-  @Patch(':id')
+  @Patch(':uuid')
   @ApiOperation({
     summary: 'Update supplier account',
   })
   update(
-    @Param('id', ParseIntPipe)
-    id: number,
-
+    @Param('uuid') uuid: string,
     @Body()
     updateSupplierAccountDto: UpdateSupplierAccountDto,
   ) {
     return this.supplierAccountsService.update(
-      id,
+      uuid,
       updateSupplierAccountDto,
     );
   }
 
-  @Delete(':id')
+  @Delete(':uuid')
   @ApiOperation({
-    summary: 'Soft delete supplier account',
+    summary:
+      'Soft delete supplier account (status → inactive)',
   })
-  remove(
-    @Param('id', ParseIntPipe)
-    id: number,
-  ) {
+  remove(@Param('uuid') uuid: string) {
     return this.supplierAccountsService.remove(
-      id,
+      uuid,
     );
   }
 
-  @Patch(':id/restore')
+  @Patch(':uuid/restore')
   @ApiOperation({
     summary:
-      'Restore soft-deleted supplier account',
+      'Restore soft-deleted supplier account (status → active)',
   })
-  restore(
-    @Param('id', ParseIntPipe)
-    id: number,
-  ) {
+  restore(@Param('uuid') uuid: string) {
     return this.supplierAccountsService.restore(
-      id,
+      uuid,
     );
   }
 }

@@ -6,7 +6,6 @@ import {
   Delete,
   Get,
   Param,
-  ParseIntPipe,
   Patch,
   Post,
   Query,
@@ -58,58 +57,50 @@ export class CustomerAccountController {
     );
   }
 
-  @Get(':id')
+  @Get(':uuid')
   @ApiOperation({
-    summary: 'Get customer account by ID',
+    summary: 'Get customer account by UUID',
   })
-  findOne(
-    @Param('id', ParseIntPipe)
-    id: number,
-  ) {
+  findOne(@Param('uuid') uuid: string) {
     return this.customerAccountService.findOne(
-      id,
+      uuid,
     );
   }
 
-  @Patch(':id')
+  @Patch(':uuid')
   @ApiOperation({
     summary: 'Update customer account',
   })
   update(
-    @Param('id', ParseIntPipe)
-    id: number,
-
+    @Param('uuid') uuid: string,
     @Body()
     updateCustomerAccountDto: UpdateCustomerAccountDto,
   ) {
     return this.customerAccountService.update(
-      id,
+      uuid,
       updateCustomerAccountDto,
     );
   }
 
-  @Delete(':id')
-  @ApiOperation({
-    summary: 'Soft delete customer account',
-  })
-  remove(
-    @Param('id', ParseIntPipe)
-    id: number,
-  ) {
-    return this.customerAccountService.remove(id);
-  }
-
-  @Patch(':id/restore')
+  @Delete(':uuid')
   @ApiOperation({
     summary:
-      'Restore soft-deleted customer account',
+      'Soft delete customer account (status → inactive)',
   })
-  restore(
-    @Param('id', ParseIntPipe)
-    id: number,
-  ) {
+  remove(@Param('uuid') uuid: string) {
+    return this.customerAccountService.remove(
+      uuid,
+    );
+  }
+
+  @Patch(':uuid/restore')
+  @ApiOperation({
+    summary:
+      'Restore soft-deleted customer account (status → active)',
+  })
+  restore(@Param('uuid') uuid: string) {
     return this.customerAccountService.restore(
-      id,
+      uuid,
     );
   }
 }

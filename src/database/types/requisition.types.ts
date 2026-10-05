@@ -19,10 +19,13 @@ export interface RequisitionAttributes {
   titleOfWork: string;
   department?: string | null;
   addedById?: string | null;
-  approvalStatus: ApprovalStatusEnum | string;
+  approvalStatus: ApprovalStatusEnum;
   attachmentUrl?: string | null;
-  status: RequisitionStatusEnum | string;
+  status: RequisitionStatusEnum;
   remarks?: string | null;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+  deletedBy?: string | null;
 }
 
 export interface RequisitionCreationAttributes {
@@ -35,10 +38,13 @@ export interface RequisitionCreationAttributes {
   titleOfWork: string;
   department?: string | null;
   addedById?: string | null;
-  approvalStatus?: ApprovalStatusEnum | string; // Has default value
+  approvalStatus?: ApprovalStatusEnum; // Has default value
   attachmentUrl?: string | null;
-  status?: RequisitionStatusEnum | string; // Has default value
+  status?: RequisitionStatusEnum; // Has default value
   remarks?: string | null;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+  deletedBy?: string | null;
 }
 
 export type RequisitionUpdateAttributes = Partial<RequisitionCreationAttributes>;

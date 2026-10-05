@@ -1,6 +1,8 @@
 // Auto-generated types for CustomerAccount
 // Source: src\database\models\customer account\ca_customer_accounts_model.ts
 
+import { CustomerAccountStatus } from '../models/customer account/ca_customer_accounts_model';
+
 export interface CustomerAccountAttributes {
   id: number;
   uuid: string;
@@ -16,6 +18,10 @@ export interface CustomerAccountAttributes {
   underGroup?: string | null;
   address?: string | null;
   addedById?: string | null;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+  deletedBy?: string | null;
+  status: CustomerAccountStatus;
 }
 
 export interface CustomerAccountCreationAttributes {
@@ -28,6 +34,10 @@ export interface CustomerAccountCreationAttributes {
   underGroup?: string | null;
   address?: string | null;
   addedById?: string | null;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+  deletedBy?: string | null;
+  status?: CustomerAccountStatus; // Has default value
 }
 
 export type CustomerAccountUpdateAttributes = Partial<CustomerAccountCreationAttributes>;

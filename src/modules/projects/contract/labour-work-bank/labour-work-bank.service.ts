@@ -13,7 +13,10 @@ import { Op } from 'sequelize';
 import { CreateLabourWorkBankDto } from './dto/create-labour-work-bank.dto';
 import { QueryLabourWorkBankDto } from './dto/query-labour-work-bank.dto';
 import { UpdateLabourWorkBankDto } from './dto/update-labour-work-bank.dto';
-import { LabourWorkBank } from 'src/database/models/labour work bank/lb_labour_work_bank_model';
+import {
+  LabourWorkBank,
+  LabourWorkBankStatus,
+} from 'src/database/models/labour work bank/lb_labour_work_bank_model';
 
 @Injectable()
 export class LabourWorkBankService {
@@ -22,7 +25,6 @@ export class LabourWorkBankService {
     private readonly labourWorkBankModel: typeof LabourWorkBank,
   ) {}
 
-  // CREATE
   async create(
     dto: CreateLabourWorkBankDto,
   ): Promise<LabourWorkBank> {
@@ -44,59 +46,50 @@ export class LabourWorkBankService {
     const labourWorkBank =
       await this.labourWorkBankModel.create({
         ...labourData,
+        status:
+          dto.status ??
+          LabourWorkBankStatus.ACTIVE,
         ...(dueDate
           ? { dueDate: new Date(dueDate) }
           : {}),
       });
 
-    return this.findOne(labourWorkBank.id);
+    return this.findOne(labourWorkBank.uuid);
   }
 
-  // FIND ALL
   async findAll(query: QueryLabourWorkBankDto) {
     const {
       page = 1,
       limit = 10,
+      skip,
       search,
       underGroup,
+      status,
       sortBy = 'createdAt',
       sortOrder = 'DESC',
       withDeleted = false,
     } = query;
 
+    const offset =
+      skip !== undefined && skip !== null
+        ? skip
+        : (page - 1) * limit;
+
     const where: any = {};
 
     if (search) {
       where[Op.or] = [
-        {
-          code: {
-            [Op.iLike]: `%${search}%`,
-          },
-        },
-        {
-          name: {
-            [Op.iLike]: `%${search}%`,
-          },
-        },
+        { code: { [Op.iLike]: `%${search}%` } },
+        { name: { [Op.iLike]: `%${search}%` } },
         {
           businessName: {
             [Op.iLike]: `%${search}%`,
           },
         },
+        { email: { [Op.iLike]: `%${search}%` } },
+        { phone: { [Op.iLike]: `%${search}%` } },
         {
-          email: {
-            [Op.iLike]: `%${search}%`,
-          },
-        },
-        {
-          phone: {
-            [Op.iLike]: `%${search}%`,
-          },
-        },
-        {
-          address: {
-            [Op.iLike]: `%${search}%`,
-          },
+          address: { [Op.iLike]: `%${search}%` },
         },
         {
           underGroup: {
@@ -110,55 +103,80 @@ export class LabourWorkBankService {
       where.underGroup = underGroup;
     }
 
+    if (status) {
+      where.status = status;
+    }
+
     const { rows, count } =
       await this.labourWorkBankModel.findAndCountAll(
         {
           where,
           limit,
-          offset: (page - 1) * limit,
+          offset,
           order: [[sortBy, sortOrder]],
           paranoid: !withDeleted,
         },
       );
 
+    const totalPages =
+      Math.ceil(count / limit) || 1;
+    const currentPage =
+      skip !== undefined && skip !== null
+        ? Math.floor(skip / limit) + 1
+        : page;
+
+    const nextPage =
+      currentPage < totalPages
+        ? currentPage + 1
+        : null;
+
+    const previousPage =
+      currentPage > 1 ? currentPage - 1 : null;
+
     return {
       data: rows,
       meta: {
-        total: count,
-        page,
+        page: currentPage,
+        pageNo: currentPage,
+        nextPage,
+        previousPage,
         limit,
-        totalPages: Math.ceil(count / limit),
+        skip: offset,
+        total: count,
+        totalPages,
       },
     };
   }
 
-  // FIND ONE
   async findOne(
-    id: string | number,
+    uuid: string,
   ): Promise<LabourWorkBank> {
     const labourWorkBank =
-      await this.labourWorkBankModel.findByPk(id);
+      await this.labourWorkBankModel.findOne({
+        where: { uuid } as any,
+      });
 
     if (!labourWorkBank) {
       throw new NotFoundException(
-        `Labour work bank #${id} not found`,
+        `Labour work bank #${uuid} not found`,
       );
     }
 
     return labourWorkBank;
   }
 
-  // UPDATE
   async update(
-    id: string | number,
+    uuid: string,
     dto: UpdateLabourWorkBankDto,
   ): Promise<LabourWorkBank> {
     const labourWorkBank =
-      await this.labourWorkBankModel.findByPk(id);
+      await this.labourWorkBankModel.findOne({
+        where: { uuid } as any,
+      });
 
     if (!labourWorkBank) {
       throw new NotFoundException(
-        `Labour work bank #${id} not found`,
+        `Labour work bank #${uuid} not found`,
       );
     }
 
@@ -189,55 +207,62 @@ export class LabourWorkBankService {
         : {}),
     });
 
-    return this.findOne(id);
+    return this.findOne(uuid);
   }
 
-  // REMOVE
   async remove(
-    id: string | number,
+    uuid: string,
   ): Promise<{ message: string }> {
     const labourWorkBank =
-      await this.labourWorkBankModel.findByPk(id);
+      await this.labourWorkBankModel.findOne({
+        where: { uuid } as any,
+      });
 
     if (!labourWorkBank) {
       throw new NotFoundException(
-        `Labour work bank #${id} not found`,
+        `Labour work bank #${uuid} not found`,
       );
     }
+
+    // status → inactive + soft delete
+    await labourWorkBank.update({
+      status: LabourWorkBankStatus.INACTIVE,
+    });
 
     await labourWorkBank.destroy();
 
     return {
-      message: `Labour work bank #${id} deleted successfully`,
+      message: `Labour work bank #${uuid} deleted successfully`,
     };
   }
 
-  // RESTORE
   async restore(
-    id: string | number,
+    uuid: string,
   ): Promise<LabourWorkBank> {
     const labourWorkBank =
-      await this.labourWorkBankModel.findByPk(
-        id,
-        {
-          paranoid: false,
-        },
-      );
+      await this.labourWorkBankModel.findOne({
+        where: { uuid } as any,
+        paranoid: false,
+      });
 
     if (!labourWorkBank) {
       throw new NotFoundException(
-        `Labour work bank #${id} not found`,
+        `Labour work bank #${uuid} not found`,
       );
     }
 
     if (!labourWorkBank.deletedAt) {
       throw new BadRequestException(
-        `Labour work bank #${id} is not deleted`,
+        `Labour work bank #${uuid} is not deleted`,
       );
     }
 
+    // status → active + restore
     await labourWorkBank.restore();
+    await labourWorkBank.update({
+      status: LabourWorkBankStatus.ACTIVE,
+    });
 
-    return this.findOne(id);
+    return this.findOne(uuid);
   }
 }

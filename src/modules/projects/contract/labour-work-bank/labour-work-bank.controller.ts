@@ -6,7 +6,6 @@ import {
   Delete,
   Get,
   Param,
-  ParseIntPipe,
   Patch,
   Post,
   Query,
@@ -21,7 +20,6 @@ import {
 import { CreateLabourWorkBankDto } from './dto/create-labour-work-bank.dto';
 import { QueryLabourWorkBankDto } from './dto/query-labour-work-bank.dto';
 import { UpdateLabourWorkBankDto } from './dto/update-labour-work-bank.dto';
-
 import { LabourWorkBankService } from './labour-work-bank.service';
 
 @ApiTags('Labour Work Bank')
@@ -59,54 +57,50 @@ export class LabourWorkBankController {
     );
   }
 
-  @Get(':id')
+  @Get(':uuid')
   @ApiOperation({
-    summary: 'Get labour work bank by ID',
+    summary: 'Get labour work bank by UUID',
   })
-  findOne(
-    @Param('id', ParseIntPipe)
-    id: number,
-  ) {
-    return this.labourWorkBankService.findOne(id);
+  findOne(@Param('uuid') uuid: string) {
+    return this.labourWorkBankService.findOne(
+      uuid,
+    );
   }
 
-  @Patch(':id')
+  @Patch(':uuid')
   @ApiOperation({
     summary: 'Update labour work bank',
   })
   update(
-    @Param('id', ParseIntPipe)
-    id: number,
-
+    @Param('uuid') uuid: string,
     @Body()
     updateLabourWorkBankDto: UpdateLabourWorkBankDto,
   ) {
     return this.labourWorkBankService.update(
-      id,
+      uuid,
       updateLabourWorkBankDto,
     );
   }
 
-  @Delete(':id')
-  @ApiOperation({
-    summary: 'Soft delete labour work bank',
-  })
-  remove(
-    @Param('id', ParseIntPipe)
-    id: number,
-  ) {
-    return this.labourWorkBankService.remove(id);
-  }
-
-  @Patch(':id/restore')
+  @Delete(':uuid')
   @ApiOperation({
     summary:
-      'Restore soft-deleted labour work bank',
+      'Soft delete labour work bank (status → inactive)',
   })
-  restore(
-    @Param('id', ParseIntPipe)
-    id: number,
-  ) {
-    return this.labourWorkBankService.restore(id);
+  remove(@Param('uuid') uuid: string) {
+    return this.labourWorkBankService.remove(
+      uuid,
+    );
+  }
+
+  @Patch(':uuid/restore')
+  @ApiOperation({
+    summary:
+      'Restore soft-deleted labour work bank (status → active)',
+  })
+  restore(@Param('uuid') uuid: string) {
+    return this.labourWorkBankService.restore(
+      uuid,
+    );
   }
 }

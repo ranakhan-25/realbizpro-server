@@ -64,11 +64,9 @@ import { RequisitionModule } from './modules/requisition/material-requisition/ma
 import { ProjectModule } from './modules/projects/project/project.module';
 import { ProjectSiteModule } from './modules/projects/project-site/project-site.module';
 import { RequisitionModule } from './modules/requisition/material-requisition/material-requisition.module';
-
-import { CustomerAccountModule } from './modules/contract/customer-accounts/customer-accounts.module';
-
-import { SupplierAccountsModule } from './modules/contract/supplier-accounts/supplier-accounts.module';
-import { LabourWorkBankModule } from './modules/contract/labour-work-bank/labour-work-bank.module';
+import { CustomerAccountModule } from './modules/projects/contract/customer-accounts/customer-accounts.module';
+import { SupplierAccountsModule } from './modules/projects/contract/supplier-accounts/supplier-accounts.module';
+import { LabourWorkBankModule } from './modules/projects/contract/labour-work-bank/labour-work-bank.module';
 
 @Module({
   imports: [
