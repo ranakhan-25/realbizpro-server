@@ -10,7 +10,8 @@ services:
     environment:
       - NODE_ENV=production
       - REDIS_URL=redis://redis:6379
-      - DATABASE_HOST=${DATABASE_HOST:-host.docker.internal}
+      - DATABASE_HOST=${DATABASE_HOST:-db-tunnel}
+      - DATABASE_PORT=${DATABASE_PORT:-5432}
     ports:
       - "${PORT:-5002}:${PORT:-5002}"
     extra_hosts:
@@ -18,6 +19,30 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+      db-tunnel:
+        condition: service_healthy
+    networks:
+      - realbiz_network
+
+  db-tunnel:
+    build:
+      context: .
+      dockerfile: docker/tunnel/Dockerfile
+    container_name: realbiz_pro_db_tunnel
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - SSH_HOST=${SSH_HOST:-103.189.5.21}
+      - SSH_PORT=${SSH_PORT:-22}
+      - SSH_USER=${SSH_USER:-dev}
+      - SSH_PASSWORD=${SSH_PASSWORD:-}
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 5432 || exit 1"]
+      interval: 3s
+      timeout: 3s
+      retries: 15
+      start_period: 4s
     networks:
       - realbiz_network
 
