@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY package.json pnpm-workspace.yaml* ./
 
 # Install all dependencies (including devDependencies required for compilation)
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # Copy application source code and scripts
 COPY . .
@@ -26,7 +26,7 @@ RUN npm run generate-types
 RUN npm run build
 
 # Remove development dependencies
-RUN npm prune --omit=dev
+RUN npm prune --omit=dev --legacy-peer-deps
 
 # ==========================================
 # Stage 2: Production Runtime
