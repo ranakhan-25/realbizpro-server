@@ -16,7 +16,7 @@ import { UpdateLabourWorkBankDto } from './dto/update_labour_work_bank.dto';
 import {
   LabourWorkBank,
   LabourWorkBankStatus,
-} from 'src/database/models/contract/pr_labour_work_bank_model';
+} from 'src/database/models/projects/contract/pr_labour_work_bank_model';
 
 @Injectable()
 export class LabourWorkBankService {

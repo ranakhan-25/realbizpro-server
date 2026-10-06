@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
-import { Project } from 'src/database/models/projects/pr_project_model';
+import { Project } from 'src/database/models/projects/project/pr_project_model';
 import type { CreateProjectDto } from './dto/create-project.dto';
 import type { QueryProjectDto } from './dto/query-project.dto';
 import type { UpdateProjectDto } from './dto/update-project.dto';

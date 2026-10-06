@@ -5,7 +5,7 @@ import {
   ForeignKey,
   Table,
 } from 'sequelize-typescript';
-import { BaseModel } from '../../base.model';
+import { BaseModel } from '../../../base.model';
 import type {
   SiteAttributes,
   SiteCreationAttributes,

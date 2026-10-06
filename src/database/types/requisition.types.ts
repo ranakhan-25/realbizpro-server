@@ -1,8 +1,8 @@
 // Auto-generated types for Requisition
-// Source: src\database\models\Requisition\re_material_requisition_model.ts
+// Source: src\database\models\projects\Requisition\re_material_requisition_model.ts
 
-import { ApprovalStatusEnum } from '../models/Requisition/re_material_requisition_model';
-import { RequisitionStatusEnum } from '../models/Requisition/re_material_requisition_model';
+import { ApprovalStatusEnum } from '../models/projects/Requisition/re_material_requisition_model';
+import { RequisitionStatusEnum } from '../models/projects/Requisition/re_material_requisition_model';
 
 export interface RequisitionAttributes {
   id: number;

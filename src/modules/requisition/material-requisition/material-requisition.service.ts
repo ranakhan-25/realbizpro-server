@@ -9,7 +9,7 @@ import {
   ApprovalStatusEnum,
   Requisition,
   RequisitionStatusEnum,
-} from 'src/database/models/Requisition/re_material_requisition_model';
+} from 'src/database/models/projects/Requisition/re_material_requisition_model';
 
 import { CreateMaterialRequisitionDto } from './dto/create-material-requisition.dto';
 import { UpdateMaterialRequisitionDto } from './dto/update-material-requisition.dto';

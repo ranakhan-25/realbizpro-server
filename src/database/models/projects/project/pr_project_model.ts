@@ -3,11 +3,8 @@ import {
   DataType,
   Table,
 } from 'sequelize-typescript';
-import { BaseModel } from '../../base.model';
-import type {
-  ProjectAttributes,
-  ProjectCreationAttributes,
-} from 'src/database/types/project.types';
+import { BaseModel } from '../../../base.model';
+import type { ProjectAttributes, ProjectCreationAttributes } from 'src/database/types/project.types';
 
 export enum ProjectStatusEnum {
   ACTIVE = 'ACTIVE',
@@ -23,7 +20,7 @@ export enum ProjectStatusEnum {
   // indexes সরিয়ে দেয়া হয়েছে আপাতত
 })
 export class Project
-  extends BaseModel<ProjectAttributes, ProjectCreationAttributes>
+  extends BaseModel<ProjectAttributes, ProjectCreationAttributes >
   implements ProjectAttributes
 {
   @Column({

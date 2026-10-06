@@ -1,7 +1,7 @@
 // Auto-generated types for Project
-// Source: src\database\models\projects\pr_project_model.ts
+// Source: src\database\models\projects\project\pr_project_model.ts
 
-import { ProjectStatusEnum } from '../models/projects/pr_project_model';
+import { ProjectStatusEnum } from '../models/projects/project/pr_project_model';
 
 export interface ProjectAttributes {
   id: number;

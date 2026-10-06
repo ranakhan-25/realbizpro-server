@@ -1,5 +1,5 @@
 import { BeforeValidate, Column, DataType, Table } from 'sequelize-typescript';
-import { BaseModel } from '../../base.model';
+import { BaseModel } from '../../../base.model';
 import { projectTypeAttributes as ProjectTypeAttributes, projectTypeCreationAttributes as ProjectTypeCreationAttributes } from 'src/database/types/projecttype.types';
 
 

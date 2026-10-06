@@ -9,7 +9,7 @@ import {
   Max,
   Min,
 } from 'class-validator';
-import { ApprovalStatusEnum, RequisitionStatusEnum } from 'src/database/models/Requisition/re_material_requisition_model';
+import { ApprovalStatusEnum, RequisitionStatusEnum } from 'src/database/models/projects/Requisition/re_material_requisition_model';
  // path adjust করো
 
 export class QueryRequisitionDto {

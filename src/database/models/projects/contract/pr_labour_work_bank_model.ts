@@ -4,14 +4,14 @@ import {
   DataType,
   Table,
 } from 'sequelize-typescript';
-import { BaseModel } from '../../base.model';
+import { BaseModel } from 'src/database/base.model';
 import type {
-  SupplierAccountsAttributes,
-  SupplierAccountsCreationAttributes,
-  SupplierAccountsUpdateAttributes,
-} from 'src/database/types/supplieraccounts.types';
+  LabourWorkBankAttributes,
+  LabourWorkBankCreationAttributes,
+  LabourWorkBankUpdateAttributes,
+} from 'src/database/types/labourworkbank.types';
 
-export enum SupplierAccountsStatus {
+export enum LabourWorkBankStatus {
   ACTIVE = 'active',
   INACTIVE = 'inactive',
   PENDING = 'pending',
@@ -19,48 +19,48 @@ export enum SupplierAccountsStatus {
 }
 
 @Table({
-  tableName: 'supplier_accounts',
+  tableName: 'labour_work_bank',
   timestamps: true,
   paranoid: true,
   underscored: false,
   indexes: [
     {
-      name: 'SupplierAccounts_supplierCode_idx',
-      fields: ['supplierCode'],
+      name: 'LabourWorkBank_code_idx',
+      fields: ['code'],
     },
     {
-      name: 'SupplierAccounts_phone_idx',
+      name: 'LabourWorkBank_phone_idx',
       fields: ['phone'],
     },
     {
-      name: 'SupplierAccounts_email_idx',
+      name: 'LabourWorkBank_email_idx',
       fields: ['email'],
     },
     {
-      name: 'SupplierAccounts_deletedAt_idx',
+      name: 'LabourWorkBank_deletedAt_idx',
       fields: ['deleted_at'],
     },
   ],
 })
-export class SupplierAccounts
+export class LabourWorkBank
   extends BaseModel<
-    SupplierAccountsUpdateAttributes,
-    SupplierAccountsCreationAttributes
+    LabourWorkBankUpdateAttributes,
+    LabourWorkBankCreationAttributes
   >
-  implements SupplierAccountsAttributes
+  implements LabourWorkBankAttributes
 {
   @Column({
     type: DataType.STRING,
     allowNull: false,
     unique: true,
   })
-  declare supplierCode: string;
+  declare code: string;
 
   @Column({
     type: DataType.STRING,
     allowNull: false,
   })
-  declare supplierName: string;
+  declare name: string;
 
   @Column({
     type: DataType.STRING,
@@ -102,7 +102,7 @@ export class SupplierAccounts
   @Column({
     type: DataType.STRING,
     allowNull: true,
-    defaultValue: 'Sundry Creditors',
+    defaultValue: 'Labour',
   })
   declare underGroup?: string;
 
@@ -132,10 +132,10 @@ export class SupplierAccounts
 
   @Column({
     type: DataType.ENUM(
-      ...Object.values(SupplierAccountsStatus),
+      ...Object.values(LabourWorkBankStatus),
     ),
     allowNull: false,
-    defaultValue: SupplierAccountsStatus.ACTIVE,
+    defaultValue: LabourWorkBankStatus.ACTIVE,
   })
-  declare status: SupplierAccountsStatus;
+  declare status: LabourWorkBankStatus;
 }

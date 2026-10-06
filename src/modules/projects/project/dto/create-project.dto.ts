@@ -20,7 +20,7 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
-import { ProjectStatusEnum } from 'src/database/models/projects/pr_project_model';
+import { ProjectStatusEnum } from 'src/database/models/projects/project/pr_project_model';
 
 export class CreateProjectDto {
   @ApiProperty({
