@@ -1,0 +1,92 @@
+<html>
+  <head>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        color: #333;
+      }
+      .warning-header {
+        color: #f57c00;
+        font-size: 24px;
+        margin-bottom: 20px;
+      }
+      .warning-section {
+        margin-bottom: 20px;
+        padding: 15px;
+        border-left: 4px solid #ffa726;
+        background-color: #fff3e0;
+      }
+      .warning-title {
+        font-weight: bold;
+        color: #ef6c00;
+        margin-bottom: 10px;
+      }
+      .code-block {
+        background-color: #f5f5f5;
+        padding: 10px;
+        border-radius: 4px;
+        font-family: monospace;
+        white-space: pre-wrap;
+        word-break: break-all;
+      }
+      .info-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .info-table th,
+      .info-table td {
+        padding: 8px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+      .info-table th {
+        background-color: #f2f2f2;
+      }
+      .duration {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #d32f2f;
+      }
+    </style>
+  </head>
+  <body>
+    <div class='warning-header'>🐢 API Performance Warning</div>
+
+    <div class='warning-section'>
+      <div class='warning-title'>Request Details</div>
+      <table class='info-table'>
+        <tr><th>Timestamp</th><td>{{timestamp}}</td></tr>
+        <tr><th>Path</th><td>{{path}}</td></tr>
+        <tr><th>User</th><td>{{userEmail}} (ID: {{userId}})</td></tr>
+        <tr><th>IP Address</th><td>{{ip}}</td></tr>
+        <tr><th>User Agent</th><td>{{userAgent}}</td></tr>
+      </table>
+    </div>
+
+    <div class='warning-section'>
+      <div class='warning-title'>Performance Issue</div>
+      <p>This request took
+        <span class='duration'>{{duration}}ms</span>
+        to complete, which exceeds the warning threshold of
+        <strong>{{threshold}}ms</strong>.</p>
+    </div>
+
+    {{#if body}}
+      <div class='warning-section'>
+        <div class='warning-title'>Request Body</div>
+        <div class='code-block'>{{body}}</div>
+      </div>
+    {{/if}}
+
+    {{#if query}}
+      <div class='warning-section'>
+        <div class='warning-title'>Query Parameters</div>
+        <div class='code-block'>{{query}}</div>
+      </div>
+    {{/if}}
+
+    <p><strong>Please investigate this endpoint for potential performance
+        optimizations.</strong></p>
+  </body>
+</html>

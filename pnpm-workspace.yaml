@@ -1,0 +1,12 @@
+allowBuilds:
+  '@firebase/util': false
+  '@nestjs/core': true
+  '@parcel/watcher': false
+  '@scarf/scarf': false
+  argon2: false
+  bcrypt: false
+  msgpackr-extract: false
+  protobufjs: false
+  puppeteer: false
+  sharp: false
+  unrs-resolver: false
