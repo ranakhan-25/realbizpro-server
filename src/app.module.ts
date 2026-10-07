@@ -69,6 +69,7 @@ import { LabourWorkBankModule } from './modules/projects/contract/labour-work-ba
 import { ProjectModule } from './modules/projects/projects/project.module';
 import { InvestorModule } from './modules/projects/investments/investor/investor.module';
 import { ShareConfigurationModule } from './modules/projects/investments/share-configuration/share-configuration.module';
+import { ContractorModule } from './modules/projects/contract/contractor/contractor.module';
 
 @Module({
   imports: [
@@ -163,6 +164,7 @@ import { ShareConfigurationModule } from './modules/projects/investments/share-c
     CustomerAccountModule,
     SupplierAccountsModule,
     LabourWorkBankModule,
+    ContractorModule,
     InvestorModule,
     ShareConfigurationModule,
   ],
