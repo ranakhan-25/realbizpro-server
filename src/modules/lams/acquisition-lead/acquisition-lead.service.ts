@@ -11,9 +11,7 @@ export class AcquisitionLeadService {
   ) {}
 
   async create(createDto: CreateAcquisitionLeadDto): Promise<AcquisitionLead> {
-    return await this.acquisitionLeadModel.create({
-      ...createDto,
-    });
+    return await this.acquisitionLeadModel.create(createDto as any);
   }
 
   async findAll(): Promise<AcquisitionLead[]> {

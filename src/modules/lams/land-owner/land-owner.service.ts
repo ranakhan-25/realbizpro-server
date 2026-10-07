@@ -11,9 +11,7 @@ export class LandOwnerService {
   ) {}
 
   async create(createDto: CreateLandOwnerDto): Promise<LandOwner> {
-    return await this.landOwnerModel.create({
-      ...createDto,
-    });
+    return await this.landOwnerModel.create(createDto as any);
   }
 
   async findAll(): Promise<LandOwner[]> {

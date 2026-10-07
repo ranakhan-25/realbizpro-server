@@ -11,9 +11,7 @@ export class LegalDocumentService {
   ) {}
 
   async create(createDto: CreateLegalDocumentDto): Promise<LegalDocument> {
-    return await this.legalDocumentModel.create({
-      ...createDto,
-    });
+    return await this.legalDocumentModel.create(createDto as any);
   }
 
   async findAll(): Promise<LegalDocument[]> {

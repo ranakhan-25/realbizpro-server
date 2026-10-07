@@ -11,9 +11,7 @@ export class FollowUpService {
   ) {}
 
   async create(createDto: CreateFollowUpDto): Promise<FollowUp> {
-    return await this.followUpModel.create({
-      ...createDto,
-    });
+    return await this.followUpModel.create(createDto as any);
   }
 
   async findAll(): Promise<FollowUp[]> {

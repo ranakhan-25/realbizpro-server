@@ -11,9 +11,7 @@ export class NegotiationProcessService {
   ) {}
 
   async create(createDto: CreateNegotiationProcessDto): Promise<NegotiationProcess> {
-    return await this.negotiationProcessModel.create({
-      ...createDto,
-    });
+    return await this.negotiationProcessModel.create(createDto as any);
   }
 
   async findAll(): Promise<NegotiationProcess[]> {
