@@ -2,12 +2,14 @@ import { Column, DataType, Table, ForeignKey, BelongsTo, Index, PrimaryKey, Defa
 import { BaseModel } from '../../base.model';
 import { AcquisitionLead } from './acquisition-lead.model';
 
+import type { NegotiationProcessAttributes, NegotiationProcessCreationAttributes } from '../../types/negotiationprocess.types';
+
 @Table({
   tableName: 'lams_negotiation_processes',
   timestamps: true,
   paranoid: true,
 })
-export class NegotiationProcess extends BaseModel {
+export class NegotiationProcess extends BaseModel<NegotiationProcessAttributes, NegotiationProcessCreationAttributes> {
   @PrimaryKey
   @Default(DataType.UUIDV4)
   @Column({ type: DataType.UUID, allowNull: false, unique: true })

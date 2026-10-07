@@ -2,12 +2,14 @@ import { Column, DataType, Table, ForeignKey, BelongsTo, Index, PrimaryKey, Defa
 import { BaseModel } from '../../base.model';
 import { AcquisitionLead } from './acquisition-lead.model';
 
+import type { FollowUpAttributes, FollowUpCreationAttributes } from '../../types/followup.types';
+
 @Table({
   tableName: 'lams_follow_ups',
   timestamps: true,
   paranoid: true,
 })
-export class FollowUp extends BaseModel {
+export class FollowUp extends BaseModel<FollowUpAttributes, FollowUpCreationAttributes> {
   @PrimaryKey
   @Default(DataType.UUIDV4)
   @Column({ type: DataType.UUID, allowNull: false, unique: true })

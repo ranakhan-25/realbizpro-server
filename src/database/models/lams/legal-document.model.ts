@@ -2,12 +2,14 @@ import { Column, DataType, Table, ForeignKey, BelongsTo, Index, PrimaryKey, Defa
 import { BaseModel } from '../../base.model';
 import { AcquisitionLead } from './acquisition-lead.model';
 
+import type { LegalDocumentAttributes, LegalDocumentCreationAttributes } from '../../types/legaldocument.types';
+
 @Table({
   tableName: 'lams_legal_documents',
   timestamps: true,
   paranoid: true,
 })
-export class LegalDocument extends BaseModel {
+export class LegalDocument extends BaseModel<LegalDocumentAttributes, LegalDocumentCreationAttributes> {
   @PrimaryKey
   @Default(DataType.UUIDV4)
   @Column({ type: DataType.UUID, allowNull: false, unique: true })

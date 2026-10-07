@@ -2,12 +2,14 @@ import { Column, DataType, Table, HasMany, Index, PrimaryKey, Default } from 'se
 import { BaseModel } from '../../base.model';
 import { LandOwner } from './land-owner.model';
 
+import type { AcquisitionLeadAttributes, AcquisitionLeadCreationAttributes } from '../../types/acquisitionlead.types';
+
 @Table({
   tableName: 'lams_acquisition_leads',
   timestamps: true,
   paranoid: true,
 })
-export class AcquisitionLead extends BaseModel {
+export class AcquisitionLead extends BaseModel<AcquisitionLeadAttributes, AcquisitionLeadCreationAttributes> {
   @PrimaryKey
   @Default(DataType.UUIDV4)
   @Column({ type: DataType.UUID, allowNull: false, unique: true })
