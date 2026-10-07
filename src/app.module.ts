@@ -66,6 +66,7 @@ import { ProjectSiteModule } from './modules/projects/project-site/project-site.
 import { CustomerAccountModule } from './modules/projects/contract/customer-accounts/customer_accounts.module';
 import { SupplierAccountsModule } from './modules/projects/contract/supplier-accounts/supplier_accounts.module';
 import { LabourWorkBankModule } from './modules/projects/contract/labour-work-bank/labour_work_bank.module';
+import { LamsModule } from './modules/lams/lams.module';
 
 @Module({
   imports: [
@@ -159,6 +160,7 @@ import { LabourWorkBankModule } from './modules/projects/contract/labour-work-ba
     CustomerAccountModule,
     SupplierAccountsModule,
     LabourWorkBankModule,
+    LamsModule,
   ],
   controllers: [AppController, HealthController],
   providers: [
