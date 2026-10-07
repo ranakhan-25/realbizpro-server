@@ -2,7 +2,7 @@ import { IsString, IsNotEmpty, IsOptional, IsNumber, IsUUID, IsDateString } from
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateNegotiationProcessDto {
-  @ApiProperty({ description: 'UUID of the associated acquisition lead' })
+  @ApiProperty({ description: 'UUID of the associated acquisition lead', example: '123e4567-e89b-12d3-a456-426614174000' })
   @IsUUID()
   @IsNotEmpty()
   lead_id: string;
@@ -32,7 +32,7 @@ export class CreateNegotiationProcessDto {
   @IsOptional()
   next_meeting_date?: string;
 
-  @ApiPropertyOptional({ description: 'Notes from the meeting' })
+  @ApiPropertyOptional({ description: 'Notes from the meeting', example: 'Discussed pricing and terms.' })
   @IsString()
   @IsOptional()
   meeting_notes?: string;

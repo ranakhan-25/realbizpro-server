@@ -2,7 +2,7 @@ import { IsString, IsNotEmpty, IsOptional, IsUUID, IsDateString } from 'class-va
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateLegalDocumentDto {
-  @ApiProperty({ description: 'UUID of the associated acquisition lead' })
+  @ApiProperty({ description: 'UUID of the associated acquisition lead', example: '123e4567-e89b-12d3-a456-426614174000' })
   @IsUUID()
   @IsNotEmpty()
   lead_id: string;
@@ -22,7 +22,7 @@ export class CreateLegalDocumentDto {
   @IsOptional()
   issue_date?: string;
 
-  @ApiPropertyOptional({ description: 'Path or URL to the uploaded file' })
+  @ApiPropertyOptional({ description: 'Path or URL to the uploaded file', example: 'https://example.com/doc.pdf' })
   @IsString()
   @IsOptional()
   file_path?: string;
@@ -32,7 +32,7 @@ export class CreateLegalDocumentDto {
   @IsOptional()
   verification_status?: string;
 
-  @ApiPropertyOptional({ description: 'Vetting remarks or notes' })
+  @ApiPropertyOptional({ description: 'Vetting remarks or notes', example: 'All documents are clear.' })
   @IsString()
   @IsOptional()
   vetting_remarks?: string;

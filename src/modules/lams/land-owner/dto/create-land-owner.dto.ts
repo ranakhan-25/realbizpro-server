@@ -2,7 +2,7 @@ import { IsString, IsNotEmpty, IsOptional, IsNumber, IsUUID } from 'class-valida
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateLandOwnerDto {
-  @ApiProperty({ description: 'UUID of the associated acquisition lead' })
+  @ApiProperty({ description: 'UUID of the associated acquisition lead', example: '123e4567-e89b-12d3-a456-426614174000' })
   @IsUUID()
   @IsNotEmpty()
   lead_id: string;
@@ -27,12 +27,12 @@ export class CreateLandOwnerDto {
   @IsOptional()
   email?: string;
 
-  @ApiPropertyOptional({ description: 'Physical address' })
+  @ApiPropertyOptional({ description: 'Physical address', example: '123 Main St, Dhaka' })
   @IsString()
   @IsOptional()
   address?: string;
 
-  @ApiPropertyOptional({ description: 'National ID number' })
+  @ApiPropertyOptional({ description: 'National ID number', example: '1234567890' })
   @IsString()
   @IsOptional()
   nid_number?: string;

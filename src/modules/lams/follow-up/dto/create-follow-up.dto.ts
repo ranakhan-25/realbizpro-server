@@ -2,7 +2,7 @@ import { IsString, IsNotEmpty, IsOptional, IsUUID, IsDateString } from 'class-va
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateFollowUpDto {
-  @ApiProperty({ description: 'UUID of the associated acquisition lead' })
+  @ApiProperty({ description: 'UUID of the associated acquisition lead', example: '123e4567-e89b-12d3-a456-426614174000' })
   @IsUUID()
   @IsNotEmpty()
   lead_id: string;
@@ -27,7 +27,7 @@ export class CreateFollowUpDto {
   @IsOptional()
   next_action_date?: string;
 
-  @ApiPropertyOptional({ description: 'Any additional remarks' })
+  @ApiPropertyOptional({ description: 'Any additional remarks', example: 'Follow up required.' })
   @IsString()
   @IsOptional()
   remarks?: string;
