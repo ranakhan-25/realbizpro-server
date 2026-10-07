@@ -61,11 +61,14 @@ import { ApprovalsModule } from './modules/approvals/approvals.module';
 import { ProjectTypeModule } from './modules/projects/project-type/project-type.module';
 
 import { RequisitionModule } from './modules/requisition/material-requisition/material-requisition.module';
-import { ProjectModule } from './modules/projects/project/project.module';
+
 import { ProjectSiteModule } from './modules/projects/project-site/project-site.module';
 import { CustomerAccountModule } from './modules/projects/contract/customer-accounts/customer_accounts.module';
 import { SupplierAccountsModule } from './modules/projects/contract/supplier-accounts/supplier_accounts.module';
 import { LabourWorkBankModule } from './modules/projects/contract/labour-work-bank/labour_work_bank.module';
+import { ProjectModule } from './modules/projects/projects/project.module';
+import { InvestorModule } from './modules/projects/investments/investor/investor.module';
+import { ShareConfigurationModule } from './modules/projects/investments/share-configuration/share-configuration.module';
 
 @Module({
   imports: [
@@ -144,6 +147,7 @@ import { LabourWorkBankModule } from './modules/projects/contract/labour-work-ba
     RequisitionModule,
     ProjectTypeModule,
     ProjectSiteModule,
+    ProjectModule,
     UsersModule,
 
     // Hrms Report
@@ -159,6 +163,8 @@ import { LabourWorkBankModule } from './modules/projects/contract/labour-work-ba
     CustomerAccountModule,
     SupplierAccountsModule,
     LabourWorkBankModule,
+    InvestorModule,
+    ShareConfigurationModule,
   ],
   controllers: [AppController, HealthController],
   providers: [
