@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
 import { AcquisitionLeadModule } from './acquisition-lead/acquisition-lead.module';
+import { LandOwnerModule } from './land-owner/land-owner.module';
 
 @Module({
   imports: [
     AcquisitionLeadModule,
-    // Other sub-modules like LandOwnerModule, NegotiationProcessModule, etc. will be added here
+    LandOwnerModule,
   ],
 })
 export class LamsModule {}
