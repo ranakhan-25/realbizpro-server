@@ -23,9 +23,9 @@ import { DatabaseSyncService } from './sync.service';
       SysCompany,
       SysUom,
       SysUserPermission,
-      Project,   // ← যোগ করো
-      projectType, // ← যোগ করো
-      Site,      // ← যোগ করো
+      Project,
+      projectType,
+      Site,
     ]),
   ],
   providers: [
