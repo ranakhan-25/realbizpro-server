@@ -16,7 +16,7 @@ import {
   Max,
   Min,
 } from 'class-validator';
-import { CustomerAccountStatus } from 'src/database/models/contract/pr_customer_accounts_model';
+import { CustomerAccountStatus } from 'src/database/models/projects/contract/pr_customer_accounts_model';
 
 export class QueryCustomerAccountDto {
   @ApiPropertyOptional({

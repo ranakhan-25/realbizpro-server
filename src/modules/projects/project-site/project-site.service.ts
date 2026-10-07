@@ -5,8 +5,8 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
-import { Site } from 'src/database/models/projects/pr_site.model';
-import { Project } from 'src/database/models/projects/pr_project_model';
+import { Site } from 'src/database/models/projects/project/pr_site.model';
+import { Project } from 'src/database/models/projects/project/pr_project_model';
 import type { CreateProjectSiteDto } from './dto/create-project-site.dto';
 
 import type { UpdateProjectSiteDto } from './dto/update-project-site.dto';
@@ -44,7 +44,9 @@ export class ProjectSiteService {
       throw new BadRequestException(
         `Project #${dto.projectId} not found`,
       );
-    }
+    } 
+
+    // site
 
     const site = await this.siteModel.create({
       ...dto,

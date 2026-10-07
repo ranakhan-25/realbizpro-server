@@ -5,8 +5,8 @@ import {
   DataType,
   Table,
 } from 'sequelize-typescript';
+import { BaseModel } from 'src/database/base.model';
 
-import { BaseModel } from '../../base.model';
 
 import {
   CustomerAccountAttributes,

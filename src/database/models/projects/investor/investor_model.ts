@@ -1,17 +1,29 @@
 /* eslint-disable prettier/prettier */
+
 import {
   Column,
   DataType,
+  HasMany,
   Table,
 } from 'sequelize-typescript';
-import { BaseModel } from '../../base.model';
-import type {
-  SupplierAccountsAttributes,
-  SupplierAccountsCreationAttributes,
-  SupplierAccountsUpdateAttributes,
-} from 'src/database/types/supplieraccounts.types';
 
-export enum SupplierAccountsStatus {
+import { BaseModel } from 'src/database/base.model';
+
+import {
+  InvestorAttributes,
+  InvestorCreationAttributes,
+  InvestorUpdateAttributes,
+} from 'src/database/types/investor.types';
+
+import { InvestorNominee } from './investor_nominee_model';
+
+export enum InvestorGroupTier {
+  TIER_1 = 'Tier 1 - Primary Investor',
+  TIER_2 = 'Tier 2 - Strategic Partner',
+  TIER_3 = 'Tier 3 - Regional Affiliate',
+}
+
+export enum InvestorStatus {
   ACTIVE = 'active',
   INACTIVE = 'inactive',
   PENDING = 'pending',
@@ -19,54 +31,36 @@ export enum SupplierAccountsStatus {
 }
 
 @Table({
-  tableName: 'supplier_accounts',
+  tableName: 'investors',
   timestamps: true,
   paranoid: true,
   underscored: false,
-  indexes: [
-    {
-      name: 'SupplierAccounts_supplierCode_idx',
-      fields: ['supplierCode'],
-    },
-    {
-      name: 'SupplierAccounts_phone_idx',
-      fields: ['phone'],
-    },
-    {
-      name: 'SupplierAccounts_email_idx',
-      fields: ['email'],
-    },
-    {
-      name: 'SupplierAccounts_deletedAt_idx',
-      fields: ['deleted_at'],
-    },
-  ],
 })
-export class SupplierAccounts
+export class Investor
   extends BaseModel<
-    SupplierAccountsUpdateAttributes,
-    SupplierAccountsCreationAttributes
+    InvestorUpdateAttributes,
+    InvestorCreationAttributes
   >
-  implements SupplierAccountsAttributes
+  implements InvestorAttributes
 {
   @Column({
     type: DataType.STRING,
     allowNull: false,
     unique: true,
   })
-  declare supplierCode: string;
+  declare code: string;
 
   @Column({
     type: DataType.STRING,
     allowNull: false,
   })
-  declare supplierName: string;
+  declare name: string;
 
   @Column({
     type: DataType.STRING,
-    allowNull: true,
+    allowNull: false,
   })
-  declare businessName?: string;
+  declare mobileNo: string;
 
   @Column({
     type: DataType.STRING,
@@ -78,7 +72,7 @@ export class SupplierAccounts
     type: DataType.STRING,
     allowNull: false,
   })
-  declare phone: string;
+  declare nid: string;
 
   @Column({
     type: DataType.TEXT,
@@ -87,24 +81,31 @@ export class SupplierAccounts
   declare address?: string;
 
   @Column({
-    type: DataType.DECIMAL(12, 2),
+    type: DataType.STRING,
     allowNull: true,
-    defaultValue: 0,
   })
-  declare creditLimit?: number;
+  declare image?: string;
 
   @Column({
-    type: DataType.DATE,
-    allowNull: true,
+    type: DataType.ENUM(
+      ...Object.values(InvestorGroupTier),
+    ),
+    allowNull: false,
   })
-  declare dueDate?: Date;
+  declare groupTier: InvestorGroupTier;
 
   @Column({
     type: DataType.STRING,
     allowNull: true,
-    defaultValue: 'Sundry Creditors',
   })
   declare underGroup?: string;
+
+  @HasMany(() => InvestorNominee, {
+    foreignKey: 'investorId',
+    sourceKey: 'uuid',
+    onDelete: 'CASCADE',
+  })
+  declare nominees?: InvestorNominee[];
 
   @Column({
     type: DataType.STRING,
@@ -132,10 +133,10 @@ export class SupplierAccounts
 
   @Column({
     type: DataType.ENUM(
-      ...Object.values(SupplierAccountsStatus),
+      ...Object.values(InvestorStatus),
     ),
     allowNull: false,
-    defaultValue: SupplierAccountsStatus.ACTIVE,
+    defaultValue: InvestorStatus.ACTIVE,
   })
-  declare status: SupplierAccountsStatus;
+  declare status: InvestorStatus;
 }
