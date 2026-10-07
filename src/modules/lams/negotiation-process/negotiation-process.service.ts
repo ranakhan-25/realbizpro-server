@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { NegotiationProcess } from '../../../database/models/lams/negotiation-process.model';
 import { CreateNegotiationProcessDto } from './dto/create-negotiation-process.dto';
+import { UpdateNegotiationProcessDto } from './dto/update-negotiation-process.dto';
 
 @Injectable()
 export class NegotiationProcessService {
@@ -16,5 +17,22 @@ export class NegotiationProcessService {
 
   async findAll(): Promise<NegotiationProcess[]> {
     return await this.negotiationProcessModel.findAll();
+  }
+
+  async findOne(id: string): Promise<NegotiationProcess> {
+    const process = await this.negotiationProcessModel.findByPk(id);
+    if (!process) throw new NotFoundException('Negotiation Process not found');
+    return process;
+  }
+
+  async update(id: string, updateDto: UpdateNegotiationProcessDto): Promise<NegotiationProcess> {
+    const process = await this.findOne(id);
+    await process.update(updateDto as any);
+    return process;
+  }
+
+  async remove(id: string): Promise<void> {
+    const process = await this.findOne(id);
+    await process.destroy();
   }
 }
