@@ -21,24 +21,24 @@ export class AcquisitionLeadController {
     return this.service.findAll();
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Get an acquisition lead by ID' })
-  @ApiParam({ name: 'id', description: 'UUID of the acquisition lead' })
-  async findOne(@Param('id') id: string) {
-    return this.service.findOne(id);
+  @Get(':uuid')
+  @ApiOperation({ summary: 'Get an acquisition lead by UUID' })
+  @ApiParam({ name: 'uuid', description: 'UUID of the acquisition lead' })
+  async findOne(@Param('uuid') uuid: string) {
+    return this.service.findOne(uuid);
   }
 
-  @Put(':id')
-  @ApiOperation({ summary: 'Update an acquisition lead by ID' })
-  @ApiParam({ name: 'id', description: 'UUID of the acquisition lead' })
-  async update(@Param('id') id: string, @Body() updateDto: UpdateAcquisitionLeadDto) {
-    return this.service.update(id, updateDto);
+  @Put(':uuid')
+  @ApiOperation({ summary: 'Update an acquisition lead by UUID' })
+  @ApiParam({ name: 'uuid', description: 'UUID of the acquisition lead' })
+  async update(@Param('uuid') uuid: string, @Body() updateDto: UpdateAcquisitionLeadDto) {
+    return this.service.update(uuid, updateDto);
   }
 
-  @Delete(':id')
-  @ApiOperation({ summary: 'Delete an acquisition lead by ID' })
-  @ApiParam({ name: 'id', description: 'UUID of the acquisition lead' })
-  async remove(@Param('id') id: string) {
-    return this.service.remove(id);
+  @Delete(':uuid')
+  @ApiOperation({ summary: 'Delete an acquisition lead by UUID' })
+  @ApiParam({ name: 'uuid', description: 'UUID of the acquisition lead' })
+  async remove(@Param('uuid') uuid: string) {
+    return this.service.remove(uuid);
   }
 }

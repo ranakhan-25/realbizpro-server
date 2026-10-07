@@ -19,20 +19,20 @@ export class AcquisitionLeadService {
     return await this.acquisitionLeadModel.findAll();
   }
 
-  async findOne(id: string): Promise<AcquisitionLead> {
-    const lead = await this.acquisitionLeadModel.findByPk(id);
+  async findOne(uuid: string): Promise<AcquisitionLead> {
+    const lead = await this.acquisitionLeadModel.findByPk(uuid);
     if (!lead) throw new NotFoundException('Acquisition Lead not found');
     return lead;
   }
 
-  async update(id: string, updateDto: UpdateAcquisitionLeadDto): Promise<AcquisitionLead> {
-    const lead = await this.findOne(id);
+  async update(uuid: string, updateDto: UpdateAcquisitionLeadDto): Promise<AcquisitionLead> {
+    const lead = await this.findOne(uuid);
     await lead.update(updateDto as any);
     return lead;
   }
 
-  async remove(id: string): Promise<void> {
-    const lead = await this.findOne(id);
+  async remove(uuid: string): Promise<void> {
+    const lead = await this.findOne(uuid);
     await lead.destroy();
   }
 }

@@ -19,20 +19,20 @@ export class LandOwnerService {
     return await this.landOwnerModel.findAll();
   }
 
-  async findOne(id: string): Promise<LandOwner> {
-    const owner = await this.landOwnerModel.findByPk(id);
+  async findOne(uuid: string): Promise<LandOwner> {
+    const owner = await this.landOwnerModel.findByPk(uuid);
     if (!owner) throw new NotFoundException('Land Owner not found');
     return owner;
   }
 
-  async update(id: string, updateDto: UpdateLandOwnerDto): Promise<LandOwner> {
-    const owner = await this.findOne(id);
+  async update(uuid: string, updateDto: UpdateLandOwnerDto): Promise<LandOwner> {
+    const owner = await this.findOne(uuid);
     await owner.update(updateDto as any);
     return owner;
   }
 
-  async remove(id: string): Promise<void> {
-    const owner = await this.findOne(id);
+  async remove(uuid: string): Promise<void> {
+    const owner = await this.findOne(uuid);
     await owner.destroy();
   }
 }

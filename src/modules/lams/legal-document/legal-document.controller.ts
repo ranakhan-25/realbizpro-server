@@ -21,24 +21,24 @@ export class LegalDocumentController {
     return this.service.findAll();
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Get a legal document record by ID' })
-  @ApiParam({ name: 'id', description: 'UUID of the legal document' })
-  async findOne(@Param('id') id: string) {
-    return this.service.findOne(id);
+  @Get(':uuid')
+  @ApiOperation({ summary: 'Get a legal document record by UUID' })
+  @ApiParam({ name: 'uuid', description: 'UUID of the legal document' })
+  async findOne(@Param('uuid') uuid: string) {
+    return this.service.findOne(uuid);
   }
 
-  @Put(':id')
-  @ApiOperation({ summary: 'Update a legal document record by ID' })
-  @ApiParam({ name: 'id', description: 'UUID of the legal document' })
-  async update(@Param('id') id: string, @Body() updateDto: UpdateLegalDocumentDto) {
-    return this.service.update(id, updateDto);
+  @Put(':uuid')
+  @ApiOperation({ summary: 'Update a legal document record by UUID' })
+  @ApiParam({ name: 'uuid', description: 'UUID of the legal document' })
+  async update(@Param('uuid') uuid: string, @Body() updateDto: UpdateLegalDocumentDto) {
+    return this.service.update(uuid, updateDto);
   }
 
-  @Delete(':id')
-  @ApiOperation({ summary: 'Delete a legal document record by ID' })
-  @ApiParam({ name: 'id', description: 'UUID of the legal document' })
-  async remove(@Param('id') id: string) {
-    return this.service.remove(id);
+  @Delete(':uuid')
+  @ApiOperation({ summary: 'Delete a legal document record by UUID' })
+  @ApiParam({ name: 'uuid', description: 'UUID of the legal document' })
+  async remove(@Param('uuid') uuid: string) {
+    return this.service.remove(uuid);
   }
 }

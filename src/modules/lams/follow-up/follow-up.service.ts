@@ -19,20 +19,20 @@ export class FollowUpService {
     return await this.followUpModel.findAll();
   }
 
-  async findOne(id: string): Promise<FollowUp> {
-    const followUp = await this.followUpModel.findByPk(id);
+  async findOne(uuid: string): Promise<FollowUp> {
+    const followUp = await this.followUpModel.findByPk(uuid);
     if (!followUp) throw new NotFoundException('Follow-up record not found');
     return followUp;
   }
 
-  async update(id: string, updateDto: UpdateFollowUpDto): Promise<FollowUp> {
-    const followUp = await this.findOne(id);
+  async update(uuid: string, updateDto: UpdateFollowUpDto): Promise<FollowUp> {
+    const followUp = await this.findOne(uuid);
     await followUp.update(updateDto as any);
     return followUp;
   }
 
-  async remove(id: string): Promise<void> {
-    const followUp = await this.findOne(id);
+  async remove(uuid: string): Promise<void> {
+    const followUp = await this.findOne(uuid);
     await followUp.destroy();
   }
 }

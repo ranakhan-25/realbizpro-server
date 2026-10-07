@@ -21,24 +21,24 @@ export class NegotiationProcessController {
     return this.service.findAll();
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Get a negotiation process record by ID' })
-  @ApiParam({ name: 'id', description: 'UUID of the negotiation process' })
-  async findOne(@Param('id') id: string) {
-    return this.service.findOne(id);
+  @Get(':uuid')
+  @ApiOperation({ summary: 'Get a negotiation process record by UUID' })
+  @ApiParam({ name: 'uuid', description: 'UUID of the negotiation process' })
+  async findOne(@Param('uuid') uuid: string) {
+    return this.service.findOne(uuid);
   }
 
-  @Put(':id')
-  @ApiOperation({ summary: 'Update a negotiation process record by ID' })
-  @ApiParam({ name: 'id', description: 'UUID of the negotiation process' })
-  async update(@Param('id') id: string, @Body() updateDto: UpdateNegotiationProcessDto) {
-    return this.service.update(id, updateDto);
+  @Put(':uuid')
+  @ApiOperation({ summary: 'Update a negotiation process record by UUID' })
+  @ApiParam({ name: 'uuid', description: 'UUID of the negotiation process' })
+  async update(@Param('uuid') uuid: string, @Body() updateDto: UpdateNegotiationProcessDto) {
+    return this.service.update(uuid, updateDto);
   }
 
-  @Delete(':id')
-  @ApiOperation({ summary: 'Delete a negotiation process record by ID' })
-  @ApiParam({ name: 'id', description: 'UUID of the negotiation process' })
-  async remove(@Param('id') id: string) {
-    return this.service.remove(id);
+  @Delete(':uuid')
+  @ApiOperation({ summary: 'Delete a negotiation process record by UUID' })
+  @ApiParam({ name: 'uuid', description: 'UUID of the negotiation process' })
+  async remove(@Param('uuid') uuid: string) {
+    return this.service.remove(uuid);
   }
 }

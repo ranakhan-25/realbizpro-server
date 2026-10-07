@@ -19,20 +19,20 @@ export class LegalDocumentService {
     return await this.legalDocumentModel.findAll();
   }
 
-  async findOne(id: string): Promise<LegalDocument> {
-    const document = await this.legalDocumentModel.findByPk(id);
+  async findOne(uuid: string): Promise<LegalDocument> {
+    const document = await this.legalDocumentModel.findByPk(uuid);
     if (!document) throw new NotFoundException('Legal Document not found');
     return document;
   }
 
-  async update(id: string, updateDto: UpdateLegalDocumentDto): Promise<LegalDocument> {
-    const document = await this.findOne(id);
+  async update(uuid: string, updateDto: UpdateLegalDocumentDto): Promise<LegalDocument> {
+    const document = await this.findOne(uuid);
     await document.update(updateDto as any);
     return document;
   }
 
-  async remove(id: string): Promise<void> {
-    const document = await this.findOne(id);
+  async remove(uuid: string): Promise<void> {
+    const document = await this.findOne(uuid);
     await document.destroy();
   }
 }

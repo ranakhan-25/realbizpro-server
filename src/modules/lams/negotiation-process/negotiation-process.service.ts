@@ -19,20 +19,20 @@ export class NegotiationProcessService {
     return await this.negotiationProcessModel.findAll();
   }
 
-  async findOne(id: string): Promise<NegotiationProcess> {
-    const process = await this.negotiationProcessModel.findByPk(id);
+  async findOne(uuid: string): Promise<NegotiationProcess> {
+    const process = await this.negotiationProcessModel.findByPk(uuid);
     if (!process) throw new NotFoundException('Negotiation Process not found');
     return process;
   }
 
-  async update(id: string, updateDto: UpdateNegotiationProcessDto): Promise<NegotiationProcess> {
-    const process = await this.findOne(id);
+  async update(uuid: string, updateDto: UpdateNegotiationProcessDto): Promise<NegotiationProcess> {
+    const process = await this.findOne(uuid);
     await process.update(updateDto as any);
     return process;
   }
 
-  async remove(id: string): Promise<void> {
-    const process = await this.findOne(id);
+  async remove(uuid: string): Promise<void> {
+    const process = await this.findOne(uuid);
     await process.destroy();
   }
 }
