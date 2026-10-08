@@ -4,9 +4,9 @@ import {
   Model,
   ModelCtor,
   Sequelize,
-} from 'sequelize-typescript'; 
-export * from './projects/pr_project_model';
-export * from './projects/pr_site.model';
+} from 'sequelize-typescript';
+export * from './projects/project/pr_project_model';
+export * from './projects/project/pr_site.model';
 export * from './lams/acquisition-lead.model';
 export * from './lams/land-owner.model';
 export * from './lams/negotiation-process.model';

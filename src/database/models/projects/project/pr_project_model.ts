@@ -5,16 +5,15 @@ import {
   Table,
 } from 'sequelize-typescript';
 
-import { BaseModel } from '../../../base.model';
-
 import {
   ProjectAttributes,
   ProjectCreationAttributes,
   ProjectUpdateAttributes,
 } from 'src/database/types/project.types';
 
-import { Site } from './pr_site.model';
 import { ShareConfiguration } from '../investor/configuration_model';
+import { BaseModel } from 'src/database/base.model';
+import { Site } from './pr_site.model';
 
 export enum ProjectStatus {
   ACTIVE = 'ACTIVE',
