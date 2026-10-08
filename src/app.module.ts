@@ -66,10 +66,7 @@ import { ProjectSiteModule } from './modules/projects/project-site/project-site.
 import { CustomerAccountModule } from './modules/projects/contract/customer-accounts/customer_accounts.module';
 import { SupplierAccountsModule } from './modules/projects/contract/supplier-accounts/supplier_accounts.module';
 import { LabourWorkBankModule } from './modules/projects/contract/labour-work-bank/labour_work_bank.module';
-import { ProjectModule } from './modules/projects/projects/project.module';
-import { InvestorModule } from './modules/projects/investments/investor/investor.module';
-import { ShareConfigurationModule } from './modules/projects/investments/share-configuration/share-configuration.module';
-import { ContractorModule } from './modules/projects/contract/contractor/contractor.module';
+import { LamsModule } from './modules/lams/lams.module';
 
 @Module({
   imports: [
@@ -164,9 +161,7 @@ import { ContractorModule } from './modules/projects/contract/contractor/contrac
     CustomerAccountModule,
     SupplierAccountsModule,
     LabourWorkBankModule,
-    ContractorModule,
-    InvestorModule,
-    ShareConfigurationModule,
+    LamsModule,
   ],
   controllers: [AppController, HealthController],
   providers: [
