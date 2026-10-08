@@ -60,13 +60,16 @@ import { ModuleUserModule } from './modules/module-user/module-user.module';
 import { ApprovalsModule } from './modules/approvals/approvals.module';
 import { ProjectTypeModule } from './modules/projects/project-type/project-type.module';
 
-import { RequisitionModule } from './modules/requisition/material-requisition/material-requisition.module';
-
 import { ProjectSiteModule } from './modules/projects/project-site/project-site.module';
 import { CustomerAccountModule } from './modules/projects/contract/customer-accounts/customer_accounts.module';
 import { SupplierAccountsModule } from './modules/projects/contract/supplier-accounts/supplier_accounts.module';
 import { LabourWorkBankModule } from './modules/projects/contract/labour-work-bank/labour_work_bank.module';
 import { LamsModule } from './modules/lams/lams.module';
+import { MaterialRequisitionModule } from './modules/projects/requisition/material-requisition/material-requisition.module';
+import { FundRequisitionModule } from './modules/projects/requisition/fund-requisition/fund-requisition.module';
+import { CategoryModule } from './modules/projects/billing/category/category.module';
+import { SubCategoryModule } from './modules/projects/billing/sub-category/sub-category.module';
+import { ProjectModule } from './modules/projects/projects/project.module';
 
 @Module({
   imports: [
@@ -142,7 +145,7 @@ import { LamsModule } from './modules/lams/lams.module';
     ApprovalsModule,
     NotificationModule,
     EmailModule,
-    RequisitionModule,
+    MaterialRequisitionModule,
     ProjectTypeModule,
     ProjectSiteModule,
     ProjectModule,
@@ -161,7 +164,10 @@ import { LamsModule } from './modules/lams/lams.module';
     CustomerAccountModule,
     SupplierAccountsModule,
     LabourWorkBankModule,
-    LamsModule,
+    MaterialRequisitionModule,
+    FundRequisitionModule,
+    CategoryModule,
+    SubCategoryModule,
   ],
   controllers: [AppController, HealthController],
   providers: [
