@@ -93,8 +93,9 @@ export class PurchaseService {
 
   async update(id: string, updateDto: UpdateInvPurchaseDto) {
     const purchase = await this.findOne(id);
+    const { items, ...headerData } = updateDto;
     await purchase.update({
-      ...updateDto,
+      ...headerData,
       date: updateDto.date ? new Date(updateDto.date) : purchase.date,
       cheque_date: updateDto.cheque_date ? new Date(updateDto.cheque_date) : purchase.cheque_date,
     });
