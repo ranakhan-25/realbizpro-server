@@ -6,6 +6,9 @@ import { InvUnitModule } from './master-data/unit/unit.module';
 import { InvItemModule } from './master-data/item/item.module';
 import { SupplierModule } from './supplier/supplier.module';
 import { PurchaseModule } from './purchase/purchase.module';
+import { MaterialUsageModule } from './material-usage/material-usage.module';
+import { StockTransferModule } from './stock-transfer/stock-transfer.module';
+import { ReportsModule } from './reports/reports.module';
 
 @Module({
   imports: [
@@ -16,6 +19,9 @@ import { PurchaseModule } from './purchase/purchase.module';
     InvItemModule,
     SupplierModule,
     PurchaseModule,
+    MaterialUsageModule,
+    StockTransferModule,
+    ReportsModule,
   ],
 })
 export class InventoryModule {}
