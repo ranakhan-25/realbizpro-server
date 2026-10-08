@@ -60,15 +60,24 @@ import { ModuleUserModule } from './modules/module-user/module-user.module';
 import { ApprovalsModule } from './modules/approvals/approvals.module';
 import { ProjectTypeModule } from './modules/projects/project-type/project-type.module';
 
+<<<<<<< HEAD
 import { ProjectModule } from './modules/projects/project/project.module';
+=======
+import { RequisitionModule } from './modules/requisition/material-requisition/material-requisition.module';
+
+>>>>>>> 00de2af5568cc73154f1d089118b546254670342
 import { ProjectSiteModule } from './modules/projects/project-site/project-site.module';
 import { CustomerAccountModule } from './modules/projects/contract/customer-accounts/customer_accounts.module';
 import { SupplierAccountsModule } from './modules/projects/contract/supplier-accounts/supplier_accounts.module';
 import { LabourWorkBankModule } from './modules/projects/contract/labour-work-bank/labour_work_bank.module';
+<<<<<<< HEAD
 import { MaterialRequisitionModule } from './modules/projects/requisition/material-requisition/material-requisition.module';
 import { FundRequisitionModule } from './modules/projects/requisition/fund-requisition/fund-requisition.module';
 import { CategoryModule } from './modules/projects/billing/category/category.module';
 import { SubCategoryModule } from './modules/projects/billing/sub-category/sub-category.module';
+=======
+import { LamsModule } from './modules/lams/lams.module';
+>>>>>>> 00de2af5568cc73154f1d089118b546254670342
 
 @Module({
   imports: [
@@ -147,6 +156,7 @@ import { SubCategoryModule } from './modules/projects/billing/sub-category/sub-c
     MaterialRequisitionModule,
     ProjectTypeModule,
     ProjectSiteModule,
+    ProjectModule,
     UsersModule,
 
     // Hrms Report
@@ -162,10 +172,14 @@ import { SubCategoryModule } from './modules/projects/billing/sub-category/sub-c
     CustomerAccountModule,
     SupplierAccountsModule,
     LabourWorkBankModule,
+<<<<<<< HEAD
     MaterialRequisitionModule,
     FundRequisitionModule,
     CategoryModule,
     SubCategoryModule,
+=======
+    LamsModule,
+>>>>>>> 00de2af5568cc73154f1d089118b546254670342
   ],
   controllers: [AppController, HealthController],
   providers: [

@@ -9,11 +9,17 @@ export interface projectTypeAttributes {
   deletedAt?: Date;
   code: string;
   name: string;
+  createdBy?: number | null;
+  updatedBy?: number | null;
+  deletedBy?: number | null;
 }
 
 export interface projectTypeCreationAttributes {
   code: string;
   name: string;
+  createdBy?: number | null;
+  updatedBy?: number | null;
+  deletedBy?: number | null;
 }
 
 export type projectTypeUpdateAttributes = Partial<projectTypeCreationAttributes>;

@@ -19,7 +19,10 @@ import { Project } from './pr_project_model';
   underscored: false,
 })
 export class Site
-  extends BaseModel<SiteAttributes, SiteCreationAttributes>
+  extends BaseModel<
+    SiteAttributes,
+    SiteCreationAttributes
+  >
   implements SiteAttributes
 {
   @Column({
@@ -62,4 +65,23 @@ export class Site
 
   @BelongsTo(() => Project)
   declare project?: Project;
+
+  // ─── Audit fields ───────────────────────────────────────
+  @Column({
+    type: DataType.INTEGER, // change to STRING / UUID if needed
+    allowNull: true,
+  })
+  declare createdBy?: number;
+
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: true,
+  })
+  declare updatedBy?: number;
+
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: true,
+  })
+  declare deletedBy?: number;
 }

@@ -15,6 +15,9 @@ export interface SiteAttributes {
   description?: string | null;
   projectType?: string | null;
   projectId: number;
+  createdBy?: number | null;
+  updatedBy?: number | null;
+  deletedBy?: number | null;
 
   // Relations
   project?: Project;
@@ -27,6 +30,9 @@ export interface SiteCreationAttributes {
   description?: string | null;
   projectType?: string | null;
   projectId: number;
+  createdBy?: number | null;
+  updatedBy?: number | null;
+  deletedBy?: number | null;
 }
 
 export type SiteUpdateAttributes = Partial<SiteCreationAttributes>;
