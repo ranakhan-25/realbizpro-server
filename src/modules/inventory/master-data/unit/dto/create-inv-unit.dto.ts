@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
+import { IsString, IsNotEmpty , IsOptional } from 'class-validator';
 
 export class CreateInvUnitDto {
   @ApiProperty({ description: 'The unique code for the unit', example: 'KG' })
@@ -27,4 +27,5 @@ export class CreateInvUnitDto {
   @IsString()
   deletedBy?: string;
 }
+
 
