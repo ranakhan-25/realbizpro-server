@@ -4,7 +4,7 @@ import { SequelizeModule } from '@nestjs/sequelize';
 
 import { CustomerAccountController } from './customer_accounts.controller';
 import { CustomerAccountService } from './customer_accounts.service';
-import { CustomerAccount } from 'src/database/models/contract/pr_customer_accounts_model';
+import { CustomerAccount } from 'src/database/models/projects/contract/pr_customer_accounts_model';
 
 @Module({
   imports: [

@@ -61,7 +61,7 @@ import { ApprovalsModule } from './modules/approvals/approvals.module';
 import { ProjectTypeModule } from './modules/projects/project-type/project-type.module';
 
 import { RequisitionModule } from './modules/requisition/material-requisition/material-requisition.module';
-import { ProjectModule } from './modules/projects/project/project.module';
+
 import { ProjectSiteModule } from './modules/projects/project-site/project-site.module';
 import { CustomerAccountModule } from './modules/projects/contract/customer-accounts/customer_accounts.module';
 import { SupplierAccountsModule } from './modules/projects/contract/supplier-accounts/supplier_accounts.module';
@@ -145,6 +145,7 @@ import { LamsModule } from './modules/lams/lams.module';
     RequisitionModule,
     ProjectTypeModule,
     ProjectSiteModule,
+    ProjectModule,
     UsersModule,
 
     // Hrms Report

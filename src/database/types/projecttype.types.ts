@@ -1,5 +1,5 @@
 // Auto-generated types for projectType
-// Source: src\database\models\projects\pr_project_types_model.ts
+// Source: src\database\models\projects\project\pr_project_types_model.ts
 
 export interface projectTypeAttributes {
   id: number;
@@ -9,11 +9,17 @@ export interface projectTypeAttributes {
   deletedAt?: Date;
   code: string;
   name: string;
+  createdBy?: number | null;
+  updatedBy?: number | null;
+  deletedBy?: number | null;
 }
 
 export interface projectTypeCreationAttributes {
   code: string;
   name: string;
+  createdBy?: number | null;
+  updatedBy?: number | null;
+  deletedBy?: number | null;
 }
 
 export type projectTypeUpdateAttributes = Partial<projectTypeCreationAttributes>;

@@ -1,17 +1,24 @@
 /* eslint-disable prettier/prettier */
+
 import {
   Column,
   DataType,
   Table,
 } from 'sequelize-typescript';
-import { BaseModel } from '../../base.model';
-import type {
-  LabourWorkBankAttributes,
-  LabourWorkBankCreationAttributes,
-  LabourWorkBankUpdateAttributes,
-} from 'src/database/types/labourworkbank.types';
+import { BaseModel } from 'src/database/base.model';
 
-export enum LabourWorkBankStatus {
+import {
+  ContractorAttributes,
+  ContractorCreationAttributes,
+  ContractorUpdateAttributes,
+} from 'src/database/types/contractor.types';
+
+export enum ContractorUnderStatus {
+  WORKER = 'worker',
+  CONTRACTOR = 'contractor',
+}
+
+export enum ContractorStatus {
   ACTIVE = 'active',
   INACTIVE = 'inactive',
   PENDING = 'pending',
@@ -19,35 +26,17 @@ export enum LabourWorkBankStatus {
 }
 
 @Table({
-  tableName: 'labour_work_bank',
+  tableName: 'contractors',
   timestamps: true,
   paranoid: true,
   underscored: false,
-  indexes: [
-    {
-      name: 'LabourWorkBank_code_idx',
-      fields: ['code'],
-    },
-    {
-      name: 'LabourWorkBank_phone_idx',
-      fields: ['phone'],
-    },
-    {
-      name: 'LabourWorkBank_email_idx',
-      fields: ['email'],
-    },
-    {
-      name: 'LabourWorkBank_deletedAt_idx',
-      fields: ['deleted_at'],
-    },
-  ],
 })
-export class LabourWorkBank
+export class Contractor
   extends BaseModel<
-    LabourWorkBankUpdateAttributes,
-    LabourWorkBankCreationAttributes
+    ContractorUpdateAttributes,
+    ContractorCreationAttributes
   >
-  implements LabourWorkBankAttributes
+  implements ContractorAttributes
 {
   @Column({
     type: DataType.STRING,
@@ -78,7 +67,7 @@ export class LabourWorkBank
     type: DataType.STRING,
     allowNull: false,
   })
-  declare phone: string;
+  declare mobileNo: string;
 
   @Column({
     type: DataType.TEXT,
@@ -89,22 +78,24 @@ export class LabourWorkBank
   @Column({
     type: DataType.DECIMAL(12, 2),
     allowNull: true,
-    defaultValue: 0,
+    defaultValue: 0.0,
   })
   declare creditLimit?: number;
 
   @Column({
-    type: DataType.DATE,
+    type: DataType.DATEONLY,
     allowNull: true,
   })
   declare dueDate?: Date;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-    defaultValue: 'Labour',
+    type: DataType.ENUM(
+      ...Object.values(ContractorUnderStatus),
+    ),
+    allowNull: false,
+    defaultValue: ContractorUnderStatus.WORKER,
   })
-  declare underGroup?: string;
+  declare under: ContractorUnderStatus;
 
   @Column({
     type: DataType.STRING,
@@ -132,10 +123,10 @@ export class LabourWorkBank
 
   @Column({
     type: DataType.ENUM(
-      ...Object.values(LabourWorkBankStatus),
+      ...Object.values(ContractorStatus),
     ),
     allowNull: false,
-    defaultValue: LabourWorkBankStatus.ACTIVE,
+    defaultValue: ContractorStatus.ACTIVE,
   })
-  declare status: LabourWorkBankStatus;
+  declare status: ContractorStatus;
 }

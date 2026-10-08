@@ -9,7 +9,7 @@ import {
   ApprovalStatusEnum,
   Requisition,
   RequisitionStatusEnum,
-} from 'src/database/models/Requisition/re_material_requisition_model';
+} from 'src/database/models/projects/Requisition/re_material_requisition_model';
 
 import { CreateMaterialRequisitionDto } from './dto/create-material-requisition.dto';
 import { UpdateMaterialRequisitionDto } from './dto/update-material-requisition.dto';
@@ -22,10 +22,15 @@ export class RequisitionService {
     private readonly requisitionModel: typeof Requisition,
   ) {}
 
-  async create(dto: CreateMaterialRequisitionDto): Promise<Requisition> {
-    const existing = await this.requisitionModel.findOne({
-      where: { requisitionNo: dto.requisitionNo },
-    });
+  async create(
+    dto: CreateMaterialRequisitionDto,
+  ): Promise<Requisition> {
+    const existing =
+      await this.requisitionModel.findOne({
+        where: {
+          requisitionNo: dto.requisitionNo,
+        },
+      });
 
     if (existing) {
       throw new BadRequestException(
@@ -33,12 +38,18 @@ export class RequisitionService {
       );
     }
 
-    const requisition = await this.requisitionModel.create({
-      ...dto,
-      status: dto.status ?? RequisitionStatusEnum.DRAFT,
-      approvalStatus: dto.approvalStatus ?? ApprovalStatusEnum.PENDING,
-      requisitionDate: dto.requisitionDate ?? new Date(),
-    });
+    const requisition =
+      await this.requisitionModel.create({
+        ...dto,
+        status:
+          dto.status ??
+          RequisitionStatusEnum.DRAFT,
+        approvalStatus:
+          dto.approvalStatus ??
+          ApprovalStatusEnum.PENDING,
+        requisitionDate:
+          dto.requisitionDate ?? new Date(),
+      });
 
     return this.findOne(requisition.id);
   }
@@ -61,26 +72,48 @@ export class RequisitionService {
 
     if (search) {
       where[Op.or] = [
-        { requisitionNo: { [Op.iLike]: `%${search}%` } },
-        { titleOfWork: { [Op.iLike]: `%${search}%` } },
-        { referenceNo: { [Op.iLike]: `%${search}%` } },
-        { department: { [Op.iLike]: `%${search}%` } },
-        { remarks: { [Op.iLike]: `%${search}%` } },
+        {
+          requisitionNo: {
+            [Op.iLike]: `%${search}%`,
+          },
+        },
+        {
+          titleOfWork: {
+            [Op.iLike]: `%${search}%`,
+          },
+        },
+        {
+          referenceNo: {
+            [Op.iLike]: `%${search}%`,
+          },
+        },
+        {
+          department: {
+            [Op.iLike]: `%${search}%`,
+          },
+        },
+        {
+          remarks: { [Op.iLike]: `%${search}%` },
+        },
       ];
     }
 
     if (status) where.status = status;
-    if (approvalStatus) where.approvalStatus = approvalStatus;
+    if (approvalStatus)
+      where.approvalStatus = approvalStatus;
     if (projectId) where.projectId = projectId;
     if (companyId) where.companyId = companyId;
 
-    const { rows, count } = await this.requisitionModel.findAndCountAll({
-      where,
-      limit,
-      offset: (page - 1) * limit,
-      order: [[sortBy, sortOrder]],
-      paranoid: !withDeleted,
-    });
+    const { rows, count } =
+      await this.requisitionModel.findAndCountAll(
+        {
+          where,
+          limit,
+          offset: (page - 1) * limit,
+          order: [[sortBy, sortOrder]],
+          paranoid: !withDeleted,
+        },
+      );
 
     return {
       data: rows,
@@ -93,11 +126,16 @@ export class RequisitionService {
     };
   }
 
-  async findOne(id: string | number): Promise<Requisition> {
-    const requisition = await this.requisitionModel.findByPk(id);
+  async findOne(
+    id: string | number,
+  ): Promise<Requisition> {
+    const requisition =
+      await this.requisitionModel.findByPk(id);
 
     if (!requisition) {
-      throw new NotFoundException(`Requisition #${id} not found`);
+      throw new NotFoundException(
+        `Requisition #${id} not found`,
+      );
     }
 
     return requisition;
@@ -107,16 +145,26 @@ export class RequisitionService {
     id: string | number,
     dto: UpdateMaterialRequisitionDto,
   ): Promise<Requisition> {
-    const requisition = await this.requisitionModel.findByPk(id);
+    const requisition =
+      await this.requisitionModel.findByPk(id);
 
     if (!requisition) {
-      throw new NotFoundException(`Requisition #${id} not found`);
+      throw new NotFoundException(
+        `Requisition #${id} not found`,
+      );
     }
 
-    if (dto.requisitionNo && dto.requisitionNo !== requisition.requisitionNo) {
-      const exists = await this.requisitionModel.findOne({
-        where: { requisitionNo: dto.requisitionNo },
-      });
+    if (
+      dto.requisitionNo &&
+      dto.requisitionNo !==
+        requisition.requisitionNo
+    ) {
+      const exists =
+        await this.requisitionModel.findOne({
+          where: {
+            requisitionNo: dto.requisitionNo,
+          },
+        });
 
       if (exists) {
         throw new BadRequestException(
@@ -129,11 +177,16 @@ export class RequisitionService {
     return this.findOne(id);
   }
 
-  async remove(id: string | number): Promise<{ message: string }> {
-    const requisition = await this.requisitionModel.findByPk(id);
+  async remove(
+    id: string | number,
+  ): Promise<{ message: string }> {
+    const requisition =
+      await this.requisitionModel.findByPk(id);
 
     if (!requisition) {
-      throw new NotFoundException(`Requisition #${id} not found`);
+      throw new NotFoundException(
+        `Requisition #${id} not found`,
+      );
     }
 
     await requisition.destroy();
@@ -143,17 +196,24 @@ export class RequisitionService {
     };
   }
 
-  async restore(id: string | number): Promise<Requisition> {
-    const requisition = await this.requisitionModel.findByPk(id, {
-      paranoid: false,
-    });
+  async restore(
+    id: string | number,
+  ): Promise<Requisition> {
+    const requisition =
+      await this.requisitionModel.findByPk(id, {
+        paranoid: false,
+      });
 
     if (!requisition) {
-      throw new NotFoundException(`Requisition #${id} not found`);
+      throw new NotFoundException(
+        `Requisition #${id} not found`,
+      );
     }
 
     if (!requisition.deletedAt) {
-      throw new BadRequestException(`Requisition #${id} is not deleted`);
+      throw new BadRequestException(
+        `Requisition #${id} is not deleted`,
+      );
     }
 
     await requisition.restore();

@@ -1,29 +1,40 @@
 import {
   Column,
   DataType,
+  HasMany,
   Table,
 } from 'sequelize-typescript';
-import { BaseModel } from '../../base.model';
-import type {
+
+import { BaseModel } from '../../../base.model';
+
+import {
   ProjectAttributes,
   ProjectCreationAttributes,
+  ProjectUpdateAttributes,
 } from 'src/database/types/project.types';
 
-export enum ProjectStatusEnum {
+import { Site } from './pr_site.model';
+import { ShareConfiguration } from '../investor/configuration_model';
+
+export enum ProjectStatus {
   ACTIVE = 'ACTIVE',
   PENDING = 'PENDING',
   COMPLETED = 'COMPLETED',
+  ON_HOLD = 'ON_HOLD',
+  CANCELLED = 'CANCELLED',
 }
 
 @Table({
-  tableName: 'projects',
+  tableName: 'project',
   timestamps: true,
   paranoid: true,
   underscored: false,
-  // indexes সরিয়ে দেয়া হয়েছে আপাতত
 })
 export class Project
-  extends BaseModel<ProjectAttributes, ProjectCreationAttributes>
+  extends BaseModel<
+    ProjectUpdateAttributes,
+    ProjectCreationAttributes
+  >
   implements ProjectAttributes
 {
   @Column({
@@ -58,10 +69,22 @@ export class Project
   declare location?: string;
 
   @Column({
-    type: DataType.DECIMAL(15, 2),
+    type: DataType.TEXT,
     allowNull: true,
   })
-  declare totalBudget?: number;
+  declare description?: string;
+
+  @Column({
+    type: DataType.DATEONLY,
+    allowNull: true,
+  })
+  declare startDate?: Date;
+
+  @Column({
+    type: DataType.DATEONLY,
+    allowNull: true,
+  })
+  declare endDate?: Date;
 
   @Column({
     type: DataType.STRING,
@@ -94,22 +117,16 @@ export class Project
   declare projectManager?: string;
 
   @Column({
+    type: DataType.DECIMAL(15, 2),
+    allowNull: true,
+  })
+  declare totalBudget?: number;
+
+  @Column({
     type: DataType.INTEGER,
     allowNull: true,
   })
   declare numberOfStoreys?: number;
-
-  @Column({
-    type: DataType.DATEONLY,
-    allowNull: true,
-  })
-  declare startDate?: Date;
-
-  @Column({
-    type: DataType.DATEONLY,
-    allowNull: true,
-  })
-  declare endDate?: Date;
 
   @Column({
     type: DataType.INTEGER,
@@ -123,15 +140,41 @@ export class Project
   declare progressPercentage?: number;
 
   @Column({
-    type: DataType.TEXT,
-    allowNull: true,
+    type: DataType.ENUM(
+      ...Object.values(ProjectStatus),
+    ),
+    allowNull: false,
+    defaultValue: ProjectStatus.ACTIVE,
   })
-  declare description?: string;
+  declare status: ProjectStatus;
+
+  @HasMany(() => Site, {
+    foreignKey: 'projectId',
+    sourceKey: 'id',
+  })
+  declare sites?: Site[];
+
+  @HasMany(() => ShareConfiguration, {
+    foreignKey: 'projectId',
+    sourceKey: 'uuid',
+  })
+  declare shareConfigurations?: ShareConfiguration[];
 
   @Column({
     type: DataType.STRING,
-    allowNull: false,
-    defaultValue: ProjectStatusEnum.ACTIVE,
+    allowNull: true,
   })
-  declare status: ProjectStatusEnum | string;
+  declare createdBy?: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  declare updatedBy?: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  declare deletedBy?: string;
 }

@@ -1,7 +1,10 @@
 // Auto-generated types for Project
-// Source: src\database\models\projects\pr_project_model.ts
+// Source: src\database\models\projects\project\pr_project_model.ts
 
-import { ProjectStatusEnum } from '../models/projects/pr_project_model';
+import { ProjectStatus } from '../models/projects/project/pr_project_model';
+
+import type { Site } from '../models/projects/project/pr_site.model';
+import type { ShareConfiguration } from '../models/projects/investor/configuration_model';
 
 export interface ProjectAttributes {
   id: number;
@@ -14,18 +17,25 @@ export interface ProjectAttributes {
   projectType?: string | null;
   areaCategory?: string | null;
   location?: string | null;
-  totalBudget?: number | null;
+  description?: string | null;
+  startDate?: Date | null;
+  endDate?: Date | null;
   contactPersonName?: string | null;
   contactPhone?: string | null;
   clientEmail?: string | null;
   contractorCompany?: string | null;
   projectManager?: string | null;
+  totalBudget?: number | null;
   numberOfStoreys?: number | null;
-  startDate?: Date | null;
-  endDate?: Date | null;
   progressPercentage?: number | null;
-  description?: string | null;
-  status: ProjectStatusEnum | string;
+  status: ProjectStatus;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+  deletedBy?: string | null;
+
+  // Relations
+  sites?: Site[];
+  shareConfigurations?: ShareConfiguration[];
 }
 
 export interface ProjectCreationAttributes {
@@ -34,23 +44,27 @@ export interface ProjectCreationAttributes {
   projectType?: string | null;
   areaCategory?: string | null;
   location?: string | null;
-  totalBudget?: number | null;
+  description?: string | null;
+  startDate?: Date | null;
+  endDate?: Date | null;
   contactPersonName?: string | null;
   contactPhone?: string | null;
   clientEmail?: string | null;
   contractorCompany?: string | null;
   projectManager?: string | null;
+  totalBudget?: number | null;
   numberOfStoreys?: number | null;
-  startDate?: Date | null;
-  endDate?: Date | null;
   progressPercentage?: number | null;
-  description?: string | null;
-  status?: ProjectStatusEnum | string; // Has default value
+  status?: ProjectStatus; // Has default value
+  createdBy?: string | null;
+  updatedBy?: string | null;
+  deletedBy?: string | null;
 }
 
 export type ProjectUpdateAttributes = Partial<ProjectCreationAttributes>;
 
 // Helper type for including relations
 export interface ProjectWithRelations extends ProjectAttributes {
-  // No relations defined
+  sites?: Site[];
+  shareConfigurations?: ShareConfiguration[];
 }

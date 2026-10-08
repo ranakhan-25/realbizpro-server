@@ -3,7 +3,7 @@ import {
   DataType,
   Table,
 } from 'sequelize-typescript';
-import { BaseModel } from '../../base.model';
+import { BaseModel } from '../../../base.model';
 import type {
   RequisitionAttributes,
   RequisitionCreationAttributes,
