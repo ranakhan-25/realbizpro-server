@@ -29,10 +29,10 @@ export class InvItemService {
   async findAll(): Promise<InvItem[]> {
     return await this.itemModel.findAll({
       include: [
-        { model: InvCategory },
-        { model: InvSubCategory },
-        { model: InvBrand },
-        { model: InvUnit },
+        { association: 'category', required: false },
+        { association: 'sub_category', required: false },
+        { association: 'brand', required: false },
+        { association: 'unit', required: false },
       ],
     });
   }
@@ -40,10 +40,10 @@ export class InvItemService {
   async findOne(uuid: string): Promise<InvItem> {
     const item = await this.itemModel.findByPk(uuid, {
       include: [
-        { model: InvCategory },
-        { model: InvSubCategory },
-        { model: InvBrand },
-        { model: InvUnit },
+        { association: 'category', required: false },
+        { association: 'sub_category', required: false },
+        { association: 'brand', required: false },
+        { association: 'unit', required: false },
       ],
     });
     if (!item) throw new NotFoundException('Item not found');

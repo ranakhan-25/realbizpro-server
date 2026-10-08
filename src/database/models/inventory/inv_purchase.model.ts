@@ -65,7 +65,7 @@ export class InvPurchase extends BaseModel<InvPurchaseAttributes, InvPurchaseCre
   @Column({ type: DataType.UUID, allowNull: true })
   site_id?: string;
 
-  @HasMany(() => InvPurchaseItem, { foreignKey: 'purchase_id', sourceKey: 'id', onDelete: 'CASCADE' })
+  @HasMany(() => InvPurchaseItem, { foreignKey: 'purchase_id', as: 'items', onDelete: 'CASCADE' })
   items?: InvPurchaseItem[];
 
   @Column({ type: DataType.STRING, allowNull: true, field: 'created_by' })

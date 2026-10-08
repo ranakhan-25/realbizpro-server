@@ -59,7 +59,7 @@ export class MaterialUsageService {
       where,
       limit,
       offset,
-      include: [InvMaterialUsageItem],
+      include: [{ model: this.usageItemModel, as: 'items', required: false }],
       order: [['date', 'DESC'], ['createdAt', 'DESC']],
     });
 
@@ -70,7 +70,9 @@ export class MaterialUsageService {
   }
 
   async findOne(id: string) {
-    const usage = await this.usageModel.findByPk(id, { include: [InvMaterialUsageItem] });
+    const usage = await this.usageModel.findByPk(id, {
+      include: [{ model: this.usageItemModel, as: 'items', required: false }],
+    });
     if (!usage) throw new NotFoundException(`Material Usage #${id} not found`);
     return usage;
   }

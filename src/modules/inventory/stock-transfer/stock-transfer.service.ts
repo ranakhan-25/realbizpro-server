@@ -11,6 +11,7 @@ import { QueryInvStockTransferDto } from './dto/query-inv-stock-transfer.dto';
 export class StockTransferService {
   constructor(
     @InjectModel(InvStockTransfer) private readonly transferModel: typeof InvStockTransfer,
+    @InjectModel(InvItem) private readonly itemModel: typeof InvItem,
   ) {}
 
   async create(createDto: CreateInvStockTransferDto) {
@@ -34,7 +35,7 @@ export class StockTransferService {
       where,
       limit,
       offset,
-      include: [InvItem],
+      include: [{ model: this.itemModel, as: 'item', required: false }],
       order: [['date', 'DESC'], ['createdAt', 'DESC']],
     });
 
@@ -45,7 +46,9 @@ export class StockTransferService {
   }
 
   async findOne(id: string) {
-    const transfer = await this.transferModel.findByPk(id, { include: [InvItem] });
+    const transfer = await this.transferModel.findByPk(id, {
+      include: [{ model: this.itemModel, as: 'item', required: false }],
+    });
     if (!transfer) throw new NotFoundException(`Stock Transfer #${id} not found`);
     return transfer;
   }

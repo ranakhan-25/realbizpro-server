@@ -20,14 +20,14 @@ export class InvMaterialUsageItem extends BaseModel<InvMaterialUsageItemAttribut
   @Column({ type: DataType.UUID, allowNull: false })
   usage_id: string;
 
-  @BelongsTo(() => InvMaterialUsage)
+  @BelongsTo(() => InvMaterialUsage, { foreignKey: 'usage_id', as: 'usage' })
   usage: InvMaterialUsage;
 
   @ForeignKey(() => InvItem)
   @Column({ type: DataType.UUID, allowNull: false })
   item_id: string;
 
-  @BelongsTo(() => InvItem)
+  @BelongsTo(() => InvItem, { foreignKey: 'item_id', as: 'item' })
   item: InvItem;
 
   @Column({ type: DataType.DECIMAL(15, 2), allowNull: false })

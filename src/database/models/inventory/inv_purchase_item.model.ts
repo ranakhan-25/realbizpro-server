@@ -1,4 +1,4 @@
-import { Column, DataType, Table, PrimaryKey, Default, BelongsTo } from 'sequelize-typescript';
+  import { Column, DataType, Table, PrimaryKey, Default, BelongsTo, ForeignKey } from 'sequelize-typescript';
 import { BaseModel } from '../../base.model';
 import { InvPurchase } from './inv_purchase.model';
 
@@ -15,10 +15,11 @@ export class InvPurchaseItem extends BaseModel<InvPurchaseItemAttributes, InvPur
   @Column({ type: DataType.UUID, allowNull: false, unique: true })
   declare id: any;
 
+  @ForeignKey(() => InvPurchase)
   @Column({ type: DataType.UUID, allowNull: false })
   purchase_id: string;
 
-  @BelongsTo(() => InvPurchase, { foreignKey: 'purchase_id', targetKey: 'id', onDelete: 'CASCADE' })
+  @BelongsTo(() => InvPurchase, { foreignKey: 'purchase_id', as: 'purchase', onDelete: 'CASCADE' })
   purchase?: InvPurchase;
 
   @Column({ type: DataType.UUID, allowNull: false })

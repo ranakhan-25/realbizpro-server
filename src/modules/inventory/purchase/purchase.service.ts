@@ -75,7 +75,7 @@ export class PurchaseService {
       where,
       limit,
       offset,
-      include: [InvPurchaseItem],
+      include: [{ model: this.purchaseItemModel, as: 'items', required: false }],
       order: [['date', 'DESC'], ['createdAt', 'DESC']],
     });
 
@@ -86,7 +86,9 @@ export class PurchaseService {
   }
 
   async findOne(id: string) {
-    const purchase = await this.purchaseModel.findByPk(id, { include: [InvPurchaseItem] });
+    const purchase = await this.purchaseModel.findByPk(id, {
+      include: [{ model: this.purchaseItemModel, as: 'items', required: false }],
+    });
     if (!purchase) throw new NotFoundException(`Purchase #${id} not found`);
     return purchase;
   }

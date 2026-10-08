@@ -47,6 +47,6 @@ export class InvMaterialUsage extends BaseModel<InvMaterialUsageAttributes, InvM
   @Column({ type: DataType.STRING, allowNull: true, field: 'deleted_by' })
   declare deletedBy?: string;
 
-  @HasMany(() => InvMaterialUsageItem, 'usage_id')
+  @HasMany(() => InvMaterialUsageItem, { foreignKey: 'usage_id', as: 'items' })
   items: InvMaterialUsageItem[];
 }

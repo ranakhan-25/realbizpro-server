@@ -40,28 +40,28 @@ export class InvItem extends BaseModel<InvItemAttributes, InvItemCreationAttribu
   @Column({ type: DataType.UUID, allowNull: false })
   category_id: any;
 
-  @BelongsTo(() => InvCategory)
+  @BelongsTo(() => InvCategory, { foreignKey: 'category_id', as: 'category' })
   category: InvCategory;
 
   @ForeignKey(() => InvSubCategory)
   @Column({ type: DataType.UUID, allowNull: true })
   sub_category_id?: any;
 
-  @BelongsTo(() => InvSubCategory)
+  @BelongsTo(() => InvSubCategory, { foreignKey: 'sub_category_id', as: 'sub_category' })
   sub_category: InvSubCategory;
 
   @ForeignKey(() => InvBrand)
   @Column({ type: DataType.UUID, allowNull: true })
   brand_id?: any;
 
-  @BelongsTo(() => InvBrand)
+  @BelongsTo(() => InvBrand, { foreignKey: 'brand_id', as: 'brand' })
   brand: InvBrand;
 
   @ForeignKey(() => InvUnit)
   @Column({ type: DataType.UUID, allowNull: false })
   unit_id: any;
 
-  @BelongsTo(() => InvUnit)
+  @BelongsTo(() => InvUnit, { foreignKey: 'unit_id', as: 'unit' })
   unit: InvUnit;
 
   @Column({ type: DataType.INTEGER, allowNull: true })
