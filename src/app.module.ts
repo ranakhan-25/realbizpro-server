@@ -70,6 +70,8 @@ import { FundRequisitionModule } from './modules/projects/requisition/fund-requi
 import { CategoryModule } from './modules/projects/billing/category/category.module';
 import { SubCategoryModule } from './modules/projects/billing/sub-category/sub-category.module';
 import { ProjectModule } from './modules/projects/projects/project.module';
+import { ServiceWorkRequisitionItemModule } from './modules/projects/requisition/service-work-requisition-item/service-work-requisition-item.module';
+import { ServiceWorkRequisitionModule } from './modules/projects/requisition/service-work-requisition/service-work-requisition.module';
 
 @Module({
   imports: [
@@ -168,6 +170,8 @@ import { ProjectModule } from './modules/projects/projects/project.module';
     FundRequisitionModule,
     CategoryModule,
     SubCategoryModule,
+    ServiceWorkRequisitionItemModule,
+    ServiceWorkRequisitionModule,
   ],
   controllers: [AppController, HealthController],
   providers: [
