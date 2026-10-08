@@ -5,12 +5,12 @@ import {
   ForeignKey,
   Table,
 } from 'sequelize-typescript';
-import { BaseModel } from '../../../base.model';
 import type {
   SiteAttributes,
   SiteCreationAttributes,
 } from 'src/database/types/site.types';
 import { Project } from './pr_project_model';
+import { BaseModel } from 'src/database/base.model';
 
 @Table({
   tableName: 'sites',
