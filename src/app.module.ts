@@ -42,7 +42,7 @@ import { MobileUserModule } from './modules/engine/user-management/mobile-user/m
 import { UsersModule } from './modules/engine/user-management/users/users.module';
 import { SysOfficeModule } from './modules/system/sys-office/sys-office.module';
 import { NotificationModule } from './modules/notifications/notifications.module';
-import { SysDivisionModule } from './modules/system/sys-division/sys-division.module';
+
 import { SysOfficeTypeModule } from './modules/system/hrm_office_type/hrm_office_type.module';
 import { JobLogModule } from './modules/system/job-log/job-log.module';
 import { CompanyModule } from './modules/system/sys-company/sys-company.module';
@@ -72,6 +72,14 @@ import { SubCategoryModule } from './modules/projects/billing/sub-category/sub-c
 import { ProjectModule } from './modules/projects/projects/project.module';
 import { ServiceWorkRequisitionItemModule } from './modules/projects/requisition/service-work-requisition-item/service-work-requisition-item.module';
 import { ServiceWorkRequisitionModule } from './modules/projects/requisition/service-work-requisition/service-work-requisition.module';
+import { BoqModule } from './modules/projects/boq/boq.module';
+import { FlatLandModule } from './modules/projects/flatland/flatland.module';
+import { TaskModule } from './modules/projects/task/task.module';
+import { BoqComparisonModule } from './modules/projects/boqcomparison/boqcomparison.module';
+import { DetailsModule } from './modules/projects/details/details.module';
+import { SysDivisionModule } from './modules/system/sys-division/sys-division.module';
+import { QuotationModule } from './modules/projects/quotation/quotation.module';
+
 
 @Module({
   imports: [
@@ -152,7 +160,11 @@ import { ServiceWorkRequisitionModule } from './modules/projects/requisition/ser
     ProjectSiteModule,
     ProjectModule,
     UsersModule,
-
+    BoqModule,
+    TaskModule,
+    BoqComparisonModule,
+    DetailsModule,
+    QuotationModule,
     // Hrms Report
     SysDivisionModule,
     SysOfficeTypeModule,
@@ -172,6 +184,7 @@ import { ServiceWorkRequisitionModule } from './modules/projects/requisition/ser
     SubCategoryModule,
     ServiceWorkRequisitionItemModule,
     ServiceWorkRequisitionModule,
+    FlatLandModule,
   ],
   controllers: [AppController, HealthController],
   providers: [
