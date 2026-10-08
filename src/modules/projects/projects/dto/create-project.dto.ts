@@ -18,7 +18,7 @@ import {
   Max,
   Min,
 } from 'class-validator';
-import { ProjectStatus } from 'src/database/models';
+import { ProjectStatus } from 'src/database/models/projects/project/pr_project_model';
 
 
 

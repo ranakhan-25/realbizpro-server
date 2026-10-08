@@ -14,6 +14,7 @@ import {
 } from '@nestjs/throttler';
 import * as path from 'path';
 import { AppController } from './app.controller';
+import { InventoryModule } from './modules/inventory/inventory.module';
 import { AppService } from './app.service';
 import { AuthLoggingInterceptor } from './common/interceptors/auth-logging.interceptor';
 import { ErrorTransformInterceptor } from './common/interceptors/error-transform.interceptor';
@@ -169,6 +170,7 @@ import { ServiceWorkRequisitionModule } from './modules/projects/requisition/ser
     MaterialRequisitionModule,
     FundRequisitionModule,
     CategoryModule,
+    InventoryModule,
     SubCategoryModule,
     ServiceWorkRequisitionItemModule,
     ServiceWorkRequisitionModule,

@@ -12,7 +12,7 @@ import { Op } from 'sequelize';
 import {
   Project,
   ProjectStatus,
-} from 'src/database/models';
+} from 'src/database/models/projects/project/pr_project_model';
 
 import { CreateProjectDto } from './dto/create-project.dto';
 import { QueryProjectDto } from './dto/query-project.dto';
