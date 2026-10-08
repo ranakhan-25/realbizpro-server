@@ -9,7 +9,7 @@ import { ShareConfigurationService } from './share-configuration.service';
 import { ShareConfiguration } from 'src/database/models/projects/investor/configuration_model';
 
 import { Investor } from 'src/database/models/projects/investor/investor_model';
-import { Project } from 'src/database/models';
+import { Project } from 'src/database/models/projects/project/pr_project_model';
 
 @Module({
   imports: [

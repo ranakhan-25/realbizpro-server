@@ -20,7 +20,7 @@ import { Investor } from 'src/database/models/projects/investor/investor_model';
 import { CreateShareConfigurationDto } from './dto/create-share-configuration.dto';
 import { QueryShareConfigurationDto } from './dto/query-share-configuration.dto';
 import { UpdateShareConfigurationDto } from './dto/update-share-configuration.dto';
-import { Project } from 'src/database/models';
+import { Project } from 'src/database/models/projects/project/pr_project_model';
 
 @Injectable()
 export class ShareConfigurationService {

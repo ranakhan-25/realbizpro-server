@@ -11,4 +11,20 @@ export class CreateInvUnitDto {
   @IsString()
   @IsNotEmpty()
   name: string;
+
+  @ApiPropertyOptional({ example: 'uuid', description: 'Created By ID' })
+  @IsOptional()
+  @IsString()
+  createdBy?: string;
+
+  @ApiPropertyOptional({ example: 'uuid', description: 'Updated By ID' })
+  @IsOptional()
+  @IsString()
+  updatedBy?: string;
+
+  @ApiPropertyOptional({ example: 'uuid', description: 'Deleted By ID' })
+  @IsOptional()
+  @IsString()
+  deletedBy?: string;
 }
+

@@ -16,7 +16,7 @@ import {
   ShareConfigurationUpdateAttributes,
 } from 'src/database/types/shareconfiguration.types';
 
-import { Project } from '../..';
+import { Project } from '../project/pr_project_model';
 import { Investor } from './investor_model';
 
 export enum ShareConfigurationStatus {

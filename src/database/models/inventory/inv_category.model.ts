@@ -50,4 +50,14 @@ export class InvCategory extends BaseModel<InvCategoryAttributes, InvCategoryCre
 
   @HasMany(() => InvItem)
   items: InvItem[];
+
+  @Column({ type: DataType.STRING, allowNull: true, field: 'created_by' })
+  declare createdBy?: string;
+
+  @Column({ type: DataType.STRING, allowNull: true, field: 'updated_by' })
+  declare updatedBy?: string;
+
+  @Column({ type: DataType.STRING, allowNull: true, field: 'deleted_by' })
+  declare deletedBy?: string;
 }
+
