@@ -73,6 +73,9 @@ import { SubCategoryModule } from './modules/projects/billing/sub-category/sub-c
 import { ProjectModule } from './modules/projects/projects/project.module';
 import { ServiceWorkRequisitionItemModule } from './modules/projects/requisition/service-work-requisition-item/service-work-requisition-item.module';
 import { ServiceWorkRequisitionModule } from './modules/projects/requisition/service-work-requisition/service-work-requisition.module';
+import { ContractorModule } from './modules/projects/contract/contractor/contractor.module';
+import { InvestorModule } from './modules/projects/investments/investor/investor.module';
+import { ShareConfigurationModule } from './modules/projects/investments/share-configuration/share-configuration.module';
 
 @Module({
   imports: [
@@ -167,6 +170,9 @@ import { ServiceWorkRequisitionModule } from './modules/projects/requisition/ser
     CustomerAccountModule,
     SupplierAccountsModule,
     LabourWorkBankModule,
+    ContractorModule,
+    InvestorModule,
+    ShareConfigurationModule,
     MaterialRequisitionModule,
     FundRequisitionModule,
     CategoryModule,
