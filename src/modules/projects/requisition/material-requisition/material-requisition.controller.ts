@@ -1,5 +1,7 @@
 /* eslint-disable prettier/prettier */
 
+
+
 import {
   Body,
   Controller,
@@ -23,7 +25,7 @@ import { CreateMaterialRequisitionDto } from './dto/create-material-requisition.
 import { QueryMaterialRequisitionDto } from './dto/query-material-requisition.dto';
 import { UpdateMaterialRequisitionDto } from './dto/update-material-requisition.dto';
 
-@ApiTags('Material Requisition')
+@ApiTags('Project | Material Requisition')
 @ApiBearerAuth()
 @Controller('material-requisition')
 export class MaterialRequisitionController {
