@@ -170,6 +170,7 @@ import { ProjectModule } from './modules/projects/projects/project.module';
     CategoryModule,
     InventoryModule,
     SubCategoryModule,
+    LamsModule,
   ],
   controllers: [AppController, HealthController],
   providers: [
