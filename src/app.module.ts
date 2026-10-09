@@ -190,9 +190,7 @@ import { ProjectModule } from './modules/projects/projects/project.module';
     CategoryModule,
     InventoryModule,
     SubCategoryModule,
-    ServiceWorkRequisitionItemModule,
-    ServiceWorkRequisitionModule,
-    FlatLandModule,
+    LamsModule,
   ],
   controllers: [AppController, HealthController],
   providers: [
