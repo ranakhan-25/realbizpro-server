@@ -1,9 +1,7 @@
 /* eslint-disable prettier/prettier */
 
 import { Module } from '@nestjs/common';
-
 import { SequelizeModule } from '@nestjs/sequelize';
-
 import { MaterialRequisitionController } from './material-requisition.controller';
 
 import { MaterialRequisitionService } from './material-requisition.service';

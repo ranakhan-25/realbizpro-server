@@ -1,5 +1,4 @@
 /* eslint-disable prettier/prettier */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import {
   BadRequestException,
@@ -15,7 +14,6 @@ import { CreateMaterialRequisitionDto } from './dto/create-material-requisition.
 import { QueryMaterialRequisitionDto } from './dto/query-material-requisition.dto';
 import { UpdateMaterialRequisitionDto } from './dto/update-material-requisition.dto';
 import { MaterialRequisition } from 'src/database/models/projects/Requisition/pr_material_requisition_model';
-
 
 @Injectable()
 export class MaterialRequisitionService {
@@ -46,7 +44,7 @@ export class MaterialRequisitionService {
       await this.materialRequisitionModel.create({
         ...dto,
         demandDate: new Date(dto.demandDate),
-      } as any);
+      });
 
     return this.findOne(materialRequisition.uuid);
   }
