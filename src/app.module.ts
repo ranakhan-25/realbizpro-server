@@ -85,6 +85,8 @@ import { SysDivisionModule } from './modules/system/sys-division/sys-division.mo
 import { QuotationModule } from './modules/projects/quotation/quotation.module';
 import { ProjectModule } from './modules/projects/projects/project.module';
 
+
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -193,7 +195,11 @@ import { ProjectModule } from './modules/projects/projects/project.module';
     CategoryModule,
     InventoryModule,
     SubCategoryModule,
-    LamsModule,
+    ServiceWorkRequisitionItemModule,
+    ServiceWorkRequisitionModule,
+    FlatLandModule,
+    SupplierAccountsModule, 
+ 
   ],
   controllers: [AppController, HealthController],
   providers: [

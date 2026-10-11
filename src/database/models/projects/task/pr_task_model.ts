@@ -29,7 +29,7 @@ export enum TaskPriority {
 }
 
 @Table({
-  tableName: 'task',
+  tableName: 'pr_task',
   timestamps: true,
   paranoid: true,
   underscored: false,
