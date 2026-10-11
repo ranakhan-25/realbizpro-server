@@ -70,7 +70,7 @@ import { MaterialRequisitionModule } from './modules/projects/requisition/materi
 import { FundRequisitionModule } from './modules/projects/requisition/fund-requisition/fund-requisition.module';
 import { CategoryModule } from './modules/projects/billing/category/category.module';
 import { SubCategoryModule } from './modules/projects/billing/sub-category/sub-category.module';
-import { ProjectModule } from './modules/projects/projects/project.module';
+
 import { ServiceWorkRequisitionItemModule } from './modules/projects/requisition/service-work-requisition-item/service-work-requisition-item.module';
 import { ServiceWorkRequisitionModule } from './modules/projects/requisition/service-work-requisition/service-work-requisition.module';
 import { ContractorModule } from './modules/projects/contract/contractor/contractor.module';
@@ -83,6 +83,8 @@ import { BoqComparisonModule } from './modules/projects/boqcomparison/boqcompari
 import { DetailsModule } from './modules/projects/details/details.module';
 import { SysDivisionModule } from './modules/system/sys-division/sys-division.module';
 import { QuotationModule } from './modules/projects/quotation/quotation.module';
+import { ProjectModule } from './modules/projects/projects/project.module';
+
 
 
 @Module({
@@ -193,6 +195,8 @@ import { QuotationModule } from './modules/projects/quotation/quotation.module';
     ServiceWorkRequisitionItemModule,
     ServiceWorkRequisitionModule,
     FlatLandModule,
+    SupplierAccountsModule, 
+ 
   ],
   controllers: [AppController, HealthController],
   providers: [

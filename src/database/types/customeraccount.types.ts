@@ -1,7 +1,4 @@
-// Auto-generated types for CustomerAccount
-// Source: src\database\models\projects\contract\pr_customer_accounts_model.ts
-
-import { CustomerAccountStatus } from '../models/projects/contract/pr_customer_accounts_model';
+import type { CustomerAccountStatus } from '../models/projects/contract/pr_customer_accounts_model';
 
 export interface CustomerAccountAttributes {
   id: number;
@@ -37,12 +34,8 @@ export interface CustomerAccountCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  status?: CustomerAccountStatus; // Has default value
+  status?: CustomerAccountStatus;
 }
 
-export type CustomerAccountUpdateAttributes = Partial<CustomerAccountCreationAttributes>;
-
-// Helper type for including relations
-export interface CustomerAccountWithRelations extends CustomerAccountAttributes {
-  // No relations defined
-}
+export type CustomerAccountUpdateAttributes =
+  Partial<CustomerAccountCreationAttributes>;
