@@ -84,6 +84,8 @@ import { DetailsModule } from './modules/projects/details/details.module';
 import { SysDivisionModule } from './modules/system/sys-division/sys-division.module';
 import { QuotationModule } from './modules/projects/quotation/quotation.module';
 import { ProjectModule } from './modules/projects/projects/project.module';
+import { DepartmentModule } from './modules/hrm/employee/department/department.module';
+import { DesignationModule } from './modules/hrm/employee/designation/designation.module';
 
 
 
@@ -195,11 +197,9 @@ import { ProjectModule } from './modules/projects/projects/project.module';
     CategoryModule,
     InventoryModule,
     SubCategoryModule,
-    ServiceWorkRequisitionItemModule,
-    ServiceWorkRequisitionModule,
-    FlatLandModule,
-    SupplierAccountsModule, 
- 
+    LamsModule,
+    DepartmentModule,
+    DesignationModule,
   ],
   controllers: [AppController, HealthController],
   providers: [
