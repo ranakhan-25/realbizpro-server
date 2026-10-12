@@ -29,6 +29,12 @@ export class InvMaterialUsage extends BaseModel<InvMaterialUsageAttributes, InvM
   @Column({ type: DataType.BIGINT, allowNull: true })
   project_id?: number;
 
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  declare projectId?: string;
+
   @Column({ type: DataType.BIGINT, allowNull: true })
   site_id?: number;
 

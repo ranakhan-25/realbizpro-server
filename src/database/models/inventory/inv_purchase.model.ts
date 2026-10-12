@@ -61,6 +61,12 @@ export class InvPurchase extends BaseModel<InvPurchaseAttributes, InvPurchaseCre
   @Column({ type: DataType.UUID, allowNull: true })
   project_id?: string;
 
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  declare projectId?: string;
+
   @Column({ type: DataType.UUID, allowNull: true })
   boq_title_id?: string;
 

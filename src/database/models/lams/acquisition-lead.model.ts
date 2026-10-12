@@ -80,6 +80,12 @@ export class AcquisitionLead extends BaseModel<
   })
   deleted_by?: number;
 
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  declare projectId?: string;
+
   @HasMany(() => LandOwner, { foreignKey: 'lead_id', as: 'land_owners' })
   declare land_owners?: LandOwner[];
 

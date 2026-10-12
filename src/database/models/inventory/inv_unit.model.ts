@@ -43,5 +43,11 @@ export class InvUnit extends BaseModel<InvUnitAttributes, InvUnitCreationAttribu
 
   @Column({ type: DataType.STRING, allowNull: true, field: 'deleted_by' })
   declare deletedBy?: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  declare projectId?: string;
 }
 

@@ -41,4 +41,10 @@ export class InvMaterialUsageItem extends BaseModel<InvMaterialUsageItemAttribut
 
   @Column({ type: DataType.STRING, allowNull: true, field: 'deleted_by' })
   declare deletedBy?: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  declare projectId?: string;
 }
