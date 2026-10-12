@@ -58,4 +58,9 @@ export class CreateInvMaterialUsageDto {
   @IsOptional()
   @IsString()
   createdBy?: string;
+
+  @ApiPropertyOptional({ example: 'PRJ-1001', description: 'Optional Project Identifier' })
+  @IsOptional()
+  @IsString()
+  projectId?: string;
 }

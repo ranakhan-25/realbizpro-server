@@ -36,4 +36,9 @@ export class CreateNegotiationProcessDto {
   @IsString()
   @IsOptional()
   meeting_notes?: string;
+
+  @ApiPropertyOptional({ description: 'Optional project identifier', example: 'PRJ-1001' })
+  @IsString()
+  @IsOptional()
+  projectId?: string;
 }
