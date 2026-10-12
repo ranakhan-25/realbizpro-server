@@ -1,5 +1,5 @@
 // Auto-generated types for LabourWorkBank
-// Source: src\database\models\projects\contract\pr_labour_work_bank_model.ts
+// Source: src/database/models/projects/contract/pr_labour_work_bank_model.ts
 
 import { LabourWorkBankStatus } from '../models/projects/contract/pr_labour_work_bank_model';
 

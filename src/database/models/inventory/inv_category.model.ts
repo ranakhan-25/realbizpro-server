@@ -45,11 +45,11 @@ export class InvCategory extends BaseModel<InvCategoryAttributes, InvCategoryCre
   @Column({ type: DataType.INTEGER, allowNull: true })
   deleted_by?: number;
 
-  @HasMany(() => InvSubCategory)
-  sub_categories: InvSubCategory[];
+  @HasMany(() => InvSubCategory, { foreignKey: 'category_id', as: 'sub_categories' })
+  declare sub_categories?: InvSubCategory[];
 
-  @HasMany(() => InvItem)
-  items: InvItem[];
+  @HasMany(() => InvItem, { foreignKey: 'category_id', as: 'items' })
+  declare items?: InvItem[];
 
   @Column({ type: DataType.STRING, allowNull: true, field: 'created_by' })
   declare createdBy?: string;

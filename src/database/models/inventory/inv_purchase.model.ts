@@ -1,6 +1,7 @@
-import { Column, DataType, Table, Index, PrimaryKey, Default, HasMany } from 'sequelize-typescript';
+import { Column, DataType, Table, Index, PrimaryKey, Default, HasMany, BelongsTo, ForeignKey } from 'sequelize-typescript';
 import { BaseModel } from '../../base.model';
 import { InvPurchaseItem } from './inv_purchase_item.model';
+import { InvSupplier } from './inv_supplier.model';
 
 import type { InvPurchaseAttributes, InvPurchaseCreationAttributes } from '../../types/invpurchase.types';
 
@@ -46,8 +47,12 @@ export class InvPurchase extends BaseModel<InvPurchaseAttributes, InvPurchaseCre
   @Column({ type: DataType.DATEONLY, allowNull: true })
   cheque_date?: Date;
 
+  @ForeignKey(() => InvSupplier)
   @Column({ type: DataType.UUID, allowNull: false })
   supplier_id: string;
+
+  @BelongsTo(() => InvSupplier, { foreignKey: 'supplier_id', as: 'supplier' })
+  declare supplier?: InvSupplier;
 
   @Column({ type: DataType.UUID, allowNull: true })
   project_type_id?: string;
@@ -66,7 +71,7 @@ export class InvPurchase extends BaseModel<InvPurchaseAttributes, InvPurchaseCre
   site_id?: string;
 
   @HasMany(() => InvPurchaseItem, { foreignKey: 'purchase_id', as: 'items', onDelete: 'CASCADE' })
-  items?: InvPurchaseItem[];
+  declare items?: InvPurchaseItem[];
 
   @Column({ type: DataType.STRING, allowNull: true, field: 'created_by' })
   declare createdBy?: string;

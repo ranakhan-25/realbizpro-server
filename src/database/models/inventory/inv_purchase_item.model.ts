@@ -1,6 +1,7 @@
-  import { Column, DataType, Table, PrimaryKey, Default, BelongsTo, ForeignKey } from 'sequelize-typescript';
+import { Column, DataType, Table, PrimaryKey, Default, BelongsTo, ForeignKey } from 'sequelize-typescript';
 import { BaseModel } from '../../base.model';
 import { InvPurchase } from './inv_purchase.model';
+import { InvItem } from './inv_item.model';
 
 import type { InvPurchaseItemAttributes, InvPurchaseItemCreationAttributes } from '../../types/invpurchaseitem.types';
 
@@ -20,10 +21,14 @@ export class InvPurchaseItem extends BaseModel<InvPurchaseItemAttributes, InvPur
   purchase_id: string;
 
   @BelongsTo(() => InvPurchase, { foreignKey: 'purchase_id', as: 'purchase', onDelete: 'CASCADE' })
-  purchase?: InvPurchase;
+  declare purchase?: InvPurchase;
 
+  @ForeignKey(() => InvItem)
   @Column({ type: DataType.UUID, allowNull: false })
   item_id: string;
+
+  @BelongsTo(() => InvItem, { foreignKey: 'item_id', as: 'item' })
+  declare item?: InvItem;
 
   @Column({ type: DataType.DECIMAL(15, 2), allowNull: false })
   quantity: number;

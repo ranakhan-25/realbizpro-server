@@ -53,6 +53,6 @@ export class LandOwner extends BaseModel<LandOwnerAttributes, LandOwnerCreationA
   @Column({ type: DataType.INTEGER, allowNull: true })
   deleted_by?: number;
 
-  @BelongsTo(() => AcquisitionLead)
-  acquisition_lead: AcquisitionLead;
+  @BelongsTo(() => AcquisitionLead, { foreignKey: 'lead_id', as: 'acquisition_lead' })
+  declare acquisition_lead?: AcquisitionLead;
 }

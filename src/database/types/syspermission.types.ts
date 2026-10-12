@@ -1,5 +1,5 @@
 // Auto-generated types for SysPermission
-// Source: src\database\models\system\sys_permission.model.ts
+// Source: src/database/models/system/sys_permission.model.ts
 
 import { ActionType } from '../models/system/sys_permission.model';
 import { ContextTypes } from '../models/system/sys_permission.model';

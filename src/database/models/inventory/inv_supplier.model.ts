@@ -1,5 +1,6 @@
-import { Column, DataType, Table, Index, PrimaryKey, Default } from 'sequelize-typescript';
+import { Column, DataType, Table, Index, PrimaryKey, Default, HasMany } from 'sequelize-typescript';
 import { BaseModel } from '../../base.model';
+import { InvPurchase } from './inv_purchase.model';
 
 import type { InvSupplierAttributes, InvSupplierCreationAttributes } from '../../types/invsupplier.types';
 
@@ -45,6 +46,9 @@ export class InvSupplier extends BaseModel<InvSupplierAttributes, InvSupplierCre
 
   @Column({ type: DataType.BIGINT, allowNull: true })
   chart_of_group_id?: number;
+
+  @HasMany(() => InvPurchase, { foreignKey: 'supplier_id', as: 'purchases' })
+  declare purchases?: InvPurchase[];
 
   @Column({ type: DataType.STRING, allowNull: true, field: 'created_by' })
   declare createdBy?: string;

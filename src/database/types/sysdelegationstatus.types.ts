@@ -1,5 +1,5 @@
 // Auto-generated types for SysDelegationStatus
-// Source: src\database\models\deligation\sys_delegation_statuses.model.ts
+// Source: src/database/models/deligation/sys_delegation_statuses.model.ts
 
 export interface SysDelegationStatusAttributes {
   module?: string | null;

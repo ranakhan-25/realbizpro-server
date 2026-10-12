@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { InvSubCategory } from '../../../../database/models/inventory/inv_sub_category.model';
+import { InvCategory } from '../../../../database/models/inventory/inv_category.model';
 import { CreateInvSubCategoryDto } from './dto/create-inv-sub-category.dto';
 import { UpdateInvSubCategoryDto } from './dto/update-inv-sub-category.dto';
 
@@ -9,6 +10,8 @@ export class InvSubCategoryService {
   constructor(
     @InjectModel(InvSubCategory)
     private readonly subCategoryModel: typeof InvSubCategory,
+    @InjectModel(InvCategory)
+    private readonly categoryModel: typeof InvCategory,
   ) {}
 
   async create(createDto: CreateInvSubCategoryDto): Promise<InvSubCategory> {
@@ -23,11 +26,15 @@ export class InvSubCategoryService {
   }
 
   async findAll(): Promise<InvSubCategory[]> {
-    return await this.subCategoryModel.findAll();
+    return await this.subCategoryModel.findAll({
+      include: [{ model: this.categoryModel, as: 'category', required: false }],
+    });
   }
 
   async findOne(uuid: string): Promise<InvSubCategory> {
-    const subCategory = await this.subCategoryModel.findByPk(uuid);
+    const subCategory = await this.subCategoryModel.findByPk(uuid, {
+      include: [{ model: this.categoryModel, as: 'category', required: false }],
+    });
     if (!subCategory) throw new NotFoundException('Sub-category not found');
     return subCategory;
   }

@@ -1,5 +1,5 @@
 // Auto-generated types for Project
-// Source: src\database\models\projects\project\pr_project_model.ts
+// Source: src/database/models/projects/project/pr_project_model.ts
 
 import { ProjectStatus } from '../models/projects/project/pr_project_model';
 
