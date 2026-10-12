@@ -19,7 +19,7 @@ export enum FlatLandStatus {
 }
 
 @Table({
-  tableName: 'flat_land',
+  tableName: 'pr_flat_land',
   timestamps: true,
   paranoid: true,
   underscored: false,

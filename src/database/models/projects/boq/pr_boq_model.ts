@@ -15,7 +15,7 @@ import {
 } from 'src/database/types/boq.types';
 
 @Table({
-  tableName: 'boq',
+  tableName: 'pr_boq',
   timestamps: true,
   paranoid: true,
   underscored: false,

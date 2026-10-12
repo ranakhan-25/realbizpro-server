@@ -19,7 +19,7 @@ import { DetailsAttributes, DetailsCreationAttributes, DetailsUpdateAttributes }
 // } from '../types/details.types'; // Path check kore deben
 
 @Table({
-  tableName: 'details',
+  tableName: 'pr_details',
   timestamps: true,
   paranoid: true,
   underscored: false,
