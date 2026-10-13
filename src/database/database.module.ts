@@ -7,7 +7,6 @@ import { SysUom } from './models/system/sys_uom.model';
 import { SysUserPermission } from './models/system/sys_user_permission.model';
 import { Project } from './models/projects/project/pr_project_model';
 import { projectType } from './models/projects/project/pr_project_types_model';
-import { Site } from './models/projects/project/pr_site.model';
 import { Investor } from './models/projects/investor/investor_model';
 import { InvestorNominee } from './models/projects/investor/investor_nominee_model';
 import { ShareConfiguration } from './models/projects/investor/configuration_model';
@@ -28,7 +27,7 @@ import { DatabaseSyncService } from './sync.service';
       SysUserPermission,
       Project,
       projectType,
-      Site,
+      // Site,
       Investor,
       InvestorNominee,
       ShareConfiguration,

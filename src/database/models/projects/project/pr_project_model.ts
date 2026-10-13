@@ -13,7 +13,6 @@ import {
 
 import { ShareConfiguration } from '../investor/configuration_model';
 import { BaseModel } from 'src/database/base.model';
-import { Site } from './pr_site.model';
 
 export enum ProjectStatus {
   ACTIVE = 'ACTIVE',
@@ -146,12 +145,6 @@ export class Project
     defaultValue: ProjectStatus.ACTIVE,
   })
   declare status: ProjectStatus;
-
-  @HasMany(() => Site, {
-    foreignKey: 'projectId',
-    sourceKey: 'id',
-  })
-  declare sites?: Site[];
 
   @HasMany(() => ShareConfiguration, {
     foreignKey: 'projectId',

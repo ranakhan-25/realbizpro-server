@@ -1,8 +1,10 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
+
 import {
   Transform,
   Type,
 } from 'class-transformer';
+
 import {
   IsBoolean,
   IsInt,
@@ -10,17 +12,18 @@ import {
   IsString,
   Max,
   Min,
+  IsIn,
 } from 'class-validator';
 
-export class QueryProjectSiteDto {
-  @ApiPropertyOptional({ example: 1, default: 1 })
+export class QueryMonthYearDto {
+  @ApiPropertyOptional({ default: 1 })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
   page?: number = 1;
 
-  @ApiPropertyOptional({ example: 10, default: 10 })
+  @ApiPropertyOptional({ default: 10 })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
@@ -28,35 +31,43 @@ export class QueryProjectSiteDto {
   @Max(100)
   limit?: number = 10;
 
-  @ApiPropertyOptional({ example: 'alpha' })
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  skip?: number;
+
+  @ApiPropertyOptional({
+    example: 'October',
+    description: 'Search month by name',
+  })
   @IsOptional()
   @IsString()
   search?: string;
 
-  @ApiPropertyOptional({ example: 'Residential' })
-  @IsOptional()
-  @IsString()
-  projectType?: string;
-
-  @ApiPropertyOptional({ example: 1 })
+  @ApiPropertyOptional({ example: 2026 })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
-  projectId?: number;
+  year?: number;
 
-  @ApiPropertyOptional({ example: 'createdAt', default: 'createdAt' })
+  @ApiPropertyOptional({ default: 'createdAt' })
   @IsOptional()
   @IsString()
   sortBy?: string = 'createdAt';
 
-  @ApiPropertyOptional({ example: 'DESC', default: 'DESC' })
+  @ApiPropertyOptional({ default: 'DESC' })
   @IsOptional()
-  @IsString()
+  @IsIn(['ASC', 'DESC'])
   sortOrder?: 'ASC' | 'DESC' = 'DESC';
 
   @ApiPropertyOptional({ default: false })
   @IsOptional()
-  @Transform(({ value }) => value === 'true' || value === true)
+  @Transform(
+    ({ value }) =>
+      value === 'true' || value === true,
+  )
   @IsBoolean()
   withDeleted?: boolean = false;
 }

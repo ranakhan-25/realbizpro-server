@@ -3,12 +3,16 @@
 import {
   Column,
   DataType,
+  HasMany,
   Table,
 } from 'sequelize-typescript';
 
 import { BaseModel } from 'src/database/base.model';
-import type { BillingCategoryAttributes, BillingCategoryCreationAttributes } from 'src/database/types/billingcategory.types';
-
+import type {
+  BillingCategoryAttributes,
+  BillingCategoryCreationAttributes,
+} from 'src/database/types/billingcategory.types';
+import { BillingSubCategory } from './pr_sub_category.madel';
 
 export enum CategoryType {
   PRODUCT = 'Product',
@@ -29,7 +33,9 @@ export class BillingCategory
   implements BillingCategoryAttributes
 {
   @Column({
-    type: DataType.ENUM(...Object.values(CategoryType)),
+    type: DataType.ENUM(
+      ...Object.values(CategoryType),
+    ),
     allowNull: false,
   })
   declare type: CategoryType;
@@ -70,4 +76,10 @@ export class BillingCategory
     allowNull: true,
   })
   declare deletedBy?: string;
+
+  @HasMany(() => BillingSubCategory, {
+    foreignKey: 'categoryId',
+    sourceKey: 'id',
+  })
+  declare subCategories?: BillingSubCategory[];
 }

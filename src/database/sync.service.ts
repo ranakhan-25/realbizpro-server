@@ -1,3 +1,5 @@
+/* eslint-disable prettier/prettier */
+
 import {
   Injectable,
   Logger,
@@ -20,10 +22,11 @@ export class DatabaseSyncService implements OnApplicationBootstrap {
     private readonly sequelize: Sequelize,
   ) {}
 
-  async onApplicationBootstrap() {
+  async onApplicationBootstrap(): Promise<void> {
     await this.initializeDatabase();
   }
-  private async initializeDatabase() {
+
+  private async initializeDatabase(): Promise<void> {
     const syncCfg =
       this.configService.getOrThrow<DatabaseSyncOptions>(
         'database.sync',
@@ -36,10 +39,32 @@ export class DatabaseSyncService implements OnApplicationBootstrap {
       );
       return;
     }
-    await this.sequelize.sync({
-      force: false,
-      alter: false,
-    });
-    this.logger.log('Database synchronized');
+
+    try {
+      await this.sequelize.sync({
+        force: false,
+        alter: false,
+      });
+
+      this.logger.log('Database synchronized');
+    } catch (error: any) {
+      this.logger.error(
+        `Database sync failed: ${error?.message ?? error}`,
+      );
+
+      if (error?.parent) {
+        this.logger.error(
+          `PostgreSQL error: ${error.parent.message}`,
+        );
+        this.logger.error(
+          `PostgreSQL code: ${error.parent.code ?? 'N/A'}`,
+        );
+        this.logger.error(
+          `SQL: ${error.sql ?? 'N/A'}`,
+        );
+      }
+
+      throw error;
+    }
   }
 }

@@ -1,16 +1,20 @@
 /* eslint-disable prettier/prettier */
 
 import {
+  BelongsTo,
   Column,
   DataType,
+  ForeignKey,
   Table,
 } from 'sequelize-typescript';
 
 import { BaseModel } from 'src/database/base.model';
+
 import type {
   BillingSubCategoryAttributes,
   BillingSubCategoryCreationAttributes,
 } from 'src/database/types/billingsubcategory.types';
+import { BillingCategory } from './pr_category.model';
 
 export enum SubCategoryType {
   PRODUCT = 'Product',
@@ -38,11 +42,18 @@ export class BillingSubCategory
   })
   declare type: SubCategoryType;
 
+  @ForeignKey(() => BillingCategory)
   @Column({
-    type: DataType.STRING,
+    type: DataType.BIGINT,
     allowNull: true,
   })
-  declare categoryId?: string;
+  declare categoryId?: number;
+
+  @BelongsTo(() => BillingCategory, {
+    foreignKey: 'categoryId',
+    targetKey: 'id',
+  })
+  declare category?: BillingCategory;
 
   @Column({
     type: DataType.STRING,

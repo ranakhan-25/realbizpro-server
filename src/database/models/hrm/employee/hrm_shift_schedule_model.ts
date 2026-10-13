@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import {
   BelongsTo,
   Column,
@@ -33,11 +32,6 @@ export enum ShiftDayName {
     {
       name: 'ShiftSchedule_shiftId_idx',
       fields: ['shiftId'],
-    },
-    {
-      name: 'ShiftSchedule_shiftId_day_unique',
-      unique: true,
-      fields: ['shiftId', 'day'],
     },
     {
       name: 'ShiftSchedule_deletedAt_idx',

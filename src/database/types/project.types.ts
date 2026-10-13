@@ -3,7 +3,6 @@
 
 import { ProjectStatus } from '../models/projects/project/pr_project_model';
 
-import type { Site } from '../models/projects/project/pr_site.model';
 import type { ShareConfiguration } from '../models/projects/investor/configuration_model';
 
 export interface ProjectAttributes {
@@ -34,7 +33,6 @@ export interface ProjectAttributes {
   deletedBy?: string | null;
 
   // Relations
-  sites?: Site[];
   shareConfigurations?: ShareConfiguration[];
 }
 
@@ -65,6 +63,5 @@ export type ProjectUpdateAttributes = Partial<ProjectCreationAttributes>;
 
 // Helper type for including relations
 export interface ProjectWithRelations extends ProjectAttributes {
-  sites?: Site[];
   shareConfigurations?: ShareConfiguration[];
 }
