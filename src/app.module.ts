@@ -86,6 +86,8 @@ import { QuotationModule } from './modules/projects/quotation/quotation.module';
 import { ProjectModule } from './modules/projects/projects/project.module';
 import { CrmModule } from './modules/crm/crm.module';
 import { CreditRealizationModule } from './modules/credit-realization/credit-realization.module';
+import { DepartmentModule } from './modules/hrm/employee/department/department.module';
+import { DesignationModule } from './modules/hrm/employee/designation/designation.module';
 
 @Module({
   imports: [
@@ -185,16 +187,21 @@ import { CreditRealizationModule } from './modules/credit-realization/credit-rea
     SupplierAccountsModule,
     LabourWorkBankModule,
     ContractorModule,
+    FlatLandModule,
     InvestorModule,
     ShareConfigurationModule,
     MaterialRequisitionModule,
     FundRequisitionModule,
+    ServiceWorkRequisitionModule,
+    ServiceWorkRequisitionItemModule,
     CategoryModule,
     InventoryModule,
     SubCategoryModule,
     LamsModule,
     CrmModule,
     CreditRealizationModule,
+    DepartmentModule,
+    DesignationModule,
   ],
   controllers: [AppController, HealthController],
   providers: [

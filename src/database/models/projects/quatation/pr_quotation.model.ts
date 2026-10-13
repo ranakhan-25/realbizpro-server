@@ -15,7 +15,7 @@ import {
 } from 'src/database/types/quotation.types';
 
 @Table({
-  tableName: 'quotation',
+  tableName: 'pr_quotation',
   timestamps: true,
   paranoid: true,
   underscored: false,

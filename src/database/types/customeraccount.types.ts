@@ -37,12 +37,8 @@ export interface CustomerAccountCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  status?: CustomerAccountStatus; // Has default value
+  status?: CustomerAccountStatus;
 }
 
-export type CustomerAccountUpdateAttributes = Partial<CustomerAccountCreationAttributes>;
-
-// Helper type for including relations
-export interface CustomerAccountWithRelations extends CustomerAccountAttributes {
-  // No relations defined
-}
+export type CustomerAccountUpdateAttributes =
+  Partial<CustomerAccountCreationAttributes>;

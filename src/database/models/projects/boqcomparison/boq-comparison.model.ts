@@ -18,7 +18,7 @@ export enum BoqComparisonStatus {
 }
 
 @Table({
-  tableName: 'boq_comparisons',
+  tableName: 'pr_boq_comparisons',
   timestamps: true,
   paranoid: true,
   underscored: false,
