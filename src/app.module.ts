@@ -88,6 +88,9 @@ import { ShiftModule } from './modules/hrm/employee/shift/shift.module';
 import { AttendanceModule } from './modules/hrm/employee/shift  allocation/attendance.module';
 import { EmployeeModule } from './modules/hrm/employee/shift  allocation/employee.module';
 import { MonthYearModule } from './modules/hrm/employee/shift  allocation/month-year.module';
+import { BonusModule } from './modules/hrm/employee/bonus/bonus.module';
+
+import { BonusGenerateModule } from './modules/hrm/employee/bonus-generate/bonus-generate.module';
 
 @Module({
   imports: [
@@ -204,6 +207,8 @@ import { MonthYearModule } from './modules/hrm/employee/shift  allocation/month-
     AttendanceModule,
     EmployeeModule,
     MonthYearModule,
+    BonusModule,
+    BonusGenerateModule,
   ],
   controllers: [AppController, HealthController],
   providers: [

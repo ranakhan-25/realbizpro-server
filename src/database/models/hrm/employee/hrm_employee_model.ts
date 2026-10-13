@@ -13,6 +13,7 @@ import {
   EmployeeCreationAttributes,
 } from 'src/database/types/employee.types';
 import { Attendance } from './hrm_attendance_model';
+import { BonusGenerate } from './hrm_bonus_generate_model';
 
 export enum EmployeeStatus {
   ACTIVE = 'active',
@@ -66,4 +67,10 @@ export class Employee extends BaseModel<
     as: 'attendances',
   })
   declare attendances?: Attendance[];
+  @HasMany(() => BonusGenerate, {
+    foreignKey: 'employeeId',
+    sourceKey: 'uuid',
+    as: 'bonusGenerates',
+  })
+  declare bonusGenerates?: BonusGenerate[];
 }
