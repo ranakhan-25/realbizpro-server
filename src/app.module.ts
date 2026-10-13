@@ -84,6 +84,8 @@ import { DetailsModule } from './modules/projects/details/details.module';
 import { SysDivisionModule } from './modules/system/sys-division/sys-division.module';
 import { QuotationModule } from './modules/projects/quotation/quotation.module';
 import { ProjectModule } from './modules/projects/projects/project.module';
+import { CrmModule } from './modules/crm/crm.module';
+import { CreditRealizationModule } from './modules/credit-realization/credit-realization.module';
 
 @Module({
   imports: [
@@ -191,6 +193,8 @@ import { ProjectModule } from './modules/projects/projects/project.module';
     InventoryModule,
     SubCategoryModule,
     LamsModule,
+    CrmModule,
+    CreditRealizationModule,
   ],
   controllers: [AppController, HealthController],
   providers: [
