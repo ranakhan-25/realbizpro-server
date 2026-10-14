@@ -15,7 +15,9 @@ export class EmployeeHierarchyService {
     private readonly employeeListModel: typeof EmployeeList,
   ) {}
 
-  async findAll(query: QueryEmployeeHierarchyDto) {
+  async findAll(
+    query: QueryEmployeeHierarchyDto,
+  ) {
     const {
       search,
       status,
@@ -30,7 +32,11 @@ export class EmployeeHierarchyService {
     if (search) {
       where[Op.or] = [
         { name: { [Op.like]: `%${search}%` } },
-        { employeeCode: { [Op.like]: `%${search}%` } },
+        {
+          employeeCode: {
+            [Op.like]: `%${search}%`,
+          },
+        },
       ];
     }
 
@@ -56,41 +62,58 @@ export class EmployeeHierarchyService {
 
     // Designation class import na kore, EmployeeList-er registered association theke nei
     // (jate alada class instance er karone "needs to be added to a Sequelize instance" error na ashe)
-    const assoc: any = (this.employeeListModel as any).associations?.designation;
+    const assoc: any = (
+      this.employeeListModel as any
+    ).associations?.designation;
     const target: any = assoc?.target;
-    const canInclude = !!(target && target.sequelize);
+    const canInclude = !!(
+      target && target.sequelize
+    );
 
-    const rows = await this.employeeListModel.findAll({
-      where,
-      attributes: [
-        'uuid',
-        'name',
-        'employeeCode',
-        'email',
-        'phone',
-        'image',
-        'status',
-        'joiningDate',
-        'departmentId',
-        'designationId',
-        'unitId',
-        'sectionId',
-      ],
-      ...(canInclude
-        ? {
-            include: [
-              { model: target, as: 'designation', required: false },
-            ],
-            order: [
-              [{ model: target, as: 'designation' }, 'createdAt', 'ASC'],
-              ['createdAt', 'ASC'],
-            ],
-          }
-        : { order: [['createdAt', 'ASC']] }),
-    } as any);
+    const rows =
+      await this.employeeListModel.findAll({
+        where,
+        attributes: [
+          'uuid',
+          'name',
+          'employeeCode',
+          'email',
+          'phone',
+          'image',
+          'status',
+          'joiningDate',
+          'departmentId',
+          'designationId',
+          'unitId',
+          'sectionId',
+        ],
+        ...(canInclude
+          ? {
+              include: [
+                {
+                  model: target,
+                  as: 'designation',
+                  required: false,
+                },
+              ],
+              order: [
+                [
+                  {
+                    model: target,
+                    as: 'designation',
+                  },
+                  'createdAt',
+                  'ASC',
+                ],
+                ['createdAt', 'ASC'],
+              ],
+            }
+          : { order: [['createdAt', 'ASC']] }),
+      } as any);
 
     const data = rows.map((row) => {
-      const designation: any = (row as any).designation;
+      const designation: any = (row as any)
+        .designation;
       const statusText = row.status
         ? row.status.charAt(0).toUpperCase() +
           row.status.slice(1)

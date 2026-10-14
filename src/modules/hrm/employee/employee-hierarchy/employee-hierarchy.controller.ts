@@ -1,5 +1,3 @@
-/* eslint-disable prettier/prettier */
-
 import {
   Controller,
   Get,
@@ -32,6 +30,8 @@ export class EmployeeHierarchyController {
     @Query()
     query: QueryEmployeeHierarchyDto,
   ) {
-    return this.employeeHierarchyService.findAll(query);
+    return this.employeeHierarchyService.findAll(
+      query,
+    );
   }
 }
