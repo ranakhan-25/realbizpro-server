@@ -93,6 +93,17 @@ import { BonusModule } from './modules/hrm/employee/bonus/bonus.module';
 import { BonusGenerateModule } from './modules/hrm/employee/bonus-generate/bonus-generate.module';
 import { SectionModule } from './modules/hrm/employee/section/section.module';
 import { UnitModule } from './modules/hrm/employee/unit/unit.module';
+import { CommissionModule } from './modules/hrm/employee/employee list/commission/commission.module';
+import { AllowanceModule } from './modules/hrm/employee/employee list/allowance/allowance.module';
+import { EmployeeListModule } from './modules/hrm/employee/employee list/employee-list/employee-list.module';
+import { EmployeeSalaryModule } from './modules/hrm/employee/employee list/employee-salary/employee-salary.module';
+import { EmployeeTypeModule } from './modules/hrm/employee/employee list/employee-type/employee-type.module';
+import { HrmShiftModule } from './modules/hrm/employee/employee list/hrm-shift/hrm-shift.module';
+import { LoanModule } from './modules/hrm/employee/employee list/loan/loan.module';
+import { OvertimeModule } from './modules/hrm/employee/employee list/overtime/overtime.module';
+import { SalaryGradeModule } from './modules/hrm/employee/employee list/salary-grade/salary-grade.module';
+import { SaturationDeductionModule } from './modules/hrm/employee/employee list/saturation-deduction/saturation-deduction.module';
+import { UnderModule } from './modules/hrm/employee/employee list/under/under.module';
 
 @Module({
   imports: [
@@ -213,6 +224,17 @@ import { UnitModule } from './modules/hrm/employee/unit/unit.module';
     BonusGenerateModule,
     SectionModule,
     UnitModule,
+    CommissionModule,
+    AllowanceModule,
+    EmployeeListModule,
+    EmployeeSalaryModule,
+    EmployeeTypeModule,
+    HrmShiftModule,
+    LoanModule,
+    OvertimeModule,
+    SalaryGradeModule,
+    SaturationDeductionModule,
+    UnderModule,
   ],
   controllers: [AppController, HealthController],
   providers: [

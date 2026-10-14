@@ -9,7 +9,7 @@ import { DesignationController } from './designation.controller';
 import { DesignationService } from './designation.service';
 import { Designation } from 'src/database/models/hrm/employee/hrm_designation_model';
 import { Department } from 'src/database/models/hrm/employee/hrm_department_model';
-// import { EmployeeList } from 'src/database/models/hrm/employee/hrm_employeeList_model';
+import { EmployeeList } from 'src/database/models/hrm/employee/hrm_employeeList_model';
 
 @Module({
   imports: [
@@ -17,7 +17,7 @@ import { Department } from 'src/database/models/hrm/employee/hrm_department_mode
     SequelizeModule.forFeature([
       Designation,
       Department,
-      // EmployeeList,
+      EmployeeList,
     ]),
   ],
 

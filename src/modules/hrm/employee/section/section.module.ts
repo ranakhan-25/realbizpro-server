@@ -8,10 +8,14 @@ import { SectionController } from './section.controller';
 
 import { SectionService } from './section.service';
 import { Section } from 'src/database/models/hrm/employee/hrm_section_model';
+import { EmployeeList } from 'src/database/models/hrm/employee/hrm_employeeList_model';
 
 @Module({
   imports: [
-    SequelizeModule.forFeature([Section]),
+    SequelizeModule.forFeature([
+      Section,
+      EmployeeList,
+    ]),
   ],
 
   controllers: [SectionController],
