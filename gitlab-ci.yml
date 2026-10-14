@@ -1,0 +1,140 @@
+
+# .gitlab-ci.yml
+
+stages:
+  - merge_checks
+  - build_check
+  - deploy:staging
+  - deploy:production
+
+# ---------------------------------------------------
+# MERGE CHECKS
+# ---------------------------------------------------
+merge_validation:
+  stage: merge_checks
+  only:
+    - merge_requests
+  image: node:22-alpine
+  script:
+    - echo "🔍 Validating merge request..."
+    - npm install 
+    - echo "✅ Merge validation completed"
+
+# ---------------------------------------------------
+# BUILD CHECK
+# ---------------------------------------------------
+build_check:
+  stage: build_check
+  only:
+    - staging
+    - main
+  image: node:22-alpine
+  script:
+    - echo "🔨 Checking NestJS build..."
+    - npm install
+    - echo "🗑 Removing old generated types..."
+    - rm -rf src/database/types
+    - echo "📦 Regenerating types..."
+    - npm run generate-types
+    - npm run build
+    - echo "✅ Build check passed"
+
+# ---------------------------------------------------
+# STAGING DEPLOYMENT
+# ---------------------------------------------------
+deploy_staging:
+  stage: deploy:staging
+  only:
+    - staging
+  image: node:22-alpine
+  before_script:
+    - apk add --no-cache openssh git bash
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY_BASE64" | base64 -d > ~/.ssh/id_ed25519
+    - chmod 600 ~/.ssh/id_ed25519
+    - ssh-add ~/.ssh/id_ed25519
+    - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+
+  script:
+    - |
+      ssh -o StrictHostKeyChecking=no root@103.189.5.21 << 'EOF'
+      cd /usr/share/nginx/easy_hrm_service
+
+      echo "🎯 Deploying NestJS STAGING API..."
+      git fetch origin staging
+      git reset --hard origin/staging
+
+      echo "📦 Installing dependencies..."
+      npm install
+
+      echo "🗑 Removing old generated types..."
+      rm -rf src/database/types
+
+      echo "📦 Regenerating types..."
+      npm run generate-types
+
+      echo "🔨 Building NestJS..."
+      npm run build
+
+      echo "🚀 Restarting PM2 (staging)..."
+      pm2 restart hrm_service --update-env
+
+      echo "✅ Staging API Deployment Success!"
+      EOF
+
+  environment:
+    name: staging
+    url: http://103.189.5.21:5003
+
+# ---------------------------------------------------
+# PRODUCTION DEPLOYMENT
+# ---------------------------------------------------
+deploy_production:
+  stage: deploy:production
+  only:
+    - main
+  image: node:22-alpine
+  before_script:
+    - apk add --no-cache openssh git bash
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY_BASE64" | base64 -d > ~/.ssh/id_ed25519
+    - chmod 600 ~/.ssh/id_ed25519
+    - ssh-add ~/.ssh/id_ed25519
+    - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+
+  script:
+    - |
+      ssh -o StrictHostKeyChecking=no root@103.189.5.21 << 'EOF'
+      cd /usr/share/nginx/production/hrm_service
+
+      echo "🎯 Deploying NestJS PRODUCTION API..."
+      git fetch origin main
+      git reset --hard origin/main
+
+      echo "📦 Installing dependencies..."
+      npm install
+
+      echo "🗑 Removing old generated types..."
+      rm -rf src/database/types
+
+      echo "📦 Regenerating types..."
+      npm run generate-types
+
+      echo "🔨 Building NestJS..."
+      npm run build
+
+      echo "🚀 Restarting PM2 (production)..."
+      pm2 restart prod_hrm_5013 --update-env
+
+      echo "🎉 Production API Deployment Success!"
+      EOF
+
+  environment:
+    name: production
+    url: http://103.189.5.21:5013

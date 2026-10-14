@@ -1,0 +1,38 @@
+export interface JwtAuthUser {
+  id: number;
+  userType?: string | null;
+  distributionId?: number | null;
+  warehouseId?: number | null;
+  receivingPointId?: number | null;
+  factoryId?: number | null;
+  unitId?: number | null;
+  sectionId?: number | null;
+  uuid?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  username?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  isActive?: boolean;
+  faceAuth?: number | null;
+  refreshToken?: string | null;
+  modules?: any[];
+  roles?: any[];
+  permissions?: any[];
+  userPermissions?: any[];
+  lastLoginAt?: Date | null;
+  lastLogoutAt?: Date | null;
+  isSuperUser?: boolean;
+  designationId?: any;
+  designation?: any;
+  employee?: any;
+  factory?: any;
+  unit?: any;
+  section?: any;
+  sections?: any[];
+  warehouse?: any;
+  receivingPoint?: any;
+  distribution?: any;
+  iat?: number;
+  exp?: number;
+}
