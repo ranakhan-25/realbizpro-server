@@ -91,6 +91,7 @@ import { MonthYearModule } from './modules/hrm/employee/shift  allocation/month-
 import { BonusModule } from './modules/hrm/employee/bonus/bonus.module';
 
 import { BonusGenerateModule } from './modules/hrm/employee/bonus-generate/bonus-generate.module';
+import { SectionModule } from './modules/hrm/employee/section/section.module';
 
 @Module({
   imports: [
@@ -209,6 +210,7 @@ import { BonusGenerateModule } from './modules/hrm/employee/bonus-generate/bonus
     MonthYearModule,
     BonusModule,
     BonusGenerateModule,
+    SectionModule,
   ],
   controllers: [AppController, HealthController],
   providers: [
