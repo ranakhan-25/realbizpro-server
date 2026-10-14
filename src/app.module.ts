@@ -92,6 +92,7 @@ import { BonusModule } from './modules/hrm/employee/bonus/bonus.module';
 
 import { BonusGenerateModule } from './modules/hrm/employee/bonus-generate/bonus-generate.module';
 import { SectionModule } from './modules/hrm/employee/section/section.module';
+import { UnitModule } from './modules/hrm/employee/unit/unit.module';
 
 @Module({
   imports: [
@@ -211,6 +212,7 @@ import { SectionModule } from './modules/hrm/employee/section/section.module';
     BonusModule,
     BonusGenerateModule,
     SectionModule,
+    UnitModule,
   ],
   controllers: [AppController, HealthController],
   providers: [
