@@ -104,6 +104,7 @@ import { OvertimeModule } from './modules/hrm/employee/employee list/overtime/ov
 import { SalaryGradeModule } from './modules/hrm/employee/employee list/salary-grade/salary-grade.module';
 import { SaturationDeductionModule } from './modules/hrm/employee/employee list/saturation-deduction/saturation-deduction.module';
 import { UnderModule } from './modules/hrm/employee/employee list/under/under.module';
+import { EmployeeHierarchyModule } from './modules/hrm/employee/employee-hierarchy/employee-hierarchy.module';
 
 @Module({
   imports: [
@@ -235,6 +236,7 @@ import { UnderModule } from './modules/hrm/employee/employee list/under/under.mo
     SalaryGradeModule,
     SaturationDeductionModule,
     UnderModule,
+    EmployeeHierarchyModule,
   ],
   controllers: [AppController, HealthController],
   providers: [
