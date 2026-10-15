@@ -20,7 +20,7 @@ import { CreateSectionDto } from './dto/create-section.dto';
 import { QuerySectionDto } from './dto/query-section.dto';
 import { UpdateSectionDto } from './dto/update-section.dto';
 
-@ApiTags('HRM | Section')
+@ApiTags('HRM | Employee | Section')
 @ApiBearerAuth()
 @Controller('section')
 export class SectionController {

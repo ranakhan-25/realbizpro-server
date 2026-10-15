@@ -1,5 +1,3 @@
-/* eslint-disable prettier/prettier */
-
 import {
   Body,
   Controller,
@@ -22,7 +20,7 @@ import { CreateEmployeeSalaryDto } from './dto/create-employee-salary.dto';
 import { QueryEmployeeSalaryDto } from './dto/query-employee-salary.dto';
 import { UpdateEmployeeSalaryDto } from './dto/update-employee-salary.dto';
 
-@ApiTags('HRM | Employee Salary')
+@ApiTags('HRM | Employee | Employee Salary')
 @ApiBearerAuth()
 @Controller('employee-salary')
 export class EmployeeSalaryController {

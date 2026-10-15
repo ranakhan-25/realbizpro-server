@@ -1,5 +1,3 @@
-/* eslint-disable prettier/prettier */
-
 import {
   Body,
   Controller,
@@ -22,7 +20,7 @@ import { CreateEmployeeTypeDto } from './dto/create-employee-type.dto';
 import { QueryEmployeeTypeDto } from './dto/query-employee-type.dto';
 import { UpdateEmployeeTypeDto } from './dto/update-employee-type.dto';
 
-@ApiTags('HRM | Employee Type')
+@ApiTags('HRM | Employee | Employee Type')
 @ApiBearerAuth()
 @Controller('employee-type')
 export class EmployeeTypeController {

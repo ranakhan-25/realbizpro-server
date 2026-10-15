@@ -17,7 +17,7 @@ import { AttendanceService } from './attendance.service';
 import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { QueryAttendanceDto } from './dto/query-attendance.dto';
 import { UpdateAttendanceDto } from './dto/update-attendance.dto';
-@ApiTags('HRM | Attendance')
+@ApiTags('HRM | Employee | Attendance')
 @ApiBearerAuth()
 @Controller('attendance')
 export class AttendanceController {

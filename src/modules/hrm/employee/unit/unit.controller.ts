@@ -20,7 +20,7 @@ import { CreateUnitDto } from './dto/create-unit.dto';
 import { QueryUnitDto } from './dto/query-unit.dto';
 import { UpdateUnitDto } from './dto/update-unit.dto';
 
-@ApiTags('HRM | Unit')
+@ApiTags('HRM | Employee | Unit')
 @ApiBearerAuth()
 @Controller('unit')
 export class UnitController {

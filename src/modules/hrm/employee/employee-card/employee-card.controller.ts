@@ -13,7 +13,7 @@ import {
 import { EmployeeCardService } from './employee-card.service';
 import { QueryEmployeeCardDto } from './dto/query-employee-card.dto';
 
-@ApiTags('HRM | Employee Card')
+@ApiTags('HRM | Employee | Employee Card')
 @ApiBearerAuth()
 @Controller('employee-card')
 export class EmployeeCardController {
