@@ -20,7 +20,7 @@ import { CreateLoanDto } from './dto/create-loan.dto';
 import { QueryLoanDto } from './dto/query-loan.dto';
 import { UpdateLoanDto } from './dto/update-loan.dto';
 
-@ApiTags('HRM | Loan')
+@ApiTags('HRM | Employee | Loan')
 @ApiBearerAuth()
 @Controller('loan')
 export class LoanController {

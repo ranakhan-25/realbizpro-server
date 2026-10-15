@@ -1,5 +1,3 @@
-/* eslint-disable prettier/prettier */
-
 import {
   Body,
   Controller,
@@ -22,7 +20,7 @@ import { CreateIncrementDto } from './dto/create-increment.dto';
 import { QueryIncrementDto } from './dto/query-increment.dto';
 import { UpdateIncrementDto } from './dto/update-increment.dto';
 
-@ApiTags('HRM | Increment')
+@ApiTags('HRM | Employee | Increment')
 @ApiBearerAuth()
 @Controller('increment')
 export class IncrementController {

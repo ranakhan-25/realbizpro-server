@@ -20,7 +20,7 @@ import { CreateHrmShiftDto } from './dto/create-hrm-shift.dto';
 import { QueryHrmShiftDto } from './dto/query-hrm-shift.dto';
 import { UpdateHrmShiftDto } from './dto/update-hrm-shift.dto';
 
-@ApiTags('HRM | HRM Shift')
+@ApiTags('HRM | Employee | HRM Shift')
 @ApiBearerAuth()
 @Controller('hrm-shift')
 export class HrmShiftController {

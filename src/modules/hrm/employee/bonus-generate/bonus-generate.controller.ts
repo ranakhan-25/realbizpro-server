@@ -20,7 +20,7 @@ import { CreateBonusGenerateDto } from './dto/create-bonus-generate.dto';
 import { QueryBonusGenerateDto } from './dto/query-bonus-generate.dto';
 import { UpdateBonusGenerateDto } from './dto/update-bonus-generate.dto';
 
-@ApiTags('HRM | Bonus Generate')
+@ApiTags('HRM | Employee | Bonus Generate')
 @ApiBearerAuth()
 @Controller('bonus-generate')
 export class BonusGenerateController {

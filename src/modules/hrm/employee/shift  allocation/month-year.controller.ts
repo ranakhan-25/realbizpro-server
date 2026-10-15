@@ -17,7 +17,7 @@ import { MonthYearService } from './month-year.service';
 import { CreateMonthYearDto } from './dto/create-month-year.dto';
 import { QueryMonthYearDto } from './dto/query-month-year.dto';
 import { UpdateMonthYearDto } from './dto/update-month-year.dto';
-@ApiTags('HRM | MonthYear')
+@ApiTags('HRM | Employee | MonthYear')
 @ApiBearerAuth()
 @Controller('month-year')
 export class MonthYearController {

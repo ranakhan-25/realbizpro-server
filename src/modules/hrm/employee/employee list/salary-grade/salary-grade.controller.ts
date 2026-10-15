@@ -20,7 +20,7 @@ import { CreateSalaryGradeDto } from './dto/create-salary-grade.dto';
 import { QuerySalaryGradeDto } from './dto/query-salary-grade.dto';
 import { UpdateSalaryGradeDto } from './dto/update-salary-grade.dto';
 
-@ApiTags('HRM | Salary Grade')
+@ApiTags('HRM | Employee | Salary Grade')
 @ApiBearerAuth()
 @Controller('salary-grade')
 export class SalaryGradeController {

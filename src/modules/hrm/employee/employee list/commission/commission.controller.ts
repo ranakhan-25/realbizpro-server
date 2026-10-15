@@ -20,7 +20,7 @@ import { CreateCommissionDto } from './dto/create-commission.dto';
 import { QueryCommissionDto } from './dto/query-commission.dto';
 import { UpdateCommissionDto } from './dto/update-commission.dto';
 
-@ApiTags('HRM | Commission')
+@ApiTags('HRM | Employee | Commission')
 @ApiBearerAuth()
 @Controller('commission')
 export class CommissionController {

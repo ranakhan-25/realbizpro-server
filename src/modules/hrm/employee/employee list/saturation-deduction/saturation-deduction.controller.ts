@@ -20,7 +20,7 @@ import { CreateSaturationDeductionDto } from './dto/create-saturation-deduction.
 import { QuerySaturationDeductionDto } from './dto/query-saturation-deduction.dto';
 import { UpdateSaturationDeductionDto } from './dto/update-saturation-deduction.dto';
 
-@ApiTags('HRM | Saturation Deduction')
+@ApiTags('HRM | Employee | Saturation Deduction')
 @ApiBearerAuth()
 @Controller('saturation-deduction')
 export class SaturationDeductionController {

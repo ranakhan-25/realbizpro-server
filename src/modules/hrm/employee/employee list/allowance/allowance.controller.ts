@@ -20,7 +20,7 @@ import { CreateAllowanceDto } from './dto/create-allowance.dto';
 import { QueryAllowanceDto } from './dto/query-allowance.dto';
 import { UpdateAllowanceDto } from './dto/update-allowance.dto';
 
-@ApiTags('HRM | Allowance')
+@ApiTags('HRM | Employee | Allowance')
 @ApiBearerAuth()
 @Controller('allowance')
 export class AllowanceController {
