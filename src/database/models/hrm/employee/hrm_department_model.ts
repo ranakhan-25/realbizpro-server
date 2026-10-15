@@ -12,7 +12,7 @@ import type {
   DepartmentUpdateAttributes,
 } from 'src/database/types/department.types';
 import { Designation } from './hrm_designation_model';
-// import { EmployeeList } from './hrm_employeeList_model';
+import { EmployeeList } from './hrm_employeeList_model';
 
 export enum DepartmentStatus {
   ACTIVE = 'active',
@@ -100,10 +100,10 @@ export class Department
   })
   declare designations?: Designation[];
   // Department model e
-  // @HasMany(() => EmployeeList, {
-  //   foreignKey: 'departmentId',
-  //   sourceKey: 'uuid',
-  //   as: 'employees',
-  // })
-  // declare employees?: EmployeeList[];
+  @HasMany(() => EmployeeList, {
+    foreignKey: 'departmentId',
+    sourceKey: 'uuid',
+    as: 'employees',
+  })
+  declare employees?: EmployeeList[];
 }

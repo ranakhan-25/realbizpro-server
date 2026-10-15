@@ -1,0 +1,24 @@
+// AppModule-er imports array-te ei module gulo add koro:
+import { EmployeeTypeModule } from './employee-type/employee-type.module';  // path nijer folder onujayi thik koro
+import { HrmShiftModule } from './hrm-shift/hrm-shift.module';  // path nijer folder onujayi thik koro
+import { SalaryGradeModule } from './salary-grade/salary-grade.module';  // path nijer folder onujayi thik koro
+import { UnderModule } from './under/under.module';  // path nijer folder onujayi thik koro
+import { EmployeeSalaryModule } from './employee-salary/employee-salary.module';  // path nijer folder onujayi thik koro
+import { LoanModule } from './loan/loan.module';  // path nijer folder onujayi thik koro
+import { OvertimeModule } from './overtime/overtime.module';  // path nijer folder onujayi thik koro
+import { SaturationDeductionModule } from './saturation-deduction/saturation-deduction.module';  // path nijer folder onujayi thik koro
+import { CommissionModule } from './commission/commission.module';  // path nijer folder onujayi thik koro
+import { AllowanceModule } from './allowance/allowance.module';  // path nijer folder onujayi thik koro
+
+// imports: [
+//   EmployeeTypeModule,
+//   HrmShiftModule,
+//   SalaryGradeModule,
+//   UnderModule,
+//   EmployeeSalaryModule,
+//   LoanModule,
+//   OvertimeModule,
+//   SaturationDeductionModule,
+//   CommissionModule,
+//   AllowanceModule,
+// ],

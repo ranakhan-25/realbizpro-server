@@ -11,7 +11,7 @@ import type {
   SectionCreationAttributes,
   SectionUpdateAttributes,
 } from 'src/database/types/section.types'; // ← eta use koro
-// import { EmployeeList } from './hrm_employeeList_model';
+import { EmployeeList } from './hrm_employeeList_model';
 
 export enum SectionStatus {
   ACTIVE = 'active',
@@ -81,10 +81,10 @@ export class Section
   })
   declare status: SectionStatus;
 
-  // @HasMany(() => EmployeeList, {
-  //   foreignKey: 'sectionId',
-  //   sourceKey: 'uuid',
-  //   as: 'employees',
-  // })
-  // declare employees?: EmployeeList[];
+  @HasMany(() => EmployeeList, {
+    foreignKey: 'sectionId',
+    sourceKey: 'uuid',
+    as: 'employees',
+  })
+  declare employees?: EmployeeList[];
 }

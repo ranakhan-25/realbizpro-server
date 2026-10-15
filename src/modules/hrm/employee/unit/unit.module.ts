@@ -8,9 +8,15 @@ import { UnitController } from './unit.controller';
 
 import { UnitService } from './unit.service';
 import { Unit } from 'src/database/models/hrm/employee/hrm_unit_model';
+import { EmployeeList } from 'src/database/models/hrm/employee/hrm_employeeList_model';
 
 @Module({
-  imports: [SequelizeModule.forFeature([Unit])],
+  imports: [
+    SequelizeModule.forFeature([
+      Unit,
+      EmployeeList,
+    ]),
+  ],
 
   controllers: [UnitController],
 
