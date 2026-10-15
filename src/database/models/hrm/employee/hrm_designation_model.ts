@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import {
   BelongsTo,
   Column,
@@ -15,7 +14,8 @@ import type {
   DesignationUpdateAttributes,
 } from 'src/database/types/designation.types';
 import { Department } from './hrm_department_model';
-// import { EmployeeList } from './hrm_employeeList_model';
+import { EmployeeList } from './hrm_employeeList_model';
+import { Increment } from './hrm_increment_model';
 
 export enum DesignationStatus {
   ACTIVE = 'active',
@@ -111,10 +111,16 @@ export class Designation
   })
   declare status: DesignationStatus;
   // Designation model e
-  // @HasMany(() => EmployeeList, {
-  //   foreignKey: 'designationId',
-  //   sourceKey: 'uuid',
-  //   as: 'employees',
-  // })
-  // declare employees?: EmployeeList[];
+  @HasMany(() => EmployeeList, {
+    foreignKey: 'designationId',
+    sourceKey: 'uuid',
+    as: 'employees',
+  })
+  declare employees?: EmployeeList[];
+  @HasMany(() => Increment, {
+    foreignKey: 'designationId',
+    sourceKey: 'uuid',
+    as: 'increments',
+  })
+  declare increments?: Increment[];
 }

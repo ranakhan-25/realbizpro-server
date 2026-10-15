@@ -18,7 +18,7 @@ import { CreateEmployeeDto } from './dto/create-employee.dto';
 
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { QueryEmployeeDto } from './dto/query-employee.dto';
-@ApiTags('Employee')
+@ApiTags('HRM | Employee')
 @ApiBearerAuth()
 @Controller('employee')
 export class EmployeeController {

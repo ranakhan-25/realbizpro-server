@@ -11,7 +11,7 @@ import {
   UnitCreationAttributes,
   UnitUpdateAttributes,
 } from 'src/database/types/unit.types';
-// import { EmployeeList } from './hrm_employeeList_model';
+import { EmployeeList } from './hrm_employeeList_model';
 
 export enum UnitStatus {
   ACTIVE = 'active',
@@ -78,10 +78,10 @@ export class Unit
   })
   declare status: UnitStatus;
 
-  // @HasMany(() => EmployeeList, {
-  //   foreignKey: 'unitId',
-  //   sourceKey: 'uuid',
-  //   as: 'employees',
-  // })
-  // declare employees?: EmployeeList[];
+  @HasMany(() => EmployeeList, {
+    foreignKey: 'unitId',
+    sourceKey: 'uuid',
+    as: 'employees',
+  })
+  declare employees?: EmployeeList[];
 }

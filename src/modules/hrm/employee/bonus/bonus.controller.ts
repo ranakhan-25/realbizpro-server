@@ -1,5 +1,3 @@
-/* eslint-disable prettier/prettier */
-
 import {
   Body,
   Controller,
@@ -22,7 +20,7 @@ import { CreateBonusDto } from './dto/create-bonus.dto';
 import { QueryBonusDto } from './dto/query-bonus.dto';
 import { UpdateBonusDto } from './dto/update-bonus.dto';
 
-@ApiTags('Bonus')
+@ApiTags('HRM | Bonus')
 @ApiBearerAuth()
 @Controller('bonus')
 export class BonusController {

@@ -22,7 +22,7 @@ import { CreateDesignationDto } from './dto/create-designation.dto';
 import { QueryDesignationDto } from './dto/query-designation.dto';
 import { UpdateDesignationDto } from './dto/update-designation.dto';
 
-@ApiTags('Designation')
+@ApiTags('HRM | Designation')
 @ApiBearerAuth()
 @Controller('designation')
 export class DesignationController {

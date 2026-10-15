@@ -1,5 +1,3 @@
-/* eslint-disable prettier/prettier */
-
 import {
   Body,
   Controller,
@@ -22,7 +20,7 @@ import { CreateShiftDto } from './dto/create-shift.dto';
 import { QueryShiftDto } from './dto/query-shift.dto';
 import { UpdateShiftDto } from './dto/update-shift.dto';
 
-@ApiTags('Shift')
+@ApiTags('HRM | Shift')
 @ApiBearerAuth()
 @Controller('shift')
 export class ShiftController {

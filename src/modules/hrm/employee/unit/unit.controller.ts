@@ -1,5 +1,3 @@
-/* eslint-disable prettier/prettier */
-
 import {
   Body,
   Controller,
@@ -22,7 +20,7 @@ import { CreateUnitDto } from './dto/create-unit.dto';
 import { QueryUnitDto } from './dto/query-unit.dto';
 import { UpdateUnitDto } from './dto/update-unit.dto';
 
-@ApiTags('Unit')
+@ApiTags('HRM | Unit')
 @ApiBearerAuth()
 @Controller('unit')
 export class UnitController {

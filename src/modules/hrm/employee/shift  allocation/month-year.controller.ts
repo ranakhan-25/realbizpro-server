@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import {
   Body,
   Controller,
@@ -18,7 +17,7 @@ import { MonthYearService } from './month-year.service';
 import { CreateMonthYearDto } from './dto/create-month-year.dto';
 import { QueryMonthYearDto } from './dto/query-month-year.dto';
 import { UpdateMonthYearDto } from './dto/update-month-year.dto';
-@ApiTags('MonthYear')
+@ApiTags('HRM | MonthYear')
 @ApiBearerAuth()
 @Controller('month-year')
 export class MonthYearController {

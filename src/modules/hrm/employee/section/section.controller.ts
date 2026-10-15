@@ -1,5 +1,3 @@
-/* eslint-disable prettier/prettier */
-
 import {
   Body,
   Controller,
@@ -22,7 +20,7 @@ import { CreateSectionDto } from './dto/create-section.dto';
 import { QuerySectionDto } from './dto/query-section.dto';
 import { UpdateSectionDto } from './dto/update-section.dto';
 
-@ApiTags('Section')
+@ApiTags('HRM | Section')
 @ApiBearerAuth()
 @Controller('section')
 export class SectionController {
