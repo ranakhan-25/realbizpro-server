@@ -14,7 +14,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { CustomerAccountStatus } from 'src/database/models/projects/contract/pr_customer_accounts_model';
+import { CustomerAccountStatus } from 'src/database/models/projects/contract/pr_customer_accounts.model';
 
 export class CreateCustomerAccountDto {
   @ApiProperty({

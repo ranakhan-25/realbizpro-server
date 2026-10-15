@@ -19,7 +19,7 @@ import {
   ApproveStatus,
   FundRequisition,
   PaymentStatus,
-} from 'src/database/models/projects/Requisition/pr_fund_requisition_model';
+} from 'src/database/models/projects/fund-requisition/pr_fund_requisition.model';
 
 @Injectable()
 export class FundRequisitionService {

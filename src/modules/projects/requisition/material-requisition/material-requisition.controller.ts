@@ -1,7 +1,4 @@
 /* eslint-disable prettier/prettier */
-
-
-
 import {
   Body,
   Controller,
@@ -10,100 +7,76 @@ import {
   Param,
   Patch,
   Post,
+  ParseUUIDPipe,
   Query,
+  Req,
 } from '@nestjs/common';
-
 import {
   ApiBearerAuth,
-  ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-
 import { MaterialRequisitionService } from './material-requisition.service';
-
 import { CreateMaterialRequisitionDto } from './dto/create-material-requisition.dto';
-import { QueryMaterialRequisitionDto } from './dto/query-material-requisition.dto';
 import { UpdateMaterialRequisitionDto } from './dto/update-material-requisition.dto';
+import { QueryMaterialRequisitionDto } from './dto/query-material-requisition.dto';
 
-@ApiTags('Project | Material Requisition')
+@ApiTags('Project | Requisition | Material Requisition')
 @ApiBearerAuth()
 @Controller('material-requisition')
 export class MaterialRequisitionController {
   constructor(
-    private readonly materialRequisitionService: MaterialRequisitionService,
+    private readonly requisitionService: MaterialRequisitionService,
   ) {}
 
   @Post()
-  @ApiOperation({
-    summary: 'Create a new material requisition',
-  })
   create(
-    @Body()
-    createMaterialRequisitionDto: CreateMaterialRequisitionDto,
+    @Body() dto: CreateMaterialRequisitionDto,
+    @Req() req: any,
   ) {
-    return this.materialRequisitionService.create(
-      createMaterialRequisitionDto,
+    return this.requisitionService.create(
+      dto,
+      req.user?.uuid,
     );
   }
 
   @Get()
-  @ApiOperation({
-    summary: 'Get all material requisitions',
-  })
   findAll(
-    @Query()
-    query: QueryMaterialRequisitionDto,
+    @Query() query: QueryMaterialRequisitionDto,
   ) {
-    return this.materialRequisitionService.findAll(
-      query,
-    );
+    return this.requisitionService.findAll(query);
   }
 
   @Get(':uuid')
-  @ApiOperation({
-    summary: 'Get material requisition by UUID',
-  })
-  findOne(@Param('uuid') uuid: string) {
-    return this.materialRequisitionService.findOne(
-      uuid,
-    );
+  findOne(
+    @Param('uuid', new ParseUUIDPipe())
+    uuid: string,
+  ) {
+    return this.requisitionService.findOne(uuid);
   }
 
   @Patch(':uuid')
-  @ApiOperation({
-    summary:
-      'Update material requisition by UUID',
-  })
   update(
-    @Param('uuid') uuid: string,
-    @Body()
-    updateMaterialRequisitionDto: UpdateMaterialRequisitionDto,
+    @Param('uuid', new ParseUUIDPipe())
+    uuid: string,
+    @Body() dto: UpdateMaterialRequisitionDto,
+    @Req() req: any,
   ) {
-    return this.materialRequisitionService.update(
+    return this.requisitionService.update(
       uuid,
-      updateMaterialRequisitionDto,
+      dto,
+      req.user?.uuid,
     );
   }
 
   @Delete(':uuid')
-  @ApiOperation({
-    summary:
-      'Soft delete material requisition by UUID',
-  })
-  remove(@Param('uuid') uuid: string) {
-    return this.materialRequisitionService.remove(
+  remove(
+    @Param('uuid', new ParseUUIDPipe())
+    uuid: string,
+    @Req() req: any,
+  ) {
+    return this.requisitionService.remove(
       uuid,
-    );
-  }
-
-  @Patch(':uuid/restore')
-  @ApiOperation({
-    summary:
-      'Restore deleted material requisition by UUID',
-  })
-  restore(@Param('uuid') uuid: string) {
-    return this.materialRequisitionService.restore(
-      uuid,
+      req.user?.uuid,
     );
   }
 }

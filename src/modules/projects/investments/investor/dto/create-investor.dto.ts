@@ -25,7 +25,7 @@ import {
 import {
   InvestorGroupTier,
   InvestorStatus,
-} from 'src/database/models/projects/investor/investor_model';
+} from 'src/database/models/projects/investor/investor.model';
 
 export class CreateInvestorNomineeDto {
   @ApiProperty({

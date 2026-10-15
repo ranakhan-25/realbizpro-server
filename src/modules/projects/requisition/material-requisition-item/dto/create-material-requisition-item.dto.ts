@@ -1,0 +1,76 @@
+import {
+  ApiProperty,
+  ApiPropertyOptional,
+} from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUUID,
+} from 'class-validator';
+
+export class CreateMaterialRequisitionItemDto {
+  @ApiProperty({
+    description:
+      'An existing MaterialRequisition.uuid',
+    example:
+      '550e8400-e29b-41d4-a716-446655440002',
+  })
+  @IsUUID()
+  @IsNotEmpty()
+  materialRequisitionId: string;
+
+  @ApiProperty({ example: 'ITEM-001' })
+  @IsString()
+  @IsNotEmpty()
+  itemCode: string;
+
+  @ApiPropertyOptional({ example: 'Cement Bag' })
+  @IsString()
+  @IsOptional()
+  itemName?: string;
+
+  @ApiPropertyOptional({
+    example: 'OPC 50kg bag',
+  })
+  @IsString()
+  @IsOptional()
+  details?: string;
+
+  @ApiPropertyOptional({ example: 'Bag' })
+  @IsString()
+  @IsOptional()
+  unit?: string;
+
+  @ApiPropertyOptional({ example: 100 })
+  @Type(() => Number)
+  @IsNumber()
+  @IsOptional()
+  budgetQty?: number;
+
+  @ApiPropertyOptional({ example: 20 })
+  @Type(() => Number)
+  @IsNumber()
+  @IsOptional()
+  alreadyPurchaseQty?: number;
+
+  @ApiPropertyOptional({ example: 80 })
+  @Type(() => Number)
+  @IsNumber()
+  @IsOptional()
+  availableQty?: number;
+
+  @ApiPropertyOptional({ example: 30 })
+  @Type(() => Number)
+  @IsNumber()
+  @IsOptional()
+  demandQty?: number;
+
+  @ApiPropertyOptional({ example: 50 })
+  @Type(() => Number)
+  @IsNumber()
+  @IsOptional()
+  stock?: number;
+}

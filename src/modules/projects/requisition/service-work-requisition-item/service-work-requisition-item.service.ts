@@ -10,7 +10,7 @@ import { Op, WhereOptions } from 'sequelize';
 
 import { ServiceWorkRequisitionItemAttributes } from 'src/database/types/serviceworkrequisitionitem.types';
 
-import { ServiceWorkRequisitionItem } from 'src/database/models/projects/Requisition/pr_service_work_requisition_item_model';
+import { ServiceWorkRequisitionItem } from 'src/database/models/projects/service-work-requisition-item/pr_service_work_requisition_item.model';
 
 import { CreateServiceWorkRequisitionItemDto } from './dto/create-service-work-requisition-item.dto';
 import { UpdateServiceWorkRequisitionItemDto } from './dto/update-service-work-requisition-item.dto';

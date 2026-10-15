@@ -1,7 +1,9 @@
-// Auto-generated types for projectType
-// Source: src\database\models\projects\project\pr_project_types_model.ts
+// Auto-generated types for ProjectType
+// Source: src\database\models\projects\project-type\pr_project_type.model.ts
 
-export interface projectTypeAttributes {
+import type { ProjectShareAssignment } from '../models/projects/project-share-assignment/pr_project_share_assignment.model';
+
+export interface ProjectTypeAttributes {
   id: number;
   uuid: string;
   createdAt: Date;
@@ -12,9 +14,12 @@ export interface projectTypeAttributes {
   createdBy?: number | null;
   updatedBy?: number | null;
   deletedBy?: number | null;
+
+  // Relations
+  shareAssignments?: ProjectShareAssignment[];
 }
 
-export interface projectTypeCreationAttributes {
+export interface ProjectTypeCreationAttributes {
   code: string;
   name: string;
   createdBy?: number | null;
@@ -22,9 +27,9 @@ export interface projectTypeCreationAttributes {
   deletedBy?: number | null;
 }
 
-export type projectTypeUpdateAttributes = Partial<projectTypeCreationAttributes>;
+export type ProjectTypeUpdateAttributes = Partial<ProjectTypeCreationAttributes>;
 
 // Helper type for including relations
-export interface projectTypeWithRelations extends projectTypeAttributes {
-  // No relations defined
+export interface ProjectTypeWithRelations extends ProjectTypeAttributes {
+  shareAssignments?: ProjectShareAssignment[];
 }

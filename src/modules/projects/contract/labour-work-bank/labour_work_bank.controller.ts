@@ -22,7 +22,7 @@ import { QueryLabourWorkBankDto } from './dto/query_labour_work_bank.dto';
 import { UpdateLabourWorkBankDto } from './dto/update_labour_work_bank.dto';
 import { LabourWorkBankService } from './labour_work_bank.service';
 
-@ApiTags('Labour Work Bank')
+@ApiTags('Project | Contract | Labour Work Bank')
 @ApiBearerAuth()
 @Controller('labour-work-bank')
 export class LabourWorkBankController {

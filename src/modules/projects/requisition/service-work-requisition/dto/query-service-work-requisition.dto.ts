@@ -11,9 +11,9 @@ import {
   Max,
   Min,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 
-import { ServiceWorkRequisitionStatus } from 'src/database/models/projects/Requisition/pr_service_work_requisition.model';
+import { ServiceWorkRequisitionStatus } from 'src/database/models/projects/service-work-requisition/pr_service_work_requisition.model';
 
 export class QueryServiceWorkRequisitionDto {
   @IsDateString()
@@ -107,7 +107,9 @@ export class QueryServiceWorkRequisitionDto {
   @IsString()
   sortOrder?: 'ASC' | 'DESC';
 
-  @Type(() => Boolean)
+  @Transform(({ value }) =>
+    value === 'true' ? true : value === 'false' ? false : value,
+  )
   @IsBoolean()
   @IsOptional()
   withDeleted?: boolean = false;

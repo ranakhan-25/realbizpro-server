@@ -16,7 +16,7 @@ import { UpdateCustomerAccountDto } from './dto/update_customer_account.dto';
 import {
   CustomerAccount,
   CustomerAccountStatus,
-} from 'src/database/models/projects/contract/pr_customer_accounts_model';
+} from 'src/database/models/projects/contract/pr_customer_accounts.model';
 
 @Injectable()
 export class CustomerAccountService {

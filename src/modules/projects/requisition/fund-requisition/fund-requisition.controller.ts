@@ -23,7 +23,7 @@ import { CreateFundRequisitionDto } from './dto/create-fund-requisition.dto';
 import { UpdateFundRequisitionDto } from './dto/update-fund-requisition.dto';
 import { QueryFundRequisitionDto } from './dto/query-fund-requisition.dto';
 
-@ApiTags('Fund Requisition')
+@ApiTags('Project | Requisition | Fund Requisition')
 @ApiBearerAuth()
 @Controller('fund-requisition')
 export class FundRequisitionController {
@@ -38,6 +38,18 @@ export class FundRequisitionController {
   create(@Body() dto: CreateFundRequisitionDto) {
     return this.fundRequisitionService.create(
       dto,
+    );
+  }
+
+  @Get('reports')
+  @ApiOperation({
+    summary: 'Get fund requisition report rows (paginated and filterable)',
+  })
+  findReport(
+    @Query() query: QueryFundRequisitionDto,
+  ) {
+    return this.fundRequisitionService.findAll(
+      query,
     );
   }
 

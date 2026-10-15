@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
-import { Details } from 'src/database/models/projects/details/pr_details_model';
+import { Details } from 'src/database/models/projects/details/pr_details.model';
 import { CreateDetailsDto } from './dto/create-detail.dto';
 import { QueryDetailsDto } from './dto/query-detail.dto';
 import { UpdateDetailsDto } from './dto/update-detail.dto';

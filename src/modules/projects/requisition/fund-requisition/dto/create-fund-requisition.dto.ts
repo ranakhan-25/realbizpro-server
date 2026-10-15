@@ -9,7 +9,7 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
-import { ApproveStatus, PaymentStatus } from 'src/database/models/projects/Requisition/pr_fund_requisition_model';
+import { ApproveStatus, PaymentStatus } from 'src/database/models/projects/fund-requisition/pr_fund_requisition.model';
 
 
 export class CreateFundRequisitionDto {

@@ -11,7 +11,7 @@ import {
   Max,
   Min,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 
 export class QueryServiceWorkRequisitionItemDto {
   @IsUUID()
@@ -105,7 +105,9 @@ export class QueryServiceWorkRequisitionItemDto {
   // SOFT DELETE
   // =========================
 
-  @Type(() => Boolean)
+  @Transform(({ value }) =>
+    value === 'true' ? true : value === 'false' ? false : value,
+  )
   @IsBoolean()
   @IsOptional()
   withDeleted?: boolean = false;

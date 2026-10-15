@@ -1,12 +1,16 @@
 /* eslint-disable prettier/prettier */
 
 import {
+  BelongsTo,
   Column,
   DataType,
+  ForeignKey,
   Table,
 } from 'sequelize-typescript';
 
 import { BaseModel } from '../../../base.model';
+import { BillingCategory } from '../billing/pr_category.model';
+import { BillingSubCategory } from '../billing/pr_sub_category.model';
 
 import {
   QuotationAttributes,
@@ -15,7 +19,7 @@ import {
 } from 'src/database/types/quotation.types';
 
 @Table({
-  tableName: 'quotation',
+  tableName: 'pr_quotation',
   timestamps: true,
   paranoid: true,
   underscored: false,
@@ -88,6 +92,53 @@ export class Quotation
     allowNull: true,
   })
   declare site?: string;
+
+  @ForeignKey(() => BillingCategory)
+  @Column({
+    type: DataType.UUID,
+    allowNull: true,
+  })
+  declare categoryId?: string;
+
+  @BelongsTo(() => BillingCategory, {
+    foreignKey: 'categoryId',
+    targetKey: 'uuid',
+    as: 'category',
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
+  declare category?: BillingCategory;
+
+  @ForeignKey(() => BillingSubCategory)
+  @Column({
+    type: DataType.UUID,
+    allowNull: true,
+  })
+  declare subCategoryId?: string;
+
+  @BelongsTo(() => BillingSubCategory, {
+    foreignKey: 'subCategoryId',
+    targetKey: 'uuid',
+    as: 'subCategory',
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
+  declare subCategory?: BillingSubCategory;
+
+  @Column({
+    type: DataType.JSONB,
+    allowNull: false,
+    defaultValue: [],
+  })
+  declare items: Array<{
+    itemName: string;
+    unit: string;
+    quantity: number;
+    rate: number;
+    details: string;
+    image: string;
+    amount: number;
+  }>;
 
   @Column({
     type: DataType.STRING,
