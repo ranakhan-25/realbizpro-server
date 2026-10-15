@@ -22,7 +22,7 @@ import { CreateEmployeeTypeDto } from './dto/create-employee-type.dto';
 import { QueryEmployeeTypeDto } from './dto/query-employee-type.dto';
 import { UpdateEmployeeTypeDto } from './dto/update-employee-type.dto';
 
-@ApiTags('Employee Type')
+@ApiTags('HRM | Employee Type')
 @ApiBearerAuth()
 @Controller('employee-type')
 export class EmployeeTypeController {
@@ -51,7 +51,9 @@ export class EmployeeTypeController {
     @Query()
     query: QueryEmployeeTypeDto,
   ) {
-    return this.employeeTypeService.findAll(query);
+    return this.employeeTypeService.findAll(
+      query,
+    );
   }
 
   @Get(':uuid')
@@ -79,7 +81,8 @@ export class EmployeeTypeController {
 
   @Delete(':uuid')
   @ApiOperation({
-    summary: 'Soft delete employee type (status → inactive)',
+    summary:
+      'Soft delete employee type (status → inactive)',
   })
   remove(@Param('uuid') uuid: string) {
     return this.employeeTypeService.remove(uuid);
@@ -87,7 +90,8 @@ export class EmployeeTypeController {
 
   @Patch(':uuid/restore')
   @ApiOperation({
-    summary: 'Restore soft-deleted employee type (status → active)',
+    summary:
+      'Restore soft-deleted employee type (status → active)',
   })
   restore(@Param('uuid') uuid: string) {
     return this.employeeTypeService.restore(uuid);

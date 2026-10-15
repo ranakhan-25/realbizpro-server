@@ -1,5 +1,3 @@
-/* eslint-disable prettier/prettier */
-
 import {
   Body,
   Controller,
@@ -22,7 +20,7 @@ import { CreateCommissionDto } from './dto/create-commission.dto';
 import { QueryCommissionDto } from './dto/query-commission.dto';
 import { UpdateCommissionDto } from './dto/update-commission.dto';
 
-@ApiTags('Commission')
+@ApiTags('HRM | Commission')
 @ApiBearerAuth()
 @Controller('commission')
 export class CommissionController {

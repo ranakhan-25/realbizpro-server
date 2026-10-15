@@ -20,7 +20,7 @@ import { CreateOvertimeDto } from './dto/create-overtime.dto';
 import { QueryOvertimeDto } from './dto/query-overtime.dto';
 import { UpdateOvertimeDto } from './dto/update-overtime.dto';
 
-@ApiTags('Overtime')
+@ApiTags('HRM | Overtime')
 @ApiBearerAuth()
 @Controller('overtime')
 export class OvertimeController {

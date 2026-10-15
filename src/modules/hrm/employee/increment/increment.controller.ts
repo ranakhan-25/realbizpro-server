@@ -22,7 +22,7 @@ import { CreateIncrementDto } from './dto/create-increment.dto';
 import { QueryIncrementDto } from './dto/query-increment.dto';
 import { UpdateIncrementDto } from './dto/update-increment.dto';
 
-@ApiTags('Increment')
+@ApiTags('HRM | Increment')
 @ApiBearerAuth()
 @Controller('increment')
 export class IncrementController {
@@ -79,7 +79,8 @@ export class IncrementController {
 
   @Delete(':uuid')
   @ApiOperation({
-    summary: 'Soft delete increment (status → inactive)',
+    summary:
+      'Soft delete increment (status → inactive)',
   })
   remove(@Param('uuid') uuid: string) {
     return this.incrementService.remove(uuid);
@@ -87,7 +88,8 @@ export class IncrementController {
 
   @Patch(':uuid/restore')
   @ApiOperation({
-    summary: 'Restore soft-deleted increment (status → active)',
+    summary:
+      'Restore soft-deleted increment (status → active)',
   })
   restore(@Param('uuid') uuid: string) {
     return this.incrementService.restore(uuid);

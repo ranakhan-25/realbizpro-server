@@ -1,5 +1,3 @@
-/* eslint-disable prettier/prettier */
-
 import {
   Controller,
   Get,
@@ -15,7 +13,7 @@ import {
 import { EmployeeCardService } from './employee-card.service';
 import { QueryEmployeeCardDto } from './dto/query-employee-card.dto';
 
-@ApiTags('Employee Card')
+@ApiTags('HRM | Employee Card')
 @ApiBearerAuth()
 @Controller('employee-card')
 export class EmployeeCardController {
@@ -32,6 +30,8 @@ export class EmployeeCardController {
     @Query()
     query: QueryEmployeeCardDto,
   ) {
-    return this.employeeCardService.findAll(query);
+    return this.employeeCardService.findAll(
+      query,
+    );
   }
 }

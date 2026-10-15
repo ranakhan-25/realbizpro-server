@@ -23,7 +23,7 @@ import {
 } from './dto/query-employee-list.dto';
 import { UpdateEmployeeListDto } from './dto/update-employee-list.dto';
 
-@ApiTags('Employee List')
+@ApiTags('HRM | Employee List')
 @ApiBearerAuth()
 @Controller('employee-list')
 export class EmployeeListController {

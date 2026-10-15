@@ -1,5 +1,3 @@
-/* eslint-disable prettier/prettier */
-
 import {
   Body,
   Controller,
@@ -22,7 +20,7 @@ import { CreateLoanDto } from './dto/create-loan.dto';
 import { QueryLoanDto } from './dto/query-loan.dto';
 import { UpdateLoanDto } from './dto/update-loan.dto';
 
-@ApiTags('Loan')
+@ApiTags('HRM | Loan')
 @ApiBearerAuth()
 @Controller('loan')
 export class LoanController {

@@ -13,7 +13,7 @@ import {
 import { EmployeeHierarchyService } from './employee-hierarchy.service';
 import { QueryEmployeeHierarchyDto } from './dto/query-employee-hierarchy.dto';
 
-@ApiTags('Employee Hierarchy')
+@ApiTags('HRM | Employee Hierarchy')
 @ApiBearerAuth()
 @Controller('employee-hierarchy')
 export class EmployeeHierarchyController {

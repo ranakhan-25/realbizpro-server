@@ -22,7 +22,7 @@ import { CreateEmployeeSalaryDto } from './dto/create-employee-salary.dto';
 import { QueryEmployeeSalaryDto } from './dto/query-employee-salary.dto';
 import { UpdateEmployeeSalaryDto } from './dto/update-employee-salary.dto';
 
-@ApiTags('Employee Salary')
+@ApiTags('HRM | Employee Salary')
 @ApiBearerAuth()
 @Controller('employee-salary')
 export class EmployeeSalaryController {
@@ -45,13 +45,16 @@ export class EmployeeSalaryController {
 
   @Get()
   @ApiOperation({
-    summary: 'Get all employee salaries (paginated)',
+    summary:
+      'Get all employee salaries (paginated)',
   })
   findAll(
     @Query()
     query: QueryEmployeeSalaryDto,
   ) {
-    return this.employeeSalaryService.findAll(query);
+    return this.employeeSalaryService.findAll(
+      query,
+    );
   }
 
   @Get(':uuid')
@@ -59,7 +62,9 @@ export class EmployeeSalaryController {
     summary: 'Get employee salary by UUID',
   })
   findOne(@Param('uuid') uuid: string) {
-    return this.employeeSalaryService.findOne(uuid);
+    return this.employeeSalaryService.findOne(
+      uuid,
+    );
   }
 
   @Patch(':uuid')
@@ -82,14 +87,19 @@ export class EmployeeSalaryController {
     summary: 'Soft delete employee salary',
   })
   remove(@Param('uuid') uuid: string) {
-    return this.employeeSalaryService.remove(uuid);
+    return this.employeeSalaryService.remove(
+      uuid,
+    );
   }
 
   @Patch(':uuid/restore')
   @ApiOperation({
-    summary: 'Restore soft-deleted employee salary',
+    summary:
+      'Restore soft-deleted employee salary',
   })
   restore(@Param('uuid') uuid: string) {
-    return this.employeeSalaryService.restore(uuid);
+    return this.employeeSalaryService.restore(
+      uuid,
+    );
   }
 }

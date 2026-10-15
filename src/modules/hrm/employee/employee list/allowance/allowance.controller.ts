@@ -1,5 +1,3 @@
-/* eslint-disable prettier/prettier */
-
 import {
   Body,
   Controller,
@@ -22,7 +20,7 @@ import { CreateAllowanceDto } from './dto/create-allowance.dto';
 import { QueryAllowanceDto } from './dto/query-allowance.dto';
 import { UpdateAllowanceDto } from './dto/update-allowance.dto';
 
-@ApiTags('Allowance')
+@ApiTags('HRM | Allowance')
 @ApiBearerAuth()
 @Controller('allowance')
 export class AllowanceController {

@@ -20,7 +20,7 @@ import { CreateUnderDto } from './dto/create-under.dto';
 import { QueryUnderDto } from './dto/query-under.dto';
 import { UpdateUnderDto } from './dto/update-under.dto';
 
-@ApiTags('Under')
+@ApiTags('HRM | Under')
 @ApiBearerAuth()
 @Controller('under')
 export class UnderController {
