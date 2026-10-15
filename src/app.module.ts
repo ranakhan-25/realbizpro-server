@@ -105,6 +105,8 @@ import { SalaryGradeModule } from './modules/hrm/employee/employee list/salary-g
 import { SaturationDeductionModule } from './modules/hrm/employee/employee list/saturation-deduction/saturation-deduction.module';
 import { UnderModule } from './modules/hrm/employee/employee list/under/under.module';
 import { EmployeeHierarchyModule } from './modules/hrm/employee/employee-hierarchy/employee-hierarchy.module';
+import { EmployeeCardModule } from './modules/hrm/employee/employee-card/employee-card.module';
+import { IncrementModule } from './modules/hrm/employee/increment/increment.module';
 
 @Module({
   imports: [
@@ -237,6 +239,8 @@ import { EmployeeHierarchyModule } from './modules/hrm/employee/employee-hierarc
     SaturationDeductionModule,
     UnderModule,
     EmployeeHierarchyModule,
+    EmployeeCardModule,
+    IncrementModule,
   ],
   controllers: [AppController, HealthController],
   providers: [

@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import {
   BelongsTo,
   Column,
@@ -28,6 +27,7 @@ import { Loan } from './hrm_loan_model';
 import { SaturationDeduction } from './hrm_saturationdeduction_model';
 import { Overtime } from './hrm_overtime_model';
 import { EmployeeType } from './hrm_employee_type-model';
+import { Increment } from './hrm_increment_model';
 
 export enum EmployeeListStatus {
   ACTIVE = 'active',
@@ -478,4 +478,10 @@ export class EmployeeList
     as: 'overtimes',
   })
   declare overtimes?: Overtime[];
+  @HasMany(() => Increment, {
+    foreignKey: 'employeeId',
+    sourceKey: 'uuid',
+    as: 'increments',
+  })
+  declare increments?: Increment[];
 }

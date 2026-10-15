@@ -1,5 +1,3 @@
-/* eslint-disable prettier/prettier */
-
 import { Module } from '@nestjs/common';
 
 import { SequelizeModule } from '@nestjs/sequelize';
@@ -10,6 +8,7 @@ import { DesignationService } from './designation.service';
 import { Designation } from 'src/database/models/hrm/employee/hrm_designation_model';
 import { Department } from 'src/database/models/hrm/employee/hrm_department_model';
 import { EmployeeList } from 'src/database/models/hrm/employee/hrm_employeeList_model';
+import { Increment } from 'src/database/models/hrm/employee/hrm_increment_model';
 
 @Module({
   imports: [
@@ -18,6 +17,7 @@ import { EmployeeList } from 'src/database/models/hrm/employee/hrm_employeeList_
       Designation,
       Department,
       EmployeeList,
+      Increment,
     ]),
   ],
 

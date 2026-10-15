@@ -15,6 +15,7 @@ import { HrmShift } from 'src/database/models/hrm/employee/hrm_hrm_shift_model';
 // relation: new import
 import { Under } from 'src/database/models/hrm/employee/hrm_under_model'; // relation: new import
 import { EmployeeType } from 'src/database/models/hrm/employee/hrm_employee_type-model';
+import { Increment } from 'src/database/models/hrm/employee/hrm_increment_model';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { EmployeeType } from 'src/database/models/hrm/employee/hrm_employee_type
       HrmShift,
       EmployeeType,
       Under,
+      Increment,
     ]), // relation: employee-er 8 ta relation model
   ],
 
