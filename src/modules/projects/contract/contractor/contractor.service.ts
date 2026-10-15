@@ -13,7 +13,7 @@ import { Op } from 'sequelize';
 import {
   Contractor,
   ContractorStatus,
-} from 'src/database/models/projects/contract/pr_contractor_model';
+} from 'src/database/models/projects/contract/pr_contractor.model';
 import { CreateContractorDto } from './dto/create-contractor.dto';
 import { QueryContractorDto } from './dto/query-contractor.dto';
 import { UpdateContractorDto } from './dto/update-contractor.dto';

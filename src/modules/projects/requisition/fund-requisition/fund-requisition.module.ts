@@ -5,7 +5,7 @@ import { SequelizeModule } from '@nestjs/sequelize';
 
 import { FundRequisitionController } from './fund-requisition.controller';
 import { FundRequisitionService } from './fund-requisition.service';
-import { FundRequisition } from 'src/database/models/projects/Requisition/pr_fund_requisition_model';
+import { FundRequisition } from 'src/database/models/projects/fund-requisition/pr_fund_requisition.model';
 
 @Module({
   imports: [

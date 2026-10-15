@@ -6,13 +6,13 @@ import {
   HasMany,
   Table,
 } from 'sequelize-typescript';
+import { MaterialRequisition } from '../material-requisition/pr_material_requisition.model';
+import { Quotation } from '../quatation/pr_quotation.model';
+import { BillingSubCategory } from './pr_sub_category.model';
 
 import { BaseModel } from 'src/database/base.model';
-import type {
-  BillingCategoryAttributes,
-  BillingCategoryCreationAttributes,
-} from 'src/database/types/billingcategory.types';
-import { BillingSubCategory } from './pr_sub_category.madel';
+import type { BillingCategoryAttributes, BillingCategoryCreationAttributes } from 'src/database/types/billingcategory.types';
+
 
 export enum CategoryType {
   PRODUCT = 'Product',
@@ -33,9 +33,7 @@ export class BillingCategory
   implements BillingCategoryAttributes
 {
   @Column({
-    type: DataType.ENUM(
-      ...Object.values(CategoryType),
-    ),
+    type: DataType.ENUM(...Object.values(CategoryType)),
     allowNull: false,
   })
   declare type: CategoryType;
@@ -59,6 +57,27 @@ export class BillingCategory
   })
   declare description?: string;
 
+  @HasMany(() => MaterialRequisition, {
+    foreignKey: 'categoryId',
+    sourceKey: 'uuid',
+    as: 'materialRequisitions',
+  })
+  declare materialRequisitions?: MaterialRequisition[];
+
+  @HasMany(() => BillingSubCategory, {
+    foreignKey: 'categoryId',
+    sourceKey: 'uuid',
+    as: 'subCategories',
+  })
+  declare subCategories?: BillingSubCategory[];
+
+  @HasMany(() => Quotation, {
+    foreignKey: 'categoryId',
+    sourceKey: 'uuid',
+    as: 'quotations',
+  })
+  declare quotations?: Quotation[];
+
   @Column({
     type: DataType.STRING,
     allowNull: true,
@@ -76,10 +95,4 @@ export class BillingCategory
     allowNull: true,
   })
   declare deletedBy?: string;
-
-  @HasMany(() => BillingSubCategory, {
-    foreignKey: 'categoryId',
-    sourceKey: 'id',
-  })
-  declare subCategories?: BillingSubCategory[];
 }

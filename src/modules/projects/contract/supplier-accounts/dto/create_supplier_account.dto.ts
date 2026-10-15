@@ -20,7 +20,7 @@ import {
   IsString,
   Min,
 } from 'class-validator';
-import { SupplierAccountsStatus } from 'src/database/models/projects/contract/pr_supplier_accounts_model';
+import { SupplierAccountsStatus } from 'src/database/models/projects/contract/pr_supplier_accounts.model';
 
 export class CreateSupplierAccountDto {
   @ApiProperty({

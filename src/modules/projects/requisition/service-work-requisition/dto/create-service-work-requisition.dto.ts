@@ -8,7 +8,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-import { ServiceWorkRequisitionStatus } from 'src/database/models/projects/Requisition/pr_service_work_requisition.model';
+import { ServiceWorkRequisitionStatus } from 'src/database/models/projects/service-work-requisition/pr_service_work_requisition.model';
 
 export class CreateServiceWorkRequisitionDto {
   @IsDateString()

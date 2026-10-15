@@ -13,9 +13,9 @@ import { Op } from 'sequelize';
 import {
   Investor,
   InvestorStatus,
-} from 'src/database/models/projects/investor/investor_model';
+} from 'src/database/models/projects/investor/investor.model';
 
-import { InvestorNominee } from 'src/database/models/projects/investor/investor_nominee_model';
+import { InvestorNominee } from 'src/database/models/projects/investor/investor_nominee.model';
 
 import { CreateInvestorDto } from './dto/create-investor.dto';
 import { QueryInvestorDto } from './dto/query-investor.dto';

@@ -23,7 +23,7 @@ import { CreateServiceWorkRequisitionDto } from './dto/create-service-work-requi
 import { UpdateServiceWorkRequisitionDto } from './dto/update-service-work-requisition.dto';
 import { QueryServiceWorkRequisitionDto } from './dto/query-service-work-requisition.dto';
 
-@ApiTags('Service Work Requisition')
+@ApiTags('Project | Requisition | Service Work Requisition')
 @ApiBearerAuth()
 @Controller('service-work-requisition')
 export class ServiceWorkRequisitionController {

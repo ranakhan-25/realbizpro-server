@@ -21,7 +21,7 @@ import {
   Min,
 } from 'class-validator';
 
-import { ShareConfigurationStatus } from 'src/database/models/projects/investor/configuration_model';
+import { ShareConfigurationStatus } from 'src/database/models/projects/investor/configuration.model';
 
 export class CreateShareConfigurationDto {
   @ApiProperty({

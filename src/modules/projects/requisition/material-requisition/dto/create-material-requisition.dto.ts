@@ -1,150 +1,133 @@
-/* eslint-disable prettier/prettier */
-
-import {
-  IsDateString,
-  IsEnum,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  MaxLength,
-} from 'class-validator';
-
 import {
   ApiProperty,
   ApiPropertyOptional,
 } from '@nestjs/swagger';
-import { ApprovalStatus } from 'src/database/models/projects/Requisition/pr_material_requisition_model';
-
+import { Type } from 'class-transformer';
+import {
+  IsArray,
+  IsDateString,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUUID,
+  ValidateNested,
+} from 'class-validator';
+import {
+  ApprovalLayerStatus,
+  MaterialRequisitionStatus,
+} from 'src/database/models/projects/material-requisition/pr_material_requisition.model';
+import { NestedMaterialRequisitionItemDto } from '../../material-requisition-item/dto/nested-material-requisition-item.dto';
 
 export class CreateMaterialRequisitionDto {
-  @ApiProperty({
-    example: 'Real Estate',
-    description: 'Project type',
-  })
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(100)
-  projectType: string;
-
-  @ApiProperty({
-    example: 'Main Office Building Project',
-    description: 'Project name',
-  })
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(255)
-  projectName: string;
-
-  @ApiProperty({
-    example:
-      'Construction of Main Office Building',
-    description: 'Title or name of work',
-  })
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(255)
-  titleOrNameOfWork: string;
-
-  @ApiProperty({
-    example: 'REQ-2026-0001',
-    description: 'Unique requisition code',
-  })
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(255)
-  code: string;
-
-  @ApiProperty({
-    example: 'REF-2026-001',
-    description: 'Reference number',
-  })
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(255)
-  referenceNumber: string;
-
-  @ApiProperty({
-    example: '2026-10-15',
-    description: 'Demand date',
-  })
+  @ApiProperty({ example: '2026-10-12' })
   @IsDateString()
   @IsNotEmpty()
-  demandDate: string;
+  date: string;
 
-  @ApiProperty({
-    example: 'company-uuid-123',
-    description: 'Company ID or reference',
-  })
+  @ApiPropertyOptional({ example: '2026-10-20' })
+  @IsDateString()
+  @IsOptional()
+  demandDate?: string;
+
+  @ApiProperty({ example: 'REC00097' })
   @IsString()
   @IsNotEmpty()
-  @MaxLength(255)
-  company: string;
+  code: string;
 
-  @ApiPropertyOptional({
-    example: 'supplier-uuid-123',
-    description: 'Supplier ID or reference',
-  })
-  @IsOptional()
+  @ApiPropertyOptional({ example: 'REF-001' })
   @IsString()
-  @MaxLength(255)
-  supplier?: string;
-
-  @ApiPropertyOptional({
-    example:
-      'https://example.com/files/requisition.pdf',
-    description: 'Attachment URL',
-  })
   @IsOptional()
+  ref?: string;
+
+  @ApiPropertyOptional({ example: 'Residential' })
   @IsString()
-  attachmentUrl?: string;
-
-  @ApiPropertyOptional({
-    example: 'user-uuid-123',
-    description: 'User who added the requisition',
-  })
   @IsOptional()
-  @IsString()
-  addedBy?: string;
+  projectType?: string;
 
   @ApiPropertyOptional({
-    example: 'PENDING',
-    description: 'Approval layer',
-  })
-  @IsOptional()
-  @IsString()
-  approvalLayer?: string;
-
-  @ApiPropertyOptional({
-    enum: ApprovalStatus,
-    example: ApprovalStatus.PENDING,
-    description: 'Requisition status',
-  })
-  @IsOptional()
-  @IsEnum(ApprovalStatus)
-  status?: ApprovalStatus;
-
-  @ApiPropertyOptional({
-    example: 'user-uuid-123',
-    description: 'User who created the record',
-  })
-  @IsOptional()
-  @IsString()
-  createdBy?: string;
-
-  @ApiPropertyOptional({
-    example: 'user-uuid-123',
     description:
-      'User who last updated the record',
+      'An existing Project.uuid (not Project.id)',
+    example:
+      '550e8400-e29b-41d4-a716-446655440000',
   })
+  @IsUUID()
   @IsOptional()
-  @IsString()
-  updatedBy?: string;
+  projectId?: string;
 
   @ApiPropertyOptional({
-    example: 'user-uuid-123',
-    description: 'User who deleted the record',
+    example: 'Bricks Works',
   })
-  @IsOptional()
   @IsString()
-  deletedBy?: string;
+  @IsOptional()
+  titleNameOfWork?: string;
+
+  @ApiPropertyOptional({ example: 'task-001' })
+  @IsString()
+  @IsOptional()
+  ifTask?: string;
+
+  @ApiPropertyOptional({
+    description: 'An existing Site.uuid',
+    example:
+      '550e8400-e29b-41d4-a716-446655440002',
+  })
+  @IsUUID()
+  @IsOptional()
+  siteId?: string;
+
+  @ApiPropertyOptional({
+    description: 'Category UUID',
+    example:
+      '550e8400-e29b-41d4-a716-446655440003',
+  })
+  @IsUUID()
+  @IsOptional()
+  categoryId?: string;
+
+  @ApiPropertyOptional({
+    example: 'Required for block A.',
+  })
+  @IsString()
+  @IsOptional()
+  note?: string;
+
+  @ApiPropertyOptional({ example: 15000 })
+  @Type(() => Number)
+  @IsNumber()
+  @IsOptional()
+  total?: number;
+
+  @ApiPropertyOptional({
+    example: 'uploads/materials.pdf',
+  })
+  @IsString()
+  @IsOptional()
+  attachment?: string;
+
+  @ApiPropertyOptional({
+    enum: ApprovalLayerStatus,
+    example: ApprovalLayerStatus.PENDING,
+  })
+  @IsEnum(ApprovalLayerStatus)
+  @IsOptional()
+  approvalLayer?: ApprovalLayerStatus;
+
+  @ApiPropertyOptional({
+    enum: MaterialRequisitionStatus,
+    example: MaterialRequisitionStatus.PENDING,
+  })
+  @IsEnum(MaterialRequisitionStatus)
+  @IsOptional()
+  status?: MaterialRequisitionStatus;
+
+  @ApiPropertyOptional({
+    type: [NestedMaterialRequisitionItemDto],
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => NestedMaterialRequisitionItemDto)
+  @IsOptional()
+  items?: NestedMaterialRequisitionItemDto[];
 }

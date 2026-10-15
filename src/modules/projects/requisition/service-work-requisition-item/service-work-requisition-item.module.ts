@@ -8,7 +8,7 @@ import { ServiceWorkRequisitionItemController } from './service-work-requisition
 
 import { ServiceWorkRequisitionItemService } from './service-work-requisition-item.service';
 
-import { ServiceWorkRequisitionItem } from 'src/database/models/projects/Requisition/pr_service_work_requisition_item_model';
+import { ServiceWorkRequisitionItem } from 'src/database/models/projects/service-work-requisition-item/pr_service_work_requisition_item.model';
 
 @Module({
   imports: [

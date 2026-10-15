@@ -25,7 +25,7 @@ import { QueryShareConfigurationDto } from './dto/query-share-configuration.dto'
 
 import { UpdateShareConfigurationDto } from './dto/update-share-configuration.dto';
 
-@ApiTags('Share Configuration')
+@ApiTags('Project | Investments | Share Configuration')
 @ApiBearerAuth()
 @Controller('share-configuration')
 export class ShareConfigurationController {

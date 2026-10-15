@@ -1,356 +1,261 @@
-/* eslint-disable prettier/prettier */
-
 import {
-  BadRequestException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-
 import { InjectModel } from '@nestjs/sequelize';
-
-import { Op } from 'sequelize';
-
+import { Op, WhereOptions } from 'sequelize';
+import { Sequelize } from 'sequelize-typescript';
+import { Project } from 'src/database/models/projects/project/pr_project.model';
+import { Site } from 'src/database/models/projects/project-site/pr_project_site.model';
+import { BillingCategory } from 'src/database/models/projects/billing/pr_category.model';
+import { MaterialRequisition } from 'src/database/models/projects/material-requisition/pr_material_requisition.model';
+import { MaterialRequisitionItem } from 'src/database/models/projects/material-requisition-item/pr_material_requisition_item.model';
 import { CreateMaterialRequisitionDto } from './dto/create-material-requisition.dto';
 import { QueryMaterialRequisitionDto } from './dto/query-material-requisition.dto';
 import { UpdateMaterialRequisitionDto } from './dto/update-material-requisition.dto';
-import { MaterialRequisition } from 'src/database/models/projects/Requisition/pr_material_requisition_model';
 
 @Injectable()
 export class MaterialRequisitionService {
   constructor(
     @InjectModel(MaterialRequisition)
-    private readonly materialRequisitionModel: typeof MaterialRequisition,
+    private readonly requisitionModel: typeof MaterialRequisition,
+    @InjectModel(MaterialRequisitionItem)
+    private readonly itemModel: typeof MaterialRequisitionItem,
+    @InjectModel(Project)
+    private readonly projectModel: typeof Project,
+    @InjectModel(Site)
+    private readonly siteModel: typeof Site,
+    @InjectModel(BillingCategory)
+    private readonly categoryModel: typeof BillingCategory,
+    private readonly sequelize: Sequelize,
   ) {}
 
   async create(
     dto: CreateMaterialRequisitionDto,
-  ): Promise<MaterialRequisition> {
-    const existing =
-      await this.materialRequisitionModel.findOne(
-        {
-          where: {
-            code: dto.code,
-          },
-        },
-      );
+    userId?: string,
+  ) {
+    const uuid = await this.sequelize.transaction(
+      async (transaction) => {
+        const { items, ...requisitionData } = dto;
+        const requisition =
+          await this.requisitionModel.create(
+            {
+              ...requisitionData,
+              createdBy: userId,
+              addedById: userId,
+            },
+            { transaction },
+          );
 
-    if (existing) {
-      throw new BadRequestException(
-        `Material requisition code "${dto.code}" already exists`,
-      );
-    }
+        if (items?.length) {
+          await this.itemModel.bulkCreate(
+            items.map((item) => ({
+              ...item,
+              materialRequisitionId:
+                requisition.uuid,
+              createdBy: userId,
+            })),
+            { transaction },
+          );
+        }
 
-    const materialRequisition =
-      await this.materialRequisitionModel.create({
-        ...dto,
-        demandDate: new Date(dto.demandDate),
-      });
+        return requisition.uuid;
+      },
+    );
 
-    return this.findOne(materialRequisition.uuid);
+    return this.findOne(uuid);
   }
 
   async findAll(
     query: QueryMaterialRequisitionDto,
   ) {
-    const {
-      page = 1,
-      limit = 20,
-      skip,
-      search,
-      code,
-      referenceNumber,
-      projectName,
-      projectType,
-      company,
-      supplier,
-      titleOrNameOfWork,
-      addedBy,
-      approvalLayer,
-      status,
-      fromDate,
-      toDate,
-      sortBy = 'createdAt',
-      sortOrder = 'DESC',
-      withDeleted = false,
-    } = query;
-
-    const offset =
-      skip !== undefined && skip !== null
-        ? skip
-        : (page - 1) * limit;
-
-    const where: any = {};
-
-    if (search) {
-      where[Op.or] = [
-        {
-          code: {
-            [Op.iLike]: `%${search}%`,
-          },
-        },
-        {
-          referenceNumber: {
-            [Op.iLike]: `%${search}%`,
-          },
-        },
-        {
-          projectType: {
-            [Op.iLike]: `%${search}%`,
-          },
-        },
-        {
-          projectName: {
-            [Op.iLike]: `%${search}%`,
-          },
-        },
-        {
-          titleOrNameOfWork: {
-            [Op.iLike]: `%${search}%`,
-          },
-        },
-        {
-          company: {
-            [Op.iLike]: `%${search}%`,
-          },
-        },
-        {
-          supplier: {
-            [Op.iLike]: `%${search}%`,
-          },
-        },
-        {
-          addedBy: {
-            [Op.iLike]: `%${search}%`,
-          },
-        },
-      ];
-    }
-
-    if (code) {
-      where.code = code;
-    }
-
-    if (referenceNumber) {
-      where.referenceNumber = referenceNumber;
-    }
-
-    if (projectName) {
-      where.projectName = projectName;
-    }
-
-    if (projectType) {
-      where.projectType = projectType;
-    }
-
-    if (company) {
-      where.company = company;
-    }
-
-    if (supplier) {
-      where.supplier = supplier;
-    }
-
-    if (titleOrNameOfWork) {
-      where.titleOrNameOfWork = titleOrNameOfWork;
-    }
-
-    if (addedBy) {
-      where.addedBy = addedBy;
-    }
-
-    if (approvalLayer) {
-      where.approvalLayer = approvalLayer;
-    }
-
-    if (status) {
-      where.status = status;
-    }
-
-    if (fromDate || toDate) {
-      where.demandDate = {};
-
-      if (fromDate) {
-        where.demandDate[Op.gte] = new Date(
-          `${fromDate}T00:00:00.000Z`,
-        );
-      }
-
-      if (toDate) {
-        where.demandDate[Op.lte] = new Date(
-          `${toDate}T23:59:59.999Z`,
-        );
-      }
-    }
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 10;
+    const where: WhereOptions<MaterialRequisition> =
+      query.search
+        ? {
+            [Op.or]: [
+              {
+                code: {
+                  [Op.iLike]: `%${query.search}%`,
+                },
+              },
+              {
+                titleNameOfWork: {
+                  [Op.iLike]: `%${query.search}%`,
+                },
+              },
+              {
+                ref: {
+                  [Op.iLike]: `%${query.search}%`,
+                },
+              },
+            ],
+          }
+        : {};
 
     const { rows, count } =
-      await this.materialRequisitionModel.findAndCountAll(
+      await this.requisitionModel.findAndCountAll(
         {
-          where,
+          where: where as WhereOptions,
+          include: [
+            {
+              model: this.projectModel,
+              as: 'project',
+            },
+            {
+              model: this.siteModel,
+              as: 'site',
+            },
+            {
+              model: this.categoryModel,
+              as: 'category',
+            },
+            {
+              model: this.itemModel,
+              as: 'items',
+            },
+          ],
           limit,
-          offset,
-          order: [[sortBy, sortOrder]],
-          paranoid: !withDeleted,
+          offset: (page - 1) * limit,
+          order: [['createdAt', 'DESC']],
+          distinct: true,
         },
       );
-
-    const totalPages =
-      Math.ceil(count / limit) || 1;
-
-    const currentPage =
-      skip !== undefined && skip !== null
-        ? Math.floor(skip / limit) + 1
-        : page;
-
-    const nextPage =
-      currentPage < totalPages
-        ? currentPage + 1
-        : null;
-
-    const previousPage =
-      currentPage > 1 ? currentPage - 1 : null;
 
     return {
       data: rows,
       meta: {
-        page: currentPage,
-        pageNo: currentPage,
-        nextPage,
-        previousPage,
-        limit,
-        skip: offset,
         total: count,
-        totalPages,
+        page,
+        limit,
+        totalPages: Math.ceil(count / limit),
       },
     };
   }
 
-  async findOne(
-    uuid: string,
-  ): Promise<MaterialRequisition> {
-    const materialRequisition =
-      await this.materialRequisitionModel.findOne(
-        {
-          where: {
-            uuid,
-          } as any,
-        },
-      );
+  async findOne(uuid: string) {
+    const where: WhereOptions<MaterialRequisition> =
+      { uuid };
+    const requisition =
+      await this.requisitionModel.findOne({
+        where: where as WhereOptions,
+        include: [
+          {
+            model: this.projectModel,
+            as: 'project',
+          },
+          {
+            model: this.siteModel,
+            as: 'site',
+          },
+          {
+            model: this.categoryModel,
+            as: 'category',
+          },
+          {
+            model: this.itemModel,
+            as: 'items',
+          },
+        ],
+      });
 
-    if (!materialRequisition) {
+    if (!requisition) {
       throw new NotFoundException(
-        `Material requisition #${uuid} not found`,
+        `Material Requisition not found: ${uuid}`,
       );
     }
 
-    return materialRequisition;
+    return requisition;
   }
 
   async update(
     uuid: string,
     dto: UpdateMaterialRequisitionDto,
-  ): Promise<MaterialRequisition> {
-    const materialRequisition =
-      await this.materialRequisitionModel.findOne(
-        {
-          where: {
-            uuid,
-          } as any,
-        },
-      );
+    userId?: string,
+  ) {
+    await this.sequelize.transaction(
+      async (transaction) => {
+        const where: WhereOptions<MaterialRequisition> =
+          { uuid };
+        const requisition =
+          await this.requisitionModel.findOne({
+            where: where as WhereOptions,
+            transaction,
+          });
 
-    if (!materialRequisition) {
-      throw new NotFoundException(
-        `Material requisition #${uuid} not found`,
-      );
-    }
+        if (!requisition) {
+          throw new NotFoundException(
+            `Material Requisition not found: ${uuid}`,
+          );
+        }
 
-    if (
-      dto.code &&
-      dto.code !== materialRequisition.code
-    ) {
-      const exists =
-        await this.materialRequisitionModel.findOne(
+        const { items, ...requisitionData } = dto;
+        await requisition.update(
           {
-            where: {
-              code: dto.code,
-            },
+            ...requisitionData,
+            updatedBy: userId,
           },
+          { transaction },
         );
 
-      if (exists) {
-        throw new BadRequestException(
-          `Material requisition code "${dto.code}" already exists`,
-        );
-      }
-    }
+        if (items !== undefined) {
+          const itemWhere: WhereOptions<MaterialRequisitionItem> =
+            {
+              materialRequisitionId: uuid,
+            };
+          await this.itemModel.destroy({
+            where: itemWhere as WhereOptions,
+            transaction,
+          });
 
-    const updateData: any = {
-      ...dto,
-    };
-
-    if (dto.demandDate) {
-      updateData.demandDate = new Date(
-        dto.demandDate,
-      );
-    }
-
-    await materialRequisition.update(updateData);
+          if (items.length) {
+            await this.itemModel.bulkCreate(
+              items.map((item) => ({
+                ...item,
+                materialRequisitionId: uuid,
+                createdBy: userId,
+              })),
+              { transaction },
+            );
+          }
+        }
+      },
+    );
 
     return this.findOne(uuid);
   }
 
-  async remove(
-    uuid: string,
-  ): Promise<{ message: string }> {
-    const materialRequisition =
-      await this.materialRequisitionModel.findOne(
-        {
-          where: {
-            uuid,
-          } as any,
-        },
-      );
+  async remove(uuid: string, userId?: string) {
+    await this.sequelize.transaction(
+      async (transaction) => {
+        const where: WhereOptions<MaterialRequisition> =
+          { uuid };
+        const requisition =
+          await this.requisitionModel.findOne({
+            where: where as WhereOptions,
+            transaction,
+          });
 
-    if (!materialRequisition) {
-      throw new NotFoundException(
-        `Material requisition #${uuid} not found`,
-      );
-    }
+        if (!requisition) {
+          throw new NotFoundException(
+            `Material Requisition not found: ${uuid}`,
+          );
+        }
 
-    await materialRequisition.destroy();
+        await requisition.update(
+          { deletedBy: userId },
+          { transaction },
+        );
+        await requisition.destroy({
+          transaction,
+        });
+      },
+    );
 
     return {
-      message: `Material requisition #${uuid} deleted successfully`,
+      message:
+        'Material Requisition deleted successfully',
     };
-  }
-
-  async restore(
-    uuid: string,
-  ): Promise<MaterialRequisition> {
-    const materialRequisition =
-      await this.materialRequisitionModel.findOne(
-        {
-          where: {
-            uuid,
-          } as any,
-          paranoid: false,
-        },
-      );
-
-    if (!materialRequisition) {
-      throw new NotFoundException(
-        `Material requisition #${uuid} not found`,
-      );
-    }
-
-    if (!materialRequisition.deletedAt) {
-      throw new BadRequestException(
-        `Material requisition #${uuid} is not deleted`,
-      );
-    }
-
-    await materialRequisition.restore();
-
-    return this.findOne(uuid);
   }
 }

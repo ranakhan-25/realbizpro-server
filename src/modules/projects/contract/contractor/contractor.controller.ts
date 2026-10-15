@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {
   Body,
   Controller,
@@ -20,13 +21,25 @@ import { CreateContractorDto } from './dto/create-contractor.dto';
 import { QueryContractorDto } from './dto/query-contractor.dto';
 import { UpdateContractorDto } from './dto/update-contractor.dto';
 
-@ApiTags('Contractor')
+@ApiTags('Project | Contract | Contractor')
 @ApiBearerAuth()
 @Controller('contractor')
 export class ContractorController {
   constructor(
     private readonly contractorService: ContractorService,
   ) {}
+
+  @Get('reports/at-a-glance')
+  @ApiOperation({ summary: 'Contractor at-a-glance report' })
+  atAGlanceReport(@Query() query: QueryContractorDto) {
+    return this.contractorService.findAll(query);
+  }
+
+  @Get('reports/project-summary')
+  @ApiOperation({ summary: 'Contractor summary report' })
+  projectSummaryReport(@Query() query: QueryContractorDto) {
+    return this.contractorService.findAll(query);
+  }
 
   @Post()
   @ApiOperation({

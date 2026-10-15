@@ -1,17 +1,25 @@
 /* eslint-disable prettier/prettier */
 
-import { IsOptional, IsString, IsInt, Min, IsBoolean } from 'class-validator';
-import { Type } from 'class-transformer';
-
-
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform, Type } from 'class-transformer';
+import {
+  IsBoolean,
+  IsDateString,
+  IsInt,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 
 export class QueryQuotationDto {
+  @ApiPropertyOptional({ example: 1, default: 1 })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
   page?: number = 1;
 
+  @ApiPropertyOptional({ example: 10, default: 10 })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
@@ -32,6 +40,7 @@ export class QueryQuotationDto {
   @IsString()
   projectType?: string;
 
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
   project?: string;
@@ -45,6 +54,14 @@ export class QueryQuotationDto {
   approveStatus?: string;
 
   @IsOptional()
+  @IsDateString()
+  startDate?: string;
+
+  @IsOptional()
+  @IsDateString()
+  endDate?: string;
+
+  @IsOptional()
   @IsString()
   sortBy?: string = 'createdAt';
 
@@ -53,7 +70,7 @@ export class QueryQuotationDto {
   sortOrder?: 'ASC' | 'DESC' = 'DESC';
 
   @IsOptional()
-  @Type(() => Boolean)
+  @Transform(({ value }) => value === true || value === 'true')
   @IsBoolean()
   withDeleted?: boolean = false;
 }
