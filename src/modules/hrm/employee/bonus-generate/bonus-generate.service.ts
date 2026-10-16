@@ -1,5 +1,3 @@
-/* eslint-disable prettier/prettier */
-
 import {
   BadRequestException,
   Injectable,
@@ -14,10 +12,11 @@ import {
   BonusGenerateStatus,
 } from 'src/database/models/hrm/employee/hrm_bonus_generate_model';
 import { Bonus } from 'src/database/models/hrm/employee/hrm_bonus_model';
-import { Employee } from 'src/database/models/hrm/employee/hrm_employee_model';
+// import { Employee } from 'src/database/models/hrm/employee/hrm_employee_model';
 import { CreateBonusGenerateDto } from './dto/create-bonus-generate.dto';
 import { UpdateBonusGenerateDto } from './dto/update-bonus-generate.dto';
 import { QueryBonusGenerateDto } from './dto/query-bonus-generate.dto';
+import { EmployeeList } from 'src/database/models/hrm/employee/hrm_employeeList_model';
 
 @Injectable()
 export class BonusGenerateService {
@@ -26,8 +25,8 @@ export class BonusGenerateService {
     private readonly bonusGenerateModel: typeof BonusGenerate,
     @InjectModel(Bonus)
     private readonly bonusModel: typeof Bonus,
-    @InjectModel(Employee)
-    private readonly employeeModel: typeof Employee,
+    @InjectModel(EmployeeList)
+    private readonly employeeModel: typeof EmployeeList,
   ) {}
 
   // ---------- helpers ----------
