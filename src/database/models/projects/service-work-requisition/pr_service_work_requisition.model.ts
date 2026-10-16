@@ -72,7 +72,7 @@ export class ServiceWorkRequisition
 
   @ForeignKey(() => Project)
   @Column({
-    type: DataType.STRING,
+    type: DataType.UUID,
     allowNull: true,
     field: 'targetProjectId',
   })
@@ -89,7 +89,7 @@ export class ServiceWorkRequisition
 
   @ForeignKey(() => BillingCategory)
   @Column({
-    type: DataType.STRING,
+    type: DataType.UUID,
     allowNull: true,
     field: 'titleOrWorkNameId',
   })
@@ -106,7 +106,7 @@ export class ServiceWorkRequisition
 
   @ForeignKey(() => BillingSubCategory)
   @Column({
-    type: DataType.STRING,
+    type: DataType.UUID,
     allowNull: true,
     field: 'taskSubcategory',
   })
@@ -123,7 +123,7 @@ export class ServiceWorkRequisition
 
   @ForeignKey(() => Site)
   @Column({
-    type: DataType.STRING,
+    type: DataType.UUID,
     allowNull: true,
     field: 'constructionSiteId',
   })

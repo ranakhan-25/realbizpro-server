@@ -214,6 +214,7 @@ import { IncrementModule } from './modules/hrm/employee/increment/increment.modu
     JobLogModule,
     HmacAuthModule,
     BullBoardModule,
+    BoqModule,
     CategoryModule,
     SubCategoryModule,
     CustomerAccountModule,
