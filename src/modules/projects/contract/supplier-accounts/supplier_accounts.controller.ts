@@ -20,7 +20,7 @@ import { QuerySupplierAccountDto } from './dto/query_supplier_account.dto';
 import { UpdateSupplierAccountDto } from './dto/update_supplier_account.dto';
 import { SupplierAccountsService } from './supplier_accounts.service';
 
-@ApiTags('Supplier Accounts')
+@ApiTags('Project | Contract | Supplier Accounts')
 @ApiBearerAuth()
 @Controller('supplier-accounts')
 export class SupplierAccountsController {

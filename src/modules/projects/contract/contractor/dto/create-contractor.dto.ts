@@ -23,7 +23,7 @@ import {
 import {
   ContractorStatus,
   ContractorUnderStatus,
-} from 'src/database/models/projects/contract/pr_contractor_model';
+} from 'src/database/models/projects/contract/pr_contractor.model';
 
 export class CreateContractorDto {
   @ApiProperty({

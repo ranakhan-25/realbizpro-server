@@ -2,17 +2,13 @@ import {
   ApiProperty,
   ApiPropertyOptional,
 } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import {
-  Transform,
-  Type,
-} from 'class-transformer';
-import {
-  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
   MaxLength,
-  Min,
+  IsUUID,
 } from 'class-validator';
 
 export class CreateProjectSiteDto {
@@ -52,22 +48,12 @@ export class CreateProjectSiteDto {
   @Transform(({ value }) => (value === '' ? null : value))
   description?: string;
 
-  @ApiPropertyOptional({
-    description: 'Project Type',
-    example: 'Residential',
-  })
-  @IsOptional()
-  @IsString()
-  @Transform(({ value }) => (value === '' ? null : value))
-  projectType?: string;
-
   @ApiProperty({
     description: 'Related Project ID',
-    example: 1,
+    example: '6f5c7e7a-46df-4e46-9eb3-14a92805fac3',
+    format: 'uuid',
   })
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
+  @IsUUID()
   @IsNotEmpty({ message: 'Project is required' })
-  projectId: number;
+  projectId: string;
 }

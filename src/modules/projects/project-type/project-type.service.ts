@@ -4,50 +4,52 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Op } from 'sequelize';
-
-import { projectType } from 'src/database/models/projects/project/pr_project_types_model';
+import { Op, WhereOptions } from 'sequelize';
+import { ProjectType } from 'src/database/models/projects/project-type/pr_project_type.model';
 import { CreateProjectTypeDto } from './dto/create-project-type.dto';
-import { UpdateProjectTypeDto } from './dto/update-project-type.dto';
 import { QueryProjectTypeDto } from './dto/query-project-type.dto';
+import { UpdateProjectTypeDto } from './dto/update-project-type.dto';
 
 @Injectable()
 export class ProjectTypeService {
   constructor(
-    @InjectModel(projectType)
-    private readonly projectTypeModel: typeof projectType,
+    @InjectModel(ProjectType)
+    private readonly projectTypeModel: typeof ProjectType,
   ) {}
 
-  async create(dto: CreateProjectTypeDto) {
+  async create(dto: CreateProjectTypeDto, userId?: number) {
     if (dto.code) {
       await this.ensureCodeUnique(dto.code);
     }
-    return this.projectTypeModel.create(dto as any);
+
+    const projectType = await this.projectTypeModel.create({
+      ...dto,
+      createdBy: userId,
+    });
+    return projectType;
   }
 
   async findAll(query: QueryProjectTypeDto) {
-    const {
-      page = 1,
-      limit = 10,
-      search,
-      sortBy = 'id',
-      sortOrder = 'ASC',
-    } = query;
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 10;
+    const search = query.search?.trim();
 
-    const where: any = {};
-    if (search) {
-      where[Op.or] = [
-        { code: { [Op.iLike]: `%${search}%` } },
-        { name: { [Op.iLike]: `%${search}%` } },
-      ];
-    }
+    const where: WhereOptions<ProjectType> = search
+      ? {
+          [Op.or]: [
+            { code: { [Op.iLike]: `%${search}%` } },
+            { name: { [Op.iLike]: `%${search}%` } },
+          ],
+        }
+      : {};
 
-    const { rows, count } = await this.projectTypeModel.findAndCountAll({
-      where,
-      order: [[sortBy, sortOrder]],
-      limit,
-      offset: (page - 1) * limit,
-    });
+    const { rows, count } =
+      await this.projectTypeModel.findAndCountAll({
+        where: where as WhereOptions<ProjectType>,
+        order: [['id', 'ASC']],
+        limit,
+        offset: (page - 1) * limit,
+      });
 
     return {
       data: rows,
@@ -60,32 +62,60 @@ export class ProjectTypeService {
     };
   }
 
-  async findOne(id: number) {
-    const projectType = await this.projectTypeModel.findByPk(id);
+  async findOne(uuid: string) {
+    const projectType = await this.projectTypeModel.findOne({
+      where: { uuid } as WhereOptions<ProjectType>,
+    });
+
     if (!projectType) {
-      throw new NotFoundException(`Project type #${id} not found`);
+      throw new NotFoundException(
+        `Project type "${uuid}" not found`,
+      );
     }
+
     return projectType;
   }
 
-  async update(id: number, dto: UpdateProjectTypeDto) {
-    const projectType = await this.findOne(id);
+  async update(
+    uuid: string,
+    dto: UpdateProjectTypeDto,
+    userId?: number,
+  ) {
+    const projectType = await this.findOne(uuid);
 
     if (dto.code && dto.code !== projectType.code) {
-      await this.ensureCodeUnique(dto.code);
+      const existing = await this.projectTypeModel.findOne({
+        where: {
+          code: dto.code,
+          uuid: { [Op.ne]: uuid },
+        } as WhereOptions<ProjectType>,
+      });
+
+      if (existing) {
+        throw new ConflictException(
+          `Code "${dto.code}" already exists`,
+        );
+      }
     }
 
-    return projectType.update(dto as any);
+    await projectType.update({
+      ...dto,
+      updatedBy: userId,
+    });
+    return projectType;
   }
 
-  async remove(id: number) {
-    const projectType = await this.findOne(id);
-    await projectType.destroy(); // paranoid: true, tai soft delete
+  async remove(uuid: string) {
+    const projectType = await this.findOne(uuid);
+    await projectType.destroy();
     return { message: 'Project type deleted successfully' };
   }
 
   private async ensureCodeUnique(code: string) {
-    const exists = await this.projectTypeModel.findOne({ where: { code } });
+    const exists = await this.projectTypeModel.findOne({
+      where: { code } as WhereOptions<ProjectType>,
+    });
+
     if (exists) {
       throw new ConflictException(`Code "${code}" already exists`);
     }

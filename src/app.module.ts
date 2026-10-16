@@ -68,14 +68,11 @@ import { LabourWorkBankModule } from './modules/projects/contract/labour-work-ba
 import { LamsModule } from './modules/lams/lams.module';
 import { MaterialRequisitionModule } from './modules/projects/requisition/material-requisition/material-requisition.module';
 import { FundRequisitionModule } from './modules/projects/requisition/fund-requisition/fund-requisition.module';
-import { CategoryModule } from './modules/projects/billing/category/category.module';
-import { SubCategoryModule } from './modules/projects/billing/sub-category/sub-category.module';
 
 import { ServiceWorkRequisitionItemModule } from './modules/projects/requisition/service-work-requisition-item/service-work-requisition-item.module';
 import { ServiceWorkRequisitionModule } from './modules/projects/requisition/service-work-requisition/service-work-requisition.module';
 import { ContractorModule } from './modules/projects/contract/contractor/contractor.module';
 import { InvestorModule } from './modules/projects/investments/investor/investor.module';
-import { ShareConfigurationModule } from './modules/projects/investments/share-configuration/share-configuration.module';
 import { BoqModule } from './modules/projects/boq/boq.module';
 import { FlatLandModule } from './modules/projects/flatland/flatland.module';
 import { TaskModule } from './modules/projects/task/task.module';
@@ -83,11 +80,30 @@ import { BoqComparisonModule } from './modules/projects/boqcomparison/boqcompari
 import { DetailsModule } from './modules/projects/details/details.module';
 import { SysDivisionModule } from './modules/system/sys-division/sys-division.module';
 import { QuotationModule } from './modules/projects/quotation/quotation.module';
-import { ProjectModule } from './modules/projects/projects/project.module';
 import { CrmModule } from './modules/crm/crm.module';
 import { CreditRealizationModule } from './modules/credit-realization/credit-realization.module';
 import { DepartmentModule } from './modules/hrm/employee/department/department.module';
 import { DesignationModule } from './modules/hrm/employee/designation/designation.module';
+import { ShiftModule } from './modules/hrm/employee/shift/shift.module';
+import { AttendanceModule } from './modules/hrm/employee/shift  allocation/attendance.module';
+import { EmployeeModule } from './modules/hrm/employee/shift  allocation/employee.module';
+import { MonthYearModule } from './modules/hrm/employee/shift  allocation/month-year.module';
+import { BonusModule } from './modules/hrm/employee/bonus/bonus.module';
+
+import { BonusGenerateModule } from './modules/hrm/employee/bonus-generate/bonus-generate.module';
+import { SectionModule } from './modules/hrm/employee/section/section.module';
+import { UnitModule } from './modules/hrm/employee/unit/unit.module';
+import { ProjectModule } from './modules/projects/project/project.module';
+import { ProjectDocumentModule } from './modules/projects/project-document/project-document.module';
+import { ProjectShareConfigurationModule } from './modules/projects/project-share-configuration/project-share-configuration.module';
+import { LandInfrastructureModule } from './modules/projects/land-infrastructure/land-infrastructure.module';
+import { FlatLandOfferModule } from './modules/projects/flat-land-offer/flat-land-offer.module';
+import { ProjectBillingRecordModule } from './modules/projects/billing/project-billing-record.module';
+import { ShareConfigurationModule } from './modules/projects/investments/share-configuration/share-configuration.module';
+import { ProjectShareAssignmentModule } from './modules/projects/project-share-assignment/project-share-assignment.module';
+import { CategoryModule } from './modules/projects/billing/category/category.module';
+import { SubCategoryModule } from './modules/projects/billing/sub-category/sub-category.module';
+import { FlatLandBookingModule } from './modules/projects/flat-land-booking/flat-land-booking.module';
 
 @Module({
   imports: [
@@ -173,6 +189,7 @@ import { DesignationModule } from './modules/hrm/employee/designation/designatio
     BoqComparisonModule,
     DetailsModule,
     QuotationModule,
+    LandInfrastructureModule,
     // Hrms Report
     SysDivisionModule,
     SysOfficeTypeModule,
@@ -183,25 +200,54 @@ import { DesignationModule } from './modules/hrm/employee/designation/designatio
     JobLogModule,
     HmacAuthModule,
     BullBoardModule,
+    CategoryModule,
+    SubCategoryModule,
     CustomerAccountModule,
+    FlatLandBookingModule,
     SupplierAccountsModule,
     LabourWorkBankModule,
     ContractorModule,
     FlatLandModule,
     InvestorModule,
-    ShareConfigurationModule,
+    ProjectShareConfigurationModule,
     MaterialRequisitionModule,
     FundRequisitionModule,
+    ProjectBillingRecordModule,
     ServiceWorkRequisitionModule,
     ServiceWorkRequisitionItemModule,
-    CategoryModule,
+    ProjectDocumentModule,
     InventoryModule,
-    SubCategoryModule,
+    FlatLandOfferModule,
+    ShareConfigurationModule,
+    ProjectShareAssignmentModule,
+
     LamsModule,
     CrmModule,
     CreditRealizationModule,
     DepartmentModule,
     DesignationModule,
+    ShiftModule,
+    AttendanceModule,
+    EmployeeModule,
+    MonthYearModule,
+    BonusModule,
+    BonusGenerateModule,
+    SectionModule,
+    UnitModule,
+    CommissionModule,
+    AllowanceModule,
+    EmployeeListModule,
+    EmployeeSalaryModule,
+    EmployeeTypeModule,
+    HrmShiftModule,
+    LoanModule,
+    OvertimeModule,
+    SalaryGradeModule,
+    SaturationDeductionModule,
+    UnderModule,
+    EmployeeHierarchyModule,
+    EmployeeCardModule,
+    IncrementModule,
   ],
   controllers: [AppController, HealthController],
   providers: [

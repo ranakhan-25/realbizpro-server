@@ -11,7 +11,7 @@ import { Op } from 'sequelize';
 import { CreateBoqDto } from './dto/create-boq.dto';
 import { QueryBoqDto } from './dto/query-boq.dto';
 import { UpdateBoqDto } from './dto/update-boq.dto';
-import { Boq } from 'src/database/models/projects/boq/pr_boq_model';
+import { Boq } from 'src/database/models/projects/boq/pr_boq.model';
 
 @Injectable()
 export class BoqService {

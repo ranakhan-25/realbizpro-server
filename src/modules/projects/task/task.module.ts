@@ -5,7 +5,7 @@ import { SequelizeModule } from '@nestjs/sequelize';
 
 import { TaskController } from './task.controller';
 import { TaskService } from './task.service';
-import { Task } from 'src/database/models/projects/task/pr_task_model';
+import { Task } from 'src/database/models/projects/task/pr_task.model';
 
 @Module({
   imports: [

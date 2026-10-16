@@ -1,10 +1,11 @@
+/* eslint-disable prettier/prettier */
 import * as fs from 'fs';
 import * as path from 'path';
 import {
   Model,
   ModelCtor,
   Sequelize,
-} from 'sequelize-typescript'; 
+} from 'sequelize-typescript';
 
 /**
  * A specific type alias for a class that extends Sequelize's Model.

@@ -16,7 +16,7 @@ import {
   Max,
   Min,
 } from 'class-validator';
-import { TaskPriority, TaskStatus } from 'src/database/models/projects/task/pr_task_model';
+import { TaskPriority, TaskStatus } from 'src/database/models/projects/task/pr_task.model';
 
 
 export class QueryTaskDto {

@@ -6,8 +6,8 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { InvestorController } from './investor.controller';
 import { InvestorService } from './investor.service';
 
-import { Investor } from 'src/database/models/projects/investor/investor_model';
-import { InvestorNominee } from 'src/database/models/projects/investor/investor_nominee_model';
+import { Investor } from 'src/database/models/projects/investor/investor.model';
+import { InvestorNominee } from 'src/database/models/projects/investor/investor_nominee.model';
 
 @Module({
   imports: [

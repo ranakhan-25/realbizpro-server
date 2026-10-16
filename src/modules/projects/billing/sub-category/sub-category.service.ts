@@ -13,13 +13,16 @@ import { Op } from 'sequelize';
 import { CreateSubCategoryDto } from './dto/create-sub-category.dto';
 import { UpdateSubCategoryDto } from './dto/update-sub-category.dto';
 import { QuerySubCategoryDto } from './dto/query-sub-category.dto';
-import { BillingSubCategory } from 'src/database/models/projects/billing/pr_sub_category.madel';
+import { BillingSubCategory } from 'src/database/models/projects/billing/pr_sub_category.model';
+import { BillingCategory } from 'src/database/models/projects/billing/pr_category.model';
 
 @Injectable()
 export class SubCategoryService {
   constructor(
     @InjectModel(BillingSubCategory)
     private readonly billingSubCategoryModel: typeof BillingSubCategory,
+    @InjectModel(BillingCategory)
+    private readonly billingCategoryModel: typeof BillingCategory,
   ) {}
 
   // CREATE
@@ -48,12 +51,7 @@ export class SubCategoryService {
         updatedBy: dto.updatedBy,
       });
 
-    return {
-      success: true,
-      message:
-        'Sub category created successfully',
-      data: subCategory,
-    };
+    return subCategory;
   }
 
   // GET ALL
@@ -96,11 +94,6 @@ export class SubCategoryService {
             [Op.iLike]: `%${query.search}%`,
           },
         },
-        {
-          categoryId: {
-            [Op.iLike]: `%${query.search}%`,
-          },
-        },
       ];
     }
 
@@ -113,18 +106,40 @@ export class SubCategoryService {
           order: [['createdAt', 'DESC']],
         },
       );
+    const categoryIds = [
+      ...new Set(
+        rows
+          .map((row) => row.categoryId)
+          .filter((uuid): uuid is string => Boolean(uuid)),
+      ),
+    ];
+    const categories = categoryIds.length
+      ? await this.billingCategoryModel.findAll({
+          where: { uuid: { [Op.in]: categoryIds } },
+          attributes: ['uuid', 'name'],
+        })
+      : [];
+    const categoriesByUuid = new Map(
+      categories.map((category) => [
+        category.uuid,
+        category.toJSON(),
+      ]),
+    );
+    const rowsWithCategory = rows.map((row) => ({
+      ...row.toJSON(),
+      category: row.categoryId
+        ? (categoriesByUuid.get(row.categoryId) ?? null)
+        : null,
+    }));
 
     return {
-      success: true,
-      data: {
-        data: rows,
-        meta: {
-          total: count,
-          page,
-          limit,
-          skip,
-          totalPages: Math.ceil(count / limit),
-        },
+      data: rowsWithCategory,
+      meta: {
+        total: count,
+        page,
+        limit,
+        skip,
+        totalPages: Math.ceil(count / limit),
       },
     };
   }
@@ -144,9 +159,16 @@ export class SubCategoryService {
       );
     }
 
+    const category = subCategory.categoryId
+      ? await this.billingCategoryModel.findOne({
+          where: { uuid: subCategory.categoryId },
+          attributes: ['uuid', 'name'],
+        })
+      : null;
+
     return {
-      success: true,
-      data: subCategory,
+      ...subCategory.toJSON(),
+      category: category?.toJSON() ?? null,
     };
   }
 
@@ -196,12 +218,7 @@ export class SubCategoryService {
       ...dto,
     });
 
-    return {
-      success: true,
-      message:
-        'Sub category updated successfully',
-      data: subCategory,
-    };
+    return subCategory;
   }
 
   // DELETE
@@ -221,11 +238,7 @@ export class SubCategoryService {
 
     await subCategory.destroy();
 
-    return {
-      success: true,
-      message:
-        'Sub category deleted successfully',
-    };
+    return { message: 'Sub category deleted successfully' };
   }
 
   // RESTORE
@@ -252,11 +265,6 @@ export class SubCategoryService {
 
     await subCategory.restore();
 
-    return {
-      success: true,
-      message:
-        'Sub category restored successfully',
-      data: subCategory,
-    };
+    return subCategory;
   }
 }

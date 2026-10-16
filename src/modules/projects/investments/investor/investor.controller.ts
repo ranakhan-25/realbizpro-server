@@ -20,7 +20,7 @@ import { CreateInvestorDto } from './dto/create-investor.dto';
 import { QueryInvestorDto } from './dto/query-investor.dto';
 import { UpdateInvestorDto } from './dto/update-investor.dto';
 
-@ApiTags('Investor')
+@ApiTags('Project | Investments | Investor')
 @ApiBearerAuth()
 @Controller('investor')
 export class InvestorController {

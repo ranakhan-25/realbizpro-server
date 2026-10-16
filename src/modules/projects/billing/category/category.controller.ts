@@ -24,7 +24,7 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { QueryCategoryDto } from './dto/query-category.dto';
 
-@ApiTags('Billing | Category')
+@ApiTags('Project | Billing | Category')
 @ApiBearerAuth()
 @Controller('category')
 export class CategoryController {

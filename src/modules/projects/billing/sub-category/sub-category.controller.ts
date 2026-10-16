@@ -24,7 +24,7 @@ import { UpdateSubCategoryDto } from './dto/update-sub-category.dto';
 import { QuerySubCategoryDto } from './dto/query-sub-category.dto';
 import { SubCategoryService } from './sub-category.service';
 
-@ApiTags('Billing | Sub Category')
+@ApiTags('Project | Billing | Sub Category')
 @ApiBearerAuth()
 @Controller('billing-sub-category')
 export class SubCategoryController {

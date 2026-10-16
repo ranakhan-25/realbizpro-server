@@ -1,7 +1,7 @@
 // Auto-generated types for SupplierAccounts
-// Source: src/database/models/projects/contract/pr_supplier_accounts_model.ts
+// Source: src\database\models\projects\contract\pr_supplier_accounts.model.ts
 
-import { SupplierAccountsStatus } from '../models/projects/contract/pr_supplier_accounts_model';
+import { SupplierAccountsStatus } from '../models/projects/contract/pr_supplier_accounts.model';
 
 export interface SupplierAccountsAttributes {
   id: number;

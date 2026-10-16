@@ -1,23 +1,29 @@
 /* eslint-disable prettier/prettier */
-
 import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { MaterialRequisitionController } from './material-requisition.controller';
 
 import { MaterialRequisitionService } from './material-requisition.service';
-import { MaterialRequisition } from 'src/database/models/projects/Requisition/pr_material_requisition_model';
+import { MaterialRequisitionController } from './material-requisition.controller';
+import { Project } from 'src/database/models/projects/project/pr_project.model';
+import { Site } from 'src/database/models/projects/project-site/pr_project_site.model';
+import { BillingCategory } from 'src/database/models/projects/billing/pr_category.model';
+import { MaterialRequisition } from 'src/database/models/projects/material-requisition/pr_material_requisition.model';
+import { MaterialRequisitionItem } from 'src/database/models/projects/material-requisition-item/pr_material_requisition_item.model';
+import { ProjectModule } from '../../project/project.module';
 
 @Module({
   imports: [
     SequelizeModule.forFeature([
       MaterialRequisition,
+      MaterialRequisitionItem,
+      Project,
+      Site,
+      BillingCategory,
     ]),
+    ProjectModule,
   ],
-
   controllers: [MaterialRequisitionController],
-
   providers: [MaterialRequisitionService],
-
   exports: [MaterialRequisitionService],
 })
 export class MaterialRequisitionModule {}

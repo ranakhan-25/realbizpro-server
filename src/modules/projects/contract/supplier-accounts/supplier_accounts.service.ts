@@ -14,7 +14,7 @@ import { UpdateSupplierAccountDto } from './dto/update_supplier_account.dto';
 import {
   SupplierAccounts,
   SupplierAccountsStatus,
-} from 'src/database/models/projects/contract/pr_supplier_accounts_model';
+} from 'src/database/models/projects/contract/pr_supplier_accounts.model';
 
 @Injectable()
 export class SupplierAccountsService {

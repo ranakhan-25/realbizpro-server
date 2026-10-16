@@ -1,10 +1,45 @@
 import {
+  IsArray,
+  IsNumber,
   IsString,
   IsOptional,
-  IsNumber,
   IsDateString,
   IsNotEmpty,
+  IsUUID,
+  Min,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
+
+export class QuotationItemDto {
+  @IsString()
+  @IsNotEmpty()
+  itemName: string;
+
+  @IsString()
+  unit: string;
+
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  quantity: number;
+
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  rate: number;
+
+  @IsString()
+  details: string;
+
+  @IsString()
+  image: string;
+
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  amount: number;
+}
 
 export class CreateQuotationDto {
   @IsOptional()
@@ -20,7 +55,7 @@ export class CreateQuotationDto {
   customer?: string;
 
   @IsOptional()
-  @IsString()
+  @IsUUID()
   customerId?: string;
 
   @IsNotEmpty()
@@ -36,8 +71,16 @@ export class CreateQuotationDto {
   project?: string;
 
   @IsOptional()
-  @IsString()
+  @IsUUID()
   projectId?: string;
+
+  @IsOptional()
+  @IsUUID()
+  categoryId?: string;
+
+  @IsOptional()
+  @IsUUID()
+  subCategoryId?: string;
 
   @IsOptional()
   @IsString()
@@ -58,6 +101,11 @@ export class CreateQuotationDto {
   @IsOptional()
   @IsNumber()
   grandTotal?: number;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => QuotationItemDto)
+  items: QuotationItemDto[] = [];
 
   @IsOptional()
   @IsString()

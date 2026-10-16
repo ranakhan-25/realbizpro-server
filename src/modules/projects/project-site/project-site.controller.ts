@@ -1,27 +1,34 @@
 /* eslint-disable prettier/prettier */
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
-  ParseIntPipe,
+  Controller,
   Delete,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
   Query,
+  Req,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { ProjectSiteService } from './project-site.service';
+import type { Request } from 'express';
 import { CreateProjectSiteDto } from './dto/create-project-site.dto';
-
+import { QueryProjectSiteDto } from './dto/query-project-site.dto';
 import { UpdateProjectSiteDto } from './dto/update-project-site.dto';
-import { QueryProjectSiteDto } from './dto/query-site.dto';
+import { ProjectSiteService } from './project-site.service';
 
-@ApiTags('Project Sites')
+type AuthenticatedRequest = Request & {
+  user?: {
+    id?: number;
+  };
+};
+
+@ApiTags('Project | Sites')
 @ApiBearerAuth()
 @Controller('project-sites')
 export class ProjectSiteController {
@@ -30,48 +37,49 @@ export class ProjectSiteController {
   ) {}
 
   @Post()
+  @ApiOperation({ summary: 'Create a project site' })
   create(
-    @Body()
-    createProjectSiteDto: CreateProjectSiteDto,
+    @Body() dto: CreateProjectSiteDto,
+    @Req() request: AuthenticatedRequest,
   ) {
-    return this.projectSiteService.create(
-      createProjectSiteDto,
-    );
+    return this.projectSiteService.create(dto, request.user?.id);
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all sites (paginated)' })
+  @ApiOperation({ summary: 'List project sites' })
   findAll(@Query() query: QueryProjectSiteDto) {
     return this.projectSiteService.findAll(query);
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Get site by ID' })
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.projectSiteService.findOne(id);
+  @Get(':uuid')
+  @ApiOperation({ summary: 'Get a project site by UUID' })
+  findOne(@Param('uuid', ParseUUIDPipe) uuid: string) {
+    return this.projectSiteService.findOne(uuid);
   }
 
-  @Patch(':id')
+  @Patch(':uuid')
+  @ApiOperation({ summary: 'Update a project site' })
   update(
-    @Param('id') id: string,
-    @Body()
-    updateProjectSiteDto: UpdateProjectSiteDto,
+    @Param('uuid', ParseUUIDPipe) uuid: string,
+    @Body() dto: UpdateProjectSiteDto,
+    @Req() request: AuthenticatedRequest,
   ) {
     return this.projectSiteService.update(
-      +id,
-      updateProjectSiteDto,
+      uuid,
+      dto,
+      request.user?.id,
     );
   }
 
-  @Delete(':id')
-  @ApiOperation({ summary: 'Soft delete site' })
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.projectSiteService.remove(id);
+  @Delete(':uuid')
+  @ApiOperation({ summary: 'Soft-delete a project site' })
+  remove(@Param('uuid', ParseUUIDPipe) uuid: string) {
+    return this.projectSiteService.remove(uuid);
   }
 
-  @Patch(':id/restore')
-  @ApiOperation({ summary: 'Restore soft-deleted site' })
-  restore(@Param('id', ParseIntPipe) id: number) {
-    return this.projectSiteService.restore(id);
+  @Patch(':uuid/restore')
+  @ApiOperation({ summary: 'Restore a deleted project site' })
+  restore(@Param('uuid', ParseUUIDPipe) uuid: string) {
+    return this.projectSiteService.restore(uuid);
   }
 }

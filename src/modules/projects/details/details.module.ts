@@ -5,7 +5,7 @@ import { SequelizeModule } from '@nestjs/sequelize';
 
 import { DetailsService } from './details.service';
 import { DetailsController } from './details.controller';
-import { Details } from 'src/database/models/projects/details/pr_details_model';
+import { Details } from 'src/database/models/projects/details/pr_details.model';
 
 @Module({
   imports: [SequelizeModule.forFeature([Details])],

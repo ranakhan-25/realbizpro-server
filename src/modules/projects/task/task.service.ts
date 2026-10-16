@@ -13,7 +13,7 @@ import { Op } from 'sequelize';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { QueryTaskDto } from './dto/query-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
-import { Task, TaskPriority, TaskStatus } from 'src/database/models/projects/task/pr_task_model';
+import { Task, TaskPriority, TaskStatus } from 'src/database/models/projects/task/pr_task.model';
 
 @Injectable()
 export class TaskService {

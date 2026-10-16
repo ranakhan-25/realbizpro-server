@@ -5,7 +5,7 @@ import { SequelizeModule } from '@nestjs/sequelize';
 
 import { ContractorController } from './contractor.controller';
 import { ContractorService } from './contractor.service';
-import { Contractor } from 'src/database/models/projects/contract/pr_contractor_model';
+import { Contractor } from 'src/database/models/projects/contract/pr_contractor.model';
 
 @Module({
   imports: [

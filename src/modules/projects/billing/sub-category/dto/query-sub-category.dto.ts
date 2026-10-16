@@ -1,16 +1,17 @@
 /* eslint-disable prettier/prettier */
 
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 
 import {
   IsEnum,
   IsInt,
   IsOptional,
   IsString,
+  IsUUID,
   Max,
   Min,
 } from 'class-validator';
-import { SubCategoryType } from 'src/database/models/projects/billing/pr_sub_category.madel';
+import { SubCategoryType } from 'src/database/models/projects/billing/pr_sub_category.model';
 
 export class QuerySubCategoryDto {
   @IsOptional()
@@ -41,6 +42,9 @@ export class QuerySubCategoryDto {
   type?: SubCategoryType;
 
   @IsOptional()
-  @IsString()
+  @Transform(({ value }) =>
+    value === '' ? undefined : value,
+  )
+  @IsUUID()
   categoryId?: string;
 }

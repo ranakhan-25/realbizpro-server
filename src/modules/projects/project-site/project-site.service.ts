@@ -1,106 +1,88 @@
+/* eslint-disable prettier/prettier */
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectModel } from '@nestjs/sequelize';
-import { Op } from 'sequelize';
-import { Site } from 'src/database/models/projects/project/pr_site.model';
-import { Project } from 'src/database/models/projects/project/pr_project_model';
-import type { CreateProjectSiteDto } from './dto/create-project-site.dto';
-
-import type { UpdateProjectSiteDto } from './dto/update-project-site.dto';
-import { QueryProjectSiteDto } from './dto/query-site.dto';
+import { InjectConnection, InjectModel } from '@nestjs/sequelize';
+import { Op, WhereOptions } from 'sequelize';
+import { Sequelize } from 'sequelize-typescript';
+import { Project } from 'src/database/models/projects/project/pr_project.model';
+import { Site } from 'src/database/models/projects/project-site/pr_project_site.model';
+import { CreateProjectSiteDto } from './dto/create-project-site.dto';
+import { QueryProjectSiteDto } from './dto/query-project-site.dto';
+import { UpdateProjectSiteDto } from './dto/update-project-site.dto';
 
 @Injectable()
 export class ProjectSiteService {
   constructor(
     @InjectModel(Site)
     private readonly siteModel: typeof Site,
-
     @InjectModel(Project)
     private readonly projectModel: typeof Project,
+    @InjectConnection()
+    private readonly sequelize: Sequelize,
   ) {}
 
-  async create(
-    dto: CreateProjectSiteDto,
-  ): Promise<Site> {
-    const existing = await this.siteModel.findOne(
-      {
-        where: { code: dto.code },
-      },
-    );
-    if (existing) {
-      throw new BadRequestException(
-        `Site code "${dto.code}" already exists`,
-      );
-    }
+  async create(dto: CreateProjectSiteDto, userId?: number) {
+    const uuid = await this.sequelize.transaction(async (transaction) => {
+      const existing = await this.siteModel.findOne({
+        where: { code: dto.code } as WhereOptions<Site>,
+        transaction,
+      });
+      if (existing) {
+        throw new ConflictException(
+          `Site code "${dto.code}" already exists`,
+        );
+      }
 
-    const project =
-      await this.projectModel.findByPk(
-        dto.projectId,
-      );
-    if (!project) {
-      throw new BadRequestException(
-        `Project #${dto.projectId} not found`,
-      );
-    } 
+      const project = await this.projectModel.findOne({
+        where: { uuid: dto.projectId } as WhereOptions<Project>,
+        transaction,
+      });
+      if (!project) {
+        throw new BadRequestException(
+          `Project "${dto.projectId}" not found`,
+        );
+      }
 
-    // site
-
-    const site = await this.siteModel.create({
-      ...dto,
+      const site = await this.siteModel.create(
+        {
+          ...dto,
+          createdBy: userId,
+        },
+        { transaction },
+      );
+      return site.uuid;
     });
-    return this.findOne(site.id);
+
+    return this.findOne(uuid);
   }
 
   async findAll(query: QueryProjectSiteDto) {
-    const {
-      page = 1,
-      limit = 10,
-      search,
-      projectType,
-      projectId,
-      sortBy = 'createdAt',
-      sortOrder = 'DESC',
-      withDeleted = false,
-    } = query;
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 10;
+    const search = query.search?.trim();
 
-    const where: any = {};
+    const where: WhereOptions<Site> = search
+      ? {
+          [Op.or]: [
+            { code: { [Op.iLike]: `%${search}%` } },
+            { name: { [Op.iLike]: `%${search}%` } },
+            { location: { [Op.iLike]: `%${search}%` } },
+            { description: { [Op.iLike]: `%${search}%` } },
+          ],
+        }
+      : {};
 
-    if (search) {
-      where[Op.or] = [
-        { name: { [Op.iLike]: `%${search}%` } },
-        { code: { [Op.iLike]: `%${search}%` } },
-        {
-          location: { [Op.iLike]: `%${search}%` },
-        },
-        {
-          description: {
-            [Op.iLike]: `%${search}%`,
-          },
-        },
-      ];
-    }
-
-    if (projectType)
-      where.projectType = projectType;
-    if (projectId) where.projectId = projectId;
-
-    const { rows, count } =
-      await this.siteModel.findAndCountAll({
-        where,
-        include: [
-          {
-            model: this.projectModel,
-            attributes: ['id', 'code', 'name'],
-          },
-        ],
-        limit,
-        offset: (page - 1) * limit,
-        order: [[sortBy, sortOrder]],
-        paranoid: !withDeleted,
-      });
+    const { rows, count } = await this.siteModel.findAndCountAll({
+      where: where as WhereOptions<Site>,
+      include: [{ model: this.projectModel, as: 'project', attributes: ['uuid', 'code', 'name'] }],
+      limit,
+      offset: (page - 1) * limit,
+      order: [['createdAt', 'DESC']],
+    });
 
     return {
       data: rows,
@@ -113,109 +95,98 @@ export class ProjectSiteService {
     };
   }
 
-  async findOne(
-    id: string | number,
-  ): Promise<Site> {
-    const site = await this.siteModel.findByPk(
-      id,
-      {
-        include: [
-          {
-            model: this.projectModel,
-            attributes: ['id', 'code', 'name'],
-          },
-        ],
-      },
-    );
+  async findOne(uuid: string): Promise<Site> {
+    const site = await this.siteModel.findOne({
+      where: { uuid } as WhereOptions<Site>,
+      include: [{ model: this.projectModel, as: 'project', attributes: ['uuid', 'code', 'name'] }],
+    });
 
     if (!site) {
-      throw new NotFoundException(
-        `Site #${id} not found`,
-      );
+      throw new NotFoundException(`Site "${uuid}" not found`);
     }
 
     return site;
   }
 
   async update(
-    id: string | number,
+    uuid: string,
     dto: UpdateProjectSiteDto,
+    userId?: number,
   ): Promise<Site> {
-    const site =
-      await this.siteModel.findByPk(id);
-    if (!site) {
-      throw new NotFoundException(
-        `Site #${id} not found`,
-      );
-    }
+    await this.sequelize.transaction(async (transaction) => {
+      const site = await this.siteModel.findOne({
+        where: { uuid } as WhereOptions<Site>,
+        transaction,
+      });
+      if (!site) {
+        throw new NotFoundException(`Site "${uuid}" not found`);
+      }
 
-    if (dto.code && dto.code !== site.code) {
-      const exists = await this.siteModel.findOne(
+      if (dto.code && dto.code !== site.code) {
+        const existing = await this.siteModel.findOne({
+          where: {
+            code: dto.code,
+            uuid: { [Op.ne]: uuid },
+          } as WhereOptions<Site>,
+          transaction,
+        });
+        if (existing) {
+          throw new ConflictException(
+            `Site code "${dto.code}" already exists`,
+          );
+        }
+      }
+
+      if (dto.projectId) {
+        const project = await this.projectModel.findOne({
+          where: { uuid: dto.projectId } as WhereOptions<Project>,
+          transaction,
+        });
+        if (!project) {
+          throw new BadRequestException(
+            `Project "${dto.projectId}" not found`,
+          );
+        }
+      }
+
+      await site.update(
         {
-          where: { code: dto.code },
+          ...dto,
+          updatedBy: userId,
         },
+        { transaction },
       );
-      if (exists) {
-        throw new BadRequestException(
-          `Site code "${dto.code}" already exists`,
-        );
-      }
-    }
+    });
 
-    if (dto.projectId) {
-      const project =
-        await this.projectModel.findByPk(
-          dto.projectId,
-        );
-      if (!project) {
-        throw new BadRequestException(
-          `Project #${dto.projectId} not found`,
-        );
-      }
-    }
-
-    await site.update(dto);
-    return this.findOne(id);
+    return this.findOne(uuid);
   }
 
-  async remove(
-    id: string | number,
-  ): Promise<{ message: string }> {
-    const site =
-      await this.siteModel.findByPk(id);
+  async remove(uuid: string): Promise<{ message: string }> {
+    const site = await this.siteModel.findOne({
+      where: { uuid } as WhereOptions<Site>,
+    });
     if (!site) {
-      throw new NotFoundException(
-        `Site #${id} not found`,
-      );
+      throw new NotFoundException(`Site "${uuid}" not found`);
     }
 
     await site.destroy();
-    return {
-      message: `Site #${id} deleted successfully`,
-    };
+    return { message: `Site "${uuid}" deleted successfully` };
   }
 
-  async restore(
-    id: string | number,
-  ): Promise<Site> {
-    const site = await this.siteModel.findByPk(
-      id,
-      { paranoid: false },
-    );
+  async restore(uuid: string): Promise<Site> {
+    const site = await this.siteModel.findOne({
+      where: { uuid } as WhereOptions<Site>,
+      paranoid: false,
+    });
 
     if (!site) {
-      throw new NotFoundException(
-        `Site #${id} not found`,
-      );
+      throw new NotFoundException(`Site "${uuid}" not found`);
     }
-
     if (!site.deletedAt) {
-      throw new BadRequestException(
-        `Site #${id} is not deleted`,
-      );
+      throw new BadRequestException(`Site "${uuid}" is not deleted`);
     }
 
     await site.restore();
-    return this.findOne(id);
+    return this.findOne(uuid);
   }
 }

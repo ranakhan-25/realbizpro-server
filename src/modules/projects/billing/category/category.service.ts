@@ -47,11 +47,7 @@ export class CategoryService {
         updatedBy: dto.updatedBy,
       });
 
-    return {
-      success: true,
-      message: 'Category created successfully',
-      data: category,
-    };
+    return category;
   }
 
   // GET ALL
@@ -99,16 +95,13 @@ export class CategoryService {
       });
 
     return {
-      success: true,
-      data: {
-        data: rows,
-        meta: {
-          total: count,
-          page,
-          limit,
-          skip,
-          totalPages: Math.ceil(count / limit),
-        },
+      data: rows,
+      meta: {
+        total: count,
+        page,
+        limit,
+        skip,
+        totalPages: Math.ceil(count / limit),
       },
     };
   }
@@ -128,10 +121,7 @@ export class CategoryService {
       );
     }
 
-    return {
-      success: true,
-      data: category,
-    };
+    return category;
   }
 
   // UPDATE
@@ -174,11 +164,7 @@ export class CategoryService {
       ...dto,
     });
 
-    return {
-      success: true,
-      message: 'Category updated successfully',
-      data: category,
-    };
+    return category;
   }
 
   // DELETE
@@ -198,10 +184,7 @@ export class CategoryService {
 
     await category.destroy();
 
-    return {
-      success: true,
-      message: 'Category deleted successfully',
-    };
+    return { message: 'Category deleted successfully' };
   }
 
   // RESTORE
@@ -228,10 +211,6 @@ export class CategoryService {
 
     await category.restore();
 
-    return {
-      success: true,
-      message: 'Category restored successfully',
-      data: category,
-    };
+    return category;
   }
 }

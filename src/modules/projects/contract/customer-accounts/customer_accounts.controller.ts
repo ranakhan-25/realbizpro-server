@@ -20,7 +20,7 @@ import { QueryCustomerAccountDto } from './dto/query_customer_account.dto';
 import { UpdateCustomerAccountDto } from './dto/update_customer_account.dto';
 import { CustomerAccountService } from './customer_accounts.service';
 
-@ApiTags('Customer Account')
+@ApiTags('Project | Contract | Customer Account')
 @ApiBearerAuth()
 @Controller('customer-account')
 export class CustomerAccountController {

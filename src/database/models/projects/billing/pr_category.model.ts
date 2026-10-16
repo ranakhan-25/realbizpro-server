@@ -3,8 +3,12 @@
 import {
   Column,
   DataType,
+  HasMany,
   Table,
 } from 'sequelize-typescript';
+import { MaterialRequisition } from '../material-requisition/pr_material_requisition.model';
+import { Quotation } from '../quatation/pr_quotation.model';
+import { BillingSubCategory } from './pr_sub_category.model';
 
 import { BaseModel } from 'src/database/base.model';
 import type { BillingCategoryAttributes, BillingCategoryCreationAttributes } from 'src/database/types/billingcategory.types';
@@ -52,6 +56,27 @@ export class BillingCategory
     allowNull: true,
   })
   declare description?: string;
+
+  @HasMany(() => MaterialRequisition, {
+    foreignKey: 'categoryId',
+    sourceKey: 'uuid',
+    as: 'materialRequisitions',
+  })
+  declare materialRequisitions?: MaterialRequisition[];
+
+  @HasMany(() => BillingSubCategory, {
+    foreignKey: 'categoryId',
+    sourceKey: 'uuid',
+    as: 'subCategories',
+  })
+  declare subCategories?: BillingSubCategory[];
+
+  @HasMany(() => Quotation, {
+    foreignKey: 'categoryId',
+    sourceKey: 'uuid',
+    as: 'quotations',
+  })
+  declare quotations?: Quotation[];
 
   @Column({
     type: DataType.STRING,

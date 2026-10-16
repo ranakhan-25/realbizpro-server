@@ -21,7 +21,7 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { QueryTaskDto } from './dto/query-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 
-@ApiTags('Task')
+@ApiTags('Project | Task')
 @ApiBearerAuth()
 @Controller('task')
 export class TaskController {
