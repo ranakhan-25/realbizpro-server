@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, ConflictException } from '@nestjs/common
 import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
 import { InvSupplier } from 'src/database/models/inventory/inv_supplier.model';
+import { InvPurchase } from 'src/database/models/inventory/inv_purchase.model';
 import { CreateInvSupplierDto } from './dto/create-inv-supplier.dto';
 import { UpdateInvSupplierDto } from './dto/update-inv-supplier.dto';
 import { QueryInvSupplierDto } from './dto/query-inv-supplier.dto';
@@ -11,6 +12,8 @@ export class SupplierService {
   constructor(
     @InjectModel(InvSupplier)
     private readonly supplierModel: typeof InvSupplier,
+    @InjectModel(InvPurchase)
+    private readonly purchaseModel: typeof InvPurchase,
   ) {}
 
   async create(createDto: CreateInvSupplierDto) {
@@ -57,7 +60,9 @@ export class SupplierService {
   }
 
   async findOne(id: string) {
-    const supplier = await this.supplierModel.findByPk(id);
+    const supplier = await this.supplierModel.findByPk(id, {
+      include: [{ model: this.purchaseModel, as: 'purchases', required: false }],
+    });
     if (!supplier) throw new NotFoundException(`Supplier #${id} not found`);
     return supplier;
   }

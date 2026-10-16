@@ -16,11 +16,22 @@ export class AcquisitionLeadService {
   }
 
   async findAll(): Promise<AcquisitionLead[]> {
-    return await this.acquisitionLeadModel.findAll();
+    return await this.acquisitionLeadModel.findAll({
+      include: [
+        { association: 'land_owners', required: false },
+      ],
+    });
   }
 
   async findOne(uuid: string): Promise<AcquisitionLead> {
-    const lead = await this.acquisitionLeadModel.findByPk(uuid);
+    const lead = await this.acquisitionLeadModel.findByPk(uuid, {
+      include: [
+        { association: 'land_owners', required: false },
+        { association: 'follow_ups', required: false },
+        { association: 'negotiation_processes', required: false },
+        { association: 'legal_documents', required: false },
+      ],
+    });
     if (!lead) throw new NotFoundException('Acquisition Lead not found');
     return lead;
   }

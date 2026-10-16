@@ -21,4 +21,14 @@ export class CreateAcquisitionLeadDto {
   @IsNumber()
   @IsOptional()
   land_area?: number;
+
+  @ApiPropertyOptional({ description: 'Status of the lead', example: 'New' })
+  @IsString()
+  @IsOptional()
+  lead_status?: string;
+
+  @ApiPropertyOptional({ description: 'Optional project identifier', example: 'PRJ-1001' })
+  @IsString()
+  @IsOptional()
+  projectId?: string;
 }

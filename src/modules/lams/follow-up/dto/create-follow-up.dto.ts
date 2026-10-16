@@ -31,4 +31,9 @@ export class CreateFollowUpDto {
   @IsString()
   @IsOptional()
   remarks?: string;
+
+  @ApiPropertyOptional({ description: 'Optional project identifier', example: 'PRJ-1001' })
+  @IsString()
+  @IsOptional()
+  projectId?: string;
 }

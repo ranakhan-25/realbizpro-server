@@ -16,11 +16,19 @@ export class LegalDocumentService {
   }
 
   async findAll(): Promise<LegalDocument[]> {
-    return await this.legalDocumentModel.findAll();
+    return await this.legalDocumentModel.findAll({
+      include: [
+        { association: 'acquisition_lead', required: false },
+      ],
+    });
   }
 
   async findOne(uuid: string): Promise<LegalDocument> {
-    const document = await this.legalDocumentModel.findByPk(uuid);
+    const document = await this.legalDocumentModel.findByPk(uuid, {
+      include: [
+        { association: 'acquisition_lead', required: false },
+      ],
+    });
     if (!document) throw new NotFoundException('Legal Document not found');
     return document;
   }

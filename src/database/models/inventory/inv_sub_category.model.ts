@@ -28,8 +28,8 @@ export class InvSubCategory extends BaseModel<InvSubCategoryAttributes, InvSubCa
   @Column({ type: DataType.UUID, allowNull: false })
   category_id: any;
 
-  @BelongsTo(() => InvCategory)
-  category: InvCategory;
+  @BelongsTo(() => InvCategory, { foreignKey: 'category_id', as: 'category' })
+  declare category?: InvCategory;
 
   @Column({ type: DataType.INTEGER, allowNull: true })
   created_by?: number;
@@ -40,8 +40,8 @@ export class InvSubCategory extends BaseModel<InvSubCategoryAttributes, InvSubCa
   @Column({ type: DataType.INTEGER, allowNull: true })
   deleted_by?: number;
 
-  @HasMany(() => InvItem)
-  items: InvItem[];
+  @HasMany(() => InvItem, { foreignKey: 'sub_category_id', as: 'items' })
+  declare items?: InvItem[];
 
   @Column({ type: DataType.STRING, allowNull: true, field: 'created_by' })
   declare createdBy?: string;
@@ -51,5 +51,11 @@ export class InvSubCategory extends BaseModel<InvSubCategoryAttributes, InvSubCa
 
   @Column({ type: DataType.STRING, allowNull: true, field: 'deleted_by' })
   declare deletedBy?: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  declare projectId?: string;
 }
 

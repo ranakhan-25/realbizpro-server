@@ -3,6 +3,8 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Sequelize } from 'sequelize-typescript';
 import { InvPurchase } from 'src/database/models/inventory/inv_purchase.model';
 import { InvPurchaseItem } from 'src/database/models/inventory/inv_purchase_item.model';
+import { InvSupplier } from 'src/database/models/inventory/inv_supplier.model';
+import { InvItem } from 'src/database/models/inventory/inv_item.model';
 import { CreateInvPurchaseDto } from './dto/create-inv-purchase.dto';
 import { UpdateInvPurchaseDto } from './dto/update-inv-purchase.dto';
 import { QueryInvPurchaseDto } from './dto/query-inv-purchase.dto';
@@ -12,6 +14,8 @@ export class PurchaseService {
   constructor(
     @InjectModel(InvPurchase) private readonly purchaseModel: typeof InvPurchase,
     @InjectModel(InvPurchaseItem) private readonly purchaseItemModel: typeof InvPurchaseItem,
+    @InjectModel(InvSupplier) private readonly supplierModel: typeof InvSupplier,
+    @InjectModel(InvItem) private readonly itemModel: typeof InvItem,
     private sequelize: Sequelize,
   ) {}
 
@@ -75,7 +79,15 @@ export class PurchaseService {
       where,
       limit,
       offset,
-      include: [{ model: this.purchaseItemModel, as: 'items', required: false }],
+      include: [
+        { model: this.supplierModel, as: 'supplier', required: false },
+        {
+          model: this.purchaseItemModel,
+          as: 'items',
+          required: false,
+          include: [{ model: this.itemModel, as: 'item', required: false }],
+        },
+      ],
       order: [['date', 'DESC'], ['createdAt', 'DESC']],
     });
 
@@ -87,7 +99,15 @@ export class PurchaseService {
 
   async findOne(id: string) {
     const purchase = await this.purchaseModel.findByPk(id, {
-      include: [{ model: this.purchaseItemModel, as: 'items', required: false }],
+      include: [
+        { model: this.supplierModel, as: 'supplier', required: false },
+        {
+          model: this.purchaseItemModel,
+          as: 'items',
+          required: false,
+          include: [{ model: this.itemModel, as: 'item', required: false }],
+        },
+      ],
     });
     if (!purchase) throw new NotFoundException(`Purchase #${id} not found`);
     return purchase;

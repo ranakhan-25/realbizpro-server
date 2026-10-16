@@ -41,4 +41,9 @@ export class CreateLandOwnerDto {
   @IsNumber()
   @IsOptional()
   ownership_percentage?: number;
+
+  @ApiPropertyOptional({ description: 'Optional project identifier', example: 'PRJ-1001' })
+  @IsString()
+  @IsOptional()
+  projectId?: string;
 }

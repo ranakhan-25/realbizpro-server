@@ -16,11 +16,19 @@ export class LandOwnerService {
   }
 
   async findAll(): Promise<LandOwner[]> {
-    return await this.landOwnerModel.findAll();
+    return await this.landOwnerModel.findAll({
+      include: [
+        { association: 'acquisition_lead', required: false },
+      ],
+    });
   }
 
   async findOne(uuid: string): Promise<LandOwner> {
-    const owner = await this.landOwnerModel.findByPk(uuid);
+    const owner = await this.landOwnerModel.findByPk(uuid, {
+      include: [
+        { association: 'acquisition_lead', required: false },
+      ],
+    });
     if (!owner) throw new NotFoundException('Land Owner not found');
     return owner;
   }

@@ -1,5 +1,5 @@
 // Auto-generated types for SysUom
-// Source: src\database\models\system\sys_uom.model.ts
+// Source: src/database/models/system/sys_uom.model.ts
 
 import { StatusEnum } from '../enum/status.enum';
 

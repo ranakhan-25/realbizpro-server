@@ -3,9 +3,10 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { SupplierService } from './supplier.service';
 import { SupplierController } from './supplier.controller';
 import { InvSupplier } from 'src/database/models/inventory/inv_supplier.model';
+import { InvPurchase } from 'src/database/models/inventory/inv_purchase.model';
 
 @Module({
-  imports: [SequelizeModule.forFeature([InvSupplier])],
+  imports: [SequelizeModule.forFeature([InvSupplier, InvPurchase])],
   controllers: [SupplierController],
   providers: [SupplierService],
 })

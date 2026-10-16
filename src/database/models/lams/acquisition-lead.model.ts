@@ -9,6 +9,9 @@ import {
 } from 'sequelize-typescript';
 import { BaseModel } from '../../base.model';
 import { LandOwner } from './land-owner.model';
+import { FollowUp } from './follow-up.model';
+import { NegotiationProcess } from './negotiation-process.model';
+import { LegalDocument } from './legal-document.model';
 
 import type {
   AcquisitionLeadAttributes,
@@ -77,6 +80,21 @@ export class AcquisitionLead extends BaseModel<
   })
   deleted_by?: number;
 
-  @HasMany(() => LandOwner)
-  land_owners: LandOwner[];
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  declare projectId?: string;
+
+  @HasMany(() => LandOwner, { foreignKey: 'lead_id', as: 'land_owners' })
+  declare land_owners?: LandOwner[];
+
+  @HasMany(() => FollowUp, { foreignKey: 'lead_id', as: 'follow_ups' })
+  declare follow_ups?: FollowUp[];
+
+  @HasMany(() => NegotiationProcess, { foreignKey: 'lead_id', as: 'negotiation_processes' })
+  declare negotiation_processes?: NegotiationProcess[];
+
+  @HasMany(() => LegalDocument, { foreignKey: 'lead_id', as: 'legal_documents' })
+  declare legal_documents?: LegalDocument[];
 }

@@ -16,11 +16,19 @@ export class FollowUpService {
   }
 
   async findAll(): Promise<FollowUp[]> {
-    return await this.followUpModel.findAll();
+    return await this.followUpModel.findAll({
+      include: [
+        { association: 'acquisition_lead', required: false },
+      ],
+    });
   }
 
   async findOne(uuid: string): Promise<FollowUp> {
-    const followUp = await this.followUpModel.findByPk(uuid);
+    const followUp = await this.followUpModel.findByPk(uuid, {
+      include: [
+        { association: 'acquisition_lead', required: false },
+      ],
+    });
     if (!followUp) throw new NotFoundException('Follow-up record not found');
     return followUp;
   }

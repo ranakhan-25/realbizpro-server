@@ -16,11 +16,19 @@ export class NegotiationProcessService {
   }
 
   async findAll(): Promise<NegotiationProcess[]> {
-    return await this.negotiationProcessModel.findAll();
+    return await this.negotiationProcessModel.findAll({
+      include: [
+        { association: 'acquisition_lead', required: false },
+      ],
+    });
   }
 
   async findOne(uuid: string): Promise<NegotiationProcess> {
-    const process = await this.negotiationProcessModel.findByPk(uuid);
+    const process = await this.negotiationProcessModel.findByPk(uuid, {
+      include: [
+        { association: 'acquisition_lead', required: false },
+      ],
+    });
     if (!process) throw new NotFoundException('Negotiation Process not found');
     return process;
   }

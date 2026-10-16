@@ -36,4 +36,9 @@ export class CreateLegalDocumentDto {
   @IsString()
   @IsOptional()
   vetting_remarks?: string;
+
+  @ApiPropertyOptional({ description: 'Optional project identifier', example: 'PRJ-1001' })
+  @IsString()
+  @IsOptional()
+  projectId?: string;
 }
