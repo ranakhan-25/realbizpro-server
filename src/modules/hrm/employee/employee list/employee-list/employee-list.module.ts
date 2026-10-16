@@ -16,6 +16,8 @@ import { HrmShift } from 'src/database/models/hrm/employee/hrm_hrm_shift_model';
 import { Under } from 'src/database/models/hrm/employee/hrm_under_model'; // relation: new import
 import { EmployeeType } from 'src/database/models/hrm/employee/hrm_employee_type-model';
 import { Increment } from 'src/database/models/hrm/employee/hrm_increment_model';
+import { Attendance } from 'src/database/models/hrm/employee/hrm_attendance_model';
+import { BonusGenerate } from 'src/database/models/hrm/employee/hrm_bonus_generate_model';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { Increment } from 'src/database/models/hrm/employee/hrm_increment_model'
       EmployeeType,
       Under,
       Increment,
+      Attendance,
+      BonusGenerate,
     ]), // relation: employee-er 8 ta relation model
   ],
 
