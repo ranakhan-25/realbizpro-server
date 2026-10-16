@@ -1,5 +1,5 @@
 // Auto-generated types for CrmFeature
-// Source: src/database/models/crm/crm_feature.model.ts
+// Source: src\database\models\crm\crm_feature.model.ts
 
 export interface CrmFeatureAttributes {
   id: number;

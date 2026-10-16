@@ -1,5 +1,5 @@
 // Auto-generated types for ProjectType
-// Source: src/database/models/projects/project-type/pr_project_type.model.ts
+// Source: src\database\models\projects\project-type\pr_project_type.model.ts
 
 import type { ProjectShareAssignment } from '../models/projects/project-share-assignment/pr_project_share_assignment.model';
 

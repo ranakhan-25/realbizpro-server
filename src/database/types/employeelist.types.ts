@@ -1,5 +1,5 @@
 // Auto-generated types for EmployeeList
-// Source: src/database/models/hrm/employee/hrm_employeeList_model.ts
+// Source: src\database\models\hrm\employee\hrm_employeeList_model.ts
 
 import { MaritalStatus } from '../models/hrm/employee/hrm_employeeList_model';
 import { EmployeeListStatus } from '../models/hrm/employee/hrm_employeeList_model';
@@ -9,7 +9,7 @@ import type { Section } from '../models/hrm/employee/hrm_section_model';
 import type { Department } from '../models/hrm/employee/hrm_department_model';
 import type { Designation } from '../models/hrm/employee/hrm_designation_model';
 import type { SalaryGrade } from '../models/hrm/employee/hrm_salary_grade_model';
-import type { HrmShift } from '../models/hrm/employee/hrm_hrm_shift_model';
+import type { Shift } from '../models/hrm/employee/hrm_shift_model';
 import type { EmployeeType } from '../models/hrm/employee/hrm_employee_type-model';
 import type { Under } from '../models/hrm/employee/hrm_under_model';
 import type { EmployeeSalary } from '../models/hrm/employee/hrm_employeesalary_model';
@@ -19,6 +19,8 @@ import type { Loan } from '../models/hrm/employee/hrm_loan_model';
 import type { SaturationDeduction } from '../models/hrm/employee/hrm_saturationdeduction_model';
 import type { Overtime } from '../models/hrm/employee/hrm_overtime_model';
 import type { Increment } from '../models/hrm/employee/hrm_increment_model';
+import type { Attendance } from '../models/hrm/employee/hrm_attendance_model';
+import type { BonusGenerate } from '../models/hrm/employee/hrm_bonus_generate_model';
 
 export interface EmployeeListAttributes {
   id: number;
@@ -41,8 +43,6 @@ export interface EmployeeListAttributes {
   departmentId: string;
   designationId: string;
   salaryGradeId?: string | null;
-  shiftId: string;
-  employeeTypeId: string;
   underId: string;
   grossSalary: number;
   joiningDate: string;
@@ -74,7 +74,7 @@ export interface EmployeeListAttributes {
   department?: Department;
   designation?: Designation;
   salaryGrade?: SalaryGrade;
-  shift?: HrmShift;
+  shift?: Shift;
   employeeType?: EmployeeType;
   under?: Under;
   salaries?: EmployeeSalary[];
@@ -84,6 +84,8 @@ export interface EmployeeListAttributes {
   saturationDeductions?: SaturationDeduction[];
   overtimes?: Overtime[];
   increments?: Increment[];
+  attendances?: Attendance[];
+  bonusGenerates?: BonusGenerate[];
 }
 
 export interface EmployeeListCreationAttributes {
@@ -102,8 +104,6 @@ export interface EmployeeListCreationAttributes {
   departmentId: string;
   designationId: string;
   salaryGradeId?: string | null;
-  shiftId: string;
-  employeeTypeId: string;
   underId: string;
   grossSalary?: number; // Has default value
   joiningDate: string;
@@ -139,7 +139,7 @@ export interface EmployeeListWithRelations extends EmployeeListAttributes {
   department?: Department;
   designation?: Designation;
   salaryGrade?: SalaryGrade;
-  shift?: HrmShift;
+  shift?: Shift;
   employeeType?: EmployeeType;
   under?: Under;
   salaries?: EmployeeSalary[];
@@ -149,4 +149,6 @@ export interface EmployeeListWithRelations extends EmployeeListAttributes {
   saturationDeductions?: SaturationDeduction[];
   overtimes?: Overtime[];
   increments?: Increment[];
+  attendances?: Attendance[];
+  bonusGenerates?: BonusGenerate[];
 }

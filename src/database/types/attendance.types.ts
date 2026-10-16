@@ -1,9 +1,9 @@
 // Auto-generated types for Attendance
-// Source: src/database/models/hrm/employee/hrm_attendance_model.ts
+// Source: src\database\models\hrm\employee\hrm_attendance_model.ts
 
 import { AttendanceType } from '../models/hrm/employee/hrm_attendance_model';
 
-import type { Employee } from '../models/hrm/employee/hrm_employee_model';
+import type { EmployeeList } from '../models/hrm/employee/hrm_employeeList_model';
 import type { MonthYear } from '../models/hrm/employee/hrm_monthyear_model';
 
 export interface AttendanceAttributes {
@@ -22,7 +22,7 @@ export interface AttendanceAttributes {
   type: AttendanceType;
 
   // Relations
-  employee?: Employee;
+  employee?: EmployeeList;
   monthYear?: MonthYear;
 }
 
@@ -41,6 +41,6 @@ export type AttendanceUpdateAttributes = Partial<AttendanceCreationAttributes>;
 
 // Helper type for including relations
 export interface AttendanceWithRelations extends AttendanceAttributes {
-  employee?: Employee;
+  employee?: EmployeeList;
   monthYear?: MonthYear;
 }

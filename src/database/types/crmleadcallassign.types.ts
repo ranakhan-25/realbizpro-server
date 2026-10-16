@@ -1,5 +1,5 @@
 // Auto-generated types for CrmLeadCallAssign
-// Source: src/database/models/crm/crm_lead_call_assign.model.ts
+// Source: src\database\models\crm\crm_lead_call_assign.model.ts
 
 import type { CrmLead } from '../models/crm/crm_lead.model';
 

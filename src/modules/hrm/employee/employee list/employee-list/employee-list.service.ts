@@ -1,5 +1,3 @@
-/* eslint-disable prettier/prettier */
-
 import {
   BadRequestException,
   Injectable,
@@ -18,13 +16,14 @@ import { Section } from 'src/database/models/hrm/employee/hrm_section_model';
 import { Department } from 'src/database/models/hrm/employee/hrm_department_model';
 import { Designation } from 'src/database/models/hrm/employee/hrm_designation_model';
 import { SalaryGrade } from 'src/database/models/hrm/employee/hrm_salary_grade_model';
-import { HrmShift } from 'src/database/models/hrm/employee/hrm_hrm_shift_model';
+// import { HrmShift } from 'src/database/models/hrm/employee/hrm_hrm_shift_model';
 
 import { Under } from 'src/database/models/hrm/employee/hrm_under_model';
 import { CreateEmployeeListDto } from './dto/create-employee-list.dto';
 import { UpdateEmployeeListDto } from './dto/update-employee-list.dto';
 import { QueryEmployeeListDto } from './dto/query-employee-list.dto';
 import { EmployeeType } from 'src/database/models/hrm/employee/hrm_employee_type-model';
+import { Shift } from 'src/database/models/hrm/employee/hrm_shift_model';
 
 @Injectable()
 export class EmployeeListService {
@@ -65,8 +64,8 @@ export class EmployeeListService {
     private readonly designationModel: typeof Designation,
     @InjectModel(SalaryGrade)
     private readonly salaryGradeModel: typeof SalaryGrade,
-    @InjectModel(HrmShift)
-    private readonly hrmShiftModel: typeof HrmShift,
+    @InjectModel(Shift)
+    private readonly shiftModel: typeof Shift,
     @InjectModel(EmployeeType)
     private readonly employeeTypeModel: typeof EmployeeType,
     @InjectModel(Under)
@@ -98,7 +97,7 @@ export class EmployeeListService {
         this.salaryGradeModel,
         'Salary grade',
       ],
-      ['shiftId', this.hrmShiftModel, 'Shift'],
+      ['shiftId', this.shiftModel, 'Shift'],
       [
         'employeeTypeId',
         this.employeeTypeModel,

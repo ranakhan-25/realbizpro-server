@@ -1,5 +1,5 @@
 // Auto-generated types for CrmLead
-// Source: src/database/models/crm/crm_lead.model.ts
+// Source: src\database\models\crm\crm_lead.model.ts
 
 import type { CrmLeadCategory } from '../models/crm/crm_lead_category.model';
 import type { CrmLeadStage } from '../models/crm/crm_lead_stage.model';

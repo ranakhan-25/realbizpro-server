@@ -1,5 +1,5 @@
 // Auto-generated types for CrmLeadAttachment
-// Source: src/database/models/crm/crm_lead_attachment.model.ts
+// Source: src\database\models\crm\crm_lead_attachment.model.ts
 
 import type { CrmLead } from '../models/crm/crm_lead.model';
 

@@ -1,5 +1,5 @@
 // Auto-generated types for CrmTaskType
-// Source: src/database/models/crm/crm_task_type.model.ts
+// Source: src\database\models\crm\crm_task_type.model.ts
 
 export interface CrmTaskTypeAttributes {
   id: number;

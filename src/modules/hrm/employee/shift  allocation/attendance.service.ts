@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+/* eslint-disable prettier/prettier */
+
 import {
   BadRequestException,
   Injectable,
@@ -5,119 +8,167 @@ import {
 } from '@nestjs/common';
 
 import { InjectModel } from '@nestjs/sequelize';
+
 import { Op } from 'sequelize';
-
-import { CreateAttendanceDto } from './dto/create-attendance.dto';
-import { QueryAttendanceDto } from './dto/query-attendance.dto';
-import { UpdateAttendanceDto } from './dto/update-attendance.dto';
-
 import {
   Attendance,
   AttendanceType,
 } from 'src/database/models/hrm/employee/hrm_attendance_model';
+import { EmployeeList } from 'src/database/models/hrm/employee/hrm_employeeList_model';
+import { CreateAttendanceDto } from './dto/create-attendance.dto';
+import { UpdateAttendanceDto } from './dto/update-attendance.dto';
+import { QueryAttendanceDto } from './dto/query-attendance.dto';
 
 @Injectable()
 export class AttendanceService {
   constructor(
     @InjectModel(Attendance)
-    private readonly model: typeof Attendance,
+    private readonly attendanceModel: typeof Attendance,
+    @InjectModel(EmployeeList)
+    private readonly employeeListModel: typeof EmployeeList,
   ) {}
 
-  // Create attendance
+  // ---------- helpers ----------
+
+  private async ensureEmployeeExists(
+    employeeId: string,
+  ): Promise<void> {
+    const employee =
+      await this.employeeListModel.findOne({
+        where: { uuid: employeeId } as any,
+      });
+
+    if (!employee) {
+      throw new NotFoundException(
+        `Employee #${employeeId} not found`,
+      );
+    }
+  }
+
+  // MonthYear class registered na thakle skip kore (DB FK ta check korbe)
+  private async ensureMonthYearExists(
+    monthYearId: string,
+  ): Promise<void> {
+    const assoc: any = (
+      this.attendanceModel as any
+    ).associations?.monthYear;
+    const target: any = assoc?.target;
+
+    if (!target || !target.sequelize) {
+      return;
+    }
+
+    const monthYear = await target.findOne({
+      where: { uuid: monthYearId },
+    });
+
+    if (!monthYear) {
+      throw new NotFoundException(
+        `Month year #${monthYearId} not found`,
+      );
+    }
+  }
+
+  // ---------- CRUD ----------
+
   async create(
     dto: CreateAttendanceDto,
   ): Promise<Attendance> {
-    const item = await this.model.create({
-      ...dto,
-      type: dto.type ?? AttendanceType.WORKDAY,
-    });
+    await this.ensureEmployeeExists(
+      dto.employeeId,
+    );
 
-    return this.findOne(item.uuid);
+    if (dto.monthYearId) {
+      await this.ensureMonthYearExists(
+        dto.monthYearId,
+      );
+    }
+
+    const record =
+      await this.attendanceModel.create({
+        ...dto,
+        type: dto.type ?? AttendanceType.WORKDAY,
+      } as any);
+
+    return this.findOne(record.uuid);
   }
 
-  // Get all attendance with search, filters and pagination
   async findAll(query: QueryAttendanceDto) {
-    const page = query.page ?? 1;
-    const limit = query.limit ?? 10;
+    const {
+      page = 1,
+      limit = 10,
+      skip,
+      employeeId,
+      monthYearId,
+      date,
+      type,
+      search,
+      sortBy = 'createdAt',
+      sortOrder = 'DESC',
+      withDeleted = false,
+    } = query;
 
     const offset =
-      query.skip ?? (page - 1) * limit;
+      skip !== undefined && skip !== null
+        ? skip
+        : (page - 1) * limit;
 
     const where: any = {};
 
-    // Search by day or note
-    if (query.search?.trim()) {
-      const searchTerm = query.search.trim();
+    if (employeeId) {
+      where.employeeId = employeeId;
+    }
 
+    if (monthYearId) {
+      where.monthYearId = monthYearId;
+    }
+
+    if (date) {
+      where.date = date;
+    }
+
+    if (type) {
+      where.type = type;
+    }
+
+    if (search) {
       where[Op.or] = [
-        {
-          day: {
-            [Op.iLike]: `%${searchTerm}%`,
-          },
-        },
-        {
-          note: {
-            [Op.iLike]: `%${searchTerm}%`,
-          },
-        },
+        { day: { [Op.iLike]: `%${search}%` } },
+        { note: { [Op.iLike]: `%${search}%` } },
       ];
     }
 
-    // Filter by employee
-    if (query.employeeId) {
-      where.employeeId = query.employeeId;
-    }
-
-    // Filter by month-year
-    if (query.monthYearId) {
-      where.monthYearId = query.monthYearId;
-    }
-
-    // Filter by date
-    if (query.date) {
-      where.date = query.date;
-    }
-
-    // Filter by attendance type
-    if (query.type) {
-      where.type = query.type;
-    }
-
     const { rows, count } =
-      await this.model.findAndCountAll({
+      await this.attendanceModel.findAndCountAll({
         where,
         limit,
         offset,
-        paranoid: !(query.withDeleted ?? false),
-        order: [
-          [
-            query.sortBy ?? 'createdAt',
-            query.sortOrder ?? 'DESC',
-          ],
-        ],
+        order: [[sortBy, sortOrder]],
+        paranoid: !withDeleted,
       });
-
-    const currentPage =
-      query.skip !== undefined
-        ? Math.floor(offset / limit) + 1
-        : page;
 
     const totalPages =
       Math.ceil(count / limit) || 1;
+    const currentPage =
+      skip !== undefined && skip !== null
+        ? Math.floor(skip / limit) + 1
+        : page;
+
+    const nextPage =
+      currentPage < totalPages
+        ? currentPage + 1
+        : null;
+
+    const previousPage =
+      currentPage > 1 ? currentPage - 1 : null;
 
     return {
       data: rows,
       meta: {
         page: currentPage,
         pageNo: currentPage,
-        nextPage:
-          currentPage < totalPages
-            ? currentPage + 1
-            : null,
-        previousPage:
-          currentPage > 1
-            ? currentPage - 1
-            : null,
+        nextPage,
+        previousPage,
         limit,
         skip: offset,
         total: count,
@@ -126,72 +177,105 @@ export class AttendanceService {
     };
   }
 
-  // Get attendance by UUID
   async findOne(
     uuid: string,
-    withDeleted = false,
   ): Promise<Attendance> {
-    const item = await this.model.findOne({
-      where: { uuid } as any,
-      paranoid: !withDeleted,
-    });
+    const record =
+      await this.attendanceModel.findOne({
+        where: { uuid } as any,
+      });
 
-    if (!item) {
+    if (!record) {
       throw new NotFoundException(
         `Attendance #${uuid} not found`,
       );
     }
 
-    return item;
+    return record;
   }
 
-  // Update attendance
   async update(
     uuid: string,
     dto: UpdateAttendanceDto,
   ): Promise<Attendance> {
-    const item = await this.findOne(uuid);
+    const record =
+      await this.attendanceModel.findOne({
+        where: { uuid } as any,
+      });
 
-    await item.update(dto);
+    if (!record) {
+      throw new NotFoundException(
+        `Attendance #${uuid} not found`,
+      );
+    }
+
+    if (
+      dto.employeeId &&
+      dto.employeeId !== record.employeeId
+    ) {
+      await this.ensureEmployeeExists(
+        dto.employeeId,
+      );
+    }
+
+    if (
+      dto.monthYearId &&
+      dto.monthYearId !== record.monthYearId
+    ) {
+      await this.ensureMonthYearExists(
+        dto.monthYearId,
+      );
+    }
+
+    await record.update(dto as any);
 
     return this.findOne(uuid);
   }
 
-  // Soft delete attendance
   async remove(
     uuid: string,
   ): Promise<{ message: string }> {
-    const item = await this.findOne(uuid);
+    const record =
+      await this.attendanceModel.findOne({
+        where: { uuid } as any,
+      });
 
-    await item.destroy();
+    if (!record) {
+      throw new NotFoundException(
+        `Attendance #${uuid} not found`,
+      );
+    }
+
+    // soft delete
+    await record.destroy();
 
     return {
       message: `Attendance #${uuid} deleted successfully`,
     };
   }
 
-  // Restore deleted attendance
   async restore(
     uuid: string,
   ): Promise<Attendance> {
-    const item = await this.model.findOne({
-      where: { uuid } as any,
-      paranoid: false,
-    });
+    const record =
+      await this.attendanceModel.findOne({
+        where: { uuid } as any,
+        paranoid: false,
+      });
 
-    if (!item) {
+    if (!record) {
       throw new NotFoundException(
         `Attendance #${uuid} not found`,
       );
     }
 
-    if (!(item as any).deletedAt) {
+    if (!record.deletedAt) {
       throw new BadRequestException(
         `Attendance #${uuid} is not deleted`,
       );
     }
 
-    await item.restore();
+    await record.restore();
 
     return this.findOne(uuid);
   }

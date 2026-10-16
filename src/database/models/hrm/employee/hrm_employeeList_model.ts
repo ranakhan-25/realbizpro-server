@@ -17,7 +17,7 @@ import { Section } from './hrm_section_model';
 import { Department } from './hrm_department_model';
 import { Designation } from './hrm_designation_model';
 import { SalaryGrade } from './hrm_salary_grade_model';
-import { HrmShift } from './hrm_hrm_shift_model';
+// import { HrmShift } from './hrm_hrm_shift_model';
 
 import { Under } from './hrm_under_model';
 import { EmployeeSalary } from './hrm_employeesalary_model';
@@ -30,6 +30,7 @@ import { EmployeeType } from './hrm_employee_type-model';
 import { Increment } from './hrm_increment_model';
 import { Attendance } from './hrm_attendance_model';
 import { BonusGenerate } from './hrm_bonus_generate_model';
+import { Shift } from './hrm_shift_model';
 
 export enum EmployeeListStatus {
   ACTIVE = 'active',
@@ -251,26 +252,12 @@ export class EmployeeList
   })
   declare salaryGrade?: SalaryGrade;
 
-  @ForeignKey(() => HrmShift)
-  @Column({
-    type: DataType.UUID,
-    allowNull: false,
-  })
-  declare shiftId: string;
-
-  @BelongsTo(() => HrmShift, {
+  @BelongsTo(() => Shift, {
     foreignKey: 'shiftId',
     targetKey: 'uuid',
     as: 'shift',
   })
-  declare shift?: HrmShift;
-
-  @ForeignKey(() => EmployeeType)
-  @Column({
-    type: DataType.UUID,
-    allowNull: false,
-  })
-  declare employeeTypeId: string;
+  declare shift?: Shift;
 
   @BelongsTo(() => EmployeeType, {
     foreignKey: 'employeeTypeId',

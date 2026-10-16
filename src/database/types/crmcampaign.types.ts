@@ -1,5 +1,5 @@
 // Auto-generated types for CrmCampaign
-// Source: src/database/models/crm/crm_campaign.model.ts
+// Source: src\database\models\crm\crm_campaign.model.ts
 
 import type { CrmLead } from '../models/crm/crm_lead.model';
 

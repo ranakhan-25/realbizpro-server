@@ -1,5 +1,7 @@
 // Auto-generated types for Boq
-// Source: src/database/models/projects/boq/pr_boq.model.ts
+// Source: src\database\models\projects\boq\pr_boq.model.ts
+
+import type { Project } from '../models/projects/project/pr_project.model';
 
 export interface BoqAttributes {
   id: number;
@@ -7,6 +9,7 @@ export interface BoqAttributes {
   createdAt: Date;
   updatedAt: Date;
   deletedAt?: Date;
+  projectId: string | null;
   uid?: string | null;
   date: Date;
   titleOfWork: string;
@@ -21,9 +24,13 @@ export interface BoqAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+
+  // Relations
+  project: Project;
 }
 
 export interface BoqCreationAttributes {
+  projectId?: string | null; // Nullable
   uid?: string | null;
   date: Date;
   titleOfWork: string;
@@ -44,5 +51,5 @@ export type BoqUpdateAttributes = Partial<BoqCreationAttributes>;
 
 // Helper type for including relations
 export interface BoqWithRelations extends BoqAttributes {
-  // No relations defined
+  project: Project;
 }

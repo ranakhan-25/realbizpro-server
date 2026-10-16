@@ -1,5 +1,5 @@
 // Auto-generated types for SysRole
-// Source: src/database/models/system/sys_role.model.ts
+// Source: src\database\models\system\sys_role.model.ts
 
 import type { SysUser } from '../models/system/sys_user.model';
 import type { SysPermission } from '../models/system/sys_permission.model';

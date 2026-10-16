@@ -1,5 +1,5 @@
 // Auto-generated types for SysSupplier
-// Source: src/database/models/system/supplier/sys_suplier.model.ts
+// Source: src\database\models\system\supplier\sys_suplier.model.ts
 
 import { StatusEnum } from '@/database/enum/status.enum';
 

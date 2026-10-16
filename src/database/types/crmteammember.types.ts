@@ -1,5 +1,5 @@
 // Auto-generated types for CrmTeamMember
-// Source: src/database/models/crm/crm_team_member.model.ts
+// Source: src\database\models\crm\crm_team_member.model.ts
 
 import type { CrmTeam } from '../models/crm/crm_team.model';
 

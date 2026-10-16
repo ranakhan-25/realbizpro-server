@@ -1,5 +1,5 @@
 // Auto-generated types for SysRequestAssignee
-// Source: src/database/models/deligation/sys_approval_request_assingees.model.ts
+// Source: src\database\models\deligation\sys_approval_request_assingees.model.ts
 
 import type { SysApprovalRequest } from '../models/deligation/sys_approval_requests.model';
 import type { SysApprovalStep } from '../models/deligation/sys_approval_steps.model';
