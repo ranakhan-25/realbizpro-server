@@ -1,0 +1,37 @@
+// Auto-generated types for EmployeeSalary
+// Source: src/database/models/hrm/employee/hrm_employeesalary_model.ts
+
+import type { EmployeeList } from '../models/hrm/employee/hrm_employeeList_model';
+
+export interface EmployeeSalaryAttributes {
+  id: number;
+  uuid: string;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt?: Date;
+  employeeId: string;
+  basicSalary: number;
+  addedById?: string | null;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+  deletedBy?: string | null;
+
+  // Relations
+  employee?: EmployeeList;
+}
+
+export interface EmployeeSalaryCreationAttributes {
+  employeeId: string;
+  basicSalary?: number; // Has default value
+  addedById?: string | null;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+  deletedBy?: string | null;
+}
+
+export type EmployeeSalaryUpdateAttributes = Partial<EmployeeSalaryCreationAttributes>;
+
+// Helper type for including relations
+export interface EmployeeSalaryWithRelations extends EmployeeSalaryAttributes {
+  employee?: EmployeeList;
+}

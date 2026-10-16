@@ -104,6 +104,20 @@ import { ProjectShareAssignmentModule } from './modules/projects/project-share-a
 import { CategoryModule } from './modules/projects/billing/category/category.module';
 import { SubCategoryModule } from './modules/projects/billing/sub-category/sub-category.module';
 import { FlatLandBookingModule } from './modules/projects/flat-land-booking/flat-land-booking.module';
+import { CommissionModule } from './modules/hrm/employee/employee list/commission/commission.module';
+import { AllowanceModule } from './modules/hrm/employee/employee list/allowance/allowance.module';
+import { EmployeeListModule } from './modules/hrm/employee/employee list/employee-list/employee-list.module';
+import { EmployeeSalaryModule } from './modules/hrm/employee/employee list/employee-salary/employee-salary.module';
+import { EmployeeTypeModule } from './modules/hrm/employee/employee list/employee-type/employee-type.module';
+import { HrmShiftModule } from './modules/hrm/employee/employee list/hrm-shift/hrm-shift.module';
+import { LoanModule } from './modules/hrm/employee/employee list/loan/loan.module';
+import { OvertimeModule } from './modules/hrm/employee/employee list/overtime/overtime.module';
+import { SalaryGradeModule } from './modules/hrm/employee/employee list/salary-grade/salary-grade.module';
+import { SaturationDeductionModule } from './modules/hrm/employee/employee list/saturation-deduction/saturation-deduction.module';
+import { UnderModule } from './modules/hrm/employee/employee list/under/under.module';
+import { EmployeeHierarchyModule } from './modules/hrm/employee/employee-hierarchy/employee-hierarchy.module';
+import { EmployeeCardModule } from './modules/hrm/employee/employee-card/employee-card.module';
+import { IncrementModule } from './modules/hrm/employee/increment/increment.module';
 
 @Module({
   imports: [
