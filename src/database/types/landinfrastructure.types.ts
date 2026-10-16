@@ -1,5 +1,5 @@
 // Auto-generated types for LandInfrastructure
-// Source: src/database/models/projects/land-infrastructure/pr_land_infrastructure.model.ts
+// Source: src\database\models\projects\land-infrastructure\pr_land_infrastructure.model.ts
 
 import { LandInfrastructureKind } from '../models/projects/land-infrastructure/pr_land_infrastructure.model';
 

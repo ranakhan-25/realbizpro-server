@@ -1,28 +1,43 @@
+/* eslint-disable prettier/prettier */
+
 import { ApiPropertyOptional } from '@nestjs/swagger';
+
 import {
   Transform,
   Type,
 } from 'class-transformer';
+
 import {
   IsBoolean,
   IsEnum,
+  IsIn,
   IsInt,
   IsOptional,
   IsString,
+  IsUUID,
+  Matches,
   Max,
   Min,
 } from 'class-validator';
 import { AttendanceType } from 'src/database/models/hrm/employee/hrm_attendance_model';
 
 export class QueryAttendanceDto {
-  @ApiPropertyOptional({ default: 1 })
+  @ApiPropertyOptional({
+    example: 1,
+    default: 1,
+    description: 'Current page number',
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
   page?: number = 1;
 
-  @ApiPropertyOptional({ default: 10 })
+  @ApiPropertyOptional({
+    example: 10,
+    default: 10,
+    description: 'Items per page',
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
@@ -30,7 +45,11 @@ export class QueryAttendanceDto {
   @Max(100)
   limit?: number = 10;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    example: 0,
+    description:
+      'Number of records to skip (alternative to page)',
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
@@ -38,45 +57,82 @@ export class QueryAttendanceDto {
   skip?: number;
 
   @ApiPropertyOptional({
-    description:
-      'Search attendance by day or note',
     example: 'Tuesday',
+    description: 'Search by day or note',
   })
   @IsOptional()
   @IsString()
   search?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    example: 'employee-uuid',
+    description: 'Filter by employee',
+  })
   @IsOptional()
-  @IsString()
+  @IsUUID('all')
   employeeId?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    example: 'month-year-uuid',
+    description: 'Filter by month-year',
+  })
   @IsOptional()
-  @IsString()
+  @IsUUID('all')
   monthYearId?: string;
 
-  @ApiPropertyOptional({ example: '2026-10-13' })
+  @ApiPropertyOptional({
+    example: '2026-10-13',
+    description: 'Filter by date (YYYY-MM-DD)',
+  })
   @IsOptional()
-  @IsString()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+    message: 'date must be in YYYY-MM-DD format',
+  })
   date?: string;
 
-  @ApiPropertyOptional({ enum: AttendanceType })
+  @ApiPropertyOptional({
+    enum: AttendanceType,
+    example: AttendanceType.WORKDAY,
+    description: 'Filter by attendance type',
+  })
   @IsOptional()
   @IsEnum(AttendanceType)
   type?: AttendanceType;
 
-  @ApiPropertyOptional({ default: 'createdAt' })
+  @ApiPropertyOptional({
+    example: 'createdAt',
+    default: 'createdAt',
+    enum: [
+      'createdAt',
+      'updatedAt',
+      'date',
+      'day',
+      'type',
+    ],
+  })
   @IsOptional()
-  @IsString()
+  @IsIn([
+    'createdAt',
+    'updatedAt',
+    'date',
+    'day',
+    'type',
+  ])
   sortBy?: string = 'createdAt';
 
-  @ApiPropertyOptional({ default: 'DESC' })
+  @ApiPropertyOptional({
+    example: 'DESC',
+    default: 'DESC',
+    enum: ['ASC', 'DESC'],
+  })
   @IsOptional()
-  @IsEnum(['ASC', 'DESC'])
+  @IsIn(['ASC', 'DESC'])
   sortOrder?: 'ASC' | 'DESC' = 'DESC';
 
-  @ApiPropertyOptional({ default: false })
+  @ApiPropertyOptional({
+    description: 'Include soft-deleted records',
+    default: false,
+  })
   @IsOptional()
   @Transform(
     ({ value }) =>

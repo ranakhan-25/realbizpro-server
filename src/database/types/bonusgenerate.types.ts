@@ -1,10 +1,10 @@
 // Auto-generated types for BonusGenerate
-// Source: src/database/models/hrm/employee/hrm_bonus_generate_model.ts
+// Source: src\database\models\hrm\employee\hrm_bonus_generate_model.ts
 
 import { BonusGenerateStatus } from '../models/hrm/employee/hrm_bonus_generate_model';
 
 import type { Bonus } from '../models/hrm/employee/hrm_bonus_model';
-import type { Employee } from '../models/hrm/employee/hrm_employee_model';
+import type { EmployeeList } from '../models/hrm/employee/hrm_employeeList_model';
 
 export interface BonusGenerateAttributes {
   id: number;
@@ -23,7 +23,7 @@ export interface BonusGenerateAttributes {
 
   // Relations
   bonus?: Bonus;
-  employee?: Employee;
+  employee?: EmployeeList;
 }
 
 export interface BonusGenerateCreationAttributes {
@@ -42,5 +42,5 @@ export type BonusGenerateUpdateAttributes = Partial<BonusGenerateCreationAttribu
 // Helper type for including relations
 export interface BonusGenerateWithRelations extends BonusGenerateAttributes {
   bonus?: Bonus;
-  employee?: Employee;
+  employee?: EmployeeList;
 }

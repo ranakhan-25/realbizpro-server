@@ -1,5 +1,5 @@
 // Auto-generated types for SysDistrict
-// Source: src/database/models/system/sys_districts.model.ts
+// Source: src\database\models\system\sys_districts.model.ts
 
 import type { SysDivision } from '../models/system/sys_divisions.model';
 import type { SysUpazila } from '../models/system/sys_upazila.model';

@@ -1,5 +1,5 @@
 // Auto-generated types for CrmRequirementType
-// Source: src/database/models/crm/crm_requirement_type.model.ts
+// Source: src\database\models\crm\crm_requirement_type.model.ts
 
 export interface CrmRequirementTypeAttributes {
   id: number;

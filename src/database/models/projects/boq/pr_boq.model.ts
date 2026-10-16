@@ -1,5 +1,3 @@
-/* eslint-disable prettier/prettier */
-
 import {
   BelongsTo,
   Column,
@@ -35,7 +33,7 @@ export class Boq
   @ForeignKey(() => Project)
   @Column({
     type: DataType.UUID,
-    allowNull: false,
+    allowNull: true,
   })
   declare projectId: string;
 

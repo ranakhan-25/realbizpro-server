@@ -1,5 +1,5 @@
 // Auto-generated types for CrmInternalTaskAssignee
-// Source: src/database/models/crm/crm_internal_task_assignee.model.ts
+// Source: src\database\models\crm\crm_internal_task_assignee.model.ts
 
 import type { CrmInternalTask } from '../models/crm/crm_internal_task.model';
 

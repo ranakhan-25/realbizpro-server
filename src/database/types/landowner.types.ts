@@ -1,5 +1,5 @@
 // Auto-generated types for LandOwner
-// Source: src/database/models/lams/land-owner.model.ts
+// Source: src\database\models\lams\land-owner.model.ts
 
 import type { AcquisitionLead } from '../models/lams/acquisition-lead.model';
 

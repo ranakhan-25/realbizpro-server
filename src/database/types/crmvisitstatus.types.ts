@@ -1,5 +1,5 @@
 // Auto-generated types for CrmVisitStatus
-// Source: src/database/models/crm/crm_visit_status.model.ts
+// Source: src\database\models\crm\crm_visit_status.model.ts
 
 export interface CrmVisitStatusAttributes {
   id: number;

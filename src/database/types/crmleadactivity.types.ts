@@ -1,5 +1,5 @@
 // Auto-generated types for CrmLeadActivity
-// Source: src/database/models/crm/crm_lead_activity.model.ts
+// Source: src\database\models\crm\crm_lead_activity.model.ts
 
 import type { CrmLead } from '../models/crm/crm_lead.model';
 

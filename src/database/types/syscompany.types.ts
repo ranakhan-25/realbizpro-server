@@ -1,5 +1,5 @@
 // Auto-generated types for SysCompany
-// Source: src/database/models/system/sys_company.model.ts
+// Source: src\database\models\system\sys_company.model.ts
 
 export interface SysCompanyAttributes {
   id: number;

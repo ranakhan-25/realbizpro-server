@@ -1,5 +1,5 @@
 // Auto-generated types for CrmLeadPropertyInterest
-// Source: src/database/models/crm/crm_lead_property_interest.model.ts
+// Source: src\database\models\crm\crm_lead_property_interest.model.ts
 
 import type { CrmLead } from '../models/crm/crm_lead.model';
 

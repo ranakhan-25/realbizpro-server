@@ -1,5 +1,5 @@
 // Auto-generated types for CrmLeadRequirement
-// Source: src/database/models/crm/crm_lead_requirement.model.ts
+// Source: src\database\models\crm\crm_lead_requirement.model.ts
 
 import type { CrmLead } from '../models/crm/crm_lead.model';
 

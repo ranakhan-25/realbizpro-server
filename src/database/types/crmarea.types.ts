@@ -1,5 +1,5 @@
 // Auto-generated types for CrmArea
-// Source: src/database/models/crm/crm_area.model.ts
+// Source: src\database\models\crm\crm_area.model.ts
 
 export interface CrmAreaAttributes {
   id: number;

@@ -1,5 +1,5 @@
 // Auto-generated types for CrmDealNegotiation
-// Source: src/database/models/crm/crm_deal_negotiation.model.ts
+// Source: src\database\models\crm\crm_deal_negotiation.model.ts
 
 import type { CrmLead } from '../models/crm/crm_lead.model';
 
