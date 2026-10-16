@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {
   BelongsTo,
   Column,
@@ -8,13 +9,12 @@ import {
 import { BaseModel } from 'src/database/base.model';
 
 import { Bonus } from './hrm_bonus_model';
-// import { Employee } from './hrm_employee_model';
+import { Employee } from './hrm_employee_model';
 import {
   BonusGenerateAttributes,
   BonusGenerateCreationAttributes,
   BonusGenerateUpdateAttributes,
 } from 'src/database/types/bonusgenerate.types';
-import { EmployeeList } from './hrm_employeeList_model';
 
 export enum BonusGenerateStatus {
   ACTIVE = 'active',
@@ -55,7 +55,7 @@ export class BonusGenerate
   })
   declare bonusId: string;
 
-  @ForeignKey(() => EmployeeList)
+  @ForeignKey(() => Employee)
   @Column({
     type: DataType.UUID,
     allowNull: false,
@@ -109,10 +109,10 @@ export class BonusGenerate
   })
   declare bonus?: Bonus;
 
-  @BelongsTo(() => EmployeeList, {
+  @BelongsTo(() => Employee, {
     foreignKey: 'employeeId',
     targetKey: 'uuid',
     as: 'employee',
   })
-  declare employee?: EmployeeList;
+  declare employee?: Employee;
 }

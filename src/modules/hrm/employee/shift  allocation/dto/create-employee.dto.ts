@@ -8,8 +8,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { EmployeeListStatus } from 'src/database/models/hrm/employee/hrm_employeeList_model';
-// import { EmployeeStatus } from 'src/database/models/hrm/employee/hrm_employee_model';
+import { EmployeeStatus } from 'src/database/models/hrm/employee/hrm_employee_model';
 
 export class CreateEmployeeDto {
   @ApiProperty({ example: 'EMP-001' })
@@ -23,10 +22,10 @@ export class CreateEmployeeDto {
   name: string;
 
   @ApiPropertyOptional({
-    enum: EmployeeListStatus,
-    default: EmployeeListStatus.ACTIVE,
+    enum: EmployeeStatus,
+    default: EmployeeStatus.ACTIVE,
   })
   @IsOptional()
-  @IsEnum(EmployeeListStatus)
-  status?: EmployeeListStatus;
+  @IsEnum(EmployeeStatus)
+  status?: EmployeeStatus;
 }

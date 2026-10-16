@@ -13,9 +13,8 @@ import {
   AttendanceAttributes,
   AttendanceCreationAttributes,
 } from 'src/database/types/attendance.types';
-// import { Employee } from './hrm_employee_model';
+import { Employee } from './hrm_employee_model';
 import { MonthYear } from './hrm_monthyear_model';
-import { EmployeeList } from './hrm_employeeList_model';
 
 export enum AttendanceType {
   WORKDAY = 'workday',
@@ -47,7 +46,7 @@ export class Attendance extends BaseModel<
   AttendanceAttributes,
   AttendanceCreationAttributes
 > {
-  @ForeignKey(() => EmployeeList)
+  @ForeignKey(() => Employee)
   @Column({
     type: DataType.UUID,
     allowNull: false,
@@ -100,12 +99,12 @@ export class Attendance extends BaseModel<
   })
   declare type: AttendanceType;
 
-  @BelongsTo(() => EmployeeList, {
+  @BelongsTo(() => Employee, {
     foreignKey: 'employeeId',
     targetKey: 'uuid',
     as: 'employee',
   })
-  declare employee?: EmployeeList;
+  declare employee?: Employee;
 
   @BelongsTo(() => MonthYear, {
     foreignKey: 'monthYearId',

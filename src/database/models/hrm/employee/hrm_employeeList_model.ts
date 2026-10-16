@@ -28,8 +28,6 @@ import { SaturationDeduction } from './hrm_saturationdeduction_model';
 import { Overtime } from './hrm_overtime_model';
 import { EmployeeType } from './hrm_employee_type-model';
 import { Increment } from './hrm_increment_model';
-import { Attendance } from './hrm_attendance_model';
-import { BonusGenerate } from './hrm_bonus_generate_model';
 
 export enum EmployeeListStatus {
   ACTIVE = 'active',
@@ -486,16 +484,4 @@ export class EmployeeList
     as: 'increments',
   })
   declare increments?: Increment[];
-  @HasMany(() => Attendance, {
-    foreignKey: 'employeeId',
-    sourceKey: 'uuid',
-    as: 'attendances',
-  })
-  declare attendances?: Attendance[];
-  @HasMany(() => BonusGenerate, {
-    foreignKey: 'employeeId',
-    sourceKey: 'uuid',
-    as: 'bonusGenerates',
-  })
-  declare bonusGenerates?: BonusGenerate[];
 }

@@ -86,7 +86,7 @@ import { DepartmentModule } from './modules/hrm/employee/department/department.m
 import { DesignationModule } from './modules/hrm/employee/designation/designation.module';
 import { ShiftModule } from './modules/hrm/employee/shift/shift.module';
 import { AttendanceModule } from './modules/hrm/employee/shift  allocation/attendance.module';
-// import { EmployeeModule } from './modules/hrm/employee/shift  allocation/employee.module';
+import { EmployeeModule } from './modules/hrm/employee/shift  allocation/employee.module';
 import { MonthYearModule } from './modules/hrm/employee/shift  allocation/month-year.module';
 import { BonusModule } from './modules/hrm/employee/bonus/bonus.module';
 
@@ -242,7 +242,7 @@ import { IncrementModule } from './modules/hrm/employee/increment/increment.modu
     DesignationModule,
     ShiftModule,
     AttendanceModule,
-    // EmployeeModule,
+    EmployeeModule,
     MonthYearModule,
     BonusModule,
     BonusGenerateModule,
