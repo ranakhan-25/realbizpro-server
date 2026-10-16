@@ -1,8 +1,10 @@
 /* eslint-disable prettier/prettier */
 
 import {
+  BelongsTo,
   Column,
   DataType,
+  ForeignKey,
   Table,
 } from 'sequelize-typescript';
 
@@ -13,6 +15,8 @@ import {
   BoqCreationAttributes,
   BoqUpdateAttributes,
 } from 'src/database/types/boq.types';
+
+import { Project } from 'src/database/models/projects/project/pr_project.model';
 
 @Table({
   tableName: 'pr_boq',
@@ -27,6 +31,24 @@ export class Boq
   >
   implements BoqAttributes
 {
+  // -------------------- Foreign Key: Project --------------------
+  @ForeignKey(() => Project)
+  @Column({
+    type: DataType.UUID,
+    allowNull: false,
+  })
+  declare projectId: string;
+
+  @BelongsTo(() => Project, {
+    foreignKey: 'projectId',
+    targetKey: 'uuid',
+    as: 'project',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
+  declare project: Project;
+
+  // -------------------- Boq Fields --------------------
   @Column({
     type: DataType.STRING,
     allowNull: true,
@@ -86,6 +108,7 @@ export class Boq
   })
   declare available: number;
 
+  // -------------------- Audit --------------------
   @Column({
     type: DataType.STRING,
     allowNull: true,

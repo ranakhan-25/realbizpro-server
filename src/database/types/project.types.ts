@@ -15,6 +15,7 @@ import type { FlatLandBooking } from '../models/projects/flat-land-booking/pr_fl
 import type { FlatLandOffer } from '../models/projects/flat-land-offer/pr_flat_land_offer.model';
 import type { ProjectBillingRecord } from '../models/projects/billing/pr_project_billing_record.model';
 import type { ProjectTeamMember } from '../models/projects/project-team-member/pr_project_team_member.model';
+import type { Boq } from '../models/projects/boq/pr_boq.model';
 
 export interface ProjectAttributes {
   id: number;
@@ -56,6 +57,7 @@ export interface ProjectAttributes {
   flatLandOffers?: FlatLandOffer[];
   billingRecords?: ProjectBillingRecord[];
   teamMembers?: ProjectTeamMember[];
+  boqs: Boq[];
 }
 
 export interface ProjectCreationAttributes {
@@ -97,4 +99,5 @@ export interface ProjectWithRelations extends ProjectAttributes {
   flatLandOffers?: FlatLandOffer[];
   billingRecords?: ProjectBillingRecord[];
   teamMembers?: ProjectTeamMember[];
+  boqs: Boq[];
 }

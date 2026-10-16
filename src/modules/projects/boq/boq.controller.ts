@@ -14,10 +14,14 @@ import { BoqService } from './boq.service';
 import { CreateBoqDto } from './dto/create-boq.dto';
 import { UpdateBoqDto } from './dto/update-boq.dto';
 import { QueryBoqDto } from './dto/query-boq.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Project | Billing | BOQ')
 @Controller('boq')
 export class BoqController {
-  constructor(private readonly boqService: BoqService) {}
+  constructor(
+    private readonly boqService: BoqService,
+  ) {}
 
   @Post()
   create(@Body() dto: CreateBoqDto) {

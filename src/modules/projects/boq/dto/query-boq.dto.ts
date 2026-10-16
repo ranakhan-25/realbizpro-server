@@ -1,6 +1,14 @@
 /* eslint-disable prettier/prettier */
 
-import { IsOptional, IsString, IsInt, Min, IsBoolean } from 'class-validator';
+import {
+  IsBoolean,
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Min,
+} from 'class-validator';
+
 import { Type } from 'class-transformer';
 
 export class QueryBoqDto {
@@ -22,9 +30,15 @@ export class QueryBoqDto {
   @Min(0)
   skip?: number;
 
+  // -------------------- Search --------------------
   @IsOptional()
   @IsString()
   search?: string;
+
+  // -------------------- Filters --------------------
+  @IsOptional()
+  @IsUUID()
+  projectId?: string;
 
   @IsOptional()
   @IsString()
@@ -36,12 +50,18 @@ export class QueryBoqDto {
 
   @IsOptional()
   @IsString()
+  uid?: string;
+
+  // -------------------- Sorting --------------------
+  @IsOptional()
+  @IsString()
   sortBy?: string = 'createdAt';
 
   @IsOptional()
   @IsString()
   sortOrder?: 'ASC' | 'DESC' = 'DESC';
 
+  // -------------------- Deleted --------------------
   @IsOptional()
   @Type(() => Boolean)
   @IsBoolean()
