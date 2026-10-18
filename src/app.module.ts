@@ -109,7 +109,7 @@ import { AllowanceModule } from './modules/hrm/employee/employee list/allowance/
 import { EmployeeListModule } from './modules/hrm/employee/employee list/employee-list/employee-list.module';
 import { EmployeeSalaryModule } from './modules/hrm/employee/employee list/employee-salary/employee-salary.module';
 import { EmployeeTypeModule } from './modules/hrm/employee/employee list/employee-type/employee-type.module';
-import { HrmShiftModule } from './modules/hrm/employee/employee list/hrm-shift/hrm-shift.module';
+// import { HrmShiftModule } from './modules/hrm/employee/employee list/hrm-shift/hrm-shift.module';
 import { LoanModule } from './modules/hrm/employee/employee list/loan/loan.module';
 import { OvertimeModule } from './modules/hrm/employee/employee list/overtime/overtime.module';
 import { SalaryGradeModule } from './modules/hrm/employee/employee list/salary-grade/salary-grade.module';
@@ -254,7 +254,7 @@ import { IncrementModule } from './modules/hrm/employee/increment/increment.modu
     EmployeeListModule,
     EmployeeSalaryModule,
     EmployeeTypeModule,
-    HrmShiftModule,
+    // HrmShiftModule,
     LoanModule,
     OvertimeModule,
     SalaryGradeModule,

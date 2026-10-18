@@ -9,7 +9,7 @@ import type { Section } from '../models/hrm/employee/hrm_section_model';
 import type { Department } from '../models/hrm/employee/hrm_department_model';
 import type { Designation } from '../models/hrm/employee/hrm_designation_model';
 import type { SalaryGrade } from '../models/hrm/employee/hrm_salary_grade_model';
-import type { HrmShift } from '../models/hrm/employee/hrm_hrm_shift_model';
+import type { Shift } from '../models/hrm/employee/hrm_shift_model';
 import type { EmployeeType } from '../models/hrm/employee/hrm_employee_type-model';
 import type { Under } from '../models/hrm/employee/hrm_under_model';
 import type { EmployeeSalary } from '../models/hrm/employee/hrm_employeesalary_model';
@@ -43,8 +43,6 @@ export interface EmployeeListAttributes {
   departmentId: string;
   designationId: string;
   salaryGradeId?: string | null;
-  shiftId: string;
-  employeeTypeId: string;
   underId: string;
   grossSalary: number;
   joiningDate: string;
@@ -76,7 +74,7 @@ export interface EmployeeListAttributes {
   department?: Department;
   designation?: Designation;
   salaryGrade?: SalaryGrade;
-  shift?: HrmShift;
+  shift?: Shift;
   employeeType?: EmployeeType;
   under?: Under;
   salaries?: EmployeeSalary[];
@@ -106,8 +104,6 @@ export interface EmployeeListCreationAttributes {
   departmentId: string;
   designationId: string;
   salaryGradeId?: string | null;
-  shiftId: string;
-  employeeTypeId: string;
   underId: string;
   grossSalary?: number; // Has default value
   joiningDate: string;
@@ -143,7 +139,7 @@ export interface EmployeeListWithRelations extends EmployeeListAttributes {
   department?: Department;
   designation?: Designation;
   salaryGrade?: SalaryGrade;
-  shift?: HrmShift;
+  shift?: Shift;
   employeeType?: EmployeeType;
   under?: Under;
   salaries?: EmployeeSalary[];
