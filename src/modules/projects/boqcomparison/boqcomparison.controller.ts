@@ -14,8 +14,9 @@ import { BoqComparisonService } from './boqcomparison.service';
 import { CreateBoqComparisonDto } from './dto/create-boqcomparison.dto';
 import { QueryBoqComparisonDto } from './dto/query-boqcomparison.dto';
 import { UpdateBoqComparisonDto } from './dto/update-boqcomparison.dto';
+import { ApiTags } from '@nestjs/swagger';
 
-
+@ApiTags("Project | boq-comparison ")
 @Controller('boq-comparison')
 export class BoqComparisonController {
   constructor(private readonly boqComparisonService: BoqComparisonService) {}

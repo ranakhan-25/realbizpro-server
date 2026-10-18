@@ -10,6 +10,7 @@ import { BillingCategory } from 'src/database/models/projects/billing/pr_categor
 import { MaterialRequisition } from 'src/database/models/projects/material-requisition/pr_material_requisition.model';
 import { MaterialRequisitionItem } from 'src/database/models/projects/material-requisition-item/pr_material_requisition_item.model';
 import { ProjectModule } from '../../project/project.module';
+import { MaterialRequisitionItemModule } from '../material-requisition-item/material-requisition-item.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { ProjectModule } from '../../project/project.module';
       BillingCategory,
     ]),
     ProjectModule,
+    MaterialRequisitionItemModule,
   ],
   controllers: [MaterialRequisitionController],
   providers: [MaterialRequisitionService],

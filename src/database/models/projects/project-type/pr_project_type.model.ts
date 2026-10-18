@@ -12,6 +12,7 @@ import {
   ProjectTypeUpdateAttributes,
 } from 'src/database/types/projecttype.types';
 import { ProjectShareAssignment } from '../project-share-assignment/pr_project_share_assignment.model';
+import { Invoice } from '../billing/pr_invoice.model';
 
 @Table({
   tableName: 'project_types',
@@ -45,6 +46,13 @@ export class ProjectType
     as: 'shareAssignments',
   })
   declare shareAssignments?: ProjectShareAssignment[];
+
+  @HasMany(() => Invoice, {
+    foreignKey: 'projectTypeId',
+    sourceKey: 'uuid',
+    as: 'invoices',
+  })
+  declare invoices?: Invoice[];
 
   // ─── Audit fields ───────────────────────────────────────
   @Column({

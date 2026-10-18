@@ -1,14 +1,11 @@
+/* eslint-disable prettier/prettier */
 import {
   Column,
   DataType,
   Model,
   Table,
 } from 'sequelize-typescript';
-
-import type {
-  SysDelegationStatusAttributes,
-  SysDelegationStatusCreationAttributes,
-} from '../../types/sysdelegationstatus.types';
+import type { SysDelegationStatusAttributes, SysDelegationStatusCreationAttributes } from 'src/database/types/sysdelegationstatus.types';
 
 @Table({
   tableName: 'sys_delegation_statuses',
