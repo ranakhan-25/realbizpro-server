@@ -1,5 +1,5 @@
 // Auto-generated types for EmployeeList
-// Source: src/database/models/hrm/employee/hrm_employeeList_model.ts
+// Source: src\database\models\hrm\employee\hrm_employeeList_model.ts
 
 import { MaritalStatus } from '../models/hrm/employee/hrm_employeeList_model';
 import { EmployeeListStatus } from '../models/hrm/employee/hrm_employeeList_model';
@@ -19,6 +19,8 @@ import type { Loan } from '../models/hrm/employee/hrm_loan_model';
 import type { SaturationDeduction } from '../models/hrm/employee/hrm_saturationdeduction_model';
 import type { Overtime } from '../models/hrm/employee/hrm_overtime_model';
 import type { Increment } from '../models/hrm/employee/hrm_increment_model';
+import type { Attendance } from '../models/hrm/employee/hrm_attendance_model';
+import type { BonusGenerate } from '../models/hrm/employee/hrm_bonus_generate_model';
 
 export interface EmployeeListAttributes {
   id: number;
@@ -84,6 +86,8 @@ export interface EmployeeListAttributes {
   saturationDeductions?: SaturationDeduction[];
   overtimes?: Overtime[];
   increments?: Increment[];
+  attendances?: Attendance[];
+  bonusGenerates?: BonusGenerate[];
 }
 
 export interface EmployeeListCreationAttributes {
@@ -149,4 +153,6 @@ export interface EmployeeListWithRelations extends EmployeeListAttributes {
   saturationDeductions?: SaturationDeduction[];
   overtimes?: Overtime[];
   increments?: Increment[];
+  attendances?: Attendance[];
+  bonusGenerates?: BonusGenerate[];
 }

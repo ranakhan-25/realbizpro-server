@@ -1,5 +1,5 @@
 // Auto-generated types for CrInstallmentPlan
-// Source: src/database/models/credit-realization/cr_installment_plan.model.ts
+// Source: src\database\models\credit-realization\cr_installment_plan.model.ts
 
 import type { CrSaleAgreement } from '../models/credit-realization/cr_sale_agreement.model';
 import type { CrInstallmentPayment } from '../models/credit-realization/cr_installment_payment.model';

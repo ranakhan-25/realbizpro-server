@@ -66,9 +66,19 @@ export class MaterialRequisitionItemService {
           }
         : {};
 
+    const filters = {
+      ...where,
+      ...(query.materialRequisitionId
+        ? {
+            materialRequisitionId:
+              query.materialRequisitionId,
+          }
+        : {}),
+    } as WhereOptions<MaterialRequisitionItem>;
+
     const { rows, count } =
       await this.itemModel.findAndCountAll({
-        where: where as WhereOptions,
+        where: filters as WhereOptions,
         include: [
           {
             model: this.requisitionModel,

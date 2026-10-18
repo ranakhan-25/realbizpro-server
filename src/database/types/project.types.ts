@@ -1,5 +1,5 @@
 // Auto-generated types for Project
-// Source: src/database/models/projects/project/pr_project.model.ts
+// Source: src\database\models\projects\project\pr_project.model.ts
 
 import { ProjectStatus } from '../models/projects/project/pr_project.model';
 
@@ -15,6 +15,7 @@ import type { FlatLandBooking } from '../models/projects/flat-land-booking/pr_fl
 import type { FlatLandOffer } from '../models/projects/flat-land-offer/pr_flat_land_offer.model';
 import type { ProjectBillingRecord } from '../models/projects/billing/pr_project_billing_record.model';
 import type { ProjectTeamMember } from '../models/projects/project-team-member/pr_project_team_member.model';
+import type { Invoice } from '../models/projects/billing/pr_invoice.model';
 import type { Boq } from '../models/projects/boq/pr_boq.model';
 
 export interface ProjectAttributes {
@@ -57,6 +58,7 @@ export interface ProjectAttributes {
   flatLandOffers?: FlatLandOffer[];
   billingRecords?: ProjectBillingRecord[];
   teamMembers?: ProjectTeamMember[];
+  invoices?: Invoice[];
   boqs: Boq[];
 }
 
@@ -99,5 +101,6 @@ export interface ProjectWithRelations extends ProjectAttributes {
   flatLandOffers?: FlatLandOffer[];
   billingRecords?: ProjectBillingRecord[];
   teamMembers?: ProjectTeamMember[];
+  invoices?: Invoice[];
   boqs: Boq[];
 }

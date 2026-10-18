@@ -1,5 +1,5 @@
 // Auto-generated types for HrmShift
-// Source: src/database/models/hrm/employee/hrm_hrm_shift_model.ts
+// Source: src\database\models\hrm\employee\hrm_hrm_shift_model.ts
 
 import { HrmShiftStatus } from '../models/hrm/employee/hrm_hrm_shift_model';
 

@@ -1,5 +1,5 @@
 // Auto-generated types for CrmProfession
-// Source: src/database/models/crm/crm_profession.model.ts
+// Source: src\database\models\crm\crm_profession.model.ts
 
 import type { CrmLead } from '../models/crm/crm_lead.model';
 

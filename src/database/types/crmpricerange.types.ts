@@ -1,5 +1,5 @@
 // Auto-generated types for CrmPriceRange
-// Source: src/database/models/crm/crm_price_range.model.ts
+// Source: src\database\models\crm\crm_price_range.model.ts
 
 export interface CrmPriceRangeAttributes {
   id: number;

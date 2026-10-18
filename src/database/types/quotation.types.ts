@@ -1,5 +1,5 @@
 // Auto-generated types for Quotation
-// Source: src/database/models/projects/quatation/pr_quotation.model.ts
+// Source: src\database\models\projects\quatation\pr_quotation.model.ts
 
 import type { BillingCategory } from '../models/projects/billing/pr_category.model';
 import type { BillingSubCategory } from '../models/projects/billing/pr_sub_category.model';

@@ -162,13 +162,13 @@ export class ServiceWorkRequisitionService {
 
     const { rows, count } = await this.serviceWorkRequisitionModel.findAndCountAll({
       where,
-      // include: INCLUDE_RELATIONS(
-      //   this.projectModel,
-      //   this.siteModel,
-      //   this.categoryModel,
-      //   this.subCategoryModel,
-      //   this.itemModel,
-      // ),
+      include: INCLUDE_RELATIONS(
+        this.projectModel,
+        this.siteModel,
+        this.categoryModel,
+        this.subCategoryModel,
+        this.itemModel,
+      ),
       limit,
       offset: calculatedSkip,
       order: [[sortBy ?? 'createdAt', sortOrder]],
@@ -195,13 +195,13 @@ export class ServiceWorkRequisitionService {
   async findOne(uuid: string) {
     const requisition = await this.serviceWorkRequisitionModel.findOne({
       where: { uuid } as WhereOptions<ServiceWorkRequisitionAttributes>,
-      // include: INCLUDE_RELATIONS(
-      //   this.projectModel,
-      //   this.siteModel,
-      //   this.categoryModel,
-      //   this.subCategoryModel,
-      //   this.itemModel,
-      // ),
+      include: INCLUDE_RELATIONS(
+        this.projectModel,
+        this.siteModel,
+        this.categoryModel,
+        this.subCategoryModel,
+        this.itemModel,
+      ),
       paranoid: false,
     });
 

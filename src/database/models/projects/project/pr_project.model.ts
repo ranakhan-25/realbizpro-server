@@ -25,6 +25,7 @@ import { FlatLandOffer } from '../flat-land-offer/pr_flat_land_offer.model';
 import { ProjectBillingRecord } from '../billing/pr_project_billing_record.model';
 import { ProjectTeamMember } from '../project-team-member/pr_project_team_member.model';
 import { Boq } from '../boq/pr_boq.model';
+import { Invoice } from '../billing/pr_invoice.model';
 
 export enum ProjectStatus {
   ACTIVE = 'ACTIVE',
@@ -255,6 +256,13 @@ export class Project
     onUpdate: 'CASCADE',
   })
   declare teamMembers?: ProjectTeamMember[];
+
+  @HasMany(() => Invoice, {
+    foreignKey: 'projectTypeId',
+    sourceKey: 'uuid',
+    as: 'invoices',
+  })
+  declare invoices?: Invoice[];
 
   @HasMany(() => Boq, {
     foreignKey: 'projectId',

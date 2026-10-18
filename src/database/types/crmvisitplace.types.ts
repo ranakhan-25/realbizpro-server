@@ -1,5 +1,5 @@
 // Auto-generated types for CrmVisitPlace
-// Source: src/database/models/crm/crm_visit_place.model.ts
+// Source: src\database\models\crm\crm_visit_place.model.ts
 
 export interface CrmVisitPlaceAttributes {
   id: number;

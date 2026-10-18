@@ -14,26 +14,32 @@ import {
   ProjectPeriodBillingsController,
   ProjectQuotesController,
   ProjectServiceWorkNamesController,
-  ProjectWorkOrdersController,
 } from './project-billing-resources.controller';
 import { ProjectBillingRecordService } from './project-billing-record.service';
+import { BillInvoiceModule } from './bill-invoice/bill-invoice.module';
+import { ItemModule } from './item/item.module';
+import { InvoiceItemModule } from './invoice-item/invoice-item.module';
+import { WorkOrder } from 'src/database/models/projects/billing/work-order/pr_work_order.model';
+import { WorkOrderController } from './work-order/work-order.controller';
+import { WorkOrderService } from './work-order/work-order.service';
+import { CustomerAccountModule } from '../contract/customer-accounts/customer_accounts.module';
 
 @Module({
-  imports: [SequelizeModule.forFeature([ProjectBillingRecord, Project])],
+  imports: [SequelizeModule.forFeature([ProjectBillingRecord, Project, WorkOrder]), BillInvoiceModule, CustomerAccountModule, ItemModule, InvoiceItemModule],
   controllers: [
     ProjectBillItemsController,
     ProjectServiceWorkNamesController,
     ProjectBillInvoicesController,
     ProjectContractorBillsController,
     ProjectLabourWorkBillsController,
-    ProjectWorkOrdersController,
     ProjectContractorWorkOrdersController,
+    WorkOrderController,
     ProjectPeriodBillingsController,
     ProjectAdjustmentBillingsController,
     ProjectQuotesController,
     ProjectBillingRecordController,
   ],
-  providers: [ProjectBillingRecordService],
+  providers: [ProjectBillingRecordService, WorkOrderService],
   exports: [SequelizeModule],
 })
 export class ProjectBillingRecordModule {}
