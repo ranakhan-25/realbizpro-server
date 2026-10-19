@@ -112,12 +112,16 @@ import { EmployeeTypeModule } from './modules/hrm/employee/employee list/employe
 // import { HrmShiftModule } from './modules/hrm/employee/employee list/hrm-shift/hrm-shift.module';
 import { LoanModule } from './modules/hrm/employee/employee list/loan/loan.module';
 import { OvertimeModule } from './modules/hrm/employee/employee list/overtime/overtime.module';
-import { SalaryGradeModule } from './modules/hrm/employee/employee list/salary-grade/salary-grade.module';
+
 import { SaturationDeductionModule } from './modules/hrm/employee/employee list/saturation-deduction/saturation-deduction.module';
 import { UnderModule } from './modules/hrm/employee/employee list/under/under.module';
 import { EmployeeHierarchyModule } from './modules/hrm/employee/employee-hierarchy/employee-hierarchy.module';
 import { EmployeeCardModule } from './modules/hrm/employee/employee-card/employee-card.module';
 import { IncrementModule } from './modules/hrm/employee/increment/increment.module';
+import { SalaryGradeModule } from './modules/hrm/employee/employee list/salary-grade/salary-grade.module';
+import { DeductionRuleModule } from './modules/hrm/configuration/deduction-rule/deduction-rule/deduction-rule.module';
+import { AllowanceDeductionSetupModule } from './modules/hrm/configuration/allowance-deduction-setup/allowance-deduction-setup.module';
+import { SalaryGradeItemModule } from './modules/hrm/configuration/salary-grade-item/salary-grade-item.module';
 
 @Module({
   imports: [
@@ -263,6 +267,10 @@ import { IncrementModule } from './modules/hrm/employee/increment/increment.modu
     EmployeeHierarchyModule,
     EmployeeCardModule,
     IncrementModule,
+    MonthYearModule,
+    DeductionRuleModule,
+    AllowanceDeductionSetupModule,
+    SalaryGradeItemModule,
   ],
   controllers: [AppController, HealthController],
   providers: [
