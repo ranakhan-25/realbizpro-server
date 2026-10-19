@@ -86,7 +86,7 @@ import { DepartmentModule } from './modules/hrm/employee/department/department.m
 import { DesignationModule } from './modules/hrm/employee/designation/designation.module';
 import { ShiftModule } from './modules/hrm/employee/shift/shift.module';
 import { AttendanceModule } from './modules/hrm/employee/shift  allocation/attendance.module';
-// import { EmployeeModule } from './modules/hrm/employee/shift  allocation/employee.module';
+
 import { MonthYearModule } from './modules/hrm/employee/shift  allocation/month-year.module';
 import { BonusModule } from './modules/hrm/employee/bonus/bonus.module';
 
@@ -109,7 +109,7 @@ import { AllowanceModule } from './modules/hrm/employee/employee list/allowance/
 import { EmployeeListModule } from './modules/hrm/employee/employee list/employee-list/employee-list.module';
 import { EmployeeSalaryModule } from './modules/hrm/employee/employee list/employee-salary/employee-salary.module';
 import { EmployeeTypeModule } from './modules/hrm/employee/employee list/employee-type/employee-type.module';
-// import { HrmShiftModule } from './modules/hrm/employee/employee list/hrm-shift/hrm-shift.module';
+
 import { LoanModule } from './modules/hrm/employee/employee list/loan/loan.module';
 import { OvertimeModule } from './modules/hrm/employee/employee list/overtime/overtime.module';
 
@@ -122,6 +122,9 @@ import { SalaryGradeModule } from './modules/hrm/employee/employee list/salary-g
 import { DeductionRuleModule } from './modules/hrm/configuration/deduction-rule/deduction-rule/deduction-rule.module';
 import { AllowanceDeductionSetupModule } from './modules/hrm/configuration/allowance-deduction-setup/allowance-deduction-setup.module';
 import { SalaryGradeItemModule } from './modules/hrm/configuration/salary-grade-item/salary-grade-item.module';
+import { LeaveTypeModule } from './modules/hrm/configuration/leave-type/leave-type.module';
+import { HolidayModule } from './modules/hrm/configuration/holiday/holiday.module';
+import { ZkTecoDeviceModule } from './modules/hrm/configuration/zkteco-device/zkteco-device.module';
 
 @Module({
   imports: [
@@ -247,7 +250,7 @@ import { SalaryGradeItemModule } from './modules/hrm/configuration/salary-grade-
     DesignationModule,
     ShiftModule,
     AttendanceModule,
-    // EmployeeModule,
+
     MonthYearModule,
     BonusModule,
     BonusGenerateModule,
@@ -258,7 +261,7 @@ import { SalaryGradeItemModule } from './modules/hrm/configuration/salary-grade-
     EmployeeListModule,
     EmployeeSalaryModule,
     EmployeeTypeModule,
-    // HrmShiftModule,
+
     LoanModule,
     OvertimeModule,
     SalaryGradeModule,
@@ -271,6 +274,9 @@ import { SalaryGradeItemModule } from './modules/hrm/configuration/salary-grade-
     DeductionRuleModule,
     AllowanceDeductionSetupModule,
     SalaryGradeItemModule,
+    LeaveTypeModule,
+    HolidayModule,
+    ZkTecoDeviceModule,
   ],
   controllers: [AppController, HealthController],
   providers: [
