@@ -125,6 +125,7 @@ import { SalaryGradeItemModule } from './modules/hrm/configuration/salary-grade-
 import { LeaveTypeModule } from './modules/hrm/configuration/leave-type/leave-type.module';
 import { HolidayModule } from './modules/hrm/configuration/holiday/holiday.module';
 import { ZkTecoDeviceModule } from './modules/hrm/configuration/zkteco-device/zkteco-device.module';
+import { AttendanceReconciliationModule } from './modules/hrm/attendance/attendance-reconciliation/attendance-reconciliation.module';
 
 @Module({
   imports: [
@@ -277,6 +278,7 @@ import { ZkTecoDeviceModule } from './modules/hrm/configuration/zkteco-device/zk
     LeaveTypeModule,
     HolidayModule,
     ZkTecoDeviceModule,
+    AttendanceReconciliationModule,
   ],
   controllers: [AppController, HealthController],
   providers: [

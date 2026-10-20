@@ -11,14 +11,14 @@ import { Section } from 'src/database/models/hrm/employee/hrm_section_model'; //
 import { Department } from 'src/database/models/hrm/employee/hrm_department_model'; // relation: new import
 import { Designation } from 'src/database/models/hrm/employee/hrm_designation_model'; // relation: new import
 import { SalaryGrade } from 'src/database/models/hrm/employee/hrm_salary_grade_model'; // relation: new import
-// import { HrmShift } from 'src/database/models/hrm/employee/hrm_hrm_shift_model'; // relation: new import
-// relation: new import
+
 import { Under } from 'src/database/models/hrm/employee/hrm_under_model'; // relation: new import
 import { EmployeeType } from 'src/database/models/hrm/employee/hrm_employee_type-model';
 import { Increment } from 'src/database/models/hrm/employee/hrm_increment_model';
 import { Attendance } from 'src/database/models/hrm/employee/hrm_attendance_model';
 import { BonusGenerate } from 'src/database/models/hrm/employee/hrm_bonus_generate_model';
 import { Shift } from 'src/database/models/hrm/employee/hrm_shift_model';
+import { AttendanceReconciliation } from 'src/database/models/hrm/attendance/attendance_reconciliation_model';
 
 @Module({
   imports: [
@@ -35,6 +35,7 @@ import { Shift } from 'src/database/models/hrm/employee/hrm_shift_model';
       Increment,
       Attendance,
       BonusGenerate,
+      AttendanceReconciliation,
     ]), // relation: employee-er 8 ta relation model
   ],
 
