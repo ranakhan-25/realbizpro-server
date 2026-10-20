@@ -42,19 +42,21 @@ export class FlatLandOfferService {
         );
       }
 
-      if (dto.flatLandId) {
+      let propertyId = dto.flatLandId;
+      if (propertyId) {
         const property = await this.flatLandModel.findOne({
-          where: { uuid: dto.flatLandId } as WhereOptions<FlatLand>,
+          where: { uuid: propertyId } as WhereOptions<FlatLand>,
           transaction,
         });
-        if (!property || (dto.projectId && property.projectId !== dto.projectId)) {
-          throw new BadRequestException('Flat/land does not belong to the selected project');
+        if (!property) {
+          propertyId = undefined;
         }
       }
       const offer = await this.offerModel.create(
         {
           ...dto,
           projectId: project.uuid,
+          flatLandId: propertyId || null,
           offerDate: new Date(dto.offerDate),
           rate: dto.rate ?? 0,
           otherCost: dto.otherCost ?? 0,

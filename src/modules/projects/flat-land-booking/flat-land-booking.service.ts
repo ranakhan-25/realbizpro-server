@@ -77,6 +77,8 @@ export class FlatLandBookingService {
       const booking = await this.bookingModel.create(
         {
           ...dto,
+          projectId: project.uuid,
+          flatLandId: property.uuid,
           bookingDate: new Date(dto.bookingDate),
           rate: dto.rate ?? 0,
           otherCost: dto.otherCost ?? 0,
