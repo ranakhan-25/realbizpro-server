@@ -4,6 +4,7 @@
 import { ShiftStatus } from '../models/hrm/employee/hrm_shift_model';
 
 import type { ShiftSchedule } from '../models/hrm/employee/hrm_shift_schedule_model';
+import type { Attendance } from '../models/hrm/employee/hrm_attendance_model';
 
 export interface ShiftAttributes {
   id: number;
@@ -20,6 +21,7 @@ export interface ShiftAttributes {
 
   // Relations
   schedules?: ShiftSchedule[];
+  attendances?: Attendance[];
 }
 
 export interface ShiftCreationAttributes {
@@ -36,4 +38,5 @@ export type ShiftUpdateAttributes = Partial<ShiftCreationAttributes>;
 // Helper type for including relations
 export interface ShiftWithRelations extends ShiftAttributes {
   schedules?: ShiftSchedule[];
+  attendances?: Attendance[];
 }

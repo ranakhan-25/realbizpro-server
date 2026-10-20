@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 /* eslint-disable prettier/prettier */
 
 import {
@@ -45,26 +44,85 @@ export class AttendanceService {
     }
   }
 
-  // MonthYear class registered na thakle skip kore (DB FK ta check korbe)
-  private async ensureMonthYearExists(
-    monthYearId: string,
+  // Relation class registered na thakle skip kore (DB FK ta check korbe)
+  private async ensureRelationExists(
+    alias: 'monthYear' | 'department' | 'shift',
+    label: string,
+    id: string,
   ): Promise<void> {
     const assoc: any = (
       this.attendanceModel as any
-    ).associations?.monthYear;
+    ).associations?.[alias];
     const target: any = assoc?.target;
 
     if (!target || !target.sequelize) {
       return;
     }
 
-    const monthYear = await target.findOne({
-      where: { uuid: monthYearId },
+    const found = await target.findOne({
+      where: { uuid: id },
     });
 
-    if (!monthYear) {
+    if (!found) {
       throw new NotFoundException(
-        `Month year #${monthYearId} not found`,
+        `${label} #${id} not found`,
+      );
+    }
+  }
+
+  private async validateRelations(dto: {
+    monthYearId?: string | null;
+    departmentId?: string | null;
+    shiftId?: string | null;
+  }): Promise<void> {
+    if (dto.monthYearId) {
+      await this.ensureRelationExists(
+        'monthYear',
+        'Month year',
+        dto.monthYearId,
+      );
+    }
+
+    if (dto.departmentId) {
+      await this.ensureRelationExists(
+        'department',
+        'Department',
+        dto.departmentId,
+      );
+    }
+
+    if (dto.shiftId) {
+      await this.ensureRelationExists(
+        'shift',
+        'Shift',
+        dto.shiftId,
+      );
+    }
+  }
+
+  // employeeId + date unique (soft-deleted gulo-o count hoy)
+  private async ensureUniqueEmployeeDate(
+    employeeId: string,
+    date: string,
+    excludeUuid?: string,
+  ): Promise<void> {
+    const where: any = { employeeId, date };
+
+    if (excludeUuid) {
+      where.uuid = { [Op.ne]: excludeUuid };
+    }
+
+    const exists =
+      await this.attendanceModel.findOne({
+        where,
+        paranoid: false,
+      });
+
+    if (exists) {
+      throw new BadRequestException(
+        exists.deletedAt
+          ? `Attendance for ${date} already exists in deleted records, please restore it`
+          : `Attendance for this employee on ${date} already exists`,
       );
     }
   }
@@ -78,15 +136,17 @@ export class AttendanceService {
       dto.employeeId,
     );
 
-    if (dto.monthYearId) {
-      await this.ensureMonthYearExists(
-        dto.monthYearId,
-      );
-    }
+    await this.validateRelations(dto);
+
+    await this.ensureUniqueEmployeeDate(
+      dto.employeeId,
+      dto.date,
+    );
 
     const record =
       await this.attendanceModel.create({
         ...dto,
+        createdBy: dto.addedById,
         type: dto.type ?? AttendanceType.WORKDAY,
       } as any);
 
@@ -100,6 +160,11 @@ export class AttendanceService {
       skip,
       employeeId,
       monthYearId,
+      departmentId,
+      shiftId,
+      isPresent,
+      dateFrom,
+      dateTo,
       date,
       type,
       search,
@@ -123,8 +188,30 @@ export class AttendanceService {
       where.monthYearId = monthYearId;
     }
 
+    if (departmentId) {
+      where.departmentId = departmentId;
+    }
+
+    if (shiftId) {
+      where.shiftId = shiftId;
+    }
+
+    if (
+      isPresent !== undefined &&
+      isPresent !== null
+    ) {
+      where.isPresent = isPresent;
+    }
+
     if (date) {
       where.date = date;
+    } else if (dateFrom || dateTo) {
+      where.date = {
+        ...(dateFrom
+          ? { [Op.gte]: dateFrom }
+          : {}),
+        ...(dateTo ? { [Op.lte]: dateTo } : {}),
+      };
     }
 
     if (type) {
@@ -135,6 +222,9 @@ export class AttendanceService {
       where[Op.or] = [
         { day: { [Op.iLike]: `%${search}%` } },
         { note: { [Op.iLike]: `%${search}%` } },
+        {
+          comment: { [Op.iLike]: `%${search}%` },
+        },
       ];
     }
 
@@ -218,16 +308,41 @@ export class AttendanceService {
       );
     }
 
+    await this.validateRelations({
+      monthYearId:
+        dto.monthYearId !== record.monthYearId
+          ? dto.monthYearId
+          : undefined,
+      departmentId:
+        dto.departmentId !== record.departmentId
+          ? dto.departmentId
+          : undefined,
+      shiftId:
+        dto.shiftId !== record.shiftId
+          ? dto.shiftId
+          : undefined,
+    });
+
+    const newEmployeeId =
+      dto.employeeId ?? record.employeeId;
+    const newDate = dto.date ?? record.date;
+
     if (
-      dto.monthYearId &&
-      dto.monthYearId !== record.monthYearId
+      newEmployeeId !== record.employeeId ||
+      newDate !== record.date
     ) {
-      await this.ensureMonthYearExists(
-        dto.monthYearId,
+      await this.ensureUniqueEmployeeDate(
+        newEmployeeId,
+        newDate,
+        uuid,
       );
     }
 
-    await record.update(dto as any);
+    await record.update({
+      ...dto,
+      updatedBy:
+        dto.addedById ?? record.updatedBy,
+    } as any);
 
     return this.findOne(uuid);
   }

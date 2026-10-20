@@ -7,6 +7,7 @@ import { ShiftController } from './shift.controller';
 import { ShiftService } from './shift.service';
 import { Shift } from 'src/database/models/hrm/employee/hrm_shift_model';
 import { ShiftSchedule } from 'src/database/models/hrm/employee/hrm_shift_schedule_model';
+import { Attendance } from 'src/database/models/hrm/employee/hrm_attendance_model';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { ShiftSchedule } from 'src/database/models/hrm/employee/hrm_shift_schedu
     SequelizeModule.forFeature([
       Shift,
       ShiftSchedule,
+      Attendance,
     ]),
   ],
 
