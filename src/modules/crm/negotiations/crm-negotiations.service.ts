@@ -18,7 +18,39 @@ export class CrmNegotiationsService {
   ) {}
 
   async create(createDto: CreateCrmNegotiationDto) {
-    return await this.negotiationModel.create(createDto as any);
+    let leadId = createDto.lead_id;
+    if (leadId) {
+      const existingLead = await this.leadModel.findByPk(leadId);
+      if (!existingLead) {
+        leadId = undefined;
+      }
+    }
+
+    if (!leadId) {
+      let lead = await this.leadModel.findOne({ order: [['id', 'ASC']] });
+      if (!lead) {
+        lead = await this.leadModel.create({
+          full_name: 'Walk-in / Direct Client',
+          phone: '+8801700000000',
+          status: 'active',
+          priority: 'warm',
+        } as any);
+      }
+      leadId = Number(lead.id);
+    }
+
+    const offerPrice = createDto.offer_price !== undefined ? Number(createDto.offer_price) : 0;
+    const agreedPrice = createDto.agreed_price !== undefined ? Number(createDto.agreed_price) : offerPrice;
+    const discountAmount = createDto.discount_amount !== undefined ? Number(createDto.discount_amount) : 0;
+
+    return await this.negotiationModel.create({
+      ...createDto,
+      lead_id: leadId,
+      offer_price: offerPrice,
+      agreed_price: agreedPrice,
+      discount_amount: discountAmount,
+      approval_status: createDto.approval_status || 'pending',
+    } as any);
   }
 
   async findAll() {

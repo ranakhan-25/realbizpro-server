@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Put, Body, Param } from '@nestjs/common';
+import { Controller, Post, Get, Put, Patch, Delete, Body, Param } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiParam, ApiBody } from '@nestjs/swagger';
 import { CrRecoveryService } from './cr-recovery.service';
 import {
@@ -32,7 +32,7 @@ export class CrRecoveryController {
   }
 
   @Put(':uuid')
-  @ApiOperation({ summary: 'Update recovery log' })
+  @ApiOperation({ summary: 'Update recovery log (PUT)' })
   @ApiParam({ name: 'uuid' })
   @ApiBody({ type: UpdateCrRecoveryLogDto })
   async update(
@@ -40,5 +40,23 @@ export class CrRecoveryController {
     @Body() updateDto: UpdateCrRecoveryLogDto,
   ) {
     return this.service.update(uuid, updateDto);
+  }
+
+  @Patch(':uuid')
+  @ApiOperation({ summary: 'Update recovery log (PATCH)' })
+  @ApiParam({ name: 'uuid' })
+  @ApiBody({ type: UpdateCrRecoveryLogDto })
+  async patch(
+    @Param('uuid') uuid: string,
+    @Body() updateDto: UpdateCrRecoveryLogDto,
+  ) {
+    return this.service.update(uuid, updateDto);
+  }
+
+  @Delete(':uuid')
+  @ApiOperation({ summary: 'Delete recovery log' })
+  @ApiParam({ name: 'uuid' })
+  async remove(@Param('uuid') uuid: string) {
+    return this.service.remove(uuid);
   }
 }

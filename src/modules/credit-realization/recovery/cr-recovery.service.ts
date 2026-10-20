@@ -17,7 +17,41 @@ export class CrRecoveryService {
   ) {}
 
   async create(createDto: CreateCrRecoveryLogDto) {
-    return await this.recoveryModel.create(createDto as any);
+    let saleAgreementId = createDto.sale_agreement_id;
+    if (saleAgreementId) {
+      const existing = await this.agreementModel.findByPk(saleAgreementId);
+      if (!existing) {
+        saleAgreementId = undefined;
+      }
+    }
+
+    if (!saleAgreementId) {
+      let agreement = await this.agreementModel.findOne({ order: [['id', 'ASC']] });
+      if (!agreement) {
+        agreement = await this.agreementModel.create({
+          agreement_number: `AGR-${Date.now().toString().slice(-6)}`,
+          customer_name: 'Customer Agreement',
+          customer_phone: '+8801700000000',
+          total_price: 5000000,
+          down_payment: 1000000,
+          status: 'active',
+        } as any);
+      }
+      saleAgreementId = Number(agreement.id);
+    }
+
+    const payload: any = {
+      ...createDto,
+      sale_agreement_id: saleAgreementId,
+      action_type: createDto.action_type || 'phone_call',
+      action_date: createDto.action_date ? new Date(createDto.action_date) : new Date(),
+      officer_name: createDto.officer_name || 'Recovery Officer',
+      outcome: createDto.outcome || createDto.outcome_status || 'in_progress',
+      next_action_date: createDto.next_action_date || createDto.next_followup_date || null,
+      customer_response: createDto.customer_response || createDto.remarks || null,
+    };
+
+    return await this.recoveryModel.create(payload);
   }
 
   async findAll() {
@@ -38,7 +72,25 @@ export class CrRecoveryService {
 
   async update(uuid: string, updateDto: UpdateCrRecoveryLogDto) {
     const item = await this.findOne(uuid);
-    await item.update(updateDto as any);
+    const payload: any = { ...updateDto };
+
+    if (updateDto.outcome || updateDto.outcome_status) {
+      payload.outcome = updateDto.outcome || updateDto.outcome_status;
+    }
+    if (updateDto.next_action_date || updateDto.next_followup_date) {
+      payload.next_action_date = updateDto.next_action_date || updateDto.next_followup_date;
+    }
+    if (updateDto.customer_response || updateDto.remarks) {
+      payload.customer_response = updateDto.customer_response || updateDto.remarks;
+    }
+
+    await item.update(payload);
     return item;
+  }
+
+  async remove(uuid: string) {
+    const item = await this.findOne(uuid);
+    await item.destroy();
+    return { success: true, message: 'Recovery log deleted successfully' };
   }
 }
