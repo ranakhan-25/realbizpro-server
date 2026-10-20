@@ -18,6 +18,21 @@ import { Attendance } from './hrm_attendance_model';
   tableName: 'month_year',
   timestamps: true,
   paranoid: true,
+  indexes: [
+    {
+      name: 'MonthYear_month_year_idx',
+      fields: ['month', 'year'],
+      unique: true,
+    },
+    {
+      name: 'MonthYear_startDate_idx',
+      fields: ['startDate'],
+    },
+    {
+      name: 'MonthYear_endDate_idx',
+      fields: ['endDate'],
+    },
+  ],
 })
 export class MonthYear extends BaseModel<
   MonthYearAttributes,
@@ -34,6 +49,18 @@ export class MonthYear extends BaseModel<
     allowNull: false,
   })
   declare year: number;
+
+  @Column({
+    type: DataType.DATEONLY,
+    allowNull: false,
+  })
+  declare startDate: string;
+
+  @Column({
+    type: DataType.DATEONLY,
+    allowNull: false,
+  })
+  declare endDate: string;
 
   @HasMany(() => Attendance, {
     foreignKey: 'monthYearId',

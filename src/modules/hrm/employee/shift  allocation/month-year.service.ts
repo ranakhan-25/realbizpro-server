@@ -5,106 +5,147 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectModel } from '@nestjs/sequelize';
-import { Op } from 'sequelize';
 
-import { CreateMonthYearDto } from './dto/create-month-year.dto';
-import { QueryMonthYearDto } from './dto/query-month-year.dto';
-import { UpdateMonthYearDto } from './dto/update-month-year.dto';
+import { InjectModel } from '@nestjs/sequelize';
+
+import { Op } from 'sequelize';
 import { MonthYear } from 'src/database/models/hrm/employee/hrm_monthyear_model';
+import { CreateMonthYearDto } from './dto/create-month-year.dto';
+import { UpdateMonthYearDto } from './dto/update-month-year.dto';
+import { QueryMonthYearDto } from './dto/query-month-year.dto';
 
 @Injectable()
 export class MonthYearService {
   constructor(
     @InjectModel(MonthYear)
-    private readonly model: typeof MonthYear,
+    private readonly monthYearModel: typeof MonthYear,
   ) {}
 
-  // Create month-year
+  // ---------- helpers ----------
+
+  // month + year unique, tai soft-deleted gulo-o check kori
+  private async ensureMonthYearAvailable(
+    month: string,
+    year: number,
+    excludeUuid?: string,
+  ): Promise<void> {
+    const where: any = { month, year };
+
+    if (excludeUuid) {
+      where.uuid = { [Op.ne]: excludeUuid };
+    }
+
+    const existing =
+      await this.monthYearModel.findOne({
+        where,
+        paranoid: false,
+      });
+
+    if (existing) {
+      throw new BadRequestException(
+        existing.deletedAt
+          ? `Month year for ${month} ${year} already exists in deleted records, please restore it`
+          : `Month year for ${month} ${year} already exists`,
+      );
+    }
+  }
+
+  private validateDates(
+    startDate: string,
+    endDate: string,
+  ): void {
+    if (
+      new Date(endDate).getTime() <
+      new Date(startDate).getTime()
+    ) {
+      throw new BadRequestException(
+        'End date cannot be before start date',
+      );
+    }
+  }
+
+  // ---------- CRUD ----------
+
   async create(
     dto: CreateMonthYearDto,
   ): Promise<MonthYear> {
-    const duplicate = await this.model.findOne({
-      where: {
-        month: dto.month,
-        year: dto.year,
-      },
-      paranoid: false,
-    });
+    await this.ensureMonthYearAvailable(
+      dto.month,
+      dto.year,
+    );
+    this.validateDates(dto.startDate, dto.endDate);
 
-    if (duplicate) {
-      throw new BadRequestException(
-        `Month '${dto.month}' for ${dto.year} already exists`,
-      );
-    }
+    const record =
+      await this.monthYearModel.create(dto as any);
 
-    const item = await this.model.create(dto);
-
-    return this.findOne(item.uuid);
+    return this.findOne(record.uuid);
   }
 
-  // Get all month-years with search, filter and pagination
   async findAll(query: QueryMonthYearDto) {
-    const page = query.page ?? 1;
-    const limit = query.limit ?? 10;
+    const {
+      page = 1,
+      limit = 10,
+      skip,
+      search,
+      month,
+      year,
+      sortBy = 'createdAt',
+      sortOrder = 'DESC',
+      withDeleted = false,
+    } = query;
+
     const offset =
-      query.skip ?? (page - 1) * limit;
+      skip !== undefined && skip !== null
+        ? skip
+        : (page - 1) * limit;
 
     const where: any = {};
 
-    // Search by month
-    if (query.search?.trim()) {
-      const searchTerm = query.search.trim();
-
-      where[Op.or] = [
-        {
-          month: {
-            [Op.iLike]: `%${searchTerm}%`,
-          },
-        },
-      ];
+    if (search) {
+      where.month = { [Op.like]: `%${search}%` };
     }
 
-    // Filter by year
-    if (query.year !== undefined) {
-      where.year = query.year;
+    if (month) {
+      where.month = month;
+    }
+
+    if (year) {
+      where.year = year;
     }
 
     const { rows, count } =
-      await this.model.findAndCountAll({
-        where,
-        limit,
-        offset,
-        paranoid: !(query.withDeleted ?? false),
-        order: [
-          [
-            query.sortBy ?? 'createdAt',
-            query.sortOrder ?? 'DESC',
-          ],
-        ],
-      });
-
-    const currentPage =
-      query.skip !== undefined
-        ? Math.floor(offset / limit) + 1
-        : page;
+      await this.monthYearModel.findAndCountAll(
+        {
+          where,
+          limit,
+          offset,
+          order: [[sortBy, sortOrder]],
+          paranoid: !withDeleted,
+        },
+      );
 
     const totalPages =
       Math.ceil(count / limit) || 1;
+    const currentPage =
+      skip !== undefined && skip !== null
+        ? Math.floor(skip / limit) + 1
+        : page;
+
+    const nextPage =
+      currentPage < totalPages
+        ? currentPage + 1
+        : null;
+
+    const previousPage =
+      currentPage > 1 ? currentPage - 1 : null;
 
     return {
       data: rows,
       meta: {
         page: currentPage,
         pageNo: currentPage,
-        nextPage:
-          currentPage < totalPages
-            ? currentPage + 1
-            : null,
-        previousPage:
-          currentPage > 1
-            ? currentPage - 1
-            : null,
+        nextPage,
+        previousPage,
         limit,
         skip: offset,
         total: count,
@@ -113,116 +154,106 @@ export class MonthYearService {
     };
   }
 
-  // Get month-year by UUID
   async findOne(
     uuid: string,
-    withDeleted = false,
   ): Promise<MonthYear> {
-    const item = await this.model.findOne({
-      where: { uuid } as any,
-      paranoid: !withDeleted,
-    });
+    const record =
+      await this.monthYearModel.findOne({
+        where: { uuid } as any,
+      });
 
-    if (!item) {
+    if (!record) {
       throw new NotFoundException(
-        `MonthYear #${uuid} not found`,
+        `Month year #${uuid} not found`,
       );
     }
 
-    return item;
+    return record;
   }
 
-  // Update month-year
   async update(
     uuid: string,
     dto: UpdateMonthYearDto,
   ): Promise<MonthYear> {
-    const item = await this.findOne(uuid);
-
-    const nextMonth = dto.month ?? item.month;
-    const nextYear = dto.year ?? item.year;
-
-    // Check duplicate month-year combination
-    if (
-      dto.month !== undefined ||
-      dto.year !== undefined
-    ) {
-      const duplicate = await this.model.findOne({
-        where: {
-          month: nextMonth,
-          year: nextYear,
-          uuid: {
-            [Op.ne]: uuid,
-          },
-        } as any,
-        paranoid: false,
+    const record =
+      await this.monthYearModel.findOne({
+        where: { uuid } as any,
       });
 
-      if (duplicate) {
-        throw new BadRequestException(
-          `Month '${nextMonth}' for ${nextYear} already exists`,
-        );
-      }
+    if (!record) {
+      throw new NotFoundException(
+        `Month year #${uuid} not found`,
+      );
     }
 
-    await item.update(dto);
+    const newMonth = dto.month ?? record.month;
+    const newYear = dto.year ?? record.year;
+
+    if (
+      newMonth !== record.month ||
+      newYear !== record.year
+    ) {
+      await this.ensureMonthYearAvailable(
+        newMonth,
+        newYear,
+        uuid,
+      );
+    }
+
+    this.validateDates(
+      dto.startDate ?? record.startDate,
+      dto.endDate ?? record.endDate,
+    );
+
+    await record.update(dto as any);
 
     return this.findOne(uuid);
   }
 
-  // Soft delete month-year
   async remove(
     uuid: string,
   ): Promise<{ message: string }> {
-    const item = await this.findOne(uuid);
+    const record =
+      await this.monthYearModel.findOne({
+        where: { uuid } as any,
+      });
 
-    await item.destroy();
+    if (!record) {
+      throw new NotFoundException(
+        `Month year #${uuid} not found`,
+      );
+    }
+
+    // soft delete
+    await record.destroy();
 
     return {
-      message: `MonthYear #${uuid} deleted successfully`,
+      message: `Month year #${uuid} deleted successfully`,
     };
   }
 
-  // Restore deleted month-year
   async restore(
     uuid: string,
   ): Promise<MonthYear> {
-    const item = await this.model.findOne({
-      where: { uuid } as any,
-      paranoid: false,
-    });
+    const record =
+      await this.monthYearModel.findOne({
+        where: { uuid } as any,
+        paranoid: false,
+      });
 
-    if (!item) {
+    if (!record) {
       throw new NotFoundException(
-        `MonthYear #${uuid} not found`,
+        `Month year #${uuid} not found`,
       );
     }
 
-    if (!(item as any).deletedAt) {
+    if (!record.deletedAt) {
       throw new BadRequestException(
-        `MonthYear #${uuid} is not deleted`,
+        `Month year #${uuid} is not deleted`,
       );
     }
 
-    // Prevent restoring a duplicate month-year
-    const duplicate = await this.model.findOne({
-      where: {
-        month: item.month,
-        year: item.year,
-        uuid: {
-          [Op.ne]: uuid,
-        },
-      } as any,
-      paranoid: false,
-    });
-
-    if (duplicate) {
-      throw new BadRequestException(
-        `Month '${item.month}' for ${item.year} already exists`,
-      );
-    }
-
-    await item.restore();
+    await record.restore();
 
     return this.findOne(uuid);
   }

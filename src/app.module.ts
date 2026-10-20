@@ -86,7 +86,7 @@ import { DepartmentModule } from './modules/hrm/employee/department/department.m
 import { DesignationModule } from './modules/hrm/employee/designation/designation.module';
 import { ShiftModule } from './modules/hrm/employee/shift/shift.module';
 import { AttendanceModule } from './modules/hrm/employee/shift  allocation/attendance.module';
-// import { EmployeeModule } from './modules/hrm/employee/shift  allocation/employee.module';
+
 import { MonthYearModule } from './modules/hrm/employee/shift  allocation/month-year.module';
 import { BonusModule } from './modules/hrm/employee/bonus/bonus.module';
 
@@ -109,15 +109,22 @@ import { AllowanceModule } from './modules/hrm/employee/employee list/allowance/
 import { EmployeeListModule } from './modules/hrm/employee/employee list/employee-list/employee-list.module';
 import { EmployeeSalaryModule } from './modules/hrm/employee/employee list/employee-salary/employee-salary.module';
 import { EmployeeTypeModule } from './modules/hrm/employee/employee list/employee-type/employee-type.module';
-// import { HrmShiftModule } from './modules/hrm/employee/employee list/hrm-shift/hrm-shift.module';
+
 import { LoanModule } from './modules/hrm/employee/employee list/loan/loan.module';
 import { OvertimeModule } from './modules/hrm/employee/employee list/overtime/overtime.module';
-import { SalaryGradeModule } from './modules/hrm/employee/employee list/salary-grade/salary-grade.module';
+
 import { SaturationDeductionModule } from './modules/hrm/employee/employee list/saturation-deduction/saturation-deduction.module';
 import { UnderModule } from './modules/hrm/employee/employee list/under/under.module';
 import { EmployeeHierarchyModule } from './modules/hrm/employee/employee-hierarchy/employee-hierarchy.module';
 import { EmployeeCardModule } from './modules/hrm/employee/employee-card/employee-card.module';
 import { IncrementModule } from './modules/hrm/employee/increment/increment.module';
+import { SalaryGradeModule } from './modules/hrm/employee/employee list/salary-grade/salary-grade.module';
+import { DeductionRuleModule } from './modules/hrm/configuration/deduction-rule/deduction-rule/deduction-rule.module';
+import { AllowanceDeductionSetupModule } from './modules/hrm/configuration/allowance-deduction-setup/allowance-deduction-setup.module';
+import { SalaryGradeItemModule } from './modules/hrm/configuration/salary-grade-item/salary-grade-item.module';
+import { LeaveTypeModule } from './modules/hrm/configuration/leave-type/leave-type.module';
+import { HolidayModule } from './modules/hrm/configuration/holiday/holiday.module';
+import { ZkTecoDeviceModule } from './modules/hrm/configuration/zkteco-device/zkteco-device.module';
 
 @Module({
   imports: [
@@ -243,7 +250,7 @@ import { IncrementModule } from './modules/hrm/employee/increment/increment.modu
     DesignationModule,
     ShiftModule,
     AttendanceModule,
-    // EmployeeModule,
+
     MonthYearModule,
     BonusModule,
     BonusGenerateModule,
@@ -254,7 +261,7 @@ import { IncrementModule } from './modules/hrm/employee/increment/increment.modu
     EmployeeListModule,
     EmployeeSalaryModule,
     EmployeeTypeModule,
-    // HrmShiftModule,
+
     LoanModule,
     OvertimeModule,
     SalaryGradeModule,
@@ -263,6 +270,13 @@ import { IncrementModule } from './modules/hrm/employee/increment/increment.modu
     EmployeeHierarchyModule,
     EmployeeCardModule,
     IncrementModule,
+    MonthYearModule,
+    DeductionRuleModule,
+    AllowanceDeductionSetupModule,
+    SalaryGradeItemModule,
+    LeaveTypeModule,
+    HolidayModule,
+    ZkTecoDeviceModule,
   ],
   controllers: [AppController, HealthController],
   providers: [
