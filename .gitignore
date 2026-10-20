@@ -82,4 +82,9 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # ignore ci-cd file and config file
 .gitlab-ci.yml
-ecosystem.config.js 
+ecosystem.config.js
+
+# Architecture & Planning Documentation
+REALBIZ_PRO_ENTERPRISE_ARCHITECTURE_AND_RBAC_PLAN.md
+PLAN.md
+scripts/

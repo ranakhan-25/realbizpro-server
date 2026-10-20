@@ -7,6 +7,7 @@ import {
   Param,
   ParseUUIDPipe,
   Patch,
+  Put,
   Post,
   Query,
   Req,
@@ -45,6 +46,16 @@ export class FlatLandBookingController {
   @ApiOperation({ summary: 'Get a flat/land booking by UUID' })
   findOne(@Param('uuid', ParseUUIDPipe) uuid: string) {
     return this.bookingService.findOne(uuid);
+  }
+
+  @Put(':uuid')
+  @ApiOperation({ summary: 'Update a flat/land booking (PUT)' })
+  updatePut(
+    @Param('uuid', ParseUUIDPipe) uuid: string,
+    @Body() dto: UpdateFlatLandBookingDto,
+    @Req() request: AuthenticatedRequest,
+  ) {
+    return this.update(uuid, dto, request);
   }
 
   @Patch(':uuid')

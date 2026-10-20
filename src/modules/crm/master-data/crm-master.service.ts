@@ -9,6 +9,11 @@ import { CrmTeam } from '../../../database/models/crm/crm_team.model';
 import { CrmTeamMember } from '../../../database/models/crm/crm_team_member.model';
 import { CrmArea } from '../../../database/models/crm/crm_area.model';
 import { CrmFeature } from '../../../database/models/crm/crm_feature.model';
+import { CrmPriceRange } from '../../../database/models/crm/crm_price_range.model';
+import { CrmRequirementType } from '../../../database/models/crm/crm_requirement_type.model';
+import { CrmVisitPlace } from '../../../database/models/crm/crm_visit_place.model';
+import { CrmVisitStatus } from '../../../database/models/crm/crm_visit_status.model';
+import { CrmTaskType } from '../../../database/models/crm/crm_task_type.model';
 import {
   CreateCrmCategoryDto,
   UpdateCrmCategoryDto,
@@ -26,6 +31,16 @@ import {
   UpdateCrmAreaDto,
   CreateCrmFeatureDto,
   UpdateCrmFeatureDto,
+  CreateCrmPriceRangeDto,
+  UpdateCrmPriceRangeDto,
+  CreateCrmRequirementTypeDto,
+  UpdateCrmRequirementTypeDto,
+  CreateCrmVisitPlaceDto,
+  UpdateCrmVisitPlaceDto,
+  CreateCrmVisitStatusDto,
+  UpdateCrmVisitStatusDto,
+  CreateCrmTaskTypeDto,
+  UpdateCrmTaskTypeDto,
 } from './dto/create-crm-master.dto';
 
 @Injectable()
@@ -49,6 +64,16 @@ export class CrmMasterService {
     private readonly areaModel: typeof CrmArea,
     @InjectModel(CrmFeature)
     private readonly featureModel: typeof CrmFeature,
+    @InjectModel(CrmPriceRange)
+    private readonly priceRangeModel: typeof CrmPriceRange,
+    @InjectModel(CrmRequirementType)
+    private readonly requirementTypeModel: typeof CrmRequirementType,
+    @InjectModel(CrmVisitPlace)
+    private readonly visitPlaceModel: typeof CrmVisitPlace,
+    @InjectModel(CrmVisitStatus)
+    private readonly visitStatusModel: typeof CrmVisitStatus,
+    @InjectModel(CrmTaskType)
+    private readonly taskTypeModel: typeof CrmTaskType,
   ) {}
 
   // Categories
@@ -189,6 +214,11 @@ export class CrmMasterService {
     await item.update(dto as any);
     return item;
   }
+  async deleteTeam(uuid: string) {
+    const item = await this.findTeamByUuid(uuid);
+    await item.destroy();
+    return { success: true, message: 'Team deleted' };
+  }
   async addTeamMember(teamUuid: string, memberData: { user_id: string; role_in_team?: string }) {
     const team = await this.findTeamByUuid(teamUuid);
     return await this.teamMemberModel.create({
@@ -206,6 +236,21 @@ export class CrmMasterService {
   async findAllAreas() {
     return await this.areaModel.findAll({ order: [['name', 'ASC']] });
   }
+  async findAreaByUuid(uuid: string) {
+    const item = await this.areaModel.findOne({ where: { uuid } });
+    if (!item) throw new NotFoundException('Area not found');
+    return item;
+  }
+  async updateArea(uuid: string, dto: UpdateCrmAreaDto) {
+    const item = await this.findAreaByUuid(uuid);
+    await item.update(dto as any);
+    return item;
+  }
+  async deleteArea(uuid: string) {
+    const item = await this.findAreaByUuid(uuid);
+    await item.destroy();
+    return { success: true, message: 'Area deleted' };
+  }
 
   // Features
   async createFeature(dto: CreateCrmFeatureDto) {
@@ -213,5 +258,135 @@ export class CrmMasterService {
   }
   async findAllFeatures() {
     return await this.featureModel.findAll({ order: [['name', 'ASC']] });
+  }
+  async findFeatureByUuid(uuid: string) {
+    const item = await this.featureModel.findOne({ where: { uuid } });
+    if (!item) throw new NotFoundException('Feature not found');
+    return item;
+  }
+  async updateFeature(uuid: string, dto: UpdateCrmFeatureDto) {
+    const item = await this.findFeatureByUuid(uuid);
+    await item.update(dto as any);
+    return item;
+  }
+  async deleteFeature(uuid: string) {
+    const item = await this.findFeatureByUuid(uuid);
+    await item.destroy();
+    return { success: true, message: 'Feature deleted' };
+  }
+
+  // Price Ranges
+  async createPriceRange(dto: CreateCrmPriceRangeDto) {
+    return await this.priceRangeModel.create(dto as any);
+  }
+  async findAllPriceRanges() {
+    return await this.priceRangeModel.findAll({ order: [['createdAt', 'DESC']] });
+  }
+  async findPriceRangeByUuid(uuid: string) {
+    const item = await this.priceRangeModel.findOne({ where: { uuid } });
+    if (!item) throw new NotFoundException('Price range not found');
+    return item;
+  }
+  async updatePriceRange(uuid: string, dto: UpdateCrmPriceRangeDto) {
+    const item = await this.findPriceRangeByUuid(uuid);
+    await item.update(dto as any);
+    return item;
+  }
+  async deletePriceRange(uuid: string) {
+    const item = await this.findPriceRangeByUuid(uuid);
+    await item.destroy();
+    return { success: true, message: 'Price range deleted' };
+  }
+
+  // Requirement Types
+  async createRequirementType(dto: CreateCrmRequirementTypeDto) {
+    return await this.requirementTypeModel.create(dto as any);
+  }
+  async findAllRequirementTypes() {
+    return await this.requirementTypeModel.findAll({ order: [['name', 'ASC']] });
+  }
+  async findRequirementTypeByUuid(uuid: string) {
+    const item = await this.requirementTypeModel.findOne({ where: { uuid } });
+    if (!item) throw new NotFoundException('Requirement type not found');
+    return item;
+  }
+  async updateRequirementType(uuid: string, dto: UpdateCrmRequirementTypeDto) {
+    const item = await this.findRequirementTypeByUuid(uuid);
+    await item.update(dto as any);
+    return item;
+  }
+  async deleteRequirementType(uuid: string) {
+    const item = await this.findRequirementTypeByUuid(uuid);
+    await item.destroy();
+    return { success: true, message: 'Requirement type deleted' };
+  }
+
+  // Visit Places
+  async createVisitPlace(dto: CreateCrmVisitPlaceDto) {
+    return await this.visitPlaceModel.create(dto as any);
+  }
+  async findAllVisitPlaces() {
+    return await this.visitPlaceModel.findAll({ order: [['name', 'ASC']] });
+  }
+  async findVisitPlaceByUuid(uuid: string) {
+    const item = await this.visitPlaceModel.findOne({ where: { uuid } });
+    if (!item) throw new NotFoundException('Visit place not found');
+    return item;
+  }
+  async updateVisitPlace(uuid: string, dto: UpdateCrmVisitPlaceDto) {
+    const item = await this.findVisitPlaceByUuid(uuid);
+    await item.update(dto as any);
+    return item;
+  }
+  async deleteVisitPlace(uuid: string) {
+    const item = await this.findVisitPlaceByUuid(uuid);
+    await item.destroy();
+    return { success: true, message: 'Visit place deleted' };
+  }
+
+  // Visit Statuses
+  async createVisitStatus(dto: CreateCrmVisitStatusDto) {
+    return await this.visitStatusModel.create(dto as any);
+  }
+  async findAllVisitStatuses() {
+    return await this.visitStatusModel.findAll({ order: [['createdAt', 'ASC']] });
+  }
+  async findVisitStatusByUuid(uuid: string) {
+    const item = await this.visitStatusModel.findOne({ where: { uuid } });
+    if (!item) throw new NotFoundException('Visit status not found');
+    return item;
+  }
+  async updateVisitStatus(uuid: string, dto: UpdateCrmVisitStatusDto) {
+    const item = await this.findVisitStatusByUuid(uuid);
+    await item.update(dto as any);
+    return item;
+  }
+  async deleteVisitStatus(uuid: string) {
+    const item = await this.findVisitStatusByUuid(uuid);
+    await item.destroy();
+    return { success: true, message: 'Visit status deleted' };
+  }
+
+  // Task Types
+  async createTaskType(dto: CreateCrmTaskTypeDto) {
+    return await this.taskTypeModel.create(dto as any);
+  }
+  async findAllTaskTypes() {
+    return await this.taskTypeModel.findAll({ order: [['name', 'ASC']] });
+  }
+  async findTaskTypeByUuid(uuid: string) {
+    const item = await this.taskTypeModel.findOne({ where: { uuid } });
+    if (!item) throw new NotFoundException('Task type not found');
+    return item;
+  }
+  async updateTaskType(uuid: string, dto: UpdateCrmTaskTypeDto) {
+    const item = await this.findTaskTypeByUuid(uuid);
+    await item.update(dto as any);
+    return item;
+  }
+  async deleteTaskType(uuid: string) {
+    const item = await this.findTaskTypeByUuid(uuid);
+    await item.destroy();
+    return { success: true, message: 'Task type deleted' };
   }
 }

@@ -267,3 +267,140 @@ export class CreateCrmFeatureDto {
 }
 
 export class UpdateCrmFeatureDto extends PartialType(CreateCrmFeatureDto) {}
+
+export class CreateCrmPriceRangeDto {
+  @ApiProperty({ example: '50L - 1Cr' })
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @ApiPropertyOptional({ example: 5000000 })
+  @IsNumber()
+  @IsOptional()
+  min_price?: number;
+
+  @ApiPropertyOptional({ example: 10000000 })
+  @IsNumber()
+  @IsOptional()
+  max_price?: number;
+
+  @ApiPropertyOptional({ example: 'PRJ-101' })
+  @IsString()
+  @IsOptional()
+  projectId?: string;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  createdBy?: string;
+}
+
+export class UpdateCrmPriceRangeDto extends PartialType(CreateCrmPriceRangeDto) {}
+
+export class CreateCrmRequirementTypeDto {
+  @ApiProperty({ example: 'Apartment' })
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @ApiPropertyOptional({ example: 'REQ-APT' })
+  @IsString()
+  @IsOptional()
+  code?: string;
+
+  @ApiPropertyOptional({ example: 'PRJ-101' })
+  @IsString()
+  @IsOptional()
+  projectId?: string;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  createdBy?: string;
+}
+
+export class UpdateCrmRequirementTypeDto extends PartialType(CreateCrmRequirementTypeDto) {}
+
+export class CreateCrmVisitPlaceDto {
+  @ApiProperty({ example: 'Site Office - Dhanmondi' })
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @ApiPropertyOptional({ example: 'Road 27, Dhanmondi, Dhaka' })
+  @IsString()
+  @IsOptional()
+  address?: string;
+
+  @ApiPropertyOptional({ example: 'John Doe' })
+  @IsString()
+  @IsOptional()
+  contact_person?: string;
+
+  @ApiPropertyOptional({ example: '+8801700000000' })
+  @IsString()
+  @IsOptional()
+  contact_number?: string;
+
+  @ApiPropertyOptional({ example: 'PRJ-101' })
+  @IsString()
+  @IsOptional()
+  projectId?: string;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  createdBy?: string;
+}
+
+export class UpdateCrmVisitPlaceDto extends PartialType(CreateCrmVisitPlaceDto) {}
+
+export class CreateCrmVisitStatusDto {
+  @ApiProperty({ example: 'Completed' })
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @ApiPropertyOptional({ example: '#10B981' })
+  @IsString()
+  @IsOptional()
+  color?: string;
+
+  @ApiPropertyOptional({ example: 'PRJ-101' })
+  @IsString()
+  @IsOptional()
+  projectId?: string;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  createdBy?: string;
+}
+
+export class UpdateCrmVisitStatusDto extends PartialType(CreateCrmVisitStatusDto) {}
+
+export class CreateCrmTaskTypeDto {
+  @ApiProperty({ example: 'Client Call' })
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @ApiPropertyOptional({ example: 'TASK-CALL' })
+  @IsString()
+  @IsOptional()
+  code?: string;
+
+  @ApiPropertyOptional({ example: 'PRJ-101' })
+  @IsString()
+  @IsOptional()
+  projectId?: string;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  createdBy?: string;
+}
+
+export class UpdateCrmTaskTypeDto extends PartialType(CreateCrmTaskTypeDto) {}
+
+
