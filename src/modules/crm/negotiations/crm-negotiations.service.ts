@@ -53,4 +53,10 @@ export class CrmNegotiationsService {
     });
     return item;
   }
+
+  async remove(uuid: string) {
+    const item = await this.findOne(uuid);
+    await item.destroy();
+    return { success: true, message: 'Negotiation deleted' };
+  }
 }
