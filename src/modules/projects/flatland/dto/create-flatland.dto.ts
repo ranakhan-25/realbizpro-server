@@ -14,9 +14,10 @@ import {
 import { FlatLandStatus } from 'src/database/models/projects/flatland/pr_flatland.model';
 
 export class CreateFlatLandDto {
-  @ApiProperty({ format: 'uuid' })
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
   @IsUUID()
-  projectId: string;
+  projectId?: string;
 
   @ApiPropertyOptional()
   @IsOptional()

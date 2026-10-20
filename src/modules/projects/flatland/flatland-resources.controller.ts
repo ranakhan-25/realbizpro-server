@@ -7,6 +7,7 @@ import {
   Param,
   ParseUUIDPipe,
   Patch,
+  Put,
   Post,
   Query,
   Req,
@@ -45,6 +46,16 @@ export class FlatRecordsController {
   @ApiOperation({ summary: 'Get a flat by UUID' })
   findOne(@Param('uuid', ParseUUIDPipe) uuid: string) {
     return this.flatLandService.findOne(uuid, 'flat');
+  }
+
+  @Put(':uuid')
+  @ApiOperation({ summary: 'Update a flat (PUT)' })
+  updatePut(
+    @Param('uuid', ParseUUIDPipe) uuid: string,
+    @Body() dto: UpdateFlatLandDto,
+    @Req() request: AuthenticatedRequest,
+  ) {
+    return this.update(uuid, dto, request);
   }
 
   @Patch(':uuid')
@@ -100,6 +111,16 @@ export class FlatLandDetailsController {
   @ApiOperation({ summary: 'Get a land plot by UUID' })
   findOne(@Param('uuid', ParseUUIDPipe) uuid: string) {
     return this.flatLandService.findOne(uuid, 'land');
+  }
+
+  @Put(':uuid')
+  @ApiOperation({ summary: 'Update a land plot (PUT)' })
+  updatePut(
+    @Param('uuid', ParseUUIDPipe) uuid: string,
+    @Body() dto: UpdateFlatLandDto,
+    @Req() request: AuthenticatedRequest,
+  ) {
+    return this.update(uuid, dto, request);
   }
 
   @Patch(':uuid')

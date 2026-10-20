@@ -12,9 +12,10 @@ import {
 } from 'class-validator';
 
 export class CreateFlatLandOfferDto {
-  @ApiProperty({ format: 'uuid' })
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
   @IsUUID()
-  projectId: string;
+  projectId?: string;
 
   @ApiPropertyOptional({ format: 'uuid' })
   @IsOptional()

@@ -12,13 +12,15 @@ import {
 } from 'class-validator';
 
 export class CreateFlatLandBookingDto {
-  @ApiProperty({ format: 'uuid' })
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
   @IsUUID()
-  projectId: string;
+  projectId?: string;
 
-  @ApiProperty({ format: 'uuid' })
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
   @IsUUID()
-  flatLandId: string;
+  flatLandId?: string;
 
   @ApiProperty({ example: 'Booking-2902887' })
   @IsString()

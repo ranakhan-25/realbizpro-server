@@ -7,6 +7,7 @@ import {
   Param,
   ParseUUIDPipe,
   Patch,
+  Put,
   Post,
   Query,
   Req,
@@ -45,6 +46,16 @@ export class FlatLandOfferController {
   @ApiOperation({ summary: 'Get a flat/land sale offer by UUID' })
   findOne(@Param('uuid', ParseUUIDPipe) uuid: string) {
     return this.offerService.findOne(uuid);
+  }
+
+  @Put(':uuid')
+  @ApiOperation({ summary: 'Update a flat/land sale offer (PUT)' })
+  updatePut(
+    @Param('uuid', ParseUUIDPipe) uuid: string,
+    @Body() dto: UpdateFlatLandOfferDto,
+    @Req() request: AuthenticatedRequest,
+  ) {
+    return this.update(uuid, dto, request);
   }
 
   @Patch(':uuid')
