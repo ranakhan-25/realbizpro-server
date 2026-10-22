@@ -15,6 +15,14 @@ import { InvestorNominee } from './models/projects/investor/investor_nominee.mod
 import { ShareConfiguration } from './models/projects/investor/configuration.model';
 import { BillingCategory } from './models/projects/billing/pr_category.model';
 import { BillingSubCategory } from './models/projects/billing/pr_sub_category.model';
+import { Category } from './models/procurement/configuration/products/pr_category.model';
+import { CategoryAccountMapping } from './models/procurement/configuration/products/pr_category_account_mapping.model';
+import { ProcurementSubCategory } from './models/procurement/configuration/products/pr_sub_category.model';
+import { ProcurementBrand } from './models/procurement/configuration/products/pr_brand.model';
+import { ProcurementUnit } from './models/procurement/configuration/products/pr_unit.model';
+import { ProcurementItemEntry } from './models/procurement/configuration/products/pr_item_entry.model';
+import { ProcurementAssetCategory } from './models/procurement/configuration/asset/pr_asset_category.model';
+import { ProcurementAssetItemEntry } from './models/procurement/configuration/asset/pr_asset_item_entry.model';
 
 @Global()
 @Module({
@@ -36,6 +44,14 @@ import { BillingSubCategory } from './models/projects/billing/pr_sub_category.mo
       ShareConfiguration,
       BillingCategory,
       BillingSubCategory,
+      Category,
+      CategoryAccountMapping,
+      ProcurementSubCategory,
+      ProcurementBrand,
+      ProcurementUnit,
+      ProcurementItemEntry,
+      ProcurementAssetCategory,
+      ProcurementAssetItemEntry,
     ]),
   ],
   providers: [
