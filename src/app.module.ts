@@ -126,6 +126,14 @@ import { ProcurementUnitModule } from './modules/procurement/configuration/produ
 import { ProcurementItemEntryModule } from './modules/procurement/configuration/products/item-entry/item-entry.module';
 import { ProcurementAssetCategoryModule } from './modules/procurement/configuration/asset/asset-category/asset-category.module';
 import { ProcurementAssetItemEntryModule } from './modules/procurement/configuration/asset/asset-item-entry/asset-item-entry.module';
+import { SalaryGradeModule } from './modules/hrm/employee/employee list/salary-grade/salary-grade.module';
+import { AttendanceReconciliationModule } from './modules/hrm/attendance/attendance-reconciliation/attendance-reconciliation.module';
+import { AllowanceDeductionSetupModule } from './modules/hrm/configuration/allowance-deduction-setup/allowance-deduction-setup.module';
+import { DeductionRuleModule } from './modules/hrm/configuration/deduction-rule/deduction-rule/deduction-rule.module';
+import { HolidayModule } from './modules/hrm/configuration/holiday/holiday.module';
+import { LeaveTypeModule } from './modules/hrm/configuration/leave-type/leave-type.module';
+import { SalaryGradeItemModule } from './modules/hrm/configuration/salary-grade-item/salary-grade-item.module';
+import { ZkTecoDeviceModule } from './modules/hrm/configuration/zkteco-device/zkteco-device.module';
 
 @Module({
   imports: [
@@ -271,6 +279,13 @@ import { ProcurementAssetItemEntryModule } from './modules/procurement/configura
     EmployeeHierarchyModule,
     EmployeeCardModule,
     IncrementModule,
+    AttendanceReconciliationModule,
+    AllowanceDeductionSetupModule,
+    DeductionRuleModule,
+    HolidayModule,
+    LeaveTypeModule,
+    SalaryGradeItemModule,
+    ZkTecoDeviceModule,
     ProcurementCategoryModule,
     ProcurementSubCategoryModule,
     ProcurementBrandModule,
