@@ -9,6 +9,16 @@ import type { SysUserToken } from '../models/system/sys_user_token.model';
 import type { SysUserPermission } from '../models/system/sys_user_permission.model';
 import type { SysCompany } from '../models/system/sys_company.model';
 import type { SysUserCompany } from '../models/system/sys_user_company.model';
+import type { ProcurementRfq } from '../models/procurement/rfq/pr_rfq.model';
+import type { ProcurementAssetRfq } from '../models/procurement/rfq/pr_asset_rfq.model';
+import type { ProcurementMaterialRequisition } from '../models/procurement/requisition/pr_material_requisition.model';
+import type { ProcurementAssetRequisition } from '../models/procurement/requisition/pr_asset_requisition.model';
+import type { ProcurementPurchaseOrder } from '../models/procurement/purchase-order/pr_purchase_order.model';
+import type { ProcurementAssetPurchaseOrder } from '../models/procurement/purchase-order/pr_asset_purchase_order.model';
+import type { ProcurementGrn } from '../models/procurement/grn/pr_grn.model';
+import type { ProcurementPurchaseBill } from '../models/procurement/purchase-bill/pr_purchase_bill.model';
+import type { ProcurementAssetGrn } from '../models/procurement/grn/pr_asset_grn.model';
+import type { ProcurementAssetPurchaseBill } from '../models/procurement/purchase-bill/pr_asset_purchase_bill.model';
 
 export interface SysUserAttributes {
   id: number;
@@ -53,6 +63,16 @@ export interface SysUserAttributes {
   userPermissions?: SysUserPermission[];
   companies?: SysCompany[];
   userCompanies?: SysUserCompany[];
+  procurementRfqs?: ProcurementRfq[];
+  procurementAssetRfqs?: ProcurementAssetRfq[];
+  procurementMaterialRequisitions?: ProcurementMaterialRequisition[];
+  procurementAssetRequisitions?: ProcurementAssetRequisition[];
+  procurementPurchaseOrders?: ProcurementPurchaseOrder[];
+  procurementAssetPurchaseOrders?: ProcurementAssetPurchaseOrder[];
+  procurementGrns?: ProcurementGrn[];
+  procurementPurchaseBills?: ProcurementPurchaseBill[];
+  procurementAssetGrns?: ProcurementAssetGrn[];
+  procurementAssetPurchaseBills?: ProcurementAssetPurchaseBill[];
 }
 
 export interface SysUserCreationAttributes {
@@ -97,4 +117,14 @@ export interface SysUserWithRelations extends SysUserAttributes {
   userPermissions?: SysUserPermission[];
   companies?: SysCompany[];
   userCompanies?: SysUserCompany[];
+  procurementRfqs?: ProcurementRfq[];
+  procurementAssetRfqs?: ProcurementAssetRfq[];
+  procurementMaterialRequisitions?: ProcurementMaterialRequisition[];
+  procurementAssetRequisitions?: ProcurementAssetRequisition[];
+  procurementPurchaseOrders?: ProcurementPurchaseOrder[];
+  procurementAssetPurchaseOrders?: ProcurementAssetPurchaseOrder[];
+  procurementGrns?: ProcurementGrn[];
+  procurementPurchaseBills?: ProcurementPurchaseBill[];
+  procurementAssetGrns?: ProcurementAssetGrn[];
+  procurementAssetPurchaseBills?: ProcurementAssetPurchaseBill[];
 }

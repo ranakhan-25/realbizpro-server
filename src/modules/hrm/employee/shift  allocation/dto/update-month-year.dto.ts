@@ -1,4 +1,5 @@
-// update-month-year.dto.ts
+/* eslint-disable prettier/prettier */
+
 import { PartialType } from '@nestjs/swagger';
 import { CreateMonthYearDto } from './create-month-year.dto';
 

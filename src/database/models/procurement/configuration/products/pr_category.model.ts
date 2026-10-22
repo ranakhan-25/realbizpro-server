@@ -16,6 +16,10 @@ import {
 import { CategoryAccountMapping } from './pr_category_account_mapping.model';
 import { ProcurementSubCategory } from './pr_sub_category.model';
 import { ProcurementItemEntry } from './pr_item_entry.model';
+import { ProcurementGrn } from '../../grn/pr_grn.model';
+import { ProcurementRfq } from '../../rfq/pr_rfq.model';
+import { ProcurementPurchaseOrder } from '../../purchase-order/pr_purchase_order.model';
+import { ProcurementMaterialRequisition } from '../../requisition/pr_material_requisition.model';
 
 @Table({
   tableName: 'pr_category',
@@ -75,6 +79,22 @@ export class Category
     as: 'itemEntries',
   })
   declare itemEntries?: ProcurementItemEntry[];
+
+  @HasMany(() => ProcurementGrn, {
+    foreignKey: 'category_id',
+    sourceKey: 'uuid',
+    as: 'grns',
+  })
+  declare grns?: ProcurementGrn[];
+
+  @HasMany(() => ProcurementRfq, { foreignKey: 'category_id', sourceKey: 'uuid', as: 'rfqs' })
+  declare rfqs?: ProcurementRfq[];
+
+  @HasMany(() => ProcurementPurchaseOrder, { foreignKey: 'category_id', sourceKey: 'uuid', as: 'purchaseOrders' })
+  declare purchaseOrders?: ProcurementPurchaseOrder[];
+
+  @HasMany(() => ProcurementMaterialRequisition, { foreignKey: 'category_id', sourceKey: 'uuid', as: 'materialRequisitions' })
+  declare materialRequisitions?: ProcurementMaterialRequisition[];
 
   @Column({
     type: DataType.STRING,

@@ -11,6 +11,7 @@ import type {
   ShiftUpdateAttributes,
 } from 'src/database/types/shift.types';
 import { ShiftSchedule } from './hrm_shift_schedule_model';
+import { Attendance } from './hrm_attendance_model';
 
 export enum ShiftStatus {
   ACTIVE = 'active',
@@ -88,4 +89,10 @@ export class Shift
     as: 'schedules',
   })
   declare schedules?: ShiftSchedule[];
+  @HasMany(() => Attendance, {
+    foreignKey: 'shiftId',
+    sourceKey: 'uuid',
+    as: 'attendances',
+  })
+  declare attendances?: Attendance[];
 }

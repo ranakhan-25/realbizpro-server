@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Put, Delete, Body, Param } from '@nestjs/common';
+import { Controller, Post, Get, Put, Patch, Delete, Body, Param } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiParam, ApiBody } from '@nestjs/swagger';
 import { CrmTasksService } from './crm-tasks.service';
 import { CreateCrmTaskDto, UpdateCrmTaskDto } from './dto/create-crm-task.dto';
@@ -29,10 +29,18 @@ export class CrmTasksController {
   }
 
   @Put(':uuid')
-  @ApiOperation({ summary: 'Update an internal task' })
+  @ApiOperation({ summary: 'Update an internal task (PUT)' })
   @ApiParam({ name: 'uuid' })
   @ApiBody({ type: UpdateCrmTaskDto })
   async update(@Param('uuid') uuid: string, @Body() updateDto: UpdateCrmTaskDto) {
+    return this.service.update(uuid, updateDto);
+  }
+
+  @Patch(':uuid')
+  @ApiOperation({ summary: 'Update an internal task (PATCH)' })
+  @ApiParam({ name: 'uuid' })
+  @ApiBody({ type: UpdateCrmTaskDto })
+  async patch(@Param('uuid') uuid: string, @Body() updateDto: UpdateCrmTaskDto) {
     return this.service.update(uuid, updateDto);
   }
 

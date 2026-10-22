@@ -3,6 +3,7 @@
 import {
   Column,
   DataType,
+  HasMany,
   Table,
 } from 'sequelize-typescript';
 
@@ -13,6 +14,14 @@ import {
   TaskCreationAttributes,
   TaskUpdateAttributes,
 } from 'src/database/types/task.types';
+import { ProcurementRfq } from '../../procurement/rfq/pr_rfq.model';
+import { ProcurementAssetRfq } from '../../procurement/rfq/pr_asset_rfq.model';
+import { ProcurementMaterialRequisition } from '../../procurement/requisition/pr_material_requisition.model';
+import { ProcurementAssetRequisition } from '../../procurement/requisition/pr_asset_requisition.model';
+import { ProcurementPurchaseOrder } from '../../procurement/purchase-order/pr_purchase_order.model';
+import { ProcurementAssetPurchaseOrder } from '../../procurement/purchase-order/pr_asset_purchase_order.model';
+import { ProcurementGrn } from '../../procurement/grn/pr_grn.model';
+import { ProcurementAssetGrn } from '../../procurement/grn/pr_asset_grn.model';
 
 export enum TaskStatus {
   IN_PROGRESS = 'In Progress',
@@ -139,4 +148,13 @@ export class Task
     allowNull: true,
   })
   declare deletedBy?: string;
+
+  @HasMany(() => ProcurementRfq, { foreignKey: 'task_id', sourceKey: 'uuid', as: 'procurementRfqs' }) declare procurementRfqs?: ProcurementRfq[];
+  @HasMany(() => ProcurementAssetRfq, { foreignKey: 'task_id', sourceKey: 'uuid', as: 'procurementAssetRfqs' }) declare procurementAssetRfqs?: ProcurementAssetRfq[];
+  @HasMany(() => ProcurementMaterialRequisition, { foreignKey: 'task_id', sourceKey: 'uuid', as: 'procurementMaterialRequisitions' }) declare procurementMaterialRequisitions?: ProcurementMaterialRequisition[];
+  @HasMany(() => ProcurementAssetRequisition, { foreignKey: 'task_id', sourceKey: 'uuid', as: 'procurementAssetRequisitions' }) declare procurementAssetRequisitions?: ProcurementAssetRequisition[];
+  @HasMany(() => ProcurementPurchaseOrder, { foreignKey: 'task_id', sourceKey: 'uuid', as: 'procurementPurchaseOrders' }) declare procurementPurchaseOrders?: ProcurementPurchaseOrder[];
+  @HasMany(() => ProcurementAssetPurchaseOrder, { foreignKey: 'task_id', sourceKey: 'uuid', as: 'procurementAssetPurchaseOrders' }) declare procurementAssetPurchaseOrders?: ProcurementAssetPurchaseOrder[];
+  @HasMany(() => ProcurementGrn, { foreignKey: 'task_id', sourceKey: 'uuid', as: 'procurementGrns' }) declare procurementGrns?: ProcurementGrn[];
+  @HasMany(() => ProcurementAssetGrn, { foreignKey: 'task_id', sourceKey: 'uuid', as: 'procurementAssetGrns' }) declare procurementAssetGrns?: ProcurementAssetGrn[];
 }

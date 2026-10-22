@@ -13,6 +13,8 @@ import { Project } from '../project/pr_project.model';
 import { Site } from '../project-site/pr_project_site.model';
 import { BillingCategory } from '../billing/pr_category.model';
 import { MaterialRequisitionItem } from '../material-requisition-item/pr_material_requisition_item.model';
+import { ProcurementRfq } from '../../procurement/rfq/pr_rfq.model';
+import { ProcurementAssetRfq } from '../../procurement/rfq/pr_asset_rfq.model';
 import type {
   MaterialRequisitionAttributes,
   MaterialRequisitionCreationAttributes,
@@ -224,4 +226,10 @@ export class MaterialRequisition
     as: 'items',
   })
   declare items?: MaterialRequisitionItem[];
+
+  @HasMany(() => ProcurementRfq, { foreignKey: 'requisition_id', sourceKey: 'uuid', as: 'procurementRfqs' })
+  declare procurementRfqs?: ProcurementRfq[];
+
+  @HasMany(() => ProcurementAssetRfq, { foreignKey: 'requisition_id', sourceKey: 'uuid', as: 'procurementAssetRfqs' })
+  declare procurementAssetRfqs?: ProcurementAssetRfq[];
 }

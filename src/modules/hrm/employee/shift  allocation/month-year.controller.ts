@@ -1,3 +1,5 @@
+/* eslint-disable prettier/prettier */
+
 import {
   Body,
   Controller,
@@ -8,64 +10,86 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+
 import {
   ApiBearerAuth,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+
 import { MonthYearService } from './month-year.service';
 import { CreateMonthYearDto } from './dto/create-month-year.dto';
 import { QueryMonthYearDto } from './dto/query-month-year.dto';
 import { UpdateMonthYearDto } from './dto/update-month-year.dto';
-@ApiTags('HRM | Employee | MonthYear')
+
+@ApiTags('HRM | Employee | Month Year')
 @ApiBearerAuth()
 @Controller('month-year')
 export class MonthYearController {
   constructor(
-    private readonly service: MonthYearService,
+    private readonly monthYearService: MonthYearService,
   ) {}
+
   @Post()
   @ApiOperation({
-    summary: 'Create a new month-year',
+    summary: 'Create a new month year',
   })
-  create(@Body() dto: CreateMonthYearDto) {
-    return this.service.create(dto);
+  create(
+    @Body()
+    createMonthYearDto: CreateMonthYearDto,
+  ) {
+    return this.monthYearService.create(
+      createMonthYearDto,
+    );
   }
+
   @Get()
   @ApiOperation({
-    summary:
-      'Get all month-year records (paginated)',
+    summary: 'Get all month years (paginated)',
   })
-  findAll(@Query() query: QueryMonthYearDto) {
-    return this.service.findAll(query);
+  findAll(
+    @Query()
+    query: QueryMonthYearDto,
+  ) {
+    return this.monthYearService.findAll(query);
   }
+
   @Get(':uuid')
   @ApiOperation({
-    summary: 'Get month-year by UUID',
+    summary: 'Get month year by UUID',
   })
   findOne(@Param('uuid') uuid: string) {
-    return this.service.findOne(uuid);
+    return this.monthYearService.findOne(uuid);
   }
+
   @Patch(':uuid')
-  @ApiOperation({ summary: 'Update month-year' })
+  @ApiOperation({
+    summary: 'Update month year',
+  })
   update(
     @Param('uuid') uuid: string,
-    @Body() dto: UpdateMonthYearDto,
+    @Body()
+    updateMonthYearDto: UpdateMonthYearDto,
   ) {
-    return this.service.update(uuid, dto);
+    return this.monthYearService.update(
+      uuid,
+      updateMonthYearDto,
+    );
   }
+
   @Delete(':uuid')
   @ApiOperation({
-    summary: 'Soft delete month-year',
+    summary: 'Soft delete month year',
   })
   remove(@Param('uuid') uuid: string) {
-    return this.service.remove(uuid);
+    return this.monthYearService.remove(uuid);
   }
+
   @Patch(':uuid/restore')
   @ApiOperation({
-    summary: 'Restore deleted month-year',
+    summary: 'Restore soft-deleted month year',
   })
   restore(@Param('uuid') uuid: string) {
-    return this.service.restore(uuid);
+    return this.monthYearService.restore(uuid);
   }
 }

@@ -14,6 +14,15 @@ import type {
 import { Project } from '../project/pr_project.model';
 import { BaseModel } from 'src/database/base.model';
 import { ProjectShareAssignment } from '../project-share-assignment/pr_project_share_assignment.model';
+import { WorkOrder } from '../billing/work-order/pr_work_order.model';
+import { ProcurementRfq } from '../../procurement/rfq/pr_rfq.model';
+import { ProcurementAssetRfq } from '../../procurement/rfq/pr_asset_rfq.model';
+import { ProcurementMaterialRequisition } from '../../procurement/requisition/pr_material_requisition.model';
+import { ProcurementAssetRequisition } from '../../procurement/requisition/pr_asset_requisition.model';
+import { ProcurementPurchaseOrder } from '../../procurement/purchase-order/pr_purchase_order.model';
+import { ProcurementAssetPurchaseOrder } from '../../procurement/purchase-order/pr_asset_purchase_order.model';
+import { ProcurementGrn } from '../../procurement/grn/pr_grn.model';
+import { ProcurementAssetGrn } from '../../procurement/grn/pr_asset_grn.model';
 
 @Table({
   tableName: 'sites',
@@ -82,6 +91,20 @@ export class Site
     as: 'shareAssignments',
   })
   declare shareAssignments?: ProjectShareAssignment[];
+  @HasMany(() => WorkOrder, {
+    foreignKey: 'siteId',
+    sourceKey: 'uuid',
+    as: 'workOrders',
+  })
+  declare workOrders?: WorkOrder[];
+  @HasMany(() => ProcurementRfq, { foreignKey: 'site_id', sourceKey: 'uuid', as: 'procurementRfqs' }) declare procurementRfqs?: ProcurementRfq[];
+  @HasMany(() => ProcurementAssetRfq, { foreignKey: 'site_id', sourceKey: 'uuid', as: 'procurementAssetRfqs' }) declare procurementAssetRfqs?: ProcurementAssetRfq[];
+  @HasMany(() => ProcurementMaterialRequisition, { foreignKey: 'site_id', sourceKey: 'uuid', as: 'procurementMaterialRequisitions' }) declare procurementMaterialRequisitions?: ProcurementMaterialRequisition[];
+  @HasMany(() => ProcurementAssetRequisition, { foreignKey: 'site_id', sourceKey: 'uuid', as: 'procurementAssetRequisitions' }) declare procurementAssetRequisitions?: ProcurementAssetRequisition[];
+  @HasMany(() => ProcurementPurchaseOrder, { foreignKey: 'site_id', sourceKey: 'uuid', as: 'procurementPurchaseOrders' }) declare procurementPurchaseOrders?: ProcurementPurchaseOrder[];
+  @HasMany(() => ProcurementAssetPurchaseOrder, { foreignKey: 'site_id', sourceKey: 'uuid', as: 'procurementAssetPurchaseOrders' }) declare procurementAssetPurchaseOrders?: ProcurementAssetPurchaseOrder[];
+  @HasMany(() => ProcurementGrn, { foreignKey: 'site_id', sourceKey: 'uuid', as: 'procurementGrns' }) declare procurementGrns?: ProcurementGrn[];
+  @HasMany(() => ProcurementAssetGrn, { foreignKey: 'site_id', sourceKey: 'uuid', as: 'procurementAssetGrns' }) declare procurementAssetGrns?: ProcurementAssetGrn[];
   // ─── Audit fields ───────────────────────────────────────
   @Column({
     type: DataType.INTEGER, // change to STRING / UUID if needed

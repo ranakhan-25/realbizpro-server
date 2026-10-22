@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsString,
-  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsDateString,
@@ -9,17 +9,18 @@ import {
 } from 'class-validator';
 
 export class CreateCrRecoveryLogDto {
-  @ApiProperty({ example: 1, description: 'Sale Agreement ID' })
+  @ApiPropertyOptional({ example: 1, description: 'Sale Agreement ID' })
   @IsNumber()
-  @IsNotEmpty()
-  sale_agreement_id: number;
+  @IsOptional()
+  @Type(() => Number)
+  sale_agreement_id?: number;
 
   @ApiPropertyOptional({ example: 'CUST-0089' })
   @IsString()
   @IsOptional()
   customer_id?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'phone_call',
     enum: [
       'phone_call',
@@ -30,18 +31,13 @@ export class CreateCrRecoveryLogDto {
     ],
   })
   @IsString()
-  @IsIn([
-    'phone_call',
-    'reminder_letter_1',
-    'reminder_letter_2',
-    'legal_notice',
-    'in_person_visit',
-  ])
-  action_type: string;
+  @IsOptional()
+  action_type?: string;
 
-  @ApiProperty({ example: '2026-10-14T11:00:00Z' })
+  @ApiPropertyOptional({ example: '2026-10-14T11:00:00Z' })
   @IsDateString()
-  action_date: string;
+  @IsOptional()
+  action_date?: string;
 
   @ApiPropertyOptional({ example: '2026-10-25' })
   @IsDateString()
@@ -51,12 +47,13 @@ export class CreateCrRecoveryLogDto {
   @ApiPropertyOptional({ example: 125000 })
   @IsNumber()
   @IsOptional()
+  @Type(() => Number)
   promised_amount?: number;
 
-  @ApiProperty({ example: 'S. M. Faruk (Recovery Officer)' })
+  @ApiPropertyOptional({ example: 'S. M. Faruk (Recovery Officer)' })
   @IsString()
-  @IsNotEmpty()
-  officer_name: string;
+  @IsOptional()
+  officer_name?: string;
 
   @ApiPropertyOptional({
     example: 'Client stated money transfer from overseas expected by 25th Oct',
@@ -73,10 +70,42 @@ export class CreateCrRecoveryLogDto {
   @IsOptional()
   outcome?: string;
 
+  @ApiPropertyOptional({
+    example: 'resolved',
+    description: 'Outcome status alias from frontend forms',
+  })
+  @IsString()
+  @IsOptional()
+  outcome_status?: string;
+
   @ApiPropertyOptional({ example: '2026-10-26' })
   @IsDateString()
   @IsOptional()
   next_action_date?: string;
+
+  @ApiPropertyOptional({
+    example: '2026-10-26',
+    description: 'Next follow-up date alias from frontend forms',
+  })
+  @IsDateString()
+  @IsOptional()
+  next_followup_date?: string;
+
+  @ApiPropertyOptional({
+    example: 'Customer promised payment by next Monday',
+    description: 'Remarks alias from frontend forms',
+  })
+  @IsString()
+  @IsOptional()
+  remarks?: string;
+
+  @ApiPropertyOptional({
+    example: 'LN-2026-004',
+    description: 'Legal notice reference number',
+  })
+  @IsString()
+  @IsOptional()
+  legal_notice_ref?: string;
 
   @ApiPropertyOptional({ example: 'PRJ-101' })
   @IsString()

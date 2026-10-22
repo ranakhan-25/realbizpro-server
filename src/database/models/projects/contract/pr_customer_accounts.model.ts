@@ -3,16 +3,17 @@
 import {
   Column,
   DataType,
+  HasMany,
   Table,
 } from 'sequelize-typescript';
 import { BaseModel } from 'src/database/base.model';
-
 
 import {
   CustomerAccountAttributes,
   CustomerAccountCreationAttributes,
   CustomerAccountUpdateAttributes,
 } from 'src/database/types/customeraccount.types';
+import { WorkOrder } from '../billing/work-order/pr_work_order.model';
 
 export enum CustomerAccountStatus {
   ACTIVE = 'active',
@@ -115,4 +116,10 @@ export class CustomerAccount
     defaultValue: CustomerAccountStatus.ACTIVE,
   })
   declare status: CustomerAccountStatus;
+  @HasMany(() => WorkOrder, {
+    foreignKey: 'customerId',
+    sourceKey: 'uuid',
+    as: 'workOrders',
+  })
+  declare workOrders?: WorkOrder[];
 }

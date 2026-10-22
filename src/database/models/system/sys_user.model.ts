@@ -25,6 +25,16 @@ import { SysUserSection } from './sys_user_section.model';
 import { SysUserToken } from './sys_user_token.model';
 import { SysCompany } from './sys_company.model';
 import { SysUserCompany } from './sys_user_company.model';
+import { ProcurementRfq } from '../procurement/rfq/pr_rfq.model';
+import { ProcurementAssetRfq } from '../procurement/rfq/pr_asset_rfq.model';
+import { ProcurementMaterialRequisition } from '../procurement/requisition/pr_material_requisition.model';
+import { ProcurementAssetRequisition } from '../procurement/requisition/pr_asset_requisition.model';
+import { ProcurementPurchaseOrder } from '../procurement/purchase-order/pr_purchase_order.model';
+import { ProcurementAssetPurchaseOrder } from '../procurement/purchase-order/pr_asset_purchase_order.model';
+import { ProcurementGrn } from '../procurement/grn/pr_grn.model';
+import { ProcurementPurchaseBill } from '../procurement/purchase-bill/pr_purchase_bill.model';
+import { ProcurementAssetPurchaseBill } from '../procurement/purchase-bill/pr_asset_purchase_bill.model';
+import { ProcurementAssetGrn } from '../procurement/grn/pr_asset_grn.model';
 
 export enum UserTypeEnum {
   SHOWROOM = 'Showroom',
@@ -307,4 +317,15 @@ export class SysUser
       new Date() < this.refreshTokenExpiresAt
     );
   }
+
+  @HasMany(() => ProcurementRfq, { foreignKey: 'added_by_id', sourceKey: 'id', as: 'procurementRfqs' }) declare procurementRfqs?: ProcurementRfq[];
+  @HasMany(() => ProcurementAssetRfq, { foreignKey: 'added_by_id', sourceKey: 'id', as: 'procurementAssetRfqs' }) declare procurementAssetRfqs?: ProcurementAssetRfq[];
+  @HasMany(() => ProcurementMaterialRequisition, { foreignKey: 'added_by_id', sourceKey: 'id', as: 'procurementMaterialRequisitions' }) declare procurementMaterialRequisitions?: ProcurementMaterialRequisition[];
+  @HasMany(() => ProcurementAssetRequisition, { foreignKey: 'added_by_id', sourceKey: 'id', as: 'procurementAssetRequisitions' }) declare procurementAssetRequisitions?: ProcurementAssetRequisition[];
+  @HasMany(() => ProcurementPurchaseOrder, { foreignKey: 'added_by_id', sourceKey: 'id', as: 'procurementPurchaseOrders' }) declare procurementPurchaseOrders?: ProcurementPurchaseOrder[];
+  @HasMany(() => ProcurementAssetPurchaseOrder, { foreignKey: 'added_by_id', sourceKey: 'id', as: 'procurementAssetPurchaseOrders' }) declare procurementAssetPurchaseOrders?: ProcurementAssetPurchaseOrder[];
+  @HasMany(() => ProcurementGrn, { foreignKey: 'added_by_id', sourceKey: 'id', as: 'procurementGrns' }) declare procurementGrns?: ProcurementGrn[];
+  @HasMany(() => ProcurementPurchaseBill, { foreignKey: 'added_by_id', sourceKey: 'id', as: 'procurementPurchaseBills' }) declare procurementPurchaseBills?: ProcurementPurchaseBill[];
+  @HasMany(() => ProcurementAssetGrn, { foreignKey: 'added_by_id', sourceKey: 'id', as: 'procurementAssetGrns' }) declare procurementAssetGrns?: ProcurementAssetGrn[];
+  @HasMany(() => ProcurementAssetPurchaseBill, { foreignKey: 'added_by_id', sourceKey: 'id', as: 'procurementAssetPurchaseBills' }) declare procurementAssetPurchaseBills?: ProcurementAssetPurchaseBill[];
 }

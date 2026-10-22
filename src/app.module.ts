@@ -86,7 +86,7 @@ import { DepartmentModule } from './modules/hrm/employee/department/department.m
 import { DesignationModule } from './modules/hrm/employee/designation/designation.module';
 import { ShiftModule } from './modules/hrm/employee/shift/shift.module';
 import { AttendanceModule } from './modules/hrm/employee/shift  allocation/attendance.module';
-// import { EmployeeModule } from './modules/hrm/employee/shift  allocation/employee.module';
+
 import { MonthYearModule } from './modules/hrm/employee/shift  allocation/month-year.module';
 import { BonusModule } from './modules/hrm/employee/bonus/bonus.module';
 
@@ -109,10 +109,10 @@ import { AllowanceModule } from './modules/hrm/employee/employee list/allowance/
 import { EmployeeListModule } from './modules/hrm/employee/employee list/employee-list/employee-list.module';
 import { EmployeeSalaryModule } from './modules/hrm/employee/employee list/employee-salary/employee-salary.module';
 import { EmployeeTypeModule } from './modules/hrm/employee/employee list/employee-type/employee-type.module';
-// import { HrmShiftModule } from './modules/hrm/employee/employee list/hrm-shift/hrm-shift.module';
+
 import { LoanModule } from './modules/hrm/employee/employee list/loan/loan.module';
 import { OvertimeModule } from './modules/hrm/employee/employee list/overtime/overtime.module';
-import { SalaryGradeModule } from './modules/hrm/employee/employee list/salary-grade/salary-grade.module';
+
 import { SaturationDeductionModule } from './modules/hrm/employee/employee list/saturation-deduction/saturation-deduction.module';
 import { UnderModule } from './modules/hrm/employee/employee list/under/under.module';
 import { EmployeeHierarchyModule } from './modules/hrm/employee/employee-hierarchy/employee-hierarchy.module';
@@ -128,6 +128,19 @@ import { ProcurementAssetCategoryModule } from './modules/procurement/configurat
 import { ProcurementAssetItemEntryModule } from './modules/procurement/configuration/asset/asset-item-entry/asset-item-entry.module';
 import { RfqModule } from './modules/procurement/rfq/rfq.module';
 import { AssetRfqModule } from './modules/procurement/rfq/asset/asset-rfq.module';
+import { ProcurementMaterialRequisitionModule } from './modules/procurement/requisition/material-requisition/procurement-material-requisition.module';
+import { AssetRequisitionModule } from './modules/procurement/requisition/asset-requisition/asset-requisition.module';
+import { PurchaseOrderModule } from './modules/procurement/purchase-order/purchase-order.module';
+import { AssetPurchaseOrderModule } from './modules/procurement/purchase-order/asset/asset-purchase-order.module';
+import { GrnModule } from './modules/procurement/grn/grn.module';
+import { SalaryGradeModule } from './modules/hrm/employee/employee list/salary-grade/salary-grade.module';
+import { AttendanceReconciliationModule } from './modules/hrm/attendance/attendance-reconciliation/attendance-reconciliation.module';
+import { AllowanceDeductionSetupModule } from './modules/hrm/configuration/allowance-deduction-setup/allowance-deduction-setup.module';
+import { DeductionRuleModule } from './modules/hrm/configuration/deduction-rule/deduction-rule/deduction-rule.module';
+import { HolidayModule } from './modules/hrm/configuration/holiday/holiday.module';
+import { LeaveTypeModule } from './modules/hrm/configuration/leave-type/leave-type.module';
+import { SalaryGradeItemModule } from './modules/hrm/configuration/salary-grade-item/salary-grade-item.module';
+import { ZkTecoDeviceModule } from './modules/hrm/configuration/zkteco-device/zkteco-device.module';
 
 @Module({
   imports: [
@@ -253,7 +266,7 @@ import { AssetRfqModule } from './modules/procurement/rfq/asset/asset-rfq.module
     DesignationModule,
     ShiftModule,
     AttendanceModule,
-    // EmployeeModule,
+
     MonthYearModule,
     BonusModule,
     BonusGenerateModule,
@@ -264,7 +277,7 @@ import { AssetRfqModule } from './modules/procurement/rfq/asset/asset-rfq.module
     EmployeeListModule,
     EmployeeSalaryModule,
     EmployeeTypeModule,
-    // HrmShiftModule,
+
     LoanModule,
     OvertimeModule,
     SalaryGradeModule,
@@ -273,6 +286,13 @@ import { AssetRfqModule } from './modules/procurement/rfq/asset/asset-rfq.module
     EmployeeHierarchyModule,
     EmployeeCardModule,
     IncrementModule,
+    AttendanceReconciliationModule,
+    AllowanceDeductionSetupModule,
+    DeductionRuleModule,
+    HolidayModule,
+    LeaveTypeModule,
+    SalaryGradeItemModule,
+    ZkTecoDeviceModule,
     ProcurementCategoryModule,
     ProcurementSubCategoryModule,
     ProcurementBrandModule,
@@ -282,6 +302,11 @@ import { AssetRfqModule } from './modules/procurement/rfq/asset/asset-rfq.module
     ProcurementAssetItemEntryModule,
     RfqModule,
     AssetRfqModule,
+    ProcurementMaterialRequisitionModule,
+    AssetRequisitionModule,
+    PurchaseOrderModule,
+    AssetPurchaseOrderModule,
+    GrnModule,
     AccountMappingModule,
   ],
   controllers: [AppController, HealthController],

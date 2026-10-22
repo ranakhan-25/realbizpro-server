@@ -11,6 +11,8 @@ export interface MonthYearAttributes {
   deletedAt?: Date;
   month: string;
   year: number;
+  startDate: string;
+  endDate: string;
 
   // Relations
   attendances?: Attendance[];
@@ -19,6 +21,8 @@ export interface MonthYearAttributes {
 export interface MonthYearCreationAttributes {
   month: string;
   year: number;
+  startDate: string;
+  endDate: string;
 }
 
 export type MonthYearUpdateAttributes = Partial<MonthYearCreationAttributes>;

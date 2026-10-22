@@ -3,6 +3,8 @@
 
 import { CustomerAccountStatus } from '../models/projects/contract/pr_customer_accounts.model';
 
+import type { WorkOrder } from '../models/projects/billing/work-order/pr_work_order.model';
+
 export interface CustomerAccountAttributes {
   id: number;
   uuid: string;
@@ -22,6 +24,9 @@ export interface CustomerAccountAttributes {
   updatedBy?: string | null;
   deletedBy?: string | null;
   status: CustomerAccountStatus;
+
+  // Relations
+  workOrders?: WorkOrder[];
 }
 
 export interface CustomerAccountCreationAttributes {
@@ -44,5 +49,5 @@ export type CustomerAccountUpdateAttributes = Partial<CustomerAccountCreationAtt
 
 // Helper type for including relations
 export interface CustomerAccountWithRelations extends CustomerAccountAttributes {
-  // No relations defined
+  workOrders?: WorkOrder[];
 }

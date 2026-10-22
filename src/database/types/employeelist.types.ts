@@ -21,6 +21,7 @@ import type { Overtime } from '../models/hrm/employee/hrm_overtime_model';
 import type { Increment } from '../models/hrm/employee/hrm_increment_model';
 import type { Attendance } from '../models/hrm/employee/hrm_attendance_model';
 import type { BonusGenerate } from '../models/hrm/employee/hrm_bonus_generate_model';
+import type { AttendanceReconciliation } from '../models/hrm/attendance/attendance_reconciliation_model';
 
 export interface EmployeeListAttributes {
   id: number;
@@ -86,6 +87,7 @@ export interface EmployeeListAttributes {
   increments?: Increment[];
   attendances?: Attendance[];
   bonusGenerates?: BonusGenerate[];
+  attendanceReconciliations?: AttendanceReconciliation[];
 }
 
 export interface EmployeeListCreationAttributes {
@@ -151,4 +153,5 @@ export interface EmployeeListWithRelations extends EmployeeListAttributes {
   increments?: Increment[];
   attendances?: Attendance[];
   bonusGenerates?: BonusGenerate[];
+  attendanceReconciliations?: AttendanceReconciliation[];
 }

@@ -31,6 +31,7 @@ import { Increment } from './hrm_increment_model';
 import { Attendance } from './hrm_attendance_model';
 import { BonusGenerate } from './hrm_bonus_generate_model';
 import { Shift } from './hrm_shift_model';
+import { AttendanceReconciliation } from '../attendance/attendance_reconciliation_model';
 
 export enum EmployeeListStatus {
   ACTIVE = 'active',
@@ -485,4 +486,10 @@ export class EmployeeList
     as: 'bonusGenerates',
   })
   declare bonusGenerates?: BonusGenerate[];
+  @HasMany(() => AttendanceReconciliation, {
+    foreignKey: 'employeeId',
+    sourceKey: 'uuid',
+    as: 'attendanceReconciliations',
+  })
+  declare attendanceReconciliations?: AttendanceReconciliation[];
 }
