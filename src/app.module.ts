@@ -126,6 +126,8 @@ import { ProcurementUnitModule } from './modules/procurement/configuration/produ
 import { ProcurementItemEntryModule } from './modules/procurement/configuration/products/item-entry/item-entry.module';
 import { ProcurementAssetCategoryModule } from './modules/procurement/configuration/asset/asset-category/asset-category.module';
 import { ProcurementAssetItemEntryModule } from './modules/procurement/configuration/asset/asset-item-entry/asset-item-entry.module';
+import { RfqModule } from './modules/procurement/rfq/rfq.module';
+import { AssetRfqModule } from './modules/procurement/rfq/asset/asset-rfq.module';
 
 @Module({
   imports: [
@@ -278,6 +280,8 @@ import { ProcurementAssetItemEntryModule } from './modules/procurement/configura
     ProcurementItemEntryModule,
     ProcurementAssetCategoryModule,
     ProcurementAssetItemEntryModule,
+    RfqModule,
+    AssetRfqModule,
     AccountMappingModule,
   ],
   controllers: [AppController, HealthController],
