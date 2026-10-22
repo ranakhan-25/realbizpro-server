@@ -5,15 +5,16 @@ import {
   ForeignKey,
   BelongsTo,
 } from 'sequelize-typescript';
-
 import { BaseModel } from 'src/database/base.model';
-import {
+import { EmployeeList } from './hrm_employeeList_model';
+import { MonthYear } from './hrm_monthyear_model';
+import { Department } from './hrm_department_model';
+import { Shift } from './hrm_shift_model';
+
+import type {
   AttendanceAttributes,
   AttendanceCreationAttributes,
-} from 'src/database/types/attendance.types';
-// import { Employee } from './hrm_employee_model';
-import { MonthYear } from './hrm_monthyear_model';
-import { EmployeeList } from './hrm_employeeList_model';
+} from '../../../types/attendance.types';
 
 export enum AttendanceType {
   WORKDAY = 'workday',
@@ -26,6 +27,7 @@ export enum AttendanceType {
   tableName: 'attendance',
   timestamps: true,
   paranoid: true,
+  underscored: false,
   indexes: [
     {
       name: 'Attendance_date_idx',
@@ -38,6 +40,23 @@ export enum AttendanceType {
     {
       name: 'Attendance_monthYearId_idx',
       fields: ['monthYearId'],
+    },
+    {
+      name: 'Attendance_departmentId_idx',
+      fields: ['departmentId'],
+    },
+    {
+      name: 'Attendance_shiftId_idx',
+      fields: ['shiftId'],
+    },
+    {
+      name: 'Attendance_employeeId_date_idx',
+      fields: ['employeeId', 'date'],
+      unique: true,
+    },
+    {
+      name: 'Attendance_deletedAt_idx',
+      fields: ['deleted_at'],
     },
   ],
 })
@@ -52,12 +71,54 @@ export class Attendance extends BaseModel<
   })
   declare employeeId: string;
 
+  @BelongsTo(() => EmployeeList, {
+    foreignKey: 'employeeId',
+    targetKey: 'uuid',
+    as: 'employee',
+  })
+  declare employee?: EmployeeList;
+
   @ForeignKey(() => MonthYear)
   @Column({
     type: DataType.UUID,
     allowNull: true,
   })
   declare monthYearId?: string | null;
+
+  @BelongsTo(() => MonthYear, {
+    foreignKey: 'monthYearId',
+    targetKey: 'uuid',
+    as: 'monthYear',
+  })
+  declare monthYear?: MonthYear;
+
+  @ForeignKey(() => Department)
+  @Column({
+    type: DataType.UUID,
+    allowNull: true,
+  })
+  declare departmentId?: string;
+
+  @BelongsTo(() => Department, {
+    foreignKey: 'departmentId',
+    targetKey: 'uuid',
+    as: 'department',
+  })
+  declare department?: Department;
+
+  @ForeignKey(() => Shift)
+  @Column({
+    type: DataType.UUID,
+    allowNull: true,
+  })
+  declare shiftId?: string;
+
+  @BelongsTo(() => Shift, {
+    foreignKey: 'shiftId',
+    targetKey: 'uuid',
+    as: 'shift',
+  })
+  declare shift?: Shift;
 
   @Column({
     type: DataType.DATEONLY,
@@ -84,10 +145,60 @@ export class Attendance extends BaseModel<
   declare outTime?: string;
 
   @Column({
+    type: DataType.DECIMAL(5, 2),
+    allowNull: true,
+    defaultValue: 0,
+  })
+  declare hours?: number;
+
+  @Column({
     type: DataType.STRING,
     allowNull: true,
   })
+  declare inSelfie?: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  declare outSelfie?: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  declare inLocation?: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  declare outLocation?: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  declare location?: string;
+
+  @Column({
+    type: DataType.TEXT,
+    allowNull: true,
+  })
   declare note?: string;
+
+  @Column({
+    type: DataType.TEXT,
+    allowNull: true,
+  })
+  declare comment?: string;
+
+  @Column({
+    type: DataType.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  })
+  declare isPresent: boolean;
 
   @Column({
     type: DataType.ENUM(
@@ -98,17 +209,27 @@ export class Attendance extends BaseModel<
   })
   declare type: AttendanceType;
 
-  @BelongsTo(() => EmployeeList, {
-    foreignKey: 'employeeId',
-    targetKey: 'uuid',
-    as: 'employee',
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
   })
-  declare employee?: EmployeeList;
+  declare addedById?: string;
 
-  @BelongsTo(() => MonthYear, {
-    foreignKey: 'monthYearId',
-    targetKey: 'uuid',
-    as: 'monthYear',
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
   })
-  declare monthYear?: MonthYear;
+  declare createdBy?: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  declare updatedBy?: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  declare deletedBy?: string;
 }

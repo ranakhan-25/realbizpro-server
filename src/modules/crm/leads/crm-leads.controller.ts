@@ -3,6 +3,7 @@ import {
   Post,
   Get,
   Put,
+  Patch,
   Delete,
   Body,
   Param,
@@ -64,10 +65,18 @@ export class CrmLeadsController {
   }
 
   @Put(':uuid')
-  @ApiOperation({ summary: 'Update a CRM lead' })
+  @ApiOperation({ summary: 'Update a CRM lead (PUT)' })
   @ApiParam({ name: 'uuid' })
   @ApiBody({ type: UpdateCrmLeadDto })
   async update(@Param('uuid') uuid: string, @Body() updateDto: UpdateCrmLeadDto) {
+    return this.leadsService.update(uuid, updateDto);
+  }
+
+  @Patch(':uuid')
+  @ApiOperation({ summary: 'Update a CRM lead (PATCH)' })
+  @ApiParam({ name: 'uuid' })
+  @ApiBody({ type: UpdateCrmLeadDto })
+  async patch(@Param('uuid') uuid: string, @Body() updateDto: UpdateCrmLeadDto) {
     return this.leadsService.update(uuid, updateDto);
   }
 

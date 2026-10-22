@@ -58,7 +58,7 @@ export class QueryAttendanceDto {
 
   @ApiPropertyOptional({
     example: 'Tuesday',
-    description: 'Search by day or note',
+    description: 'Search by day, note or comment',
   })
   @IsOptional()
   @IsString()
@@ -79,6 +79,59 @@ export class QueryAttendanceDto {
   @IsOptional()
   @IsUUID('all')
   monthYearId?: string;
+
+  @ApiPropertyOptional({
+    example: 'department-uuid',
+    description: 'Filter by department',
+  })
+  @IsOptional()
+  @IsUUID('all')
+  departmentId?: string;
+
+  @ApiPropertyOptional({
+    example: 'shift-uuid',
+    description: 'Filter by shift',
+  })
+  @IsOptional()
+  @IsUUID('all')
+  shiftId?: string;
+
+  @ApiPropertyOptional({
+    example: true,
+    description: 'Filter by present / absent',
+  })
+  @IsOptional()
+  @Transform(({ value }) =>
+    value === 'true'
+      ? true
+      : value === 'false'
+        ? false
+        : value,
+  )
+  @IsBoolean()
+  isPresent?: boolean;
+
+  @ApiPropertyOptional({
+    example: '2026-10-01',
+    description: 'Date from (YYYY-MM-DD)',
+  })
+  @IsOptional()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+    message:
+      'dateFrom must be in YYYY-MM-DD format',
+  })
+  dateFrom?: string;
+
+  @ApiPropertyOptional({
+    example: '2026-10-31',
+    description: 'Date to (YYYY-MM-DD)',
+  })
+  @IsOptional()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+    message:
+      'dateTo must be in YYYY-MM-DD format',
+  })
+  dateTo?: string;
 
   @ApiPropertyOptional({
     example: '2026-10-13',
@@ -108,6 +161,8 @@ export class QueryAttendanceDto {
       'date',
       'day',
       'type',
+      'isPresent',
+      'hours',
     ],
   })
   @IsOptional()
@@ -117,6 +172,8 @@ export class QueryAttendanceDto {
     'date',
     'day',
     'type',
+    'isPresent',
+    'hours',
   ])
   sortBy?: string = 'createdAt';
 

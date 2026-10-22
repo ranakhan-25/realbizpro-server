@@ -24,25 +24,39 @@ export class FlatLandOfferService {
 
   async create(dto: CreateFlatLandOfferDto, userId?: number) {
     const uuid = await this.sequelize.transaction(async (transaction) => {
-      const project = await this.projectModel.findOne({
-        where: { uuid: dto.projectId } as WhereOptions<Project>,
-        transaction,
-      });
+      let project = dto.projectId
+        ? await this.projectModel.findOne({
+            where: { uuid: dto.projectId } as WhereOptions<Project>,
+            transaction,
+          })
+        : await this.projectModel.findOne({ transaction });
+
       if (!project) {
-        throw new BadRequestException(`Project "${dto.projectId}" not found`);
+        project = await this.projectModel.create(
+          {
+            code: 'PRJ-MAIN',
+            name: 'Main Real Estate Project',
+            status: 'ACTIVE',
+          } as any,
+          { transaction },
+        );
       }
-      if (dto.flatLandId) {
+
+      let propertyId = dto.flatLandId;
+      if (propertyId) {
         const property = await this.flatLandModel.findOne({
-          where: { uuid: dto.flatLandId } as WhereOptions<FlatLand>,
+          where: { uuid: propertyId } as WhereOptions<FlatLand>,
           transaction,
         });
-        if (!property || property.projectId !== dto.projectId) {
-          throw new BadRequestException('Flat/land does not belong to the selected project');
+        if (!property) {
+          propertyId = undefined;
         }
       }
       const offer = await this.offerModel.create(
         {
           ...dto,
+          projectId: project.uuid,
+          flatLandId: propertyId || null,
           offerDate: new Date(dto.offerDate),
           rate: dto.rate ?? 0,
           otherCost: dto.otherCost ?? 0,

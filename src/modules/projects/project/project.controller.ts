@@ -1,4 +1,4 @@
-﻿/* eslint-disable prettier/prettier */
+/* eslint-disable prettier/prettier */
 import {
   Body,
   Controller,
@@ -8,6 +8,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Put,
   Query,
   Req,
 } from '@nestjs/common';
@@ -145,8 +146,18 @@ export class ProjectController {
     return this.projectService.findOne(uuid);
   }
 
+  @Put(':uuid')
+  @ApiOperation({ summary: 'Update a project (PUT)' })
+  updatePut(
+    @Param('uuid', ParseUUIDPipe) uuid: string,
+    @Body() dto: UpdateProjectDto,
+    @Req() request: AuthenticatedRequest,
+  ) {
+    return this.projectService.update(uuid, dto, request.user?.id);
+  }
+
   @Patch(':uuid')
-  @ApiOperation({ summary: 'Update a project' })
+  @ApiOperation({ summary: 'Update a project (PATCH)' })
   update(
     @Param('uuid', ParseUUIDPipe) uuid: string,
     @Body() dto: UpdateProjectDto,

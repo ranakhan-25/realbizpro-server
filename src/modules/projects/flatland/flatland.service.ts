@@ -31,17 +31,28 @@ export class FlatLandService {
 
   async create(dto: CreateFlatLandDto, userId?: number) {
     const uuid = await this.sequelize.transaction(async (transaction) => {
-      const project = await this.projectModel.findOne({
-        where: { uuid: dto.projectId } as WhereOptions<Project>,
-        transaction,
-      });
+      let project = dto.projectId
+        ? await this.projectModel.findOne({
+            where: { uuid: dto.projectId } as WhereOptions<Project>,
+            transaction,
+          })
+        : await this.projectModel.findOne({ transaction });
+
       if (!project) {
-        throw new BadRequestException(`Project "${dto.projectId}" not found`);
+        project = await this.projectModel.create(
+          {
+            code: 'PRJ-MAIN',
+            name: dto.projectName || 'Main Real Estate Project',
+            status: 'ACTIVE',
+          } as any,
+          { transaction },
+        );
       }
 
       const flatLand = await this.flatLandModel.create(
         {
           ...dto,
+          projectId: project.uuid,
           projectName: dto.projectName ?? project.name,
           propertyType: dto.propertyType ?? 'flat',
           status: dto.status ?? FlatLandStatus.AVAILABLE,

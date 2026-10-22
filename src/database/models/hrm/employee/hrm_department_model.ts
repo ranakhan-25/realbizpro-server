@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import {
   Column,
   DataType,
@@ -13,6 +12,7 @@ import type {
 } from 'src/database/types/department.types';
 import { Designation } from './hrm_designation_model';
 import { EmployeeList } from './hrm_employeeList_model';
+import { Attendance } from './hrm_attendance_model';
 
 export enum DepartmentStatus {
   ACTIVE = 'active',
@@ -106,4 +106,10 @@ export class Department
     as: 'employees',
   })
   declare employees?: EmployeeList[];
+  @HasMany(() => Attendance, {
+    foreignKey: 'departmentId',
+    sourceKey: 'uuid',
+    as: 'attendances',
+  })
+  declare attendances?: Attendance[];
 }

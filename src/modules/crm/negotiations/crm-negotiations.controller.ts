@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Put, Body, Param } from '@nestjs/common';
+import { Controller, Post, Get, Put, Patch, Delete, Body, Param } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiParam, ApiBody } from '@nestjs/swagger';
 import { CrmNegotiationsService } from './crm-negotiations.service';
 import {
@@ -33,11 +33,26 @@ export class CrmNegotiationsController {
   }
 
   @Put(':uuid')
-  @ApiOperation({ summary: 'Update deal negotiation' })
+  @ApiOperation({ summary: 'Update deal negotiation (PUT)' })
   @ApiParam({ name: 'uuid' })
   @ApiBody({ type: UpdateCrmNegotiationDto })
   async update(@Param('uuid') uuid: string, @Body() updateDto: UpdateCrmNegotiationDto) {
     return this.service.update(uuid, updateDto);
+  }
+
+  @Patch(':uuid')
+  @ApiOperation({ summary: 'Update deal negotiation (PATCH)' })
+  @ApiParam({ name: 'uuid' })
+  @ApiBody({ type: UpdateCrmNegotiationDto })
+  async patch(@Param('uuid') uuid: string, @Body() updateDto: UpdateCrmNegotiationDto) {
+    return this.service.update(uuid, updateDto);
+  }
+
+  @Delete(':uuid')
+  @ApiOperation({ summary: 'Delete deal negotiation' })
+  @ApiParam({ name: 'uuid' })
+  async remove(@Param('uuid') uuid: string) {
+    return this.service.remove(uuid);
   }
 
   @Post(':uuid/approve')

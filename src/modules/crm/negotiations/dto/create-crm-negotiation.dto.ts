@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsNumber,
   IsNotEmpty,
@@ -8,29 +9,33 @@ import {
 } from 'class-validator';
 
 export class CreateCrmNegotiationDto {
-  @ApiProperty({ example: 1, description: 'Lead ID' })
+  @ApiPropertyOptional({ example: 1, description: 'Lead ID' })
   @IsNumber()
-  @IsNotEmpty()
-  lead_id: number;
+  @IsOptional()
+  @Type(() => Number)
+  lead_id?: number;
 
   @ApiPropertyOptional({ example: 'PLOT-402' })
   @IsString()
   @IsOptional()
   property_id?: string;
 
-  @ApiProperty({ example: 7500000, description: 'Initial offer price' })
+  @ApiPropertyOptional({ example: 7500000, description: 'Initial offer price' })
   @IsNumber()
-  @IsNotEmpty()
-  offer_price: number;
+  @IsOptional()
+  @Type(() => Number)
+  offer_price?: number;
 
   @ApiPropertyOptional({ example: 7200000, description: 'Client agreed price' })
   @IsNumber()
   @IsOptional()
+  @Type(() => Number)
   agreed_price?: number;
 
   @ApiPropertyOptional({ example: 300000, description: 'Discount given' })
   @IsNumber()
   @IsOptional()
+  @Type(() => Number)
   discount_amount?: number;
 
   @ApiPropertyOptional({ example: 'Special terms: 40% upfront, remaining in 24 months' })

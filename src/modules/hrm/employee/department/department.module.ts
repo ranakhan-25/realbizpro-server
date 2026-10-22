@@ -10,6 +10,7 @@ import { DepartmentService } from './department.service';
 import { Department } from 'src/database/models/hrm/employee/hrm_department_model';
 import { Designation } from 'src/database/models/hrm/employee/hrm_designation_model'; // relation: new import
 import { EmployeeList } from 'src/database/models/hrm/employee/hrm_employeeList_model';
+import { Attendance } from 'src/database/models/hrm/employee/hrm_attendance_model';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { EmployeeList } from 'src/database/models/hrm/employee/hrm_employeeList_
       Department,
       Designation,
       EmployeeList,
+      Attendance,
     ]), // relation: Designation add
   ],
 
