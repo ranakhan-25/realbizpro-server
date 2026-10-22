@@ -1,6 +1,7 @@
 import {
   Column,
   DataType,
+  HasMany,
   Table,
 } from 'sequelize-typescript';
 
@@ -9,6 +10,14 @@ import type {
   SysCompanyAttributes,
   SysCompanyCreationAttributes,
 } from '../../types/syscompany.types';
+import { ProcurementRfq } from '../procurement/rfq/pr_rfq.model';
+import { ProcurementAssetRfq } from '../procurement/rfq/pr_asset_rfq.model';
+import { ProcurementMaterialRequisition } from '../procurement/requisition/pr_material_requisition.model';
+import { ProcurementAssetRequisition } from '../procurement/requisition/pr_asset_requisition.model';
+import { ProcurementPurchaseOrder } from '../procurement/purchase-order/pr_purchase_order.model';
+import { ProcurementAssetPurchaseOrder } from '../procurement/purchase-order/pr_asset_purchase_order.model';
+import { ProcurementGrn } from '../procurement/grn/pr_grn.model';
+import { ProcurementPurchaseBill } from '../procurement/purchase-bill/pr_purchase_bill.model';
 
 @Table({
   tableName: 'sys_company',
@@ -115,4 +124,13 @@ export class SysCompany extends BaseModel<
     field: 'updated_by',
   })
   declare updatedBy?: number;
+
+  @HasMany(() => ProcurementRfq, { foreignKey: 'company_id', sourceKey: 'uuid', as: 'procurementRfqs' }) declare procurementRfqs?: ProcurementRfq[];
+  @HasMany(() => ProcurementAssetRfq, { foreignKey: 'company_id', sourceKey: 'uuid', as: 'procurementAssetRfqs' }) declare procurementAssetRfqs?: ProcurementAssetRfq[];
+  @HasMany(() => ProcurementMaterialRequisition, { foreignKey: 'company_id', sourceKey: 'uuid', as: 'procurementMaterialRequisitions' }) declare procurementMaterialRequisitions?: ProcurementMaterialRequisition[];
+  @HasMany(() => ProcurementAssetRequisition, { foreignKey: 'company_id', sourceKey: 'uuid', as: 'procurementAssetRequisitions' }) declare procurementAssetRequisitions?: ProcurementAssetRequisition[];
+  @HasMany(() => ProcurementPurchaseOrder, { foreignKey: 'company_id', sourceKey: 'uuid', as: 'procurementPurchaseOrders' }) declare procurementPurchaseOrders?: ProcurementPurchaseOrder[];
+  @HasMany(() => ProcurementAssetPurchaseOrder, { foreignKey: 'company_id', sourceKey: 'uuid', as: 'procurementAssetPurchaseOrders' }) declare procurementAssetPurchaseOrders?: ProcurementAssetPurchaseOrder[];
+  @HasMany(() => ProcurementGrn, { foreignKey: 'company_id', sourceKey: 'uuid', as: 'procurementGrns' }) declare procurementGrns?: ProcurementGrn[];
+  @HasMany(() => ProcurementPurchaseBill, { foreignKey: 'company_id', sourceKey: 'uuid', as: 'procurementPurchaseBills' }) declare procurementPurchaseBills?: ProcurementPurchaseBill[];
 }

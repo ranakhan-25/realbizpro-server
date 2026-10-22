@@ -6,6 +6,7 @@ import {
   Column,
   DataType,
   ForeignKey,
+  HasMany,
   Index,
   Table,
 } from 'sequelize-typescript';
@@ -13,6 +14,10 @@ import { BaseModel } from 'src/database/base.model';
 import { ProcurementAssetCategory } from './pr_asset_category.model';
 import { ProcurementBrand } from '../products/pr_brand.model';
 import { ProcurementUnit } from '../products/pr_unit.model';
+import { ProcurementAssetRfqItem } from '../../rfq/pr_asset_rfq_item.model';
+import { ProcurementAssetPurchaseOrderItem } from '../../purchase-order/pr_asset_purchase_order_item.model';
+import { ProcurementAssetRequisitionItem } from '../../requisition/pr_asset_requisition_item.model';
+import { ProcurementAssetGrnItem } from '../../grn/pr_asset_grn_item.model';
 
 @Table({ tableName: 'pr_asset_item_entry', timestamps: true, paranoid: true })
 export class ProcurementAssetItemEntry extends BaseModel<ProcurementAssetItemEntryAttributes, ProcurementAssetItemEntryCreationAttributes> {
@@ -51,6 +56,18 @@ export class ProcurementAssetItemEntry extends BaseModel<ProcurementAssetItemEnt
     foreignKey: 'brand_id', targetKey: 'uuid', as: 'brand',
   })
   declare brand?: ProcurementBrand;
+
+  @HasMany(() => ProcurementAssetRfqItem, { foreignKey: 'item_id', sourceKey: 'uuid', as: 'rfqItems' })
+  declare rfqItems?: ProcurementAssetRfqItem[];
+
+  @HasMany(() => ProcurementAssetPurchaseOrderItem, { foreignKey: 'item_id', sourceKey: 'uuid', as: 'purchaseOrderItems' })
+  declare purchaseOrderItems?: ProcurementAssetPurchaseOrderItem[];
+
+  @HasMany(() => ProcurementAssetRequisitionItem, { foreignKey: 'item_id', sourceKey: 'uuid', as: 'requisitionItems' })
+  declare requisitionItems?: ProcurementAssetRequisitionItem[];
+
+  @HasMany(() => ProcurementAssetGrnItem, { foreignKey: 'item_id', sourceKey: 'uuid', as: 'grnItems' })
+  declare grnItems?: ProcurementAssetGrnItem[];
 
   @Column({ type: DataType.DECIMAL(15, 2), allowNull: false, defaultValue: 0 })
   declare purchase_price: number;

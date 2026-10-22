@@ -8,6 +8,8 @@ import type { Project } from '../models/projects/project/pr_project.model';
 import type { Site } from '../models/projects/project-site/pr_project_site.model';
 import type { BillingCategory } from '../models/projects/billing/pr_category.model';
 import type { MaterialRequisitionItem } from '../models/projects/material-requisition-item/pr_material_requisition_item.model';
+import type { ProcurementRfq } from '../models/procurement/rfq/pr_rfq.model';
+import type { ProcurementAssetRfq } from '../models/procurement/rfq/pr_asset_rfq.model';
 
 export interface MaterialRequisitionAttributes {
   id: number;
@@ -40,6 +42,8 @@ export interface MaterialRequisitionAttributes {
   site?: Site;
   category?: BillingCategory;
   items?: MaterialRequisitionItem[];
+  procurementRfqs?: ProcurementRfq[];
+  procurementAssetRfqs?: ProcurementAssetRfq[];
 }
 
 export interface MaterialRequisitionCreationAttributes {
@@ -72,4 +76,6 @@ export interface MaterialRequisitionWithRelations extends MaterialRequisitionAtt
   site?: Site;
   category?: BillingCategory;
   items?: MaterialRequisitionItem[];
+  procurementRfqs?: ProcurementRfq[];
+  procurementAssetRfqs?: ProcurementAssetRfq[];
 }

@@ -126,6 +126,13 @@ import { ProcurementUnitModule } from './modules/procurement/configuration/produ
 import { ProcurementItemEntryModule } from './modules/procurement/configuration/products/item-entry/item-entry.module';
 import { ProcurementAssetCategoryModule } from './modules/procurement/configuration/asset/asset-category/asset-category.module';
 import { ProcurementAssetItemEntryModule } from './modules/procurement/configuration/asset/asset-item-entry/asset-item-entry.module';
+import { RfqModule } from './modules/procurement/rfq/rfq.module';
+import { AssetRfqModule } from './modules/procurement/rfq/asset/asset-rfq.module';
+import { ProcurementMaterialRequisitionModule } from './modules/procurement/requisition/material-requisition/procurement-material-requisition.module';
+import { AssetRequisitionModule } from './modules/procurement/requisition/asset-requisition/asset-requisition.module';
+import { PurchaseOrderModule } from './modules/procurement/purchase-order/purchase-order.module';
+import { AssetPurchaseOrderModule } from './modules/procurement/purchase-order/asset/asset-purchase-order.module';
+import { GrnModule } from './modules/procurement/grn/grn.module';
 import { SalaryGradeModule } from './modules/hrm/employee/employee list/salary-grade/salary-grade.module';
 import { AttendanceReconciliationModule } from './modules/hrm/attendance/attendance-reconciliation/attendance-reconciliation.module';
 import { AllowanceDeductionSetupModule } from './modules/hrm/configuration/allowance-deduction-setup/allowance-deduction-setup.module';
@@ -293,6 +300,13 @@ import { ZkTecoDeviceModule } from './modules/hrm/configuration/zkteco-device/zk
     ProcurementItemEntryModule,
     ProcurementAssetCategoryModule,
     ProcurementAssetItemEntryModule,
+    RfqModule,
+    AssetRfqModule,
+    ProcurementMaterialRequisitionModule,
+    AssetRequisitionModule,
+    PurchaseOrderModule,
+    AssetPurchaseOrderModule,
+    GrnModule,
     AccountMappingModule,
   ],
   controllers: [AppController, HealthController],
