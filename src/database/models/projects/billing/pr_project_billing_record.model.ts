@@ -40,11 +40,17 @@ export class ProjectBillingRecord
   >
   implements ProjectBillingRecordAttributes
 {
-  @Column({ type: DataType.STRING(60), allowNull: false })
+  @Column({
+    type: DataType.STRING(60),
+    allowNull: false,
+  })
   declare resource: ProjectBillingResource;
 
   @ForeignKey(() => Project)
-  @Column({ type: DataType.UUID, allowNull: false })
+  @Column({
+    type: DataType.UUID,
+    allowNull: false,
+  })
   declare projectId: string;
 
   @BelongsTo(() => Project, {
@@ -54,13 +60,22 @@ export class ProjectBillingRecord
   })
   declare project?: Project;
 
-  @Column({ type: DataType.STRING(100), allowNull: true })
+  @Column({
+    type: DataType.STRING(100),
+    allowNull: true,
+  })
   declare code?: string;
 
-  @Column({ type: DataType.STRING(255), allowNull: false })
+  @Column({
+    type: DataType.STRING(255),
+    allowNull: false,
+  })
   declare title: string;
 
-  @Column({ type: DataType.DATEONLY, allowNull: true })
+  @Column({
+    type: DataType.DATEONLY,
+    allowNull: true,
+  })
   declare recordDate?: Date;
 
   @Column({
@@ -70,21 +85,41 @@ export class ProjectBillingRecord
   })
   declare amount: number;
 
-  @Column({ type: DataType.STRING(40), allowNull: false, defaultValue: 'active' })
+  @Column({
+    type: DataType.STRING(40),
+    allowNull: false,
+    defaultValue: 'active',
+  })
   declare status: string;
 
-  @Column({ type: DataType.TEXT, allowNull: true })
+  @Column({
+    type: DataType.TEXT,
+    allowNull: true,
+  })
   declare description?: string;
 
-  @Column({ type: DataType.JSONB, allowNull: false, defaultValue: {} })
+  @Column({
+    type: DataType.JSONB,
+    allowNull: false,
+    defaultValue: {},
+  })
   declare details: Record<string, unknown>;
 
-  @Column({ type: DataType.STRING, allowNull: true })
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
   declare createdBy?: string;
 
-  @Column({ type: DataType.STRING, allowNull: true })
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
   declare updatedBy?: string;
 
-  @Column({ type: DataType.STRING, allowNull: true })
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
   declare deletedBy?: string;
 }

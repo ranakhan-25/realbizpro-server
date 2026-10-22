@@ -26,6 +26,7 @@ import { ProjectBillingRecord } from '../billing/pr_project_billing_record.model
 import { ProjectTeamMember } from '../project-team-member/pr_project_team_member.model';
 import { Boq } from '../boq/pr_boq.model';
 import { Invoice } from '../billing/pr_invoice.model';
+import { WorkOrder } from '../billing/work-order/pr_work_order.model';
 
 export enum ProjectStatus {
   ACTIVE = 'ACTIVE',
@@ -272,6 +273,12 @@ export class Project
     onUpdate: 'CASCADE',
   })
   declare boqs: Boq[];
+  @HasMany(() => WorkOrder, {
+    foreignKey: 'projectId',
+    sourceKey: 'uuid',
+    as: 'workOrders',
+  })
+  declare workOrders?: WorkOrder[];
 
   @Column({
     type: DataType.STRING,

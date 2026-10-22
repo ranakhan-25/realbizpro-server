@@ -5,6 +5,7 @@ import { Project } from 'src/database/models/projects/project/pr_project.model';
 import { ProjectSiteController } from './project-site.controller';
 import { ProjectSiteService } from './project-site.service';
 import { ProjectShareAssignment } from 'src/database/models/projects/project-share-assignment/pr_project_share_assignment.model';
+import { WorkOrder } from 'src/database/models/projects/billing/work-order/pr_work_order.model';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { ProjectShareAssignment } from 'src/database/models/projects/project-sha
       Site,
       Project,
       ProjectShareAssignment,
+      WorkOrder,
     ]),
   ],
   controllers: [ProjectSiteController],

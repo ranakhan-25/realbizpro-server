@@ -4,6 +4,7 @@
 import type { Project } from '../models/projects/project/pr_project.model';
 import type { MaterialRequisition } from '../models/projects/material-requisition/pr_material_requisition.model';
 import type { ProjectShareAssignment } from '../models/projects/project-share-assignment/pr_project_share_assignment.model';
+import type { WorkOrder } from '../models/projects/billing/work-order/pr_work_order.model';
 
 export interface SiteAttributes {
   id: number;
@@ -24,6 +25,7 @@ export interface SiteAttributes {
   project?: Project;
   materialRequisitions?: MaterialRequisition[];
   shareAssignments?: ProjectShareAssignment[];
+  workOrders?: WorkOrder[];
 }
 
 export interface SiteCreationAttributes {
@@ -44,4 +46,5 @@ export interface SiteWithRelations extends SiteAttributes {
   project?: Project;
   materialRequisitions?: MaterialRequisition[];
   shareAssignments?: ProjectShareAssignment[];
+  workOrders?: WorkOrder[];
 }

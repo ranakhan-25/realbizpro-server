@@ -14,6 +14,7 @@ import type {
 import { Project } from '../project/pr_project.model';
 import { BaseModel } from 'src/database/base.model';
 import { ProjectShareAssignment } from '../project-share-assignment/pr_project_share_assignment.model';
+import { WorkOrder } from '../billing/work-order/pr_work_order.model';
 
 @Table({
   tableName: 'sites',
@@ -82,6 +83,12 @@ export class Site
     as: 'shareAssignments',
   })
   declare shareAssignments?: ProjectShareAssignment[];
+  @HasMany(() => WorkOrder, {
+    foreignKey: 'siteId',
+    sourceKey: 'uuid',
+    as: 'workOrders',
+  })
+  declare workOrders?: WorkOrder[];
   // ─── Audit fields ───────────────────────────────────────
   @Column({
     type: DataType.INTEGER, // change to STRING / UUID if needed

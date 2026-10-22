@@ -1,28 +1,100 @@
-import { Allow } from 'class-validator';
+import {
+  Allow,
+  IsArray,
+  IsBoolean,
+  IsDateString,
+  IsNotEmpty,
+  IsNumber,
+  IsObject,
+  IsOptional,
+  IsString,
+  IsUUID,
+} from 'class-validator';
 
 export class WorkOrderDto {
-  @Allow() declare title: string;
-  @Allow() declare date: string;
-  @Allow() declare recordDate: string;
-  @Allow() declare code: string;
-  @Allow() declare customerId?: string;
-  @Allow() declare clientOrderNo?: string;
-  @Allow() declare projectTypeId?: string;
-  @Allow() declare projectId: string;
-  @Allow() declare siteId?: string;
-  @Allow() declare attachment?: string;
-  @Allow() declare poNo?: string;
-  @Allow() declare categoryId?: string;
-  @Allow() declare subCategoryId?: string;
-  @Allow() declare items: Array<Record<string, unknown>>;
-  @Allow() declare subtotal: number;
-  @Allow() declare vatPercent: number;
-  @Allow() declare vatInclude: boolean;
-  @Allow() declare vatAmount: number;
-  @Allow() declare aitPercent: number;
-  @Allow() declare aitInclude: boolean;
-  @Allow() declare aitAmount: number;
-  @Allow() declare grandTotal: number;
-  @Allow() declare amount: number;
-  @Allow() declare details: Record<string, unknown>;
+  @IsString()
+  @IsNotEmpty()
+  declare title: string;
+
+  @IsDateString({ strict: true })
+  @IsNotEmpty()
+  declare date: string;
+
+  @IsOptional()
+  @IsDateString({ strict: true })
+  declare recordDate?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  declare code: string;
+
+  @IsOptional()
+  @IsUUID()
+  declare customerId?: string;
+
+  @IsOptional()
+  @IsString()
+  declare clientOrderNo?: string;
+
+  @IsOptional()
+  @IsUUID()
+  declare projectTypeId?: string;
+
+  @IsUUID()
+  @IsNotEmpty()
+  declare projectId: string;
+
+  @IsOptional()
+  @IsUUID()
+  declare siteId?: string;
+
+  @IsOptional()
+  @IsString()
+  declare attachment?: string;
+
+  @IsOptional()
+  @IsString()
+  declare poNo?: string;
+
+  @IsOptional()
+  @IsUUID()
+  declare categoryId?: string;
+
+  @IsOptional()
+  @IsUUID()
+  declare subCategoryId?: string;
+
+  @IsArray()
+  declare items: Array<Record<string, unknown>>;
+
+  @IsNumber()
+  declare subtotal: number;
+
+  @IsNumber()
+  declare vatPercent: number;
+
+  @IsBoolean()
+  declare vatInclude: boolean;
+
+  @IsNumber()
+  declare vatAmount: number;
+
+  @IsNumber()
+  declare aitPercent: number;
+
+  @IsBoolean()
+  declare aitInclude: boolean;
+
+  @IsNumber()
+  declare aitAmount: number;
+
+  @IsNumber()
+  declare grandTotal: number;
+
+  @IsOptional()
+  @IsNumber()
+  declare amount: number;
+
+  @IsObject()
+  declare details: Record<string, unknown>;
 }

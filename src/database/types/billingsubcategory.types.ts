@@ -5,6 +5,7 @@ import { SubCategoryType } from '../models/projects/billing/pr_sub_category.mode
 
 import type { BillingCategory } from '../models/projects/billing/pr_category.model';
 import type { Quotation } from '../models/projects/quatation/pr_quotation.model';
+import type { WorkOrder } from '../models/projects/billing/work-order/pr_work_order.model';
 
 export interface BillingSubCategoryAttributes {
   id: number;
@@ -24,6 +25,7 @@ export interface BillingSubCategoryAttributes {
   // Relations
   category?: BillingCategory;
   quotations?: Quotation[];
+  workOrders?: WorkOrder[];
 }
 
 export interface BillingSubCategoryCreationAttributes {
@@ -43,4 +45,5 @@ export type BillingSubCategoryUpdateAttributes = Partial<BillingSubCategoryCreat
 export interface BillingSubCategoryWithRelations extends BillingSubCategoryAttributes {
   category?: BillingCategory;
   quotations?: Quotation[];
+  workOrders?: WorkOrder[];
 }

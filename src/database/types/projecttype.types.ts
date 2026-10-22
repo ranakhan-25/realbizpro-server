@@ -3,6 +3,7 @@
 
 import type { ProjectShareAssignment } from '../models/projects/project-share-assignment/pr_project_share_assignment.model';
 import type { Invoice } from '../models/projects/billing/pr_invoice.model';
+import type { WorkOrder } from '../models/projects/billing/work-order/pr_work_order.model';
 
 export interface ProjectTypeAttributes {
   id: number;
@@ -19,6 +20,7 @@ export interface ProjectTypeAttributes {
   // Relations
   shareAssignments?: ProjectShareAssignment[];
   invoices?: Invoice[];
+  workOrders?: WorkOrder[];
 }
 
 export interface ProjectTypeCreationAttributes {
@@ -35,4 +37,5 @@ export type ProjectTypeUpdateAttributes = Partial<ProjectTypeCreationAttributes>
 export interface ProjectTypeWithRelations extends ProjectTypeAttributes {
   shareAssignments?: ProjectShareAssignment[];
   invoices?: Invoice[];
+  workOrders?: WorkOrder[];
 }
