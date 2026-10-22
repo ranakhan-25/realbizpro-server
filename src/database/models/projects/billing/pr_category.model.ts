@@ -11,8 +11,11 @@ import { Quotation } from '../quatation/pr_quotation.model';
 import { BillingSubCategory } from './pr_sub_category.model';
 
 import { BaseModel } from 'src/database/base.model';
-import type { BillingCategoryAttributes, BillingCategoryCreationAttributes } from 'src/database/types/billingcategory.types';
-
+import type {
+  BillingCategoryAttributes,
+  BillingCategoryCreationAttributes,
+} from 'src/database/types/billingcategory.types';
+import { WorkOrder } from './work-order/pr_work_order.model';
 
 export enum CategoryType {
   PRODUCT = 'Product',
@@ -33,7 +36,9 @@ export class BillingCategory
   implements BillingCategoryAttributes
 {
   @Column({
-    type: DataType.ENUM(...Object.values(CategoryType)),
+    type: DataType.ENUM(
+      ...Object.values(CategoryType),
+    ),
     allowNull: false,
   })
   declare type: CategoryType;
@@ -77,6 +82,13 @@ export class BillingCategory
     as: 'quotations',
   })
   declare quotations?: Quotation[];
+
+  @HasMany(() => WorkOrder, {
+    foreignKey: 'categoryId',
+    sourceKey: 'uuid',
+    as: 'workOrders',
+  })
+  declare workOrders?: WorkOrder[];
 
   @Column({
     type: DataType.STRING,

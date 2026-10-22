@@ -17,6 +17,7 @@ import type { ProjectBillingRecord } from '../models/projects/billing/pr_project
 import type { ProjectTeamMember } from '../models/projects/project-team-member/pr_project_team_member.model';
 import type { Invoice } from '../models/projects/billing/pr_invoice.model';
 import type { Boq } from '../models/projects/boq/pr_boq.model';
+import type { WorkOrder } from '../models/projects/billing/work-order/pr_work_order.model';
 
 export interface ProjectAttributes {
   id: number;
@@ -60,6 +61,7 @@ export interface ProjectAttributes {
   teamMembers?: ProjectTeamMember[];
   invoices?: Invoice[];
   boqs: Boq[];
+  workOrders?: WorkOrder[];
 }
 
 export interface ProjectCreationAttributes {
@@ -103,4 +105,5 @@ export interface ProjectWithRelations extends ProjectAttributes {
   teamMembers?: ProjectTeamMember[];
   invoices?: Invoice[];
   boqs: Boq[];
+  workOrders?: WorkOrder[];
 }

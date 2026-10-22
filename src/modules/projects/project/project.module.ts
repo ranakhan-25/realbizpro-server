@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { Project } from 'src/database/models/projects/project/pr_project.model';
@@ -9,6 +8,7 @@ import { FlatLand } from 'src/database/models/projects/flatland/pr_flatland.mode
 import { ProjectTeamMember } from 'src/database/models/projects/project-team-member/pr_project_team_member.model';
 import { ProjectController } from './project.controller';
 import { ProjectService } from './project.service';
+import { WorkOrder } from 'src/database/models/projects/billing/work-order/pr_work_order.model';
 
 @Module({
   imports: [
@@ -19,6 +19,7 @@ import { ProjectService } from './project.service';
       ProjectShareAssignment,
       FlatLand,
       ProjectTeamMember,
+      WorkOrder,
     ]),
   ],
   controllers: [ProjectController],

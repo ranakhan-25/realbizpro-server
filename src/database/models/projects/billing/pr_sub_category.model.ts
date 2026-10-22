@@ -16,6 +16,7 @@ import type {
   BillingSubCategoryAttributes,
   BillingSubCategoryCreationAttributes,
 } from 'src/database/types/billingsubcategory.types';
+import { WorkOrder } from './work-order/pr_work_order.model';
 
 export enum SubCategoryType {
   PRODUCT = 'Product',
@@ -65,7 +66,12 @@ export class BillingSubCategory
     as: 'quotations',
   })
   declare quotations?: Quotation[];
-
+  @HasMany(() => WorkOrder, {
+    foreignKey: 'subCategoryId',
+    sourceKey: 'uuid',
+    as: 'workOrders',
+  })
+  declare workOrders?: WorkOrder[];
   @Column({
     type: DataType.STRING,
     allowNull: false,

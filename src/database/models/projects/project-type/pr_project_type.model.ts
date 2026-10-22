@@ -13,6 +13,7 @@ import {
 } from 'src/database/types/projecttype.types';
 import { ProjectShareAssignment } from '../project-share-assignment/pr_project_share_assignment.model';
 import { Invoice } from '../billing/pr_invoice.model';
+import { WorkOrder } from '../billing/work-order/pr_work_order.model';
 
 @Table({
   tableName: 'project_types',
@@ -53,6 +54,12 @@ export class ProjectType
     as: 'invoices',
   })
   declare invoices?: Invoice[];
+  @HasMany(() => WorkOrder, {
+    foreignKey: 'projectTypeId',
+    sourceKey: 'uuid',
+    as: 'workOrders',
+  })
+  declare workOrders?: WorkOrder[];
 
   // ─── Audit fields ───────────────────────────────────────
   @Column({

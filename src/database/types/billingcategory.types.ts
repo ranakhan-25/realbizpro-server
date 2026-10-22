@@ -6,6 +6,7 @@ import { CategoryType } from '../models/projects/billing/pr_category.model';
 import type { MaterialRequisition } from '../models/projects/material-requisition/pr_material_requisition.model';
 import type { BillingSubCategory } from '../models/projects/billing/pr_sub_category.model';
 import type { Quotation } from '../models/projects/quatation/pr_quotation.model';
+import type { WorkOrder } from '../models/projects/billing/work-order/pr_work_order.model';
 
 export interface BillingCategoryAttributes {
   id: number;
@@ -25,6 +26,7 @@ export interface BillingCategoryAttributes {
   materialRequisitions?: MaterialRequisition[];
   subCategories?: BillingSubCategory[];
   quotations?: Quotation[];
+  workOrders?: WorkOrder[];
 }
 
 export interface BillingCategoryCreationAttributes {
@@ -44,4 +46,5 @@ export interface BillingCategoryWithRelations extends BillingCategoryAttributes 
   materialRequisitions?: MaterialRequisition[];
   subCategories?: BillingSubCategory[];
   quotations?: Quotation[];
+  workOrders?: WorkOrder[];
 }
