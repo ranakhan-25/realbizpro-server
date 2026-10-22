@@ -118,14 +118,14 @@ import { UnderModule } from './modules/hrm/employee/employee list/under/under.mo
 import { EmployeeHierarchyModule } from './modules/hrm/employee/employee-hierarchy/employee-hierarchy.module';
 import { EmployeeCardModule } from './modules/hrm/employee/employee-card/employee-card.module';
 import { IncrementModule } from './modules/hrm/employee/increment/increment.module';
-import { SalaryGradeModule } from './modules/hrm/employee/employee list/salary-grade/salary-grade.module';
-import { DeductionRuleModule } from './modules/hrm/configuration/deduction-rule/deduction-rule/deduction-rule.module';
-import { AllowanceDeductionSetupModule } from './modules/hrm/configuration/allowance-deduction-setup/allowance-deduction-setup.module';
-import { SalaryGradeItemModule } from './modules/hrm/configuration/salary-grade-item/salary-grade-item.module';
-import { LeaveTypeModule } from './modules/hrm/configuration/leave-type/leave-type.module';
-import { HolidayModule } from './modules/hrm/configuration/holiday/holiday.module';
-import { ZkTecoDeviceModule } from './modules/hrm/configuration/zkteco-device/zkteco-device.module';
-import { AttendanceReconciliationModule } from './modules/hrm/attendance/attendance-reconciliation/attendance-reconciliation.module';
+import { CategoryModule as ProcurementCategoryModule } from './modules/procurement/configuration/products/category/category.module';
+import { AccountMappingModule } from './modules/procurement/configuration/products/account-mapping/account-mapping.module';
+import { ProcurementSubCategoryModule } from './modules/procurement/configuration/products/sub-category/sub-category.module';
+import { ProcurementBrandModule } from './modules/procurement/configuration/products/brand/brand.module';
+import { ProcurementUnitModule } from './modules/procurement/configuration/products/unit/unit.module';
+import { ProcurementItemEntryModule } from './modules/procurement/configuration/products/item-entry/item-entry.module';
+import { ProcurementAssetCategoryModule } from './modules/procurement/configuration/asset/asset-category/asset-category.module';
+import { ProcurementAssetItemEntryModule } from './modules/procurement/configuration/asset/asset-item-entry/asset-item-entry.module';
 
 @Module({
   imports: [
@@ -271,14 +271,14 @@ import { AttendanceReconciliationModule } from './modules/hrm/attendance/attenda
     EmployeeHierarchyModule,
     EmployeeCardModule,
     IncrementModule,
-    MonthYearModule,
-    DeductionRuleModule,
-    AllowanceDeductionSetupModule,
-    SalaryGradeItemModule,
-    LeaveTypeModule,
-    HolidayModule,
-    ZkTecoDeviceModule,
-    AttendanceReconciliationModule,
+    ProcurementCategoryModule,
+    ProcurementSubCategoryModule,
+    ProcurementBrandModule,
+    ProcurementUnitModule,
+    ProcurementItemEntryModule,
+    ProcurementAssetCategoryModule,
+    ProcurementAssetItemEntryModule,
+    AccountMappingModule,
   ],
   controllers: [AppController, HealthController],
   providers: [
