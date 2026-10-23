@@ -8,7 +8,7 @@ import {
 
 import { BaseModel } from '../../../base.model';
 
-import {
+import type {
   BoqAttributes,
   BoqCreationAttributes,
   BoqUpdateAttributes,
@@ -30,12 +30,13 @@ export class Boq
   implements BoqAttributes
 {
   // -------------------- Foreign Key: Project --------------------
+
   @ForeignKey(() => Project)
   @Column({
     type: DataType.UUID,
     allowNull: true,
   })
-  declare projectId: string;
+  declare projectId: string | null;
 
   @BelongsTo(() => Project, {
     foreignKey: 'projectId',
@@ -44,20 +45,21 @@ export class Boq
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  declare project: Project;
+  declare project?: Project | null;
 
   // -------------------- Boq Fields --------------------
+
   @Column({
     type: DataType.STRING,
     allowNull: true,
   })
-  declare uid?: string;
+  declare uid?: string | null;
 
   @Column({
     type: DataType.DATEONLY,
     allowNull: false,
   })
-  declare date: Date;
+  declare date: string;
 
   @Column({
     type: DataType.STRING,
@@ -107,33 +109,34 @@ export class Boq
   declare available: number;
 
   // -------------------- Audit --------------------
-  @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
-  declare addedBy?: string;
 
   @Column({
     type: DataType.STRING,
     allowNull: true,
   })
-  declare addedById?: string;
+  declare addedBy?: string | null;
 
   @Column({
     type: DataType.STRING,
     allowNull: true,
   })
-  declare createdBy?: string;
+  declare addedById?: string | null;
 
   @Column({
     type: DataType.STRING,
     allowNull: true,
   })
-  declare updatedBy?: string;
+  declare createdBy?: string | null;
 
   @Column({
     type: DataType.STRING,
     allowNull: true,
   })
-  declare deletedBy?: string;
+  declare updatedBy?: string | null;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  declare deletedBy?: string | null;
 }
