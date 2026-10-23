@@ -11,7 +11,7 @@ export interface BoqAttributes {
   deletedAt?: Date;
   projectId: string | null;
   uid?: string | null;
-  date: Date;
+  date: string;
   titleOfWork: string;
   task: string;
   budget: number;
@@ -26,13 +26,13 @@ export interface BoqAttributes {
   deletedBy?: string | null;
 
   // Relations
-  project: Project;
+  project?: Project | null;
 }
 
 export interface BoqCreationAttributes {
   projectId?: string | null; // Nullable
   uid?: string | null;
-  date: Date;
+  date: string;
   titleOfWork: string;
   task: string;
   budget?: number; // Has default value
@@ -51,5 +51,5 @@ export type BoqUpdateAttributes = Partial<BoqCreationAttributes>;
 
 // Helper type for including relations
 export interface BoqWithRelations extends BoqAttributes {
-  project: Project;
+  project?: Project | null;
 }

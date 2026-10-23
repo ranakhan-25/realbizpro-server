@@ -1,69 +1,144 @@
 /* eslint-disable prettier/prettier */
 
+import { ApiPropertyOptional } from '@nestjs/swagger';
+
+import {
+  Transform,
+  Type,
+} from 'class-transformer';
+
 import {
   IsBoolean,
+  IsIn,
   IsInt,
   IsOptional,
   IsString,
   IsUUID,
+  Matches,
+  Max,
   Min,
 } from 'class-validator';
 
-import { Type } from 'class-transformer';
+const SORT_FIELDS = [
+  'createdAt',
+  'updatedAt',
+  'date',
+  'uid',
+  'titleOfWork',
+  'task',
+  'budget',
+  'cost',
+  'available',
+];
 
 export class QueryBoqDto {
+  @ApiPropertyOptional({
+    example: 1,
+    default: 1,
+    description: 'Current page number',
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
   page?: number = 1;
 
+  @ApiPropertyOptional({
+    example: 10,
+    default: 10,
+    description: 'Items per page',
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
+  @Max(100)
   limit?: number = 10;
 
+  @ApiPropertyOptional({
+    example: 0,
+    description:
+      'Number of records to skip (alternative to page)',
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(0)
   skip?: number;
 
-  // -------------------- Search --------------------
+  @ApiPropertyOptional({
+    example: 'Foundation',
+    description: 'Search by uid, title of work or task',
+  })
   @IsOptional()
   @IsString()
   search?: string;
 
-  // -------------------- Filters --------------------
+  @ApiPropertyOptional({
+    example: 'project-uuid',
+    description: 'Filter by project',
+  })
   @IsOptional()
-  @IsUUID()
+  @IsUUID('all')
   projectId?: string;
 
+  @ApiPropertyOptional({
+    example: '2026-10-13',
+    description: 'Filter by date (YYYY-MM-DD)',
+  })
   @IsOptional()
-  @IsString()
-  titleOfWork?: string;
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+    message: 'date must be in YYYY-MM-DD format',
+  })
+  date?: string;
 
+  @ApiPropertyOptional({
+    example: '2026-10-01',
+    description: 'Date from (YYYY-MM-DD)',
+  })
   @IsOptional()
-  @IsString()
-  task?: string;
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+    message: 'dateFrom must be in YYYY-MM-DD format',
+  })
+  dateFrom?: string;
 
+  @ApiPropertyOptional({
+    example: '2026-10-31',
+    description: 'Date to (YYYY-MM-DD)',
+  })
   @IsOptional()
-  @IsString()
-  uid?: string;
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+    message: 'dateTo must be in YYYY-MM-DD format',
+  })
+  dateTo?: string;
 
-  // -------------------- Sorting --------------------
+  @ApiPropertyOptional({
+    example: 'createdAt',
+    default: 'createdAt',
+    enum: SORT_FIELDS,
+  })
   @IsOptional()
-  @IsString()
+  @IsIn(SORT_FIELDS)
   sortBy?: string = 'createdAt';
 
+  @ApiPropertyOptional({
+    example: 'DESC',
+    default: 'DESC',
+    enum: ['ASC', 'DESC'],
+  })
   @IsOptional()
-  @IsString()
+  @IsIn(['ASC', 'DESC'])
   sortOrder?: 'ASC' | 'DESC' = 'DESC';
 
-  // -------------------- Deleted --------------------
+  @ApiPropertyOptional({
+    description: 'Include soft-deleted records',
+    default: false,
+  })
   @IsOptional()
-  @Type(() => Boolean)
+  @Transform(
+    ({ value }) =>
+      value === 'true' || value === true,
+  )
   @IsBoolean()
   withDeleted?: boolean = false;
 }
