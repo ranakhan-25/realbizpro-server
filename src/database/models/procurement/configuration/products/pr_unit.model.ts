@@ -22,6 +22,8 @@ import { ProcurementAssetRfqItem } from '../../rfq/pr_asset_rfq_item.model';
 import { ProcurementAssetPurchaseOrderItem } from '../../purchase-order/pr_asset_purchase_order_item.model';
 import { ProcurementAssetRequisitionItem } from '../../requisition/pr_asset_requisition_item.model';
 import { ProcurementAssetGrnItem } from '../../grn/pr_asset_grn_item.model';
+import { ProcurementBoqItem } from '../../boq/pr_procurement_boq_item.model';
+import { ProcurementHireOrderItem } from '../../equipment-hire/pr_hire_order_item.model';
 
 @Table({
   tableName: 'pr_unit',
@@ -78,6 +80,10 @@ export class ProcurementUnit
 
   @HasMany(() => ProcurementAssetGrnItem, { foreignKey: 'unit_id', sourceKey: 'uuid', as: 'assetGrnItems' })
   declare assetGrnItems?: ProcurementAssetGrnItem[];
+
+  @HasMany(() => ProcurementBoqItem, { foreignKey: 'unit_id', sourceKey: 'uuid', as: 'procurementBoqItems' })
+  declare procurementBoqItems?: ProcurementBoqItem[];
+  @HasMany(() => ProcurementHireOrderItem, { foreignKey: 'unit_id', sourceKey: 'uuid', as: 'hireOrderItems' }) declare hireOrderItems?: ProcurementHireOrderItem[];
 
   @Column({
     type: DataType.STRING(100),

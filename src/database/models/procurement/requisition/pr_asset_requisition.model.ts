@@ -11,6 +11,7 @@ import { Site } from '../../projects/project-site/pr_project_site.model';
 import { ProcurementAssetCategory } from '../configuration/asset/pr_asset_category.model';
 import { ProcurementAssetRequisitionItem } from './pr_asset_requisition_item.model';
 import { ProcurementAssetPurchaseOrder } from '../purchase-order/pr_asset_purchase_order.model';
+import { ProcurementHireOrder } from '../equipment-hire/pr_hire_order.model';
 
 import type { ProcurementAssetRequisitionAttributes, ProcurementAssetRequisitionCreationAttributes } from '../../../types/procurementassetrequisition.types';
 
@@ -59,6 +60,7 @@ export class ProcurementAssetRequisition extends BaseModel<ProcurementAssetRequi
   @Column({ type: DataType.ENUM(...Object.values(ProcurementAssetRequisitionStatus)), allowNull: false, defaultValue: ProcurementAssetRequisitionStatus.PENDING }) declare status: ProcurementAssetRequisitionStatus;
   @HasMany(() => ProcurementAssetRequisitionItem, { foreignKey: 'requisition_id', sourceKey: 'uuid', as: 'items' }) declare items?: ProcurementAssetRequisitionItem[];
   @HasMany(() => ProcurementAssetPurchaseOrder, { foreignKey: 'requisition_id', sourceKey: 'uuid', as: 'purchaseOrders' }) declare purchaseOrders?: ProcurementAssetPurchaseOrder[];
+  @HasMany(() => ProcurementHireOrder, { foreignKey: 'requisition_id', sourceKey: 'uuid', as: 'hireOrders' }) declare hireOrders?: ProcurementHireOrder[];
   @Column({ type: DataType.STRING, allowNull: true }) declare createdBy?: string;
   @Column({ type: DataType.STRING, allowNull: true }) declare updatedBy?: string;
   @Column({ type: DataType.STRING, allowNull: true }) declare deletedBy?: string;

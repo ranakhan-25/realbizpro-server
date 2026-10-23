@@ -21,9 +21,13 @@ import { GrnService } from './grn.service';
 import { AssetGrnModule } from './asset/asset-grn.module';
 import { PurchaseBillModule } from '../purchase-bill/purchase-bill.module';
 import { GrnVsInvoiceModule } from '../reports/grn-vs-invoice/grn-vs-invoice.module';
+import { ProcurementBoqModule } from '../boq/procurement-boq.module';
+import { EquipmentHireModule } from '../equipment-hire/equipment-hire.module';
+import { ProcurementWorkOrderModule } from '../work-order/procurement-work-order.module';
+import { MaterialIssueModule } from '../material-issue/material-issue.module';
 
 @Module({
-  imports: [SequelizeModule.forFeature([ProcurementGrn, ProcurementGrnItem, SysCompany, SysUser, SupplierAccounts, Project, ProjectType, BillingCategory, Task, Site, Category, ProcurementItemEntry, ProcurementUnit, ProcurementPurchaseOrder, ProcurementPurchaseOrderItem, ProcurementMaterialRequisition]), AssetGrnModule, PurchaseBillModule, GrnVsInvoiceModule],
+  imports: [SequelizeModule.forFeature([ProcurementGrn, ProcurementGrnItem, SysCompany, SysUser, SupplierAccounts, Project, ProjectType, BillingCategory, Task, Site, Category, ProcurementItemEntry, ProcurementUnit, ProcurementPurchaseOrder, ProcurementPurchaseOrderItem, ProcurementMaterialRequisition]), AssetGrnModule, PurchaseBillModule, GrnVsInvoiceModule, ProcurementBoqModule, EquipmentHireModule, ProcurementWorkOrderModule, MaterialIssueModule],
   controllers: [GrnController],
   providers: [GrnService],
 })

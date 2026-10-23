@@ -28,6 +28,12 @@ import type { ProcurementGrn } from '../models/procurement/grn/pr_grn.model';
 import type { ProcurementPurchaseBill } from '../models/procurement/purchase-bill/pr_purchase_bill.model';
 import type { ProcurementAssetGrn } from '../models/procurement/grn/pr_asset_grn.model';
 import type { ProcurementAssetPurchaseBill } from '../models/procurement/purchase-bill/pr_asset_purchase_bill.model';
+import type { ProcurementBoq } from '../models/procurement/boq/pr_procurement_boq.model';
+import type { ProcurementWorkOrder } from '../models/procurement/work-order/pr_procurement_work_order.model';
+import type { ProcurementWorkOrderMeasurement } from '../models/procurement/work-order/pr_work_order_measurement.model';
+import type { ProcurementWorkBill } from '../models/procurement/work-order/pr_work_bill.model';
+import type { ProcurementHireOrder } from '../models/procurement/equipment-hire/pr_hire_order.model';
+import type { ProcurementHireBill } from '../models/procurement/equipment-hire/pr_hire_bill.model';
 
 export interface ProjectAttributes {
   id: number;
@@ -82,6 +88,12 @@ export interface ProjectAttributes {
   procurementPurchaseBills?: ProcurementPurchaseBill[];
   procurementAssetGrns?: ProcurementAssetGrn[];
   procurementAssetPurchaseBills?: ProcurementAssetPurchaseBill[];
+  procurementBoqs?: ProcurementBoq[];
+  procurementWorkOrders?: ProcurementWorkOrder[];
+  procurementWorkOrderMeasurements?: ProcurementWorkOrderMeasurement[];
+  procurementWorkBills?: ProcurementWorkBill[];
+  equipmentHireOrders?: ProcurementHireOrder[];
+  equipmentHireBills?: ProcurementHireBill[];
 }
 
 export interface ProjectCreationAttributes {
@@ -136,4 +148,10 @@ export interface ProjectWithRelations extends ProjectAttributes {
   procurementPurchaseBills?: ProcurementPurchaseBill[];
   procurementAssetGrns?: ProcurementAssetGrn[];
   procurementAssetPurchaseBills?: ProcurementAssetPurchaseBill[];
+  procurementBoqs?: ProcurementBoq[];
+  procurementWorkOrders?: ProcurementWorkOrder[];
+  procurementWorkOrderMeasurements?: ProcurementWorkOrderMeasurement[];
+  procurementWorkBills?: ProcurementWorkBill[];
+  equipmentHireOrders?: ProcurementHireOrder[];
+  equipmentHireBills?: ProcurementHireBill[];
 }

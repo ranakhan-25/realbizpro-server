@@ -1,9 +1,10 @@
-import { BelongsTo, Column, DataType, ForeignKey, Table } from 'sequelize-typescript';
+import { BelongsTo, Column, DataType, ForeignKey, HasMany, Table } from 'sequelize-typescript';
 import { BaseModel } from '../../../base.model';
 import { ProcurementItemEntry } from '../configuration/products/pr_item_entry.model';
 import { ProcurementUnit } from '../configuration/products/pr_unit.model';
 import { ProcurementPurchaseOrderItem } from '../purchase-order/pr_purchase_order_item.model';
 import { ProcurementGrn } from './pr_grn.model';
+import { ProcurementMaterialIssueItem } from '../material-issue/pr_material_issue_item.model';
 
 import type { ProcurementGrnItemAttributes, ProcurementGrnItemCreationAttributes } from '../../../types/procurementgrnitem.types';
 
@@ -27,6 +28,7 @@ export class ProcurementGrnItem extends BaseModel<ProcurementGrnItemAttributes, 
   @Column({ type: DataType.DECIMAL(15, 3), allowNull: false, defaultValue: 0 }) declare purchase_qty: number;
   @Column({ type: DataType.DECIMAL(15, 3), allowNull: false, defaultValue: 0 }) declare stock_qty: number;
   @Column({ type: DataType.DECIMAL(15, 2), allowNull: false, defaultValue: 0 }) declare amount: number;
+  @HasMany(() => ProcurementMaterialIssueItem, { foreignKey: 'grn_item_id', sourceKey: 'uuid', as: 'materialIssueItems' }) declare materialIssueItems?: ProcurementMaterialIssueItem[];
   @Column({ type: DataType.STRING, allowNull: true }) declare createdBy?: string;
   @Column({ type: DataType.STRING, allowNull: true }) declare updatedBy?: string;
   @Column({ type: DataType.STRING, allowNull: true }) declare deletedBy?: string;

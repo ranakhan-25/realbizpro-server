@@ -19,6 +19,7 @@ import { ProcurementGrnItem } from '../../grn/pr_grn_item.model';
 import { ProcurementRfqItem } from '../../rfq/pr_rfq_item.model';
 import { ProcurementPurchaseOrderItem } from '../../purchase-order/pr_purchase_order_item.model';
 import { ProcurementMaterialRequisitionItem } from '../../requisition/pr_material_requisition_item.model';
+import { ProcurementBoqItem } from '../../boq/pr_procurement_boq_item.model';
 
 @Table({ tableName: 'pr_item_entry', timestamps: true, paranoid: true })
 export class ProcurementItemEntry extends BaseModel<ProcurementItemEntryAttributes, ProcurementItemEntryCreationAttributes> {
@@ -76,6 +77,9 @@ export class ProcurementItemEntry extends BaseModel<ProcurementItemEntryAttribut
 
   @HasMany(() => ProcurementMaterialRequisitionItem, { foreignKey: 'item_id', sourceKey: 'uuid', as: 'requisitionItems' })
   declare requisitionItems?: ProcurementMaterialRequisitionItem[];
+
+  @HasMany(() => ProcurementBoqItem, { foreignKey: 'item_id', sourceKey: 'uuid', as: 'procurementBoqItems' })
+  declare procurementBoqItems?: ProcurementBoqItem[];
 
   @Column({ type: DataType.STRING, allowNull: true })
   declare createdBy?: string;

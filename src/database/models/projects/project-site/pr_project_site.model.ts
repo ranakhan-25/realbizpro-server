@@ -23,6 +23,7 @@ import { ProcurementPurchaseOrder } from '../../procurement/purchase-order/pr_pu
 import { ProcurementAssetPurchaseOrder } from '../../procurement/purchase-order/pr_asset_purchase_order.model';
 import { ProcurementGrn } from '../../procurement/grn/pr_grn.model';
 import { ProcurementAssetGrn } from '../../procurement/grn/pr_asset_grn.model';
+import { ProcurementHireOrder } from '../../procurement/equipment-hire/pr_hire_order.model';
 
 @Table({
   tableName: 'sites',
@@ -105,6 +106,7 @@ export class Site
   @HasMany(() => ProcurementAssetPurchaseOrder, { foreignKey: 'site_id', sourceKey: 'uuid', as: 'procurementAssetPurchaseOrders' }) declare procurementAssetPurchaseOrders?: ProcurementAssetPurchaseOrder[];
   @HasMany(() => ProcurementGrn, { foreignKey: 'site_id', sourceKey: 'uuid', as: 'procurementGrns' }) declare procurementGrns?: ProcurementGrn[];
   @HasMany(() => ProcurementAssetGrn, { foreignKey: 'site_id', sourceKey: 'uuid', as: 'procurementAssetGrns' }) declare procurementAssetGrns?: ProcurementAssetGrn[];
+  @HasMany(() => ProcurementHireOrder, { foreignKey: 'site_id', sourceKey: 'uuid', as: 'equipmentHireOrders' }) declare equipmentHireOrders?: ProcurementHireOrder[];
   // ─── Audit fields ───────────────────────────────────────
   @Column({
     type: DataType.INTEGER, // change to STRING / UUID if needed

@@ -28,12 +28,18 @@ import { SysUserCompany } from './sys_user_company.model';
 import { ProcurementRfq } from '../procurement/rfq/pr_rfq.model';
 import { ProcurementAssetRfq } from '../procurement/rfq/pr_asset_rfq.model';
 import { ProcurementMaterialRequisition } from '../procurement/requisition/pr_material_requisition.model';
+import { ProcurementMaterialIssue } from '../procurement/material-issue/pr_material_issue.model';
 import { ProcurementAssetRequisition } from '../procurement/requisition/pr_asset_requisition.model';
 import { ProcurementPurchaseOrder } from '../procurement/purchase-order/pr_purchase_order.model';
 import { ProcurementAssetPurchaseOrder } from '../procurement/purchase-order/pr_asset_purchase_order.model';
 import { ProcurementGrn } from '../procurement/grn/pr_grn.model';
 import { ProcurementPurchaseBill } from '../procurement/purchase-bill/pr_purchase_bill.model';
 import { ProcurementAssetPurchaseBill } from '../procurement/purchase-bill/pr_asset_purchase_bill.model';
+import { ProcurementBoq } from '../procurement/boq/pr_procurement_boq.model';
+import { ProcurementHireOrder } from '../procurement/equipment-hire/pr_hire_order.model';
+import { ProcurementHireIn } from '../procurement/equipment-hire/pr_hire_in.model';
+import { ProcurementHireOut } from '../procurement/equipment-hire/pr_hire_out.model';
+import { ProcurementHireBill } from '../procurement/equipment-hire/pr_hire_bill.model';
 import { ProcurementAssetGrn } from '../procurement/grn/pr_asset_grn.model';
 
 export enum UserTypeEnum {
@@ -328,4 +334,12 @@ export class SysUser
   @HasMany(() => ProcurementPurchaseBill, { foreignKey: 'added_by_id', sourceKey: 'id', as: 'procurementPurchaseBills' }) declare procurementPurchaseBills?: ProcurementPurchaseBill[];
   @HasMany(() => ProcurementAssetGrn, { foreignKey: 'added_by_id', sourceKey: 'id', as: 'procurementAssetGrns' }) declare procurementAssetGrns?: ProcurementAssetGrn[];
   @HasMany(() => ProcurementAssetPurchaseBill, { foreignKey: 'added_by_id', sourceKey: 'id', as: 'procurementAssetPurchaseBills' }) declare procurementAssetPurchaseBills?: ProcurementAssetPurchaseBill[];
+  @HasMany(() => ProcurementBoq, { foreignKey: 'responsible_user_id', sourceKey: 'id', as: 'responsibleProcurementBoqs' }) declare responsibleProcurementBoqs?: ProcurementBoq[];
+  @HasMany(() => ProcurementBoq, { foreignKey: 'added_by_id', sourceKey: 'id', as: 'createdProcurementBoqs' }) declare createdProcurementBoqs?: ProcurementBoq[];
+  @HasMany(() => ProcurementHireOrder, { foreignKey: 'added_by_id', sourceKey: 'id', as: 'createdEquipmentHireOrders' }) declare createdEquipmentHireOrders?: ProcurementHireOrder[];
+  @HasMany(() => ProcurementHireIn, { foreignKey: 'received_by_id', sourceKey: 'id', as: 'equipmentHireIns' }) declare equipmentHireIns?: ProcurementHireIn[];
+  @HasMany(() => ProcurementHireOut, { foreignKey: 'returned_by_id', sourceKey: 'id', as: 'equipmentHireOuts' }) declare equipmentHireOuts?: ProcurementHireOut[];
+  @HasMany(() => ProcurementHireBill, { foreignKey: 'added_by_id', sourceKey: 'id', as: 'equipmentHireBills' }) declare equipmentHireBills?: ProcurementHireBill[];
+  @HasMany(() => ProcurementMaterialIssue, { foreignKey: 'issued_by_id', sourceKey: 'id', as: 'procurementMaterialIssues' }) declare procurementMaterialIssues?: ProcurementMaterialIssue[];
+  @HasMany(() => ProcurementMaterialIssue, { foreignKey: 'added_by_id', sourceKey: 'id', as: 'createdProcurementMaterialIssues' }) declare createdProcurementMaterialIssues?: ProcurementMaterialIssue[];
 }
