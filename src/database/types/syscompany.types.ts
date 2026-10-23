@@ -9,6 +9,7 @@ import type { ProcurementPurchaseOrder } from '../models/procurement/purchase-or
 import type { ProcurementAssetPurchaseOrder } from '../models/procurement/purchase-order/pr_asset_purchase_order.model';
 import type { ProcurementGrn } from '../models/procurement/grn/pr_grn.model';
 import type { ProcurementPurchaseBill } from '../models/procurement/purchase-bill/pr_purchase_bill.model';
+import type { ProcurementBoq } from '../models/procurement/boq/pr_procurement_boq.model';
 
 export interface SysCompanyAttributes {
   id: number;
@@ -41,6 +42,7 @@ export interface SysCompanyAttributes {
   procurementAssetPurchaseOrders?: ProcurementAssetPurchaseOrder[];
   procurementGrns?: ProcurementGrn[];
   procurementPurchaseBills?: ProcurementPurchaseBill[];
+  procurementBoqs?: ProcurementBoq[];
 }
 
 export interface SysCompanyCreationAttributes {
@@ -73,4 +75,5 @@ export interface SysCompanyWithRelations extends SysCompanyAttributes {
   procurementAssetPurchaseOrders?: ProcurementAssetPurchaseOrder[];
   procurementGrns?: ProcurementGrn[];
   procurementPurchaseBills?: ProcurementPurchaseBill[];
+  procurementBoqs?: ProcurementBoq[];
 }

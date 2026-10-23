@@ -13,6 +13,8 @@ import type { ProcurementGrn } from '../models/procurement/grn/pr_grn.model';
 import type { ProcurementPurchaseBill } from '../models/procurement/purchase-bill/pr_purchase_bill.model';
 import type { ProcurementAssetGrn } from '../models/procurement/grn/pr_asset_grn.model';
 import type { ProcurementAssetPurchaseBill } from '../models/procurement/purchase-bill/pr_asset_purchase_bill.model';
+import type { ProcurementHireOrder } from '../models/procurement/equipment-hire/pr_hire_order.model';
+import type { ProcurementHireBill } from '../models/procurement/equipment-hire/pr_hire_bill.model';
 
 export interface SupplierAccountsAttributes {
   id: number;
@@ -46,6 +48,8 @@ export interface SupplierAccountsAttributes {
   procurementPurchaseBills?: ProcurementPurchaseBill[];
   procurementAssetGrns?: ProcurementAssetGrn[];
   procurementAssetPurchaseBills?: ProcurementAssetPurchaseBill[];
+  equipmentHireOrders?: ProcurementHireOrder[];
+  equipmentHireBills?: ProcurementHireBill[];
 }
 
 export interface SupplierAccountsCreationAttributes {
@@ -79,4 +83,6 @@ export interface SupplierAccountsWithRelations extends SupplierAccountsAttribute
   procurementPurchaseBills?: ProcurementPurchaseBill[];
   procurementAssetGrns?: ProcurementAssetGrn[];
   procurementAssetPurchaseBills?: ProcurementAssetPurchaseBill[];
+  equipmentHireOrders?: ProcurementHireOrder[];
+  equipmentHireBills?: ProcurementHireBill[];
 }

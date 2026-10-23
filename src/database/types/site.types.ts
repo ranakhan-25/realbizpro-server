@@ -13,6 +13,7 @@ import type { ProcurementPurchaseOrder } from '../models/procurement/purchase-or
 import type { ProcurementAssetPurchaseOrder } from '../models/procurement/purchase-order/pr_asset_purchase_order.model';
 import type { ProcurementGrn } from '../models/procurement/grn/pr_grn.model';
 import type { ProcurementAssetGrn } from '../models/procurement/grn/pr_asset_grn.model';
+import type { ProcurementHireOrder } from '../models/procurement/equipment-hire/pr_hire_order.model';
 
 export interface SiteAttributes {
   id: number;
@@ -42,6 +43,7 @@ export interface SiteAttributes {
   procurementAssetPurchaseOrders?: ProcurementAssetPurchaseOrder[];
   procurementGrns?: ProcurementGrn[];
   procurementAssetGrns?: ProcurementAssetGrn[];
+  equipmentHireOrders?: ProcurementHireOrder[];
 }
 
 export interface SiteCreationAttributes {
@@ -71,4 +73,5 @@ export interface SiteWithRelations extends SiteAttributes {
   procurementAssetPurchaseOrders?: ProcurementAssetPurchaseOrder[];
   procurementGrns?: ProcurementGrn[];
   procurementAssetGrns?: ProcurementAssetGrn[];
+  equipmentHireOrders?: ProcurementHireOrder[];
 }

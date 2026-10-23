@@ -4,6 +4,9 @@
 import { ContractorUnderStatus } from '../models/projects/contract/pr_contractor.model';
 import { ContractorStatus } from '../models/projects/contract/pr_contractor.model';
 
+import type { ProcurementWorkOrder } from '../models/procurement/work-order/pr_procurement_work_order.model';
+import type { ProcurementWorkBill } from '../models/procurement/work-order/pr_work_bill.model';
+
 export interface ContractorAttributes {
   id: number;
   uuid: string;
@@ -24,6 +27,10 @@ export interface ContractorAttributes {
   updatedBy?: string | null;
   deletedBy?: string | null;
   status: ContractorStatus;
+
+  // Relations
+  procurementWorkOrders?: ProcurementWorkOrder[];
+  procurementWorkBills?: ProcurementWorkBill[];
 }
 
 export interface ContractorCreationAttributes {
@@ -47,5 +54,6 @@ export type ContractorUpdateAttributes = Partial<ContractorCreationAttributes>;
 
 // Helper type for including relations
 export interface ContractorWithRelations extends ContractorAttributes {
-  // No relations defined
+  procurementWorkOrders?: ProcurementWorkOrder[];
+  procurementWorkBills?: ProcurementWorkBill[];
 }

@@ -8,6 +8,7 @@ import type { BillingCategory } from '../models/projects/billing/pr_category.mod
 import type { BillingSubCategory } from '../models/projects/billing/pr_sub_category.model';
 import type { Site } from '../models/projects/project-site/pr_project_site.model';
 import type { ServiceWorkRequisitionItem } from '../models/projects/service-work-requisition-item/pr_service_work_requisition_item.model';
+import type { ProcurementWorkOrder } from '../models/procurement/work-order/pr_procurement_work_order.model';
 
 export interface ServiceWorkRequisitionAttributes {
   id: number;
@@ -37,6 +38,7 @@ export interface ServiceWorkRequisitionAttributes {
   taskSubcategoryItem?: BillingSubCategory;
   constructionSite?: Site;
   items?: ServiceWorkRequisitionItem[];
+  procurementWorkOrders?: ProcurementWorkOrder[];
 }
 
 export interface ServiceWorkRequisitionCreationAttributes {
@@ -66,4 +68,5 @@ export interface ServiceWorkRequisitionWithRelations extends ServiceWorkRequisit
   taskSubcategoryItem?: BillingSubCategory;
   constructionSite?: Site;
   items?: ServiceWorkRequisitionItem[];
+  procurementWorkOrders?: ProcurementWorkOrder[];
 }

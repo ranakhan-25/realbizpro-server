@@ -18,6 +18,7 @@ import { ProcurementAssetRfqItem } from '../../rfq/pr_asset_rfq_item.model';
 import { ProcurementAssetPurchaseOrderItem } from '../../purchase-order/pr_asset_purchase_order_item.model';
 import { ProcurementAssetRequisitionItem } from '../../requisition/pr_asset_requisition_item.model';
 import { ProcurementAssetGrnItem } from '../../grn/pr_asset_grn_item.model';
+import { ProcurementHireOrderItem } from '../../equipment-hire/pr_hire_order_item.model';
 
 @Table({ tableName: 'pr_asset_item_entry', timestamps: true, paranoid: true })
 export class ProcurementAssetItemEntry extends BaseModel<ProcurementAssetItemEntryAttributes, ProcurementAssetItemEntryCreationAttributes> {
@@ -68,6 +69,7 @@ export class ProcurementAssetItemEntry extends BaseModel<ProcurementAssetItemEnt
 
   @HasMany(() => ProcurementAssetGrnItem, { foreignKey: 'item_id', sourceKey: 'uuid', as: 'grnItems' })
   declare grnItems?: ProcurementAssetGrnItem[];
+  @HasMany(() => ProcurementHireOrderItem, { foreignKey: 'equipment_id', sourceKey: 'uuid', as: 'hireOrderItems' }) declare hireOrderItems?: ProcurementHireOrderItem[];
 
   @Column({ type: DataType.DECIMAL(15, 2), allowNull: false, defaultValue: 0 })
   declare purchase_price: number;

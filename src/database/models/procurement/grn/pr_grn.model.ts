@@ -14,6 +14,7 @@ import { ProcurementMaterialRequisition } from '../requisition/pr_material_requi
 import { ProcurementGrnItem } from './pr_grn_item.model';
 import { ProcurementPurchaseBill } from '../purchase-bill/pr_purchase_bill.model';
 import { ProcurementPurchaseBillGrn } from '../purchase-bill/pr_purchase_bill_grn.model';
+import { ProcurementMaterialIssue } from '../material-issue/pr_material_issue.model';
 
 import type { ProcurementGrnAttributes, ProcurementGrnCreationAttributes } from '../../../types/procurementgrn.types';
 
@@ -69,6 +70,7 @@ export class ProcurementGrn extends BaseModel<ProcurementGrnAttributes, Procurem
   @Column({ type: DataType.ENUM(...Object.values(ProcurementGrnApprovalLayer)), allowNull: false, defaultValue: ProcurementGrnApprovalLayer.PENDING }) declare approval_layer: ProcurementGrnApprovalLayer;
   @Column({ type: DataType.ENUM(...Object.values(ProcurementGrnStatus)), allowNull: false, defaultValue: ProcurementGrnStatus.PENDING }) declare status: ProcurementGrnStatus;
   @HasMany(() => ProcurementGrnItem, { foreignKey: 'grn_id', sourceKey: 'uuid', as: 'items' }) declare items?: ProcurementGrnItem[];
+  @HasMany(() => ProcurementMaterialIssue, { foreignKey: 'grn_id', sourceKey: 'uuid', as: 'materialIssues' }) declare materialIssues?: ProcurementMaterialIssue[];
   @BelongsToMany(() => ProcurementPurchaseBill, { through: () => ProcurementPurchaseBillGrn, foreignKey: 'grn_id', otherKey: 'purchase_bill_id', sourceKey: 'uuid', targetKey: 'uuid', as: 'purchaseBills' }) declare purchaseBills?: ProcurementPurchaseBill[];
   @Column({ type: DataType.STRING, allowNull: true }) declare createdBy?: string;
   @Column({ type: DataType.STRING, allowNull: true }) declare updatedBy?: string;

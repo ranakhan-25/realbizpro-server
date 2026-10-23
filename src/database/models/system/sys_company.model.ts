@@ -18,6 +18,7 @@ import { ProcurementPurchaseOrder } from '../procurement/purchase-order/pr_purch
 import { ProcurementAssetPurchaseOrder } from '../procurement/purchase-order/pr_asset_purchase_order.model';
 import { ProcurementGrn } from '../procurement/grn/pr_grn.model';
 import { ProcurementPurchaseBill } from '../procurement/purchase-bill/pr_purchase_bill.model';
+import { ProcurementBoq } from '../procurement/boq/pr_procurement_boq.model';
 
 @Table({
   tableName: 'sys_company',
@@ -133,4 +134,5 @@ export class SysCompany extends BaseModel<
   @HasMany(() => ProcurementAssetPurchaseOrder, { foreignKey: 'company_id', sourceKey: 'uuid', as: 'procurementAssetPurchaseOrders' }) declare procurementAssetPurchaseOrders?: ProcurementAssetPurchaseOrder[];
   @HasMany(() => ProcurementGrn, { foreignKey: 'company_id', sourceKey: 'uuid', as: 'procurementGrns' }) declare procurementGrns?: ProcurementGrn[];
   @HasMany(() => ProcurementPurchaseBill, { foreignKey: 'company_id', sourceKey: 'uuid', as: 'procurementPurchaseBills' }) declare procurementPurchaseBills?: ProcurementPurchaseBill[];
+  @HasMany(() => ProcurementBoq, { foreignKey: 'company_id', sourceKey: 'uuid', as: 'procurementBoqs' }) declare procurementBoqs?: ProcurementBoq[];
 }
