@@ -17,6 +17,9 @@ import { JwtStrategy } from '../../../common/strategies/jwt.strategy';
 import { SysUser } from '../../../database/models/system/sys_user.model';
 import { SysUserToken } from '../../../database/models/system/sys_user_token.model';
 import { SysUserPermission } from '@/database/models/system/sys_user_permission.model';
+import { SysOrganization } from '@/database/models/system/sys_organization.model';
+import { SysRole } from '@/database/models/system/sys_role.model';
+import { SysUserRole } from '@/database/models/system/sys_user_role.model';
 import { MenuModule } from '../../menu/menu.module';
 import { UsersModule } from '../../engine/user-management/users/users.module';
 import { AuthController } from './auth.controller';
@@ -32,6 +35,9 @@ import { SysPermission } from '@/database/models/system/sys_permission.model';
       SysUserToken,
       SysPermission,
       SysUserPermission,
+      SysOrganization,
+      SysRole,
+      SysUserRole,
     ]),
 
     PassportModule.register({
