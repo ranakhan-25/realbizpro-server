@@ -117,8 +117,8 @@ export class ModulesService {
   // Dynamic Module & Nested Feature Tree Methods
   // ==========================================
 
-  private mapFeatureNode(f: SysFeatures): FeatureNodeResponseDto {
-    const raw = f.get({ plain: true });
+  private mapFeatureNode(f: any): FeatureNodeResponseDto {
+    const raw = typeof f?.get === 'function' ? f.get({ plain: true }) : f || {};
     return {
       id: raw.id,
       uuid: raw.uuid,
@@ -132,8 +132,8 @@ export class ModulesService {
     };
   }
 
-  private mapModuleTreeNode(m: SysModules): ModuleTreeNodeResponseDto {
-    const raw = m.get({ plain: true });
+  private mapModuleTreeNode(m: any): ModuleTreeNodeResponseDto {
+    const raw = typeof m?.get === 'function' ? m.get({ plain: true }) : m || {};
     return {
       id: raw.id,
       uuid: raw.uuid,
@@ -144,7 +144,7 @@ export class ModulesService {
       description: raw.description,
       displayOrder: raw.displayOrder || 0,
       isActive: raw.isActive ?? true,
-      features: (raw.features || []).map((f: SysFeatures) =>
+      features: (raw.features || []).map((f: any) =>
         this.mapFeatureNode(f),
       ),
     };
