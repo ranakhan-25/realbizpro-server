@@ -187,7 +187,7 @@ export class OrganizationsService {
   async findOne(identifier: string | number): Promise<OrganizationResponseDto> {
     const isNumeric = !isNaN(Number(identifier));
     const where: any = isNumeric
-      ? { [Op.or]: [{ id: Number(identifier) }, { uuid: String(identifier) }] }
+      ? { id: Number(identifier) }
       : { uuid: String(identifier) };
 
     const org = await this.orgModel.findOne({
@@ -230,7 +230,7 @@ export class OrganizationsService {
       const isNum = !isNaN(Number(orgDto.planId));
       plan = await this.planModel.findOne({
         where: isNum
-          ? { [Op.or]: [{ id: Number(orgDto.planId) }, { uuid: String(orgDto.planId) }] }
+          ? { id: Number(orgDto.planId) }
           : { uuid: String(orgDto.planId) },
       });
     }
@@ -354,7 +354,7 @@ export class OrganizationsService {
   async update(identifier: string | number, dto: UpdateOrganizationDto): Promise<OrganizationResponseDto> {
     const isNumeric = !isNaN(Number(identifier));
     const where: any = isNumeric
-      ? { [Op.or]: [{ id: Number(identifier) }, { uuid: String(identifier) }] }
+      ? { id: Number(identifier) }
       : { uuid: String(identifier) };
 
     const org = await this.orgModel.findOne({ where });
@@ -373,7 +373,7 @@ export class OrganizationsService {
   ): Promise<OrganizationResponseDto> {
     const isNumeric = !isNaN(Number(identifier));
     const where: any = isNumeric
-      ? { [Op.or]: [{ id: Number(identifier) }, { uuid: String(identifier) }] }
+      ? { id: Number(identifier) }
       : { uuid: String(identifier) };
 
     const org = await this.orgModel.findOne({ where });
@@ -394,7 +394,7 @@ export class OrganizationsService {
       const isNum = !isNaN(Number(dto.planId));
       const newPlan = await this.planModel.findOne({
         where: isNum
-          ? { [Op.or]: [{ id: Number(dto.planId) }, { uuid: String(dto.planId) }] }
+          ? { id: Number(dto.planId) }
           : { uuid: String(dto.planId) },
       });
       if (!newPlan) throw new NotFoundException(`Plan "${dto.planId}" not found`);
@@ -431,7 +431,7 @@ export class OrganizationsService {
   async toggleLock(identifier: string | number, dto: ToggleLockDto): Promise<OrganizationResponseDto> {
     const isNumeric = !isNaN(Number(identifier));
     const where: any = isNumeric
-      ? { [Op.or]: [{ id: Number(identifier) }, { uuid: String(identifier) }] }
+      ? { id: Number(identifier) }
       : { uuid: String(identifier) };
 
     const org = await this.orgModel.findOne({ where });
@@ -460,7 +460,7 @@ export class OrganizationsService {
   ): Promise<EntitledModuleSummaryDto[]> {
     const isNumeric = !isNaN(Number(identifier));
     const where: any = isNumeric
-      ? { [Op.or]: [{ id: Number(identifier) }, { uuid: String(identifier) }] }
+      ? { id: Number(identifier) }
       : { uuid: String(identifier) };
 
     const org = await this.orgModel.findOne({ where });

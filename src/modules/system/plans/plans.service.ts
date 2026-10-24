@@ -62,7 +62,7 @@ export class PlansService {
   async findOne(identifier: string | number): Promise<PlanResponseDto> {
     const isNumeric = !isNaN(Number(identifier));
     const where: any = isNumeric
-      ? { [Op.or]: [{ id: Number(identifier) }, { uuid: String(identifier) }] }
+      ? { id: Number(identifier) }
       : { uuid: String(identifier) };
 
     const plan = await this.planModel.findOne({ where });
@@ -87,7 +87,7 @@ export class PlansService {
   async update(identifier: string | number, dto: UpdatePlanDto): Promise<PlanResponseDto> {
     const isNumeric = !isNaN(Number(identifier));
     const where: any = isNumeric
-      ? { [Op.or]: [{ id: Number(identifier) }, { uuid: String(identifier) }] }
+      ? { id: Number(identifier) }
       : { uuid: String(identifier) };
 
     const plan = await this.planModel.findOne({ where });
@@ -111,7 +111,7 @@ export class PlansService {
   async remove(identifier: string | number): Promise<{ message: string; id: number | string }> {
     const isNumeric = !isNaN(Number(identifier));
     const where: any = isNumeric
-      ? { [Op.or]: [{ id: Number(identifier) }, { uuid: String(identifier) }] }
+      ? { id: Number(identifier) }
       : { uuid: String(identifier) };
 
     const plan = await this.planModel.findOne({ where });
