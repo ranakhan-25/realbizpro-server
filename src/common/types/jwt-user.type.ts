@@ -23,6 +23,10 @@ export interface JwtAuthUser {
   lastLoginAt?: Date | null;
   lastLogoutAt?: Date | null;
   isSuperUser?: boolean;
+  orgId?: number | null;
+  orgUuid?: string | null;
+  isOrgAdmin?: boolean;
+  organization?: any;
   designationId?: any;
   designation?: any;
   employee?: any;
