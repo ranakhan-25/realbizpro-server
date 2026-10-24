@@ -88,15 +88,32 @@ export class Category
   })
   declare grns?: ProcurementGrn[];
 
-  @HasMany(() => ProcurementRfq, { foreignKey: 'category_id', sourceKey: 'uuid', as: 'rfqs' })
+  @HasMany(() => ProcurementRfq, {
+    foreignKey: 'category_id',
+    sourceKey: 'uuid',
+    as: 'rfqs',
+  })
   declare rfqs?: ProcurementRfq[];
 
-  @HasMany(() => ProcurementPurchaseOrder, { foreignKey: 'category_id', sourceKey: 'uuid', as: 'purchaseOrders' })
+  @HasMany(() => ProcurementPurchaseOrder, {
+    foreignKey: 'category_id',
+    sourceKey: 'uuid',
+    as: 'purchaseOrders',
+  })
   declare purchaseOrders?: ProcurementPurchaseOrder[];
 
-  @HasMany(() => ProcurementMaterialRequisition, { foreignKey: 'category_id', sourceKey: 'uuid', as: 'materialRequisitions' })
+  @HasMany(() => ProcurementMaterialRequisition, {
+    foreignKey: 'category_id',
+    sourceKey: 'uuid',
+    as: 'materialRequisitions',
+  })
   declare materialRequisitions?: ProcurementMaterialRequisition[];
-  @HasMany(() => ProcurementBoqItem, { foreignKey: 'category_id', sourceKey: 'uuid', as: 'procurementBoqItems' }) declare procurementBoqItems?: ProcurementBoqItem[];
+  @HasMany(() => ProcurementBoqItem, {
+    foreignKey: 'category_id',
+    sourceKey: 'uuid',
+    as: 'procurementBoqItems',
+  })
+  declare procurementBoqItems?: ProcurementBoqItem[];
 
   @Column({
     type: DataType.STRING,

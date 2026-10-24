@@ -123,6 +123,8 @@ import { AccountMappingModule } from './modules/procurement/configuration/produc
 import { ProcurementLaborTypeModule } from './modules/procurement/configuration/labor-type/labor-type.module';
 import { ProcurementSubcontractPackageModule } from './modules/procurement/configuration/subcontract-package/subcontract-package.module';
 import { ProcurementDashboardModule } from './modules/procurement/dashboard/procurement-dashboard.module';
+import { CommunicationStatusModule } from './modules/crm/configuration/communication-status/communication-status.module';
+import { LeadModule } from './modules/crm/lead/lead.module';
 import { ProcurementSubCategoryModule } from './modules/procurement/configuration/products/sub-category/sub-category.module';
 import { ProcurementBrandModule } from './modules/procurement/configuration/products/brand/brand.module';
 import { ProcurementUnitModule } from './modules/procurement/configuration/products/unit/unit.module';
@@ -317,6 +319,8 @@ import { ZkTecoDeviceModule } from './modules/hrm/configuration/zkteco-device/zk
     ProcurementLaborTypeModule,
     ProcurementSubcontractPackageModule,
     ProcurementDashboardModule,
+    CommunicationStatusModule,
+    LeadModule,
   ],
   controllers: [AppController, HealthController],
   providers: [
