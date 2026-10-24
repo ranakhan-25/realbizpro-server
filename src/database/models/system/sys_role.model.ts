@@ -1,8 +1,11 @@
 // Role.model.ts
 import {
+  BelongsTo,
   BelongsToMany,
   Column,
   DataType,
+  ForeignKey,
+  HasMany,
   Table,
 } from 'sequelize-typescript';
 import { BaseModel } from '../../base.model';
@@ -10,6 +13,8 @@ import { SysPermission } from './sys_permission.model';
 import { SysRolePermission } from './sys_role_permission.model';
 import { SysUser } from './sys_user.model';
 import { SysUserRole } from './sys_user_role.model';
+import { SysOrganization } from './sys_organization.model';
+import { SysRoleFeature } from './sys_role_feature.model';
 import type {
   SysRoleAttributes,
   SysRoleCreationAttributes,
@@ -20,7 +25,10 @@ import type {
   timestamps: true,
   paranoid: true,
   underscored: true,
-  indexes: [{ fields: ['name'], unique: true }],
+  indexes: [
+    { fields: ['name'], unique: true },
+    { fields: ['org_id'] },
+  ],
 })
 export class SysRole extends BaseModel<
   SysRoleAttributes,
@@ -46,19 +54,49 @@ export class SysRole extends BaseModel<
   })
   declare description?: string;
 
+  @ForeignKey(() => SysOrganization)
+  @Column({
+    type: DataType.BIGINT,
+    allowNull: true,
+    field: 'org_id',
+    comment: 'Null for system-level roles (e.g. Super Admin), set for tenant-specific roles',
+  })
+  declare orgId?: number;
+
+  @Column({
+    type: DataType.UUID,
+    allowNull: true,
+    field: 'org_uuid',
+  })
+  declare orgUuid?: string;
+
+  @Column({
+    type: DataType.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+    field: 'is_system_role',
+  })
+  declare isSystemRole: boolean;
+
+  @BelongsTo(() => SysOrganization, 'org_id')
+  declare organization?: SysOrganization;
+
+  @HasMany(() => SysRoleFeature, 'role_id')
+  declare roleFeatures?: SysRoleFeature[];
+
   // FIXED: Use only BelongsToMany for many-to-many relationships
   @BelongsToMany(() => SysUser, {
     through: () => SysUserRole,
-    foreignKey: 'role_id', // Make sure this matches your UserRole table column
-    otherKey: 'user_id', // Make sure this matches your UserRole table column
+    foreignKey: 'role_id',
+    otherKey: 'user_id',
     as: 'users',
   })
   declare users?: SysUser[];
 
   @BelongsToMany(() => SysPermission, {
     through: () => SysRolePermission,
-    foreignKey: 'role_id', // Make sure this matches your RolePermission table column
-    otherKey: 'permission_id', // Make sure this matches your RolePermission table column
+    foreignKey: 'role_id',
+    otherKey: 'permission_id',
     as: 'permissions',
   })
   declare permissions?: SysPermission[];

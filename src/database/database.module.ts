@@ -23,6 +23,11 @@ import { ProcurementUnit } from './models/procurement/configuration/products/pr_
 import { ProcurementItemEntry } from './models/procurement/configuration/products/pr_item_entry.model';
 import { ProcurementAssetCategory } from './models/procurement/configuration/asset/pr_asset_category.model';
 import { ProcurementAssetItemEntry } from './models/procurement/configuration/asset/pr_asset_item_entry.model';
+import { SysPlan } from './models/system/sys_plan.model';
+import { SysOrganization } from './models/system/sys_organization.model';
+import { SysOrgEntitlement } from './models/system/sys_org_entitlement.model';
+import { SysRoleFeature } from './models/system/sys_role_feature.model';
+import { SysUserFeatureOverride } from './models/system/sys_user_feature_override.model';
 
 @Global()
 @Module({
@@ -52,6 +57,11 @@ import { ProcurementAssetItemEntry } from './models/procurement/configuration/as
       ProcurementItemEntry,
       ProcurementAssetCategory,
       ProcurementAssetItemEntry,
+      SysPlan,
+      SysOrganization,
+      SysOrgEntitlement,
+      SysRoleFeature,
+      SysUserFeatureOverride,
     ]),
   ],
   providers: [
