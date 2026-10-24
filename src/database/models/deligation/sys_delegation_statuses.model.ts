@@ -5,7 +5,7 @@ import {
   Model,
   Table,
 } from 'sequelize-typescript';
-import type { SysDelegationStatusAttributes, SysDelegationStatusCreationAttributes } from 'src/database/types/sysdelegationstatus.types';
+import type { SysDelegationStatusAttributes, SysDelegationStatusCreationAttributes } from 'src/database/types/sys_delegation_statuses.model.types';
 
 @Table({
   tableName: 'sys_delegation_statuses',

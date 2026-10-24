@@ -141,6 +141,23 @@ import { HolidayModule } from './modules/hrm/configuration/holiday/holiday.modul
 import { LeaveTypeModule } from './modules/hrm/configuration/leave-type/leave-type.module';
 import { SalaryGradeItemModule } from './modules/hrm/configuration/salary-grade-item/salary-grade-item.module';
 import { ZkTecoDeviceModule } from './modules/hrm/configuration/zkteco-device/zkteco-device.module';
+import { FloorModule } from './modules/projects/floor/floor.module';
+
+import { ProjectAgreementModule } from './modules/projects/project_aggrement/project_aggrement.module';
+import { ProjectMilestoneModule } from './modules/projects/project_milestone/project_milestone.module';
+import { BuildingModule } from './modules/projects/building/building.module';
+import { ProjectPartyModule } from './modules/projects/project_party/project_party.module';
+import { ProjectTaskModule } from './modules/projects/projec_task/projec_task.module';
+import { ProjectBudgetModule } from './modules/projects/project_budget/project_budget.module';
+import { ProjectCostModule } from './modules/projects/project_cost/project_cost.module';
+import { ProjectProgressModule } from './modules/projects/project_progress/project_progress.module';
+import { ProjectControlModule } from './modules/projects/project_control/project_control.module';
+import { UnitPlotModule } from './modules/projects/unit_plot/unit_plot.module';
+
+
+
+
+
 
 @Module({
   imports: [
@@ -220,7 +237,19 @@ import { ZkTecoDeviceModule } from './modules/hrm/configuration/zkteco-device/zk
     ProjectTypeModule,
     ProjectSiteModule,
     ProjectModule,
-    UsersModule,
+    UsersModule, 
+    BuildingModule,
+    FloorModule,
+    UnitPlotModule,
+   
+    ProjectAgreementModule,
+    ProjectMilestoneModule,
+    ProjectPartyModule,
+    ProjectTaskModule,
+    ProjectBudgetModule,
+    ProjectCostModule,
+    ProjectProgressModule, 
+    ProjectControlModule,
     BoqModule,
     TaskModule,
     BoqComparisonModule,
@@ -308,6 +337,10 @@ import { ZkTecoDeviceModule } from './modules/hrm/configuration/zkteco-device/zk
     AssetPurchaseOrderModule,
     GrnModule,
     AccountMappingModule,
+    ProjectBudgetModule,
+    ProjectCostModule,
+    ProjectProgressModule,
+    ProjectControlModule,
   ],
   controllers: [AppController, HealthController],
   providers: [

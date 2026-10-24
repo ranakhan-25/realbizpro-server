@@ -7,7 +7,7 @@ import {
 import type {
   SysDelegationStatusAttributes,
   SysDelegationStatusCreationAttributes,
-} from '../../types/sysdelegationstatus.types';
+} from 'src/database/types/sys_delegation_statuses.model.types';
 
 @Table({
   tableName: 'sys_delegation_statuses',

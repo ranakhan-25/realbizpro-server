@@ -14,6 +14,7 @@ class SequelizeTypeGenerator {
     });
     // Cache for model locations with exact file paths
     this.modelLocations = new Map();
+    this.modelNameCounts = new Map();
     this.scanModelLocations();
 
     if (this.config.outputPath) {
@@ -60,6 +61,10 @@ class SequelizeTypeGenerator {
 
         if (classMatch) {
           const className = classMatch[1];
+          this.modelNameCounts.set(
+            className,
+            (this.modelNameCounts.get(className) || 0) + 1,
+          );
           this.modelLocations.set(
             className,
             filePath,
@@ -709,7 +714,9 @@ export interface ${className}WithRelations extends ${className}Attributes {${
 
     const outputFile = path.join(
       outputDir,
-      `${className.toLowerCase()}.types.ts`,
+      this.modelNameCounts.get(className) > 1
+        ? `${path.basename(originalFilePath, '.ts').replace(/_model$/, '')}.types.ts`
+        : `${className.toLowerCase()}.types.ts`,
     );
     fs.writeFileSync(outputFile, fileContent);
 
@@ -905,6 +912,11 @@ export interface ${className}WithRelations extends ${className}Attributes {${
         )
         .replace(/\\/g, '/')
         .replace('.ts', '');
+      const hasDisambiguatedTypesFile =
+        path.basename(typesFilePath) !== `${className.toLowerCase()}.types.ts`;
+      const typeModulePath = hasDisambiguatedTypesFile
+        ? `src/database/types/${path.basename(typesFilePath, '.ts')}`
+        : relativePath;
 
       const importStatement = `import type { ${className}Attributes, ${className}CreationAttributes } from '${relativePath}';`;
 
@@ -912,8 +924,26 @@ export interface ${className}WithRelations extends ${className}Attributes {${
         `import(?:\\s+type)?\\s+\\{[^}]*\\b${className}Attributes\\b[^}]*\\b${className}CreationAttributes\\b[^}]*\\}\\s+from\\s+['"][^'"]+['"];?`,
       );
 
-      // Check if types are already imported
-      if (typeImportRegex.test(content)) {
+      const existingTypeImport = content.match(typeImportRegex);
+      if (existingTypeImport) {
+        if (!hasDisambiguatedTypesFile) {
+          console.log(
+            `📄 Types already imported in ${filePath}`,
+          );
+          return;
+        }
+
+        const updatedTypeImport = existingTypeImport[0].replace(
+          /from\s+(['"])[^'"]+\1/,
+          `from '${typeModulePath}'`,
+        );
+        if (updatedTypeImport !== existingTypeImport[0]) {
+          content = content.replace(
+            existingTypeImport[0],
+            updatedTypeImport,
+          );
+          fs.writeFileSync(filePath, content);
+        }
         console.log(
           `📄 Types already imported in ${filePath}`,
         );

@@ -9,7 +9,7 @@ import { BaseModel } from '../../base.model';
 import type {
   SysRequestAssigneeAttributes,
   SysRequestAssigneeCreationAttributes,
-} from '../../types/sysrequestassignee.types';
+} from 'src/database/types/sys_approval_request_assingees.model.types';
 import { SysUser } from '../system/sys_user.model';
 import { SysApprovalRequest } from './sys_approval_requests.model';
 import { SysApprovalStep } from './sys_approval_steps.model';
