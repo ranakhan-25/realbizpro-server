@@ -8,7 +8,7 @@ import {
   Table,
 } from 'sequelize-typescript';
 import { BaseModel } from 'src/database/base.model';
-import {
+import {              
   CategoryAttributes,
   CategoryCreationAttributes,
   CategoryUpdateAttributes,
