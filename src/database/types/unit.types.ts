@@ -1,5 +1,5 @@
 // Auto-generated types for Unit
-// Source: src\database\models\hrm\employee\hrm_unit_model.ts
+// Source: src/database/models/hrm/employee/hrm_unit_model.ts
 
 import { UnitStatus } from '../models/hrm/employee/hrm_unit_model';
 

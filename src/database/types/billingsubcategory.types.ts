@@ -1,5 +1,5 @@
 // Auto-generated types for BillingSubCategory
-// Source: src\database\models\projects\billing\pr_sub_category.model.ts
+// Source: src/database/models/projects/billing/pr_sub_category.model.ts
 
 import { SubCategoryType } from '../models/projects/billing/pr_sub_category.model';
 

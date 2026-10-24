@@ -1,5 +1,5 @@
 // Auto-generated types for FlatLand
-// Source: src\database\models\projects\flatland\pr_flatland.model.ts
+// Source: src/database/models/projects/flatland/pr_flatland.model.ts
 
 import { FlatLandStatus } from '../models/projects/flatland/pr_flatland.model';
 

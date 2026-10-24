@@ -1,5 +1,5 @@
 // Auto-generated types for CrSaleAgreement
-// Source: src\database\models\credit-realization\cr_sale_agreement.model.ts
+// Source: src/database/models/credit-realization/cr_sale_agreement.model.ts
 
 import type { CrInstallmentPlan } from '../models/credit-realization/cr_installment_plan.model';
 import type { CrPlotDistribution } from '../models/credit-realization/cr_plot_distribution.model';
