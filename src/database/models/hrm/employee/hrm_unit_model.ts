@@ -19,14 +19,14 @@ export enum UnitStatus {
 }
 
 @Table({
-  tableName: 'unit',
+  tableName: 'hrm_unit',
   timestamps: true,
   paranoid: true,
   underscored: false,
   indexes: [
-    { name: 'Unit_name_idx', fields: ['name'] },
+    { name: 'HrmUnit_name_idx', fields: ['name'] },
     {
-      name: 'Unit_deletedAt_idx',
+      name: 'HrmUnit_deletedAt_idx',
       fields: ['deleted_at'],
     },
   ],
