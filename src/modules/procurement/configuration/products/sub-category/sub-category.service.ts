@@ -7,6 +7,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
 import { Category } from 'src/database/models/procurement/configuration/products/pr_category.model';
 import { ProcurementSubCategory } from 'src/database/models/procurement/configuration/products/pr_sub_category.model';
+import { BillingSubCategory } from 'src/database/models/projects/billing/pr_sub_category.model';
 import { CreateProcurementSubCategoryDto } from './dto/create-sub-category.dto';
 import { QueryProcurementSubCategoryDto } from './dto/query-sub-category.dto';
 import { UpdateProcurementSubCategoryDto } from './dto/update-sub-category.dto';
@@ -19,6 +20,9 @@ export class ProcurementSubCategoryService {
 
     @InjectModel(Category)
     private readonly categoryModel: typeof Category,
+
+    @InjectModel(BillingSubCategory)
+    private readonly billingSubCategoryModel: typeof BillingSubCategory,
   ) {}
 
   async create(dto: CreateProcurementSubCategoryDto) {
@@ -106,6 +110,59 @@ export class ProcurementSubCategoryService {
         previousPage: currentPage > 1 ? currentPage - 1 : null,
       },
     };
+  }
+
+  async dropdown(categoryId?: string) {
+    const where: any = {};
+    if (categoryId) where.categoryId = categoryId;
+    return this.subCategoryModel.findAll({
+      where,
+      attributes: ['uuid', 'code', 'name', 'categoryId'],
+      include: [{
+        association: 'category',
+        attributes: ['uuid', 'code', 'name', 'type'],
+        required: false,
+      }],
+      order: [['name', 'ASC']],
+    });
+  }
+
+  async combinedDropdown(categoryId?: string) {
+    const where: any = {};
+    if (categoryId) where.categoryId = categoryId;
+    const [procurementSubCategories, billingSubCategories] = await Promise.all([
+      this.subCategoryModel.findAll({
+        where,
+        include: [{
+          association: 'category',
+          required: false,
+        }],
+        order: [['name', 'ASC']],
+      }),
+      this.billingSubCategoryModel.findAll({
+        where,
+        include: [{
+          association: 'category',
+          required: false,
+        }],
+        order: [['name', 'ASC']],
+      }),
+    ]);
+    return [
+      ...procurementSubCategories.map((subCategory) => ({
+        ...subCategory.toJSON(),
+        source: 'procurement',
+        type: null,
+        description: null,
+      })),
+      ...billingSubCategories.map((subCategory) => ({
+        ...subCategory.toJSON(),
+        source: 'projects-billing',
+        createdBy: subCategory.createdBy ?? null,
+        updatedBy: subCategory.updatedBy ?? null,
+        deletedBy: subCategory.deletedBy ?? null,
+      })),
+    ].sort((left, right) => left.name.localeCompare(right.name));
   }
 
   async findOne(uuid: string) {

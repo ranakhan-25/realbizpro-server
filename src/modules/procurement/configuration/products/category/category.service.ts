@@ -16,6 +16,8 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Category } from 'src/database/models/procurement/configuration/products/pr_category.model';
 import { CategoryAccountMapping } from 'src/database/models/procurement/configuration/products/pr_category_account_mapping.model';
+import { ProcurementSubCategory } from 'src/database/models/procurement/configuration/products/pr_sub_category.model';
+import { BillingCategory } from 'src/database/models/projects/billing/pr_category.model';
 import type { QueryCategoryDto } from './dto/query-catefory.dto';
 
 
@@ -27,6 +29,9 @@ export class CategoryService {
 
     @InjectModel(CategoryAccountMapping)
     private readonly mappingModel: typeof CategoryAccountMapping,
+
+    @InjectModel(BillingCategory)
+    private readonly billingCategoryModel: typeof BillingCategory,
 
     @InjectConnection()
     private readonly sequelize: Sequelize,
@@ -121,6 +126,13 @@ export class CategoryService {
             as: 'accountMapping',
             required: false,
           },
+          {
+            association: 'subCategories',
+            attributes: ['uuid', 'code', 'name', 'categoryId'],
+            required: false,
+            separate: true,
+            order: [['name', 'ASC']],
+          },
         ],
       });
 
@@ -163,6 +175,13 @@ export class CategoryService {
             as: 'accountMapping',
             required: false,
           },
+          {
+            association: 'subCategories',
+            attributes: ['uuid', 'code', 'name', 'categoryId'],
+            required: false,
+            separate: true,
+            order: [['name', 'ASC']],
+          },
         ],
       });
 
@@ -173,6 +192,48 @@ export class CategoryService {
     }
 
     return category;
+  }
+
+  async dropdown(type?: string) {
+    const where: any = {};
+    if (type) where.type = type;
+    return this.categoryModel.findAll({
+      where,
+      attributes: ['uuid', 'code', 'name', 'type'],
+      order: [['name', 'ASC']],
+    });
+  }
+
+  async combinedDropdown(type?: string) {
+    const procurementWhere: any = {};
+    const billingWhere: any = {};
+    if (type) {
+      procurementWhere.type = type;
+      billingWhere.type = type;
+    }
+    const [procurementCategories, billingCategories] = await Promise.all([
+      this.categoryModel.findAll({
+        where: procurementWhere,
+        order: [['name', 'ASC']],
+      }),
+      this.billingCategoryModel.findAll({
+        where: billingWhere,
+        order: [['name', 'ASC']],
+      }),
+    ]);
+    return [
+      ...procurementCategories.map((category) => ({
+        ...category.toJSON(),
+        source: 'procurement',
+        description: null,
+      })),
+      ...billingCategories.map((category) => ({
+        ...category.toJSON(),
+        source: 'projects-billing',
+        uid: null,
+        addedById: null,
+      })),
+    ].sort((left, right) => left.name.localeCompare(right.name));
   }
 
   async update(

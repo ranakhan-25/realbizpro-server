@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { IdLogicModule } from '@easysofts/id-logic';
 import { Module } from '@nestjs/common';
 import {
@@ -123,6 +124,8 @@ import { AccountMappingModule } from './modules/procurement/configuration/produc
 import { ProcurementLaborTypeModule } from './modules/procurement/configuration/labor-type/labor-type.module';
 import { ProcurementSubcontractPackageModule } from './modules/procurement/configuration/subcontract-package/subcontract-package.module';
 import { ProcurementDashboardModule } from './modules/procurement/dashboard/procurement-dashboard.module';
+import { CommunicationStatusModule } from './modules/crm/configuration/communication-status/communication-status.module';
+import { LeadModule } from './modules/crm/lead/lead.module';
 import { ProcurementSubCategoryModule } from './modules/procurement/configuration/products/sub-category/sub-category.module';
 import { ProcurementBrandModule } from './modules/procurement/configuration/products/brand/brand.module';
 import { ProcurementUnitModule } from './modules/procurement/configuration/products/unit/unit.module';
@@ -343,6 +346,11 @@ import { UnitPlotModule } from './modules/projects/unit_plot/unit_plot.module';
     GrnModule,
     PartyModule,
     AccountMappingModule,
+    ProcurementLaborTypeModule,
+    ProcurementSubcontractPackageModule,
+    ProcurementDashboardModule,
+    CommunicationStatusModule,
+    LeadModule,
     ProjectBudgetModule,
     ProjectCostModule,
     ProjectProgressModule,
