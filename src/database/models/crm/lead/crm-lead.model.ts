@@ -24,8 +24,10 @@ import {
   LeadSource,
 } from './crm-lead-master-data.model';
 
+import type { LeadAttributes, LeadCreationAttributes } from '../../../types/lead.types';
+
 @Table({ tableName: 'crm_leads', timestamps: true, paranoid: true, underscored: true })
-export class Lead extends BaseModel {
+export class Lead extends BaseModel<LeadAttributes, LeadCreationAttributes> {
   @Column({ type: DataType.STRING(50), allowNull: false, field: 'lead_code' })
   declare leadCode: string;
 

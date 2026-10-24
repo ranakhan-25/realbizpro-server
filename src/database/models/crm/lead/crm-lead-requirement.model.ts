@@ -3,8 +3,10 @@ import { BaseModel } from 'src/database/base.model';
 import { LeadRequirementType } from './crm-lead-master-data.model';
 import { Lead } from './crm-lead.model';
 
+import type { LeadRequirementAttributes, LeadRequirementCreationAttributes } from '../../../types/leadrequirement.types';
+
 @Table({ tableName: 'crm_lead_requirements', timestamps: true, paranoid: true, underscored: true })
-export class LeadRequirement extends BaseModel {
+export class LeadRequirement extends BaseModel<LeadRequirementAttributes, LeadRequirementCreationAttributes> {
   @ForeignKey(() => Lead)
   @Column({ type: DataType.BIGINT, allowNull: false, field: 'lead_id' }) declare leadId: number;
   @ForeignKey(() => LeadRequirementType)

@@ -2,8 +2,10 @@ import { BelongsTo, Column, DataType, ForeignKey, Table } from 'sequelize-typesc
 import { BaseModel } from 'src/database/base.model';
 import { Lead } from './crm-lead.model';
 
+import type { LeadPropertyInterestAttributes, LeadPropertyInterestCreationAttributes } from '../../../types/leadpropertyinterest.types';
+
 @Table({ tableName: 'crm_lead_property_interests', timestamps: true, paranoid: true, underscored: true })
-export class LeadPropertyInterest extends BaseModel {
+export class LeadPropertyInterest extends BaseModel<LeadPropertyInterestAttributes, LeadPropertyInterestCreationAttributes> {
   @ForeignKey(() => Lead)
   @Column({ type: DataType.BIGINT, allowNull: false, field: 'lead_id' }) declare leadId: number;
   @Column({ type: DataType.STRING(255), allowNull: true, field: 'project_name' }) declare projectName?: string;

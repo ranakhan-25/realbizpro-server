@@ -3,8 +3,10 @@ import { BaseModel } from 'src/database/base.model';
 import { SysUser } from 'src/database/models/system/sys_user.model';
 import { Lead } from './crm-lead.model';
 
+import type { LeadTransferLogAttributes, LeadTransferLogCreationAttributes } from '../../../types/leadtransferlog.types';
+
 @Table({ tableName: 'crm_lead_transfer_logs', timestamps: true, paranoid: true, underscored: true })
-export class LeadTransferLog extends BaseModel {
+export class LeadTransferLog extends BaseModel<LeadTransferLogAttributes, LeadTransferLogCreationAttributes> {
   @ForeignKey(() => Lead)
   @Column({ type: DataType.BIGINT, allowNull: false, field: 'lead_id' }) declare leadId: number;
   @Column({ type: DataType.STRING, allowNull: false, field: 'transferred_from' }) declare transferredFrom: string;

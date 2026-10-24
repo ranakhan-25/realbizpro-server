@@ -8,13 +8,15 @@ import { BaseModel } from 'src/database/base.model';
 import { Lead } from 'src/database/models/crm/lead/crm-lead.model';
 import { CommunicationStatus } from './crm-communication-status.model';
 
+import type { LeadStageAttributes, LeadStageCreationAttributes } from '../../../types/leadstage.types';
+
 @Table({
   tableName: 'crm_lead_stages',
   timestamps: true,
   paranoid: true,
   underscored: true,
 })
-export class LeadStage extends BaseModel {
+export class LeadStage extends BaseModel<LeadStageAttributes, LeadStageCreationAttributes> {
   @Column({ type: DataType.STRING(150), allowNull: false, unique: true })
   declare name: string;
 

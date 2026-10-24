@@ -14,6 +14,7 @@ class SequelizeTypeGenerator {
     });
     // Cache for model locations with exact file paths
     this.modelLocations = new Map();
+    this.modelNameCounts = new Map();
     this.scanModelLocations();
 
     if (this.config.outputPath) {
@@ -50,16 +51,15 @@ class SequelizeTypeGenerator {
     modelFiles.forEach((filePath) => {
       // Read the file to extract the actual class name
       try {
-        const content = fs.readFileSync(
-          filePath,
-          'utf8',
-        );
-        const classMatch = content.match(
-          /export class (\w+)\s+extends/,
-        );
+        const sourceFile = this.project.addSourceFileAtPath(filePath);
+        const modelClasses = this.findModelClasses(sourceFile);
 
-        if (classMatch) {
-          const className = classMatch[1];
+        modelClasses.forEach((modelClass) => {
+          const className = modelClass.getName();
+          this.modelNameCounts.set(
+            className,
+            (this.modelNameCounts.get(className) || 0) + 1,
+          );
           this.modelLocations.set(
             className,
             filePath,
@@ -67,7 +67,7 @@ class SequelizeTypeGenerator {
           console.log(
             `📍 Found ${className} at ${filePath}`,
           );
-        }
+        });
       } catch (error) {
         console.error(
           `❌ Error reading ${filePath}:`,
@@ -95,10 +95,10 @@ class SequelizeTypeGenerator {
 
     const generatedFiles = new Set();
     modelFiles.forEach((filePath) => {
-      const generatedFile = this.processModelFile(filePath);
-      if (generatedFile) {
+      const generatedFilesForModelFile = this.processModelFile(filePath);
+      (generatedFilesForModelFile || []).forEach((generatedFile) => {
         generatedFiles.add(path.resolve(generatedFile));
-      }
+      });
     });
 
     if (this.config.outputPath) {
@@ -139,25 +139,19 @@ class SequelizeTypeGenerator {
         this.project.addSourceFileAtPath(
           filePath,
         );
-      const modelClass =
-        this.findModelClass(sourceFile);
+      const modelClasses = this.findModelClasses(sourceFile);
 
-      if (!modelClass) {
+      if (modelClasses.length === 0) {
         console.log(
           `⚠️  No model class found in ${filePath}`,
         );
-        return;
+        return [];
       }
-
-      console.log(
-        `🔧 Processing ${modelClass.getName()}...`,
-      );
-
-      const modelInfo = this.extractModelInfo(
-        modelClass,
-        sourceFile,
-      );
-      return this.generateTypeFile(modelInfo, filePath);
+      return modelClasses.map((modelClass) => {
+        console.log(`🔧 Processing ${modelClass.getName()}...`);
+        const modelInfo = this.extractModelInfo(modelClass, sourceFile);
+        return this.generateTypeFile(modelInfo, filePath);
+      });
     } catch (error) {
       console.error(
         `❌ Error processing ${filePath}:`,
@@ -166,15 +160,18 @@ class SequelizeTypeGenerator {
     }
   }
 
-  findModelClass(sourceFile) {
-    const classes = sourceFile.getClasses();
-    return classes.find((cls) => {
-      const baseClass = cls.getBaseClass();
-      return (
-        baseClass &&
-        (baseClass.getName() === 'BaseModel' ||
-          baseClass.getName() === 'Model')
-      );
+  findModelClasses(sourceFile) {
+    return sourceFile.getClasses().filter((modelClass) => {
+      if (!modelClass.isExported() || !modelClass.getDecorator('Table')) {
+        return false;
+      }
+      let baseClass = modelClass.getBaseClass();
+      while (baseClass) {
+        const name = baseClass.getName();
+        if (name === 'BaseModel' || name === 'Model') return true;
+        baseClass = baseClass.getBaseClass();
+      }
+      return false;
     });
   }
 
@@ -182,8 +179,12 @@ class SequelizeTypeGenerator {
     const properties = [];
     const relations = [];
     const className = modelClass.getName();
-    const baseClassName =
-      modelClass.getBaseClass()?.getName();
+    let baseClass = modelClass.getBaseClass();
+    let baseClassName = baseClass?.getName();
+    while (baseClass && baseClassName !== 'BaseModel' && baseClassName !== 'Model') {
+      baseClass = baseClass.getBaseClass();
+      baseClassName = baseClass?.getName();
+    }
     const enums = this.extractEnums(sourceFile);
     const importedEnums =
       this.extractImportedEnums(sourceFile);
@@ -195,8 +196,15 @@ class SequelizeTypeGenerator {
       );
 
     // Get all properties
-    const classProperties =
-      modelClass.getProperties();
+    const classHierarchy = [];
+    let currentClass = modelClass;
+    while (currentClass) {
+      classHierarchy.unshift(currentClass);
+      const parent = currentClass.getBaseClass();
+      if (!parent || parent.getName() === 'BaseModel' || parent.getName() === 'Model') break;
+      currentClass = parent;
+    }
+    const classProperties = classHierarchy.flatMap((classDeclaration) => classDeclaration.getProperties());
 
     classProperties.forEach((prop) => {
       const columnDecorator =
@@ -709,7 +717,9 @@ export interface ${className}WithRelations extends ${className}Attributes {${
 
     const outputFile = path.join(
       outputDir,
-      `${className.toLowerCase()}.types.ts`,
+      this.modelNameCounts.get(className) > 1
+        ? `${path.basename(originalFilePath, '.ts').replace(/_model$/, '')}.types.ts`
+        : `${className.toLowerCase()}.types.ts`,
     );
     fs.writeFileSync(outputFile, fileContent);
 
@@ -905,15 +915,38 @@ export interface ${className}WithRelations extends ${className}Attributes {${
         )
         .replace(/\\/g, '/')
         .replace('.ts', '');
+      const hasDisambiguatedTypesFile =
+        path.basename(typesFilePath) !== `${className.toLowerCase()}.types.ts`;
+      const typeModulePath = hasDisambiguatedTypesFile
+        ? `src/database/types/${path.basename(typesFilePath, '.ts')}`
+        : relativePath;
 
-      const importStatement = `import type { ${className}Attributes, ${className}CreationAttributes } from '${relativePath}';`;
+      const importStatement = `import type { ${className}Attributes, ${className}CreationAttributes } from '${typeModulePath}';`;
 
       const typeImportRegex = new RegExp(
         `import(?:\\s+type)?\\s+\\{[^}]*\\b${className}Attributes\\b[^}]*\\b${className}CreationAttributes\\b[^}]*\\}\\s+from\\s+['"][^'"]+['"];?`,
       );
 
-      // Check if types are already imported
-      if (typeImportRegex.test(content)) {
+      const existingTypeImport = content.match(typeImportRegex);
+      if (existingTypeImport) {
+        if (!hasDisambiguatedTypesFile) {
+          console.log(
+            `📄 Types already imported in ${filePath}`,
+          );
+          return;
+        }
+
+        const updatedTypeImport = existingTypeImport[0].replace(
+          /from\s+(['"])[^'"]+\1/,
+          `from '${typeModulePath}'`,
+        );
+        if (updatedTypeImport !== existingTypeImport[0]) {
+          content = content.replace(
+            existingTypeImport[0],
+            updatedTypeImport,
+          );
+          fs.writeFileSync(filePath, content);
+        }
         console.log(
           `📄 Types already imported in ${filePath}`,
         );

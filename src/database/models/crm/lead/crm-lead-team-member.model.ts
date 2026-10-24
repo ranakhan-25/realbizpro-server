@@ -3,8 +3,10 @@ import { BaseModel } from 'src/database/base.model';
 import { SysUser } from 'src/database/models/system/sys_user.model';
 import { LeadTeam } from './crm-lead-master-data.model';
 
+import type { LeadTeamMemberAttributes, LeadTeamMemberCreationAttributes } from '../../../types/leadteammember.types';
+
 @Table({ tableName: 'crm_team_members', timestamps: true, paranoid: true, underscored: true })
-export class LeadTeamMember extends BaseModel {
+export class LeadTeamMember extends BaseModel<LeadTeamMemberAttributes, LeadTeamMemberCreationAttributes> {
   @ForeignKey(() => LeadTeam)
   @Column({ type: DataType.BIGINT, allowNull: false, field: 'team_id' }) declare teamId: number;
 

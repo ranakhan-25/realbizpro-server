@@ -8,6 +8,8 @@ import {
 import { BaseModel } from 'src/database/base.model';
 import { LeadStage } from './crm-lead-stage.model';
 
+import type { CommunicationStatusAttributes, CommunicationStatusCreationAttributes } from '../../../types/communicationstatus.types';
+
 export enum CommunicationStatusState {
   ACTIVE = 'ACTIVE',
   INACTIVE = 'INACTIVE',
@@ -19,7 +21,7 @@ export enum CommunicationStatusState {
   paranoid: true,
   underscored: true,
 })
-export class CommunicationStatus extends BaseModel {
+export class CommunicationStatus extends BaseModel<CommunicationStatusAttributes, CommunicationStatusCreationAttributes> {
   @Column({ type: DataType.STRING(150), allowNull: false })
   declare name: string;
 

@@ -3,8 +3,10 @@ import { BaseModel } from 'src/database/base.model';
 import { SysUser } from 'src/database/models/system/sys_user.model';
 import { Lead } from './crm-lead.model';
 
+import type { LeadCallAssignmentAttributes, LeadCallAssignmentCreationAttributes } from '../../../types/leadcallassignment.types';
+
 @Table({ tableName: 'crm_lead_call_assigns', timestamps: true, paranoid: true, underscored: true })
-export class LeadCallAssignment extends BaseModel {
+export class LeadCallAssignment extends BaseModel<LeadCallAssignmentAttributes, LeadCallAssignmentCreationAttributes> {
   @ForeignKey(() => Lead)
   @Column({ type: DataType.BIGINT, allowNull: false, field: 'lead_id' }) declare leadId: number;
   @Column({ type: DataType.STRING, allowNull: false, field: 'assigned_from' }) declare assignedFrom: string;

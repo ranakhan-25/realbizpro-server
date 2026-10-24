@@ -4,8 +4,10 @@ import { SysUser } from 'src/database/models/system/sys_user.model';
 import { LeadVisitPlace, LeadVisitStatus } from './crm-lead-master-data.model';
 import { Lead } from './crm-lead.model';
 
+import type { LeadActivityAttributes, LeadActivityCreationAttributes } from '../../../types/leadactivity.types';
+
 @Table({ tableName: 'crm_lead_activities', timestamps: true, paranoid: true, underscored: true })
-export class LeadActivity extends BaseModel {
+export class LeadActivity extends BaseModel<LeadActivityAttributes, LeadActivityCreationAttributes> {
   @ForeignKey(() => Lead)
   @Column({ type: DataType.BIGINT, allowNull: false, field: 'lead_id' }) declare leadId: number;
   @Column({ type: DataType.STRING(50), allowNull: false, field: 'activity_type' }) declare activityType: string;
