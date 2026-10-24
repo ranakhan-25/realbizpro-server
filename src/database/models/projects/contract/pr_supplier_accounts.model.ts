@@ -21,6 +21,8 @@ import { ProcurementGrn } from '../../procurement/grn/pr_grn.model';
 import { ProcurementPurchaseBill } from '../../procurement/purchase-bill/pr_purchase_bill.model';
 import { ProcurementAssetPurchaseBill } from '../../procurement/purchase-bill/pr_asset_purchase_bill.model';
 import { ProcurementAssetGrn } from '../../procurement/grn/pr_asset_grn.model';
+import { ProcurementHireOrder } from '../../procurement/equipment-hire/pr_hire_order.model';
+import { ProcurementHireBill } from '../../procurement/equipment-hire/pr_hire_bill.model';
 
 export enum SupplierAccountsStatus {
   ACTIVE = 'active',
@@ -160,4 +162,6 @@ export class SupplierAccounts
   @HasMany(() => ProcurementPurchaseBill, { foreignKey: 'supplier_id', sourceKey: 'uuid', as: 'procurementPurchaseBills' }) declare procurementPurchaseBills?: ProcurementPurchaseBill[];
   @HasMany(() => ProcurementAssetGrn, { foreignKey: 'supplier_id', sourceKey: 'uuid', as: 'procurementAssetGrns' }) declare procurementAssetGrns?: ProcurementAssetGrn[];
   @HasMany(() => ProcurementAssetPurchaseBill, { foreignKey: 'supplier_id', sourceKey: 'uuid', as: 'procurementAssetPurchaseBills' }) declare procurementAssetPurchaseBills?: ProcurementAssetPurchaseBill[];
+  @HasMany(() => ProcurementHireOrder, { foreignKey: 'vendor_id', sourceKey: 'uuid', as: 'equipmentHireOrders' }) declare equipmentHireOrders?: ProcurementHireOrder[];
+  @HasMany(() => ProcurementHireBill, { foreignKey: 'vendor_id', sourceKey: 'uuid', as: 'equipmentHireBills' }) declare equipmentHireBills?: ProcurementHireBill[];
 }

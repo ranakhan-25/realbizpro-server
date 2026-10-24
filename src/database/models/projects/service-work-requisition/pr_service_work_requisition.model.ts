@@ -21,6 +21,7 @@ import { Project } from '../project/pr_project.model';
 import { Site } from '../project-site/pr_project_site.model';
 import { BillingCategory } from '../billing/pr_category.model';
 import { BillingSubCategory } from '../billing/pr_sub_category.model';
+import { ProcurementWorkOrder } from '../../procurement/work-order/pr_procurement_work_order.model';
 
 export enum ServiceWorkRequisitionStatus {
   ACTIVE = 'active',
@@ -173,6 +174,9 @@ export class ServiceWorkRequisition
     as: 'items',
   })
   declare items?: ServiceWorkRequisitionItem[];
+
+  @HasMany(() => ProcurementWorkOrder, { foreignKey: 'requisition_id', sourceKey: 'uuid', as: 'procurementWorkOrders' })
+  declare procurementWorkOrders?: ProcurementWorkOrder[];
 
   // =========================
   // AUDIT

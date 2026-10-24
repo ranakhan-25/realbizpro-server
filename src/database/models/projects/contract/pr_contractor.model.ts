@@ -3,9 +3,12 @@
 import {
   Column,
   DataType,
+  HasMany,
   Table,
 } from 'sequelize-typescript';
 import { BaseModel } from 'src/database/base.model';
+import { ProcurementWorkOrder } from '../../procurement/work-order/pr_procurement_work_order.model';
+import { ProcurementWorkBill } from '../../procurement/work-order/pr_work_bill.model';
 
 import {
   ContractorAttributes,
@@ -129,4 +132,9 @@ export class Contractor
     defaultValue: ContractorStatus.ACTIVE,
   })
   declare status: ContractorStatus;
+
+  @HasMany(() => ProcurementWorkOrder, { foreignKey: 'subcontractor_id', sourceKey: 'uuid', as: 'procurementWorkOrders' })
+  declare procurementWorkOrders?: ProcurementWorkOrder[];
+  @HasMany(() => ProcurementWorkBill, { foreignKey: 'vendor_id', sourceKey: 'uuid', as: 'procurementWorkBills' })
+  declare procurementWorkBills?: ProcurementWorkBill[];
 }

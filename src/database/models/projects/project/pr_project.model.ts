@@ -37,6 +37,12 @@ import { ProcurementGrn } from '../../procurement/grn/pr_grn.model';
 import { ProcurementAssetGrn } from '../../procurement/grn/pr_asset_grn.model';
 import { ProcurementPurchaseBill } from '../../procurement/purchase-bill/pr_purchase_bill.model';
 import { ProcurementAssetPurchaseBill } from '../../procurement/purchase-bill/pr_asset_purchase_bill.model';
+import { ProcurementBoq } from '../../procurement/boq/pr_procurement_boq.model';
+import { ProcurementWorkOrder } from '../../procurement/work-order/pr_procurement_work_order.model';
+import { ProcurementWorkOrderMeasurement } from '../../procurement/work-order/pr_work_order_measurement.model';
+import { ProcurementWorkBill } from '../../procurement/work-order/pr_work_bill.model';
+import { ProcurementHireOrder } from '../../procurement/equipment-hire/pr_hire_order.model';
+import { ProcurementHireBill } from '../../procurement/equipment-hire/pr_hire_bill.model';
 
 export enum ProjectStatus {
   ACTIVE = 'ACTIVE',
@@ -350,6 +356,30 @@ export class Project
     as: 'procurementAssetPurchaseBills',
   })
   declare procurementAssetPurchaseBills?: ProcurementAssetPurchaseBill[];
+  @HasMany(() => ProcurementBoq, {
+    foreignKey: 'project_id',
+    sourceKey: 'uuid',
+    as: 'procurementBoqs',
+  })
+  declare procurementBoqs?: ProcurementBoq[];
+  @HasMany(() => ProcurementWorkOrder, { foreignKey: 'project_id', sourceKey: 'uuid', as: 'procurementWorkOrders' })
+  declare procurementWorkOrders?: ProcurementWorkOrder[];
+  @HasMany(() => ProcurementWorkOrderMeasurement, { foreignKey: 'project_id', sourceKey: 'uuid', as: 'procurementWorkOrderMeasurements' })
+  declare procurementWorkOrderMeasurements?: ProcurementWorkOrderMeasurement[];
+  @HasMany(() => ProcurementWorkBill, { foreignKey: 'project_id', sourceKey: 'uuid', as: 'procurementWorkBills' })
+  declare procurementWorkBills?: ProcurementWorkBill[];
+  @HasMany(() => ProcurementHireOrder, {
+    foreignKey: 'project_id',
+    sourceKey: 'uuid',
+    as: 'equipmentHireOrders',
+  })
+  declare equipmentHireOrders?: ProcurementHireOrder[];
+  @HasMany(() => ProcurementHireBill, {
+    foreignKey: 'project_id',
+    sourceKey: 'uuid',
+    as: 'equipmentHireBills',
+  })
+  declare equipmentHireBills?: ProcurementHireBill[];
 
   @Column({
     type: DataType.STRING,

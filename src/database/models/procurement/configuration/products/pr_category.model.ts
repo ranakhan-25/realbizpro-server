@@ -20,6 +20,7 @@ import { ProcurementGrn } from '../../grn/pr_grn.model';
 import { ProcurementRfq } from '../../rfq/pr_rfq.model';
 import { ProcurementPurchaseOrder } from '../../purchase-order/pr_purchase_order.model';
 import { ProcurementMaterialRequisition } from '../../requisition/pr_material_requisition.model';
+import { ProcurementBoqItem } from '../../boq/pr_procurement_boq_item.model';
 
 @Table({
   tableName: 'pr_category',
@@ -95,6 +96,7 @@ export class Category
 
   @HasMany(() => ProcurementMaterialRequisition, { foreignKey: 'category_id', sourceKey: 'uuid', as: 'materialRequisitions' })
   declare materialRequisitions?: ProcurementMaterialRequisition[];
+  @HasMany(() => ProcurementBoqItem, { foreignKey: 'category_id', sourceKey: 'uuid', as: 'procurementBoqItems' }) declare procurementBoqItems?: ProcurementBoqItem[];
 
   @Column({
     type: DataType.STRING,

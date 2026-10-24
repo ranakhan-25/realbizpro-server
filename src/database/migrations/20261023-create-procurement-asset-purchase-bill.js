@@ -1,6 +1,9 @@
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.addColumn('pr_asset_grn', 'already_billed', { type: Sequelize.BOOLEAN, allowNull: false, defaultValue: false });
+    const grnColumns = await queryInterface.describeTable('pr_asset_grn');
+    if (!grnColumns.already_billed) {
+      await queryInterface.addColumn('pr_asset_grn', 'already_billed', { type: Sequelize.BOOLEAN, allowNull: false, defaultValue: false });
+    }
     await queryInterface.createTable('pr_asset_purchase_bill', {
       id: { type: Sequelize.BIGINT, allowNull: false, autoIncrement: true, primaryKey: true }, uuid: { type: Sequelize.UUID, allowNull: false, unique: true },
       date: { type: Sequelize.DATEONLY, allowNull: false }, code: { type: Sequelize.STRING(50), allowNull: false, unique: true },

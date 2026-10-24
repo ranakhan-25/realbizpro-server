@@ -19,6 +19,12 @@ import type { ProcurementGrn } from '../models/procurement/grn/pr_grn.model';
 import type { ProcurementPurchaseBill } from '../models/procurement/purchase-bill/pr_purchase_bill.model';
 import type { ProcurementAssetGrn } from '../models/procurement/grn/pr_asset_grn.model';
 import type { ProcurementAssetPurchaseBill } from '../models/procurement/purchase-bill/pr_asset_purchase_bill.model';
+import type { ProcurementBoq } from '../models/procurement/boq/pr_procurement_boq.model';
+import type { ProcurementHireOrder } from '../models/procurement/equipment-hire/pr_hire_order.model';
+import type { ProcurementHireIn } from '../models/procurement/equipment-hire/pr_hire_in.model';
+import type { ProcurementHireOut } from '../models/procurement/equipment-hire/pr_hire_out.model';
+import type { ProcurementHireBill } from '../models/procurement/equipment-hire/pr_hire_bill.model';
+import type { ProcurementMaterialIssue } from '../models/procurement/material-issue/pr_material_issue.model';
 
 export interface SysUserAttributes {
   id: number;
@@ -73,6 +79,14 @@ export interface SysUserAttributes {
   procurementPurchaseBills?: ProcurementPurchaseBill[];
   procurementAssetGrns?: ProcurementAssetGrn[];
   procurementAssetPurchaseBills?: ProcurementAssetPurchaseBill[];
+  responsibleProcurementBoqs?: ProcurementBoq[];
+  createdProcurementBoqs?: ProcurementBoq[];
+  createdEquipmentHireOrders?: ProcurementHireOrder[];
+  equipmentHireIns?: ProcurementHireIn[];
+  equipmentHireOuts?: ProcurementHireOut[];
+  equipmentHireBills?: ProcurementHireBill[];
+  procurementMaterialIssues?: ProcurementMaterialIssue[];
+  createdProcurementMaterialIssues?: ProcurementMaterialIssue[];
 }
 
 export interface SysUserCreationAttributes {
@@ -127,4 +141,12 @@ export interface SysUserWithRelations extends SysUserAttributes {
   procurementPurchaseBills?: ProcurementPurchaseBill[];
   procurementAssetGrns?: ProcurementAssetGrn[];
   procurementAssetPurchaseBills?: ProcurementAssetPurchaseBill[];
+  responsibleProcurementBoqs?: ProcurementBoq[];
+  createdProcurementBoqs?: ProcurementBoq[];
+  createdEquipmentHireOrders?: ProcurementHireOrder[];
+  equipmentHireIns?: ProcurementHireIn[];
+  equipmentHireOuts?: ProcurementHireOut[];
+  equipmentHireBills?: ProcurementHireBill[];
+  procurementMaterialIssues?: ProcurementMaterialIssue[];
+  createdProcurementMaterialIssues?: ProcurementMaterialIssue[];
 }

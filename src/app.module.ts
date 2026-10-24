@@ -80,7 +80,6 @@ import { BoqComparisonModule } from './modules/projects/boqcomparison/boqcompari
 import { DetailsModule } from './modules/projects/details/details.module';
 import { SysDivisionModule } from './modules/system/sys-division/sys-division.module';
 import { QuotationModule } from './modules/projects/quotation/quotation.module';
-import { CrmModule } from './modules/crm/crm.module';
 import { CreditRealizationModule } from './modules/credit-realization/credit-realization.module';
 import { DepartmentModule } from './modules/hrm/employee/department/department.module';
 import { DesignationModule } from './modules/hrm/employee/designation/designation.module';
@@ -118,14 +117,19 @@ import { UnderModule } from './modules/hrm/employee/employee list/under/under.mo
 import { EmployeeHierarchyModule } from './modules/hrm/employee/employee-hierarchy/employee-hierarchy.module';
 import { EmployeeCardModule } from './modules/hrm/employee/employee-card/employee-card.module';
 import { IncrementModule } from './modules/hrm/employee/increment/increment.module';
+
 import { CategoryModule as ProcurementCategoryModule } from './modules/procurement/configuration/products/category/category.module';
 import { AccountMappingModule } from './modules/procurement/configuration/products/account-mapping/account-mapping.module';
+import { ProcurementLaborTypeModule } from './modules/procurement/configuration/labor-type/labor-type.module';
+import { ProcurementSubcontractPackageModule } from './modules/procurement/configuration/subcontract-package/subcontract-package.module';
+import { ProcurementDashboardModule } from './modules/procurement/dashboard/procurement-dashboard.module';
 import { ProcurementSubCategoryModule } from './modules/procurement/configuration/products/sub-category/sub-category.module';
 import { ProcurementBrandModule } from './modules/procurement/configuration/products/brand/brand.module';
 import { ProcurementUnitModule } from './modules/procurement/configuration/products/unit/unit.module';
 import { ProcurementItemEntryModule } from './modules/procurement/configuration/products/item-entry/item-entry.module';
 import { ProcurementAssetCategoryModule } from './modules/procurement/configuration/asset/asset-category/asset-category.module';
 import { ProcurementAssetItemEntryModule } from './modules/procurement/configuration/asset/asset-item-entry/asset-item-entry.module';
+
 import { RfqModule } from './modules/procurement/rfq/rfq.module';
 import { AssetRfqModule } from './modules/procurement/rfq/asset/asset-rfq.module';
 import { ProcurementMaterialRequisitionModule } from './modules/procurement/requisition/material-requisition/procurement-material-requisition.module';
@@ -133,6 +137,8 @@ import { AssetRequisitionModule } from './modules/procurement/requisition/asset-
 import { PurchaseOrderModule } from './modules/procurement/purchase-order/purchase-order.module';
 import { AssetPurchaseOrderModule } from './modules/procurement/purchase-order/asset/asset-purchase-order.module';
 import { GrnModule } from './modules/procurement/grn/grn.module';
+import { PartyModule } from './modules/procurement/parties/party.module';
+
 import { SalaryGradeModule } from './modules/hrm/employee/employee list/salary-grade/salary-grade.module';
 import { AttendanceReconciliationModule } from './modules/hrm/attendance/attendance-reconciliation/attendance-reconciliation.module';
 import { AllowanceDeductionSetupModule } from './modules/hrm/configuration/allowance-deduction-setup/allowance-deduction-setup.module';
@@ -289,7 +295,6 @@ import { UnitPlotModule } from './modules/projects/unit_plot/unit_plot.module';
     ProjectShareAssignmentModule,
 
     LamsModule,
-    CrmModule,
     CreditRealizationModule,
     DepartmentModule,
     DesignationModule,
@@ -336,6 +341,7 @@ import { UnitPlotModule } from './modules/projects/unit_plot/unit_plot.module';
     PurchaseOrderModule,
     AssetPurchaseOrderModule,
     GrnModule,
+    PartyModule,
     AccountMappingModule,
     ProjectBudgetModule,
     ProjectCostModule,
