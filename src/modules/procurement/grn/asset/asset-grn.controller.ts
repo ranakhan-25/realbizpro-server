@@ -15,5 +15,6 @@ export class AssetGrnController {
   @Get(':uuid') @ApiOperation({ summary: 'View one Asset GRN with related records and lines' }) findOne(@Param('uuid') uuid: string) { return this.service.findOne(uuid); }
   @Post() @ApiOperation({ summary: 'Create an Asset GRN' }) create(@Body() dto: CreateAssetGrnDto, @Req() req: any) { return this.service.create(dto, req.user?.id ?? req.user?.uuid); }
   @Patch(':uuid') @ApiOperation({ summary: 'Update an Asset GRN' }) update(@Param('uuid') uuid: string, @Body() dto: UpdateAssetGrnDto, @Req() req: any) { return this.service.update(uuid, dto, req.user?.id ?? req.user?.uuid); }
+  @Patch(':uuid/restore') @ApiOperation({ summary: 'Restore a soft-deleted Asset GRN by UUID' }) restore(@Param('uuid') uuid: string) { return this.service.restore(uuid); }
   @Delete(':uuid') @ApiOperation({ summary: 'Soft-delete an Asset GRN' }) remove(@Param('uuid') uuid: string, @Req() req: any) { return this.service.remove(uuid, req.user?.id ?? req.user?.uuid); }
 }

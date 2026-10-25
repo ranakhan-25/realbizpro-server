@@ -129,6 +129,21 @@ import { ProcurementSubcontractPackageModule } from './modules/procurement/confi
 import { ProcurementDashboardModule } from './modules/procurement/dashboard/procurement-dashboard.module';
 import { CommunicationStatusModule } from './modules/crm/configuration/communication-status/communication-status.module';
 import { LeadModule } from './modules/crm/lead/lead.module';
+import { TeamModule } from './modules/crm/configuration/teams/team.module';
+import { LeadCategoryModule } from './modules/crm/configuration/lead-category/lead-category.module';
+import { CampaignModule } from './modules/crm/configuration/campaigns/campaign.module';
+import { ProfessionModule } from './modules/crm/configuration/professions/profession.module';
+import { LeadSourceModule } from './modules/crm/configuration/lead-sources/lead-source.module';
+import { AreaModule } from './modules/crm/configuration/areas/area.module';
+import { LeadStageModule } from './modules/crm/configuration/lead-stages/lead-stage.module';
+import { CrmProjectModule } from './modules/crm/project/crm-project.module';
+import { PriceRangeModule } from './modules/crm/configuration/price-ranges/price-range.module';
+import { OfferModule } from './modules/crm/configuration/offers/offer.module';
+import { RequirementTypeModule } from './modules/crm/configuration/requirement-types/requirement-type.module';
+import { VisitPlaceModule } from './modules/crm/configuration/visit-places/visit-place.module';
+import { VisitStatusModule } from './modules/crm/configuration/visit-statuses/visit-status.module';
+import { TaskTypeModule } from './modules/crm/configuration/task-types/task-type.module';
+import { InternalTaskModule } from './modules/crm/internal-tasks/internal-task.module';
 import { ProcurementSubCategoryModule } from './modules/procurement/configuration/products/sub-category/sub-category.module';
 import { ProcurementBrandModule } from './modules/procurement/configuration/products/brand/brand.module';
 import { ProcurementUnitModule } from './modules/procurement/configuration/products/unit/unit.module';
@@ -356,6 +371,21 @@ import { UnitPlotModule } from './modules/projects/unit_plot/unit_plot.module';
     ProcurementSubcontractPackageModule,
     ProcurementDashboardModule,
     CommunicationStatusModule,
+    TeamModule,
+    LeadCategoryModule,
+    CampaignModule,
+    ProfessionModule,
+    LeadSourceModule,
+    AreaModule,
+    LeadStageModule,
+    CrmProjectModule,
+    PriceRangeModule,
+    OfferModule,
+    RequirementTypeModule,
+    VisitPlaceModule,
+    VisitStatusModule,
+    TaskTypeModule,
+    InternalTaskModule,
     LeadModule,
     ProjectBudgetModule,
     ProjectCostModule,

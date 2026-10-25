@@ -9,6 +9,7 @@ import {
 import { BaseModel } from 'src/database/base.model';
 import { SysUser } from 'src/database/models/system/sys_user.model';
 import { LeadStage } from 'src/database/models/crm/configuration/crm-lead-stage.model';
+import { CrmOffer } from 'src/database/models/crm/configuration/crm-offer.model';
 import { LeadActivity } from './crm-lead-activity.model';
 import { LeadAttachment } from './crm-lead-attachment.model';
 import { LeadCallAssignment } from './crm-lead-call-assignment.model';
@@ -62,6 +63,10 @@ export class Lead extends BaseModel<LeadAttributes, LeadCreationAttributes> {
   @ForeignKey(() => LeadProfession)
   @Column({ type: DataType.BIGINT, allowNull: true, field: 'profession_id' })
   declare professionId?: number;
+
+  @ForeignKey(() => CrmOffer)
+  @Column({ type: DataType.BIGINT, allowNull: true, field: 'offer_id' })
+  declare offerId?: number;
 
   @Column({ type: DataType.STRING(150), allowNull: true })
   declare designation?: string;
@@ -145,6 +150,9 @@ export class Lead extends BaseModel<LeadAttributes, LeadCreationAttributes> {
 
   @BelongsTo(() => LeadProfession, { foreignKey: 'professionId', targetKey: 'id', as: 'profession' })
   declare profession?: LeadProfession;
+
+  @BelongsTo(() => CrmOffer, { foreignKey: 'offerId', targetKey: 'id', as: 'offer' })
+  declare offer?: CrmOffer;
 
   @BelongsTo(() => LeadArea, { foreignKey: 'areaId', targetKey: 'id', as: 'area' })
   declare area?: LeadArea;

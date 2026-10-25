@@ -1,8 +1,11 @@
 // Auto-generated types for Project
-// Source: src/database/models/projects/project/pr_project.model.ts
+// Source: src\database\models\projects\project\pr_project.model.ts
 
 import { ProjectStatus } from '../models/projects/project/pr_project.model';
 
+import type { ProjectType } from '../models/projects/project-type/pr_project_type.model';
+import type { LeadArea } from '../models/crm/lead/crm-lead-master-data.model';
+import type { SysUser } from '../models/system/sys_user.model';
 import type { Site } from '../models/projects/project-site/pr_project_site.model';
 import type { ShareConfiguration } from '../models/projects/investor/configuration.model';
 import type { MaterialRequisition } from '../models/projects/material-requisition/pr_material_requisition.model';
@@ -63,6 +66,9 @@ export interface ProjectAttributes {
   deletedBy?: string | null;
 
   // Relations
+  type?: ProjectType;
+  area?: LeadArea;
+  manager?: SysUser;
   sites?: Site[];
   shareConfigurations?: ShareConfiguration[];
   materialRequisitions?: MaterialRequisition[];
@@ -123,6 +129,9 @@ export type ProjectUpdateAttributes = Partial<ProjectCreationAttributes>;
 
 // Helper type for including relations
 export interface ProjectWithRelations extends ProjectAttributes {
+  type?: ProjectType;
+  area?: LeadArea;
+  manager?: SysUser;
   sites?: Site[];
   shareConfigurations?: ShareConfiguration[];
   materialRequisitions?: MaterialRequisition[];

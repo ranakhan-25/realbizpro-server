@@ -18,21 +18,6 @@ import { ProcurementAssetGrnItem } from 'src/database/models/procurement/grn/pr_
 import { AssetGrnItemDto, CreateAssetGrnDto, UpdateAssetGrnDto } from './dto/asset-grn.dto';
 import { QueryAssetGrnDto } from './dto/query-asset-grn.dto';
 
-const include = [
-  { model: SupplierAccounts, as: 'supplier', attributes: ['uuid', 'supplierCode', 'supplierName'] },
-  { model: ProjectType, as: 'projectType', attributes: ['uuid', 'code', 'name'], required: false },
-  { model: Project, as: 'project', attributes: ['uuid', 'code', 'name'], required: false },
-  { model: BillingCategory, as: 'titleOfWork', attributes: ['uuid', 'code', 'name'], required: false },
-  { model: Task, as: 'task', attributes: ['uuid', 'taskName'], required: false },
-  { model: Site, as: 'site', attributes: ['uuid', 'code', 'name'], required: false },
-  { model: ProcurementAssetCategory, as: 'category', attributes: ['uuid', 'code', 'name'], required: false },
-  { model: SysUser, as: 'addedBy', attributes: ['id', 'name'], required: false },
-  { model: ProcurementAssetGrnItem, as: 'items', include: [
-    { model: ProcurementAssetItemEntry, as: 'item', attributes: ['uuid', 'item_code', 'name'], required: false },
-    { model: ProcurementUnit, as: 'unitRelation', attributes: ['uuid', 'code', 'name'], required: false },
-  ] },
-];
-
 @Injectable()
 export class AssetGrnService {
   constructor(
@@ -50,6 +35,27 @@ export class AssetGrnService {
     @InjectModel(ProcurementUnit) private readonly unitModel: typeof ProcurementUnit,
     @InjectModel(CategoryAccountMapping) private readonly accountMappingModel: typeof CategoryAccountMapping,
   ) {}
+
+  private get relationIncludes() {
+    return [
+      { model: this.supplierModel, as: 'supplier', attributes: ['uuid', 'supplierCode', 'supplierName'] },
+      { model: this.projectTypeModel, as: 'projectType', attributes: ['uuid', 'code', 'name'], required: false },
+      { model: this.projectModel, as: 'project', attributes: ['uuid', 'code', 'name'], required: false },
+      { model: this.workModel, as: 'titleOfWork', attributes: ['uuid', 'code', 'name'], required: false },
+      { model: this.taskModel, as: 'task', attributes: ['uuid', 'taskName'], required: false },
+      { model: this.siteModel, as: 'site', attributes: ['uuid', 'code', 'name'], required: false },
+      { model: this.categoryModel, as: 'category', attributes: ['uuid', 'code', 'name'], required: false },
+      { model: this.userModel, as: 'addedBy', attributes: ['id', 'name'], required: false },
+      {
+        model: this.lineModel,
+        as: 'items',
+        include: [
+          { model: this.itemModel, as: 'item', attributes: ['uuid', 'item_code', 'name'], required: false },
+          { model: this.unitModel, as: 'unitRelation', attributes: ['uuid', 'code', 'name'], required: false },
+        ],
+      },
+    ];
+  }
 
   private async validateRelations(dto: Partial<CreateAssetGrnDto & UpdateAssetGrnDto>) {
     const relations: Array<[keyof CreateAssetGrnDto, any, string]> = [
@@ -70,7 +76,7 @@ export class AssetGrnService {
     const lines: any[] = [];
     for (const input of inputs) {
       const item = input.item_id
-        ? await this.itemModel.findOne({ where: { uuid: input.item_id } as any, include: [{ model: ProcurementUnit, as: 'unit' }], transaction })
+        ? await this.itemModel.findOne({ where: { uuid: input.item_id } as any, include: [{ model: this.unitModel, as: 'unit' }], transaction })
         : null;
       if (input.item_id && !item) throw new BadRequestException(`Selected asset item ${input.item_id} does not exist`);
       if (categoryId && item && item.category_id !== categoryId) throw new BadRequestException(`Asset item ${item.item_code} does not belong to selected category`);
@@ -105,12 +111,12 @@ export class AssetGrnService {
     else if (date_from) where.date = { [Op.gte]: date_from };
     else if (date_to) where.date = { [Op.lte]: date_to };
     if (search) where[Op.or] = [{ code: { [Op.like]: `%${search}%` } }, { reference: { [Op.like]: `%${search}%` } }, { ledger_name: { [Op.like]: `%${search}%` } }];
-    const { rows, count } = await this.grnModel.findAndCountAll({ where, include, distinct: true, limit, offset: (page - 1) * limit, order: [['createdAt', 'DESC']] });
+    const { rows, count } = await this.grnModel.findAndCountAll({ where, include: this.relationIncludes, distinct: true, limit, offset: (page - 1) * limit, order: [['createdAt', 'DESC']] });
     return { data: rows, meta: { total: count, page, limit, totalPages: Math.ceil(count / limit) || 1 } };
   }
 
   async findOne(uuid: string, transaction?: Transaction) {
-    const grn = await this.grnModel.findOne({ where: { uuid } as any, include, transaction });
+    const grn = await this.grnModel.findOne({ where: { uuid } as any, include: this.relationIncludes, transaction });
     if (!grn) throw new NotFoundException(`Asset GRN ${uuid} not found`);
     return grn;
   }
@@ -183,6 +189,13 @@ export class AssetGrnService {
     return { message: `Asset GRN ${uuid} deleted successfully` };
   }
 
+  async restore(uuid: string) {
+    const grn = await this.grnModel.findOne({ where: { uuid } as any, paranoid: false });
+    if (!grn || !grn.deletedAt) throw new NotFoundException(`Deleted Asset GRN ${uuid} not found`);
+    await grn.restore();
+    return this.findOne(uuid);
+  }
+
   async dropdowns(projectId?: string, categoryId?: string) {
     const [suppliers, projectTypes, projects, titleOfWorks, tasks, sites, categories, items, units, users, accountMappings] = await Promise.all([
       this.supplierModel.findAll({ attributes: ['uuid', 'supplierCode', 'supplierName'], order: [['supplierName', 'ASC']] }),
@@ -192,7 +205,7 @@ export class AssetGrnService {
       this.taskModel.findAll({ attributes: ['uuid', 'uid', 'taskName'], order: [['taskName', 'ASC']] }),
       this.siteModel.findAll({ where: projectId ? { projectId } as any : {}, attributes: ['uuid', 'projectId', 'code', 'name'], order: [['name', 'ASC']] }),
       this.categoryModel.findAll({ attributes: ['uuid', 'code', 'name'], order: [['name', 'ASC']] }),
-      this.itemModel.findAll({ where: categoryId ? { category_id: categoryId } as any : {}, attributes: ['uuid', 'category_id', 'unit_id', 'item_code', 'name', 'purchase_price'], include: [{ model: ProcurementUnit, as: 'unit', attributes: ['uuid', 'code', 'name'] }], order: [['name', 'ASC']] }),
+      this.itemModel.findAll({ where: categoryId ? { category_id: categoryId } as any : {}, attributes: ['uuid', 'category_id', 'unit_id', 'item_code', 'name', 'purchase_price'], include: [{ model: this.unitModel, as: 'unit', attributes: ['uuid', 'code', 'name'] }], order: [['name', 'ASC']] }),
       this.unitModel.findAll({ attributes: ['uuid', 'code', 'name'], order: [['name', 'ASC']] }),
       this.userModel.findAll({ attributes: ['id', 'name'], order: [['name', 'ASC']] }),
       this.accountMappingModel.findAll({ attributes: ['uuid', 'categoryId', 'inventoryAccountType', 'inventoryAccountGroupCode', 'existingInventoryAccountId', 'consumptionAccountType', 'consumptionAccountGroupCode', 'existingConsumptionAccountId'] }),

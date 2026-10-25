@@ -1,5 +1,5 @@
 // Auto-generated types for ShareConfiguration
-// Source: src/database/models/projects/investor/configuration.model.ts
+// Source: src\database\models\projects\investor\configuration.model.ts
 
 import { ShareConfigurationStatus } from '../models/projects/investor/configuration.model';
 

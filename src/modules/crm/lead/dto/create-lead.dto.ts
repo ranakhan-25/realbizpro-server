@@ -14,6 +14,7 @@ export class CreateLeadDto {
   @ApiPropertyOptional() @IsOptional() @Type(() => Number) @IsInt() @Min(1) declare leadSourceId?: number;
   @ApiPropertyOptional() @IsOptional() @Type(() => Number) @IsInt() @Min(1) declare campaignId?: number;
   @ApiPropertyOptional() @IsOptional() @Type(() => Number) @IsInt() @Min(1) declare professionId?: number;
+  @ApiPropertyOptional({ description: 'Offer UUID associated with this lead' }) @IsOptional() @IsString() declare offerUuid?: string;
   @ApiPropertyOptional() @IsOptional() @Type(() => Number) @IsInt() @Min(1) declare areaId?: number;
   @ApiPropertyOptional() @IsOptional() @Type(() => Number) @IsInt() @Min(1) declare priceRangeId?: number;
   @ApiPropertyOptional() @IsOptional() @IsString() declare assignedTo?: string;

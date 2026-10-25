@@ -1,5 +1,5 @@
 // Auto-generated types for CustomerAccount
-// Source: src/database/models/projects/contract/pr_customer_accounts.model.ts
+// Source: src\database\models\projects\contract\pr_customer_accounts.model.ts
 
 import { CustomerAccountStatus } from '../models/projects/contract/pr_customer_accounts.model';
 

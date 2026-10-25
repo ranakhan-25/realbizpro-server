@@ -5,6 +5,7 @@ import { Lead } from './crm-lead.model';
 import { LeadTeamMember } from './crm-lead-team-member.model';
 import { LeadActivity } from './crm-lead-activity.model';
 import { LeadRequirement } from './crm-lead-requirement.model';
+import { Project } from 'src/database/models/projects/project/pr_project.model';
 
 abstract class LeadMasterModel extends BaseModel {
   @Column({ type: DataType.STRING, allowNull: true, field: 'created_by' }) declare createdBy?: string;
@@ -28,23 +29,29 @@ export class LeadSource extends LeadMasterModel {
   @Column({ type: DataType.STRING(100), allowNull: true }) declare code?: string;
   @Column({ type: DataType.BOOLEAN, allowNull: true, defaultValue: true, field: 'is_active' }) declare isActive?: boolean;
   @HasMany(() => Lead, { foreignKey: 'leadSourceId', sourceKey: 'id', as: 'leads' }) declare leads?: Lead[];
+  @HasMany(() => LeadCampaign, { foreignKey: 'leadSourceId', sourceKey: 'id', as: 'campaigns' }) declare campaigns?: LeadCampaign[];
 }
 
 @Table({ tableName: 'crm_campaigns', timestamps: true, paranoid: true, underscored: true })
 export class LeadCampaign extends LeadMasterModel {
   @Column({ type: DataType.STRING(200), allowNull: false }) declare name: string;
+  @ForeignKey(() => LeadSource)
+  @Column({ type: DataType.BIGINT, allowNull: true, field: 'lead_source_id' }) declare leadSourceId?: number;
   @Column({ type: DataType.DATEONLY, allowNull: true, field: 'start_date' }) declare startDate?: string;
   @Column({ type: DataType.DATEONLY, allowNull: true, field: 'end_date' }) declare endDate?: string;
   @Column({ type: DataType.DECIMAL(15, 2), allowNull: true }) declare budget?: number;
   @Column({ type: DataType.STRING(100), allowNull: true }) declare channel?: string;
   @Column({ type: DataType.STRING(50), allowNull: true }) declare status?: string;
   @Column({ type: DataType.TEXT, allowNull: true }) declare description?: string;
+  @Column({ type: DataType.STRING(150), allowNull: true, field: 'form_id' }) declare formId?: string;
+  @BelongsTo(() => LeadSource, { foreignKey: 'leadSourceId', targetKey: 'id', as: 'leadSource' }) declare leadSource?: LeadSource;
   @HasMany(() => Lead, { foreignKey: 'campaignId', sourceKey: 'id', as: 'leads' }) declare leads?: Lead[];
 }
 
 @Table({ tableName: 'crm_professions', timestamps: true, paranoid: true, underscored: true })
 export class LeadProfession extends LeadMasterModel {
   @Column({ type: DataType.STRING(150), allowNull: false }) declare name: string;
+  @Column({ type: DataType.STRING(50), allowNull: false, defaultValue: 'active' }) declare status: string;
   @Column({ type: DataType.TEXT, allowNull: true }) declare description?: string;
   @HasMany(() => Lead, { foreignKey: 'professionId', sourceKey: 'id', as: 'leads' }) declare leads?: Lead[];
 }
@@ -55,6 +62,7 @@ export class LeadArea extends LeadMasterModel {
   @Column({ type: DataType.STRING(150), allowNull: true }) declare city?: string;
   @Column({ type: DataType.STRING(150), allowNull: true }) declare zone?: string;
   @HasMany(() => Lead, { foreignKey: 'areaId', sourceKey: 'id', as: 'leads' }) declare leads?: Lead[];
+  @HasMany(() => Project, { foreignKey: 'areaCategory', sourceKey: 'uuid', as: 'projects' }) declare projects?: Project[];
 }
 
 @Table({ tableName: 'crm_price_ranges', timestamps: true, paranoid: true, underscored: true })

@@ -1,5 +1,5 @@
 // Auto-generated types for ProjectTeamMember
-// Source: src/database/models/projects/project-team-member/pr_project_team_member.model.ts
+// Source: src\database\models\projects\project-team-member\pr_project_team_member.model.ts
 
 import type { Project } from '../models/projects/project/pr_project.model';
 
