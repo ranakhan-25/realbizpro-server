@@ -41,6 +41,14 @@ const toNumberArray = ({
 };
 
 export class CreateUserDto {
+  @ApiPropertyOptional({
+    description: 'User full name',
+    example: 'John Doe',
+  })
+  @IsOptional()
+  @IsString()
+  name?: string;
+
   @ApiProperty({
     description: 'User email address',
     example: 'user@example.com',
@@ -82,13 +90,13 @@ export class CreateUserDto {
     required: false,
   })
   @IsOptional()
+  @Transform(({ value }) =>
+    value === '' || value === null ? undefined : typeof value === 'string' ? value.trim() : value,
+  )
   @IsBangladeshPhone({
     message:
       'Please provide a valid Bangladesh phone number',
   })
-  @Transform(({ value }) =>
-    value === '' ? null : value,
-  )
   @IsString({
     message: 'Phone number must be a string',
   })
@@ -101,7 +109,7 @@ export class CreateUserDto {
   })
   @IsOptional()
   @Transform(({ value }) =>
-    value === '' ? null : value,
+    value === '' || value === null ? undefined : typeof value === 'string' ? value.trim() : value,
   )
   @IsString({
     message: 'Username must be a string',
@@ -189,9 +197,13 @@ export class CreateUserDto {
     description: 'Type of the user',
     example: UserTypeEnum.OFFICE,
     enum: UserTypeEnum,
-    default: UserTypeEnum.SHOWROOM,
+    default: UserTypeEnum.OFFICE,
   })
   @IsOptional()
+  @Transform(({ value }) => {
+    if (!value || value === 'system' || value === '') return UserTypeEnum.OFFICE;
+    return value;
+  })
   @IsEnum(UserTypeEnum)
   userType?: UserTypeEnum;
 

@@ -1006,6 +1006,21 @@ export class UsersService {
         }
       }
 
+      // Resolve orgId and orgUuid from creator if present
+      let orgId = (createUserDto as any).orgId;
+      let orgUuid = (createUserDto as any).orgUuid;
+
+      if (!orgId && createdById) {
+        const creator = await this.userModel.findByPk(createdById, {
+          attributes: ['id', 'orgId', 'orgUuid'],
+          transaction,
+        });
+        if (creator?.orgId) {
+          orgId = creator.orgId;
+          orgUuid = creator.orgUuid;
+        }
+      }
+
       // Hash password
       const passwordHash = await argon2.hash(
         createUserDto.password,
@@ -1029,6 +1044,8 @@ export class UsersService {
             createUserDto.isActive ?? true,
           createdById,
           isSuperUser: false,
+          orgId,
+          orgUuid,
           userType: createUserDto.userType,
           designationId:
             createUserDto.designationId,
@@ -1067,13 +1084,17 @@ export class UsersService {
       );
 
       return {
+        id: newUser.id,
         uuid: newUser.uuid,
+        name: newUser.name,
         email: newUser.email,
         firstName: newUser.firstName,
         lastName: newUser.lastName,
         username: newUser.username,
         userType: newUser.userType,
         isActive: newUser.isActive,
+        orgId: newUser.orgId,
+        orgUuid: newUser.orgUuid,
         message: 'User created successfully',
       };
     } catch (error: any) {
