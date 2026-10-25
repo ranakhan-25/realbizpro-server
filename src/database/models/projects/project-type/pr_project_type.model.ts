@@ -24,6 +24,7 @@ import { ProcurementGrn } from '../../procurement/grn/pr_grn.model';
 import { ProcurementPurchaseBill } from '../../procurement/purchase-bill/pr_purchase_bill.model';
 import { ProcurementAssetPurchaseBill } from '../../procurement/purchase-bill/pr_asset_purchase_bill.model';
 import { ProcurementAssetGrn } from '../../procurement/grn/pr_asset_grn.model';
+import { Project } from '../project/pr_project.model';
 
 @Table({
   tableName: 'project_types',
@@ -64,6 +65,9 @@ export class ProjectType
     as: 'invoices',
   })
   declare invoices?: Invoice[];
+
+  @HasMany(() => Project, { foreignKey: 'projectType', sourceKey: 'uuid', as: 'projects' })
+  declare projects?: Project[];
   @HasMany(() => WorkOrder, {
     foreignKey: 'projectTypeId',
     sourceKey: 'uuid',

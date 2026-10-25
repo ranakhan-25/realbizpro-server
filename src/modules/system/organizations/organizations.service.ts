@@ -493,4 +493,17 @@ export class OrganizationsService {
 
     return this.getEntitlements(org.id);
   }
+
+  async getDropdown(): Promise<{ id: number; name: string }[]> {
+    const orgs = await this.orgModel.findAll({
+      attributes: ['id', 'name'],
+      where: {
+        subscriptionStatus: {
+          [Op.in]: [OrgSubscriptionStatus.ACTIVE, OrgSubscriptionStatus.TRIAL],
+        },
+      },
+      order: [['name', 'ASC']],
+    });
+    return orgs.map((org) => ({ id: org.id, name: org.name }));
+  }
 }

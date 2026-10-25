@@ -154,6 +154,15 @@ export class ProjectService {
         }
       : {};
 
+    Object.assign(where, {
+      ...(query.projectType && { projectType: query.projectType }),
+      ...(query.status && { status: query.status }),
+      ...(query.areaCategory && { areaCategory: query.areaCategory }),
+      ...(query.numberOfStoreys !== undefined && {
+        numberOfStoreys: query.numberOfStoreys,
+      }),
+    });
+
     const { rows, count } =
       await this.projectModel.findAndCountAll({
         where: where as WhereOptions<Project>,

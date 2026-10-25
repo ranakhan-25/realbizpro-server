@@ -1,6 +1,8 @@
 import {
   Column,
   DataType,
+  BelongsTo,
+  ForeignKey,
   HasMany,
   Table,
 } from 'sequelize-typescript';
@@ -43,6 +45,9 @@ import { ProcurementWorkOrderMeasurement } from '../../procurement/work-order/pr
 import { ProcurementWorkBill } from '../../procurement/work-order/pr_work_bill.model';
 import { ProcurementHireOrder } from '../../procurement/equipment-hire/pr_hire_order.model';
 import { ProcurementHireBill } from '../../procurement/equipment-hire/pr_hire_bill.model';
+import { ProjectType } from '../project-type/pr_project_type.model';
+import { LeadArea } from 'src/database/models/crm/lead/crm-lead-master-data.model';
+import { SysUser } from 'src/database/models/system/sys_user.model';
 
 export enum ProjectStatus {
   ACTIVE = 'ACTIVE',
@@ -90,17 +95,25 @@ export class Project
   })
   declare name: string;
 
+  @ForeignKey(() => ProjectType)
   @Column({
     type: DataType.STRING,
     allowNull: true,
   })
   declare projectType?: string;
 
+  @BelongsTo(() => ProjectType, { foreignKey: 'projectType', targetKey: 'uuid', as: 'type' })
+  declare type?: ProjectType;
+
+  @ForeignKey(() => LeadArea)
   @Column({
     type: DataType.STRING,
     allowNull: true,
   })
   declare areaCategory?: string;
+
+  @BelongsTo(() => LeadArea, { foreignKey: 'areaCategory', targetKey: 'uuid', as: 'area' })
+  declare area?: LeadArea;
 
   @Column({
     type: DataType.STRING,
@@ -150,11 +163,15 @@ export class Project
   })
   declare contractorCompany?: string;
 
+  @ForeignKey(() => SysUser)
   @Column({
     type: DataType.STRING,
     allowNull: true,
   })
   declare projectManager?: string;
+
+  @BelongsTo(() => SysUser, { foreignKey: 'projectManager', targetKey: 'uuid', as: 'manager' })
+  declare manager?: SysUser;
 
   @Column({
     type: DataType.DECIMAL(15, 2),

@@ -5,6 +5,7 @@ import { Lead } from './crm-lead.model';
 import { LeadTeamMember } from './crm-lead-team-member.model';
 import { LeadActivity } from './crm-lead-activity.model';
 import { LeadRequirement } from './crm-lead-requirement.model';
+import { Project } from 'src/database/models/projects/project/pr_project.model';
 
 abstract class LeadMasterModel extends BaseModel {
   @Column({ type: DataType.STRING, allowNull: true, field: 'created_by' }) declare createdBy?: string;
@@ -50,6 +51,7 @@ export class LeadCampaign extends LeadMasterModel {
 @Table({ tableName: 'crm_professions', timestamps: true, paranoid: true, underscored: true })
 export class LeadProfession extends LeadMasterModel {
   @Column({ type: DataType.STRING(150), allowNull: false }) declare name: string;
+  @Column({ type: DataType.STRING(50), allowNull: false, defaultValue: 'active' }) declare status: string;
   @Column({ type: DataType.TEXT, allowNull: true }) declare description?: string;
   @HasMany(() => Lead, { foreignKey: 'professionId', sourceKey: 'id', as: 'leads' }) declare leads?: Lead[];
 }
@@ -60,6 +62,7 @@ export class LeadArea extends LeadMasterModel {
   @Column({ type: DataType.STRING(150), allowNull: true }) declare city?: string;
   @Column({ type: DataType.STRING(150), allowNull: true }) declare zone?: string;
   @HasMany(() => Lead, { foreignKey: 'areaId', sourceKey: 'id', as: 'leads' }) declare leads?: Lead[];
+  @HasMany(() => Project, { foreignKey: 'areaCategory', sourceKey: 'uuid', as: 'projects' }) declare projects?: Project[];
 }
 
 @Table({ tableName: 'crm_price_ranges', timestamps: true, paranoid: true, underscored: true })

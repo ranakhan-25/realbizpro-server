@@ -12,15 +12,6 @@ import { Project } from 'src/database/models/projects/project/pr_project.model';
 import { ProjectType } from 'src/database/models/projects/project-type/pr_project_type.model';
 import { CreatePurchaseBillDto, QueryPurchaseBillDto, UpdatePurchaseBillDto } from './dto/purchase-bill.dto';
 
-const include = [
-  { model: SysCompany, as: 'company', attributes: ['uuid', 'name'], required: false },
-  { model: SupplierAccounts, as: 'supplier', attributes: ['uuid', 'supplierCode', 'supplierName'] },
-  { model: ProjectType, as: 'projectType', attributes: ['uuid', 'code', 'name'], required: false },
-  { model: Project, as: 'project', attributes: ['uuid', 'code', 'name'], required: false },
-  { model: SysUser, as: 'addedBy', attributes: ['id', 'name'], required: false },
-  { model: ProcurementGrn, as: 'grns', through: { attributes: [] }, attributes: ['uuid', 'code', 'reference', 'date', 'subtotal', 'grand_total', 'supplier_id', 'project_id'] },
-];
-
 @Injectable()
 export class PurchaseBillService {
   constructor(
@@ -35,13 +26,32 @@ export class PurchaseBillService {
     private readonly sequelize: Sequelize,
   ) {}
 
+  private get relationIncludes() {
+    return [
+      { model: this.company, as: 'company', attributes: ['uuid', 'name'], required: false },
+      { model: this.supplier, as: 'supplier', attributes: ['uuid', 'supplierCode', 'supplierName'] },
+      { model: this.projectType, as: 'projectType', attributes: ['uuid', 'code', 'name'], required: false },
+      { model: this.project, as: 'project', attributes: ['uuid', 'code', 'name'], required: false },
+      { model: this.user, as: 'addedBy', attributes: ['id', 'name'], required: false },
+      { model: this.grn, as: 'grns', through: { attributes: [] }, attributes: ['uuid', 'code', 'reference', 'date', 'subtotal', 'grand_total', 'supplier_id', 'project_id'] },
+    ];
+  }
+
+  private get grnRelationIncludes() {
+    return [
+      { model: this.supplier, as: 'supplier', attributes: ['uuid', 'supplierCode', 'supplierName'] },
+      { model: this.project, as: 'project', attributes: ['uuid', 'code', 'name'], required: false },
+      { model: this.projectType, as: 'projectType', attributes: ['uuid', 'code', 'name'], required: false },
+    ];
+  }
+
   async list(q: QueryPurchaseBillDto) {
     const page = Math.max(1, Number(q.page) || 1); const limit = Math.min(100, Math.max(1, Number(q.limit) || 10));
     const where: any = {};
     if (q.project_id) where.project_id = q.project_id;
     if (q.supplier_id) where.supplier_id = q.supplier_id;
     if (q.search) where[Op.or] = [{ code: { [Op.iLike]: `%${q.search}%` } }, { note: { [Op.iLike]: `%${q.search}%` } }];
-    const result = await this.bill.findAndCountAll({ where, include, distinct: true, limit, offset: (page - 1) * limit, order: [['date', 'DESC'], ['createdAt', 'DESC']] });
+    const result = await this.bill.findAndCountAll({ where, include: this.relationIncludes, distinct: true, limit, offset: (page - 1) * limit, order: [['date', 'DESC'], ['createdAt', 'DESC']] });
     return { data: result.rows, total: result.count, page, limit, totalPages: Math.ceil(result.count / limit), totals: result.rows.reduce((a, b: any) => ({ subtotal: a.subtotal + Number(b.subtotal), grand_total: a.grand_total + Number(b.grand_total), paid: a.paid + Number(b.paid), due: a.due + Number(b.due) }), { subtotal: 0, grand_total: 0, paid: 0, due: 0 }) };
   }
 
@@ -59,10 +69,10 @@ export class PurchaseBillService {
     const where: any = { already_billed: false };
     if (projectId) where.project_id = projectId;
     if (supplierId) where.supplier_id = supplierId;
-    return this.grn.findAll({ where, include: [{ model: SupplierAccounts, as: 'supplier', attributes: ['uuid', 'supplierCode', 'supplierName'] }, { model: Project, as: 'project', attributes: ['uuid', 'code', 'name'], required: false }, { model: ProjectType, as: 'projectType', attributes: ['uuid', 'code', 'name'], required: false }], order: [['date', 'DESC']] });
+    return this.grn.findAll({ where, include: this.grnRelationIncludes, order: [['date', 'DESC']] });
   }
 
-  async view(uuid: string) { const row = await this.bill.findOne({ where: { uuid }, include }); if (!row) throw new NotFoundException('Purchase bill/invoice not found'); return row; }
+  async view(uuid: string) { const row = await this.bill.findOne({ where: { uuid }, include: this.relationIncludes }); if (!row) throw new NotFoundException('Purchase bill/invoice not found'); return row; }
 
   private async compose(dto: CreatePurchaseBillDto, transaction: Transaction, billUuid?: string) {
     if (!dto.grn_ids?.length || new Set(dto.grn_ids).size !== dto.grn_ids.length) throw new BadRequestException('Select one or more unique pending GRNs');
@@ -84,7 +94,7 @@ export class PurchaseBillService {
       const bill = await this.bill.create({ ...values, added_by_id: userId } as any, { transaction });
       await this.link.bulkCreate(selected.map(row => ({ purchase_bill_id: bill.uuid, grn_id: row.uuid } as any)), { transaction });
       await this.grn.update({ already_billed: true }, { where: { uuid: { [Op.in]: selected.map(x => x.uuid) } }, transaction });
-      return bill.reload({ include, transaction });
+      return bill.reload({ include: this.relationIncludes, transaction });
     });
   }
 
@@ -100,7 +110,7 @@ export class PurchaseBillService {
         await this.link.bulkCreate(selected.map(row => ({ purchase_bill_id: uuid, grn_id: row.uuid } as any)), { transaction });
         await this.grn.update({ already_billed: true }, { where: { uuid: { [Op.in]: selected.map(x => x.uuid) } }, transaction });
       } catch (error) { throw error; }
-      return bill.reload({ include, transaction });
+      return bill.reload({ include: this.relationIncludes, transaction });
     });
   }
 

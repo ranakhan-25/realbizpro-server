@@ -23,6 +23,15 @@ export class LeadStage extends BaseModel<LeadStageAttributes, LeadStageCreationA
   @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: true })
   declare isActive: boolean;
 
+  @Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 0, field: 'order' })
+  declare sortOrder: number;
+
+  @Column({ type: DataType.STRING(50), allowNull: true })
+  declare color?: string;
+
+  @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false, field: 'is_system' })
+  declare isSystem: boolean;
+
   @HasMany(() => CommunicationStatus, {
     foreignKey: 'leadStageId',
     sourceKey: 'uuid',

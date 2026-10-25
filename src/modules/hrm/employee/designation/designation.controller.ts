@@ -54,6 +54,14 @@ export class DesignationController {
     return this.designationService.findAll(query);
   }
 
+  @Get('dropdown')
+  @ApiOperation({
+    summary: 'Get designations dropdown list',
+  })
+  getDropdown() {
+    return this.designationService.getDropdown();
+  }
+
   @Get(':uuid')
   @ApiOperation({
     summary: 'Get designation by UUID',

@@ -7,6 +7,7 @@ import { LeadActivity } from 'src/database/models/crm/lead/crm-lead-activity.mod
 import { LeadCallAssignment } from 'src/database/models/crm/lead/crm-lead-call-assignment.model';
 import { LeadPropertyInterest } from 'src/database/models/crm/lead/crm-lead-property-interest.model';
 import { Lead } from 'src/database/models/crm/lead/crm-lead.model';
+import { CrmOffer } from 'src/database/models/crm/configuration/crm-offer.model';
 import { LeadTransferLog } from 'src/database/models/crm/lead/crm-lead-transfer-log.model';
 import { LeadArea, LeadCampaign, LeadCategory, LeadPriceRange, LeadProfession, LeadSource, LeadTeam } from 'src/database/models/crm/lead/crm-lead-master-data.model';
 import { LeadTeamMember } from 'src/database/models/crm/lead/crm-lead-team-member.model';
@@ -23,6 +24,7 @@ import { QueryTransferLeadListDto } from './dto/query-transfer-lead-list.dto';
 export class LeadService {
   constructor(
     @InjectModel(Lead) private readonly leads: typeof Lead,
+    @InjectModel(CrmOffer) private readonly offers: typeof CrmOffer,
     @InjectModel(LeadStage) private readonly stages: typeof LeadStage,
     @InjectModel(CommunicationStatus) private readonly communicationStatuses: typeof CommunicationStatus,
     @InjectModel(LeadCategory) private readonly categories: typeof LeadCategory,
@@ -42,8 +44,9 @@ export class LeadService {
 
   async create(dto: CreateLeadDto) {
     const leadCode = dto.leadCode?.trim() || await this.nextCode();
-    const { projectName, ...leadData } = dto;
-    const row = await this.leads.create({ ...leadData, leadCode, leadDate: dto.leadDate ?? new Date().toISOString().slice(0, 10) } as any);
+    const { projectName, offerUuid, ...leadData } = dto;
+    const offer = offerUuid ? await this.getActiveOffer(offerUuid) : undefined;
+    const row = await this.leads.create({ ...leadData, ...(offer ? { offerId: offer.id } : {}), leadCode, leadDate: dto.leadDate ?? new Date().toISOString().slice(0, 10) } as any);
     if (projectName) await LeadPropertyInterest.create({ leadId: row.id, projectName, projectId: row.projectId } as any);
     return this.findOne(row.uuid);
   }
@@ -71,7 +74,7 @@ export class LeadService {
     const include: any[] = [
       { association: 'category', attributes: ['id', 'name'], required: false }, { association: 'stage', attributes: ['id', 'name'], required: false },
       { association: 'source', attributes: ['id', 'name'], required: false }, { association: 'campaign', attributes: ['id', 'name'], required: false },
-      { association: 'profession', attributes: ['id', 'name'], required: false }, { association: 'area', attributes: ['id', 'name'], required: false },
+      { association: 'profession', attributes: ['id', 'name'], required: false }, { association: 'offer', attributes: ['uuid', 'name', 'status'], required: false }, { association: 'area', attributes: ['id', 'name'], required: false },
       { association: 'activities', required: false, separate: true, limit: 1, order: [['activityDate', 'DESC']] },
     ];
     if (query.projectName) include.push({ association: 'propertyInterests', where: { projectName: { [Op.iLike]: `%${query.projectName}%` } }, required: true });
@@ -88,7 +91,7 @@ export class LeadService {
   }
 
   async findOne(uuid: string) {
-    const row = await this.leads.findOne({ where: { uuid }, include: ['category', 'stage', 'source', 'campaign', 'profession', 'area', 'priceRange', 'activities', 'attachments', 'callAssignments', 'propertyInterests', 'requirements', 'transferLogs'] });
+    const row = await this.leads.findOne({ where: { uuid }, include: ['category', 'stage', 'source', 'campaign', 'profession', 'offer', 'area', 'priceRange', 'activities', 'attachments', 'callAssignments', 'propertyInterests', 'requirements', 'transferLogs'] });
     if (!row) throw new NotFoundException(`Lead ${uuid} not found`);
     const users = await this.userMap([row.assignedTo, row.creditOfficerId]);
     return {
@@ -262,7 +265,7 @@ export class LeadService {
     return { deleted };
   }
 
-  async update(uuid: string, dto: UpdateLeadDto) { const row = await this.getActive(uuid); await row.update(dto as any); return this.findOne(uuid); }
+  async update(uuid: string, dto: UpdateLeadDto) { const row = await this.getActive(uuid); const { offerUuid, ...leadChanges } = dto; const changes: Record<string, any> = { ...leadChanges }; if (offerUuid !== undefined) changes.offerId = offerUuid ? (await this.getActiveOffer(offerUuid)).id : null; await row.update(changes); return this.findOne(uuid); }
   async remove(uuid: string) { const row = await this.getActive(uuid); await row.destroy(); return { message: `Lead ${uuid} deleted successfully` }; }
   async restore(uuid: string) { const row = await this.leads.findOne({ where: { uuid }, paranoid: false }); if (!row) throw new NotFoundException(`Lead ${uuid} not found`); if (!row.deletedAt) throw new BadRequestException('Lead is not deleted'); await row.restore(); return this.findOne(uuid); }
 
@@ -357,5 +360,6 @@ export class LeadService {
   async addActivity(uuid: string, dto: any) { const lead = await this.getActive(uuid); const row = await this.activities.create({ ...dto, leadId: lead.id, activityDate: dto.activityDate ?? new Date(), projectId: lead.projectId }); return row; }
 
   private async getActive(uuid: string) { const row = await this.leads.findOne({ where: { uuid } }); if (!row) throw new NotFoundException(`Lead ${uuid} not found`); return row; }
+  private async getActiveOffer(uuid: string) { const offer = await this.offers.findOne({ where: { uuid, status: 'active' } }); if (!offer) throw new BadRequestException(`Active offer ${uuid} not found`); return offer; }
   private async nextCode() { const row = await this.leads.findOne({ attributes: ['id'], order: [['id', 'DESC']], paranoid: false }); return `L${new Date().toISOString().slice(2, 10).replace(/-/g, '')}-${String(Number(row?.id ?? 0) + 1).padStart(5, '0')}`; }
 }

@@ -33,7 +33,7 @@ import {
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 
 @ApiTags('System | Organizations & Multi-Tenant')
-@Controller('system/organizations')
+@Controller(['system/organizations', 'organizations'])
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class OrganizationsController {
@@ -58,6 +58,18 @@ export class OrganizationsController {
     @Query('search') search?: string,
   ): Promise<OrganizationResponseDto[]> {
     return this.orgService.findAll({ status, isLocked, search });
+  }
+
+  @Get('dropdown')
+  @ApiOperation({
+    summary: 'Get organizations dropdown list',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Organizations dropdown retrieved successfully',
+  })
+  async getDropdown(): Promise<{ id: number; name: string }[]> {
+    return this.orgService.getDropdown();
   }
 
   @Get(':id')
