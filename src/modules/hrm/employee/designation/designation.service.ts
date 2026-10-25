@@ -135,6 +135,16 @@ export class DesignationService {
     };
   }
 
+  async getDropdown(): Promise<any[]> {
+    return this.designationModel.findAll({
+      attributes: ['id', 'uuid', 'name'],
+      where: {
+        status: DesignationStatus.ACTIVE,
+      },
+      order: [['name', 'ASC']],
+    });
+  }
+
   async findOne(
     uuid: string,
   ): Promise<Designation> {
