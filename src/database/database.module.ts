@@ -28,6 +28,13 @@ import { SysOrganization } from './models/system/sys_organization.model';
 import { SysOrgEntitlement } from './models/system/sys_org_entitlement.model';
 import { SysRoleFeature } from './models/system/sys_role_feature.model';
 import { SysUserFeatureOverride } from './models/system/sys_user_feature_override.model';
+import {
+  SysTenantSite,
+  SysTenantMenu,
+  SysTenantMenuItem,
+  SysTenantPage,
+  SysTenantPageBlock,
+} from './models/cms';
 
 @Global()
 @Module({
@@ -62,6 +69,11 @@ import { SysUserFeatureOverride } from './models/system/sys_user_feature_overrid
       SysOrgEntitlement,
       SysRoleFeature,
       SysUserFeatureOverride,
+      SysTenantSite,
+      SysTenantMenu,
+      SysTenantMenuItem,
+      SysTenantPage,
+      SysTenantPageBlock,
     ]),
   ],
   providers: [

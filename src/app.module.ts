@@ -49,6 +49,7 @@ import { JobLogModule } from './modules/system/job-log/job-log.module';
 import { CompanyModule } from './modules/system/sys-company/sys-company.module';
 import { PlansModule } from './modules/system/plans/plans.module';
 import { OrganizationsModule } from './modules/system/organizations/organizations.module';
+import { TenantCmsModule } from './modules/system/cms/tenant-cms.module';
 import { HmacAuthModule } from './modules/engine/hmac-auth/hmac-auth.module';
 import { BullBoardModule } from './modules/engine/queue-dashboard/bull-board.module';
 
@@ -241,6 +242,7 @@ import { ZkTecoDeviceModule } from './modules/hrm/configuration/zkteco-device/zk
     CompanyModule,
     PlansModule,
     OrganizationsModule,
+    TenantCmsModule,
     SysOfficeModule,
     S3minioModule,
     SysDivisionModule,
