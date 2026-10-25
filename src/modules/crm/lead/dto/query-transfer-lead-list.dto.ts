@@ -2,20 +2,20 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 
-export class QueryCallHistoryDto {
-  @ApiPropertyOptional({ description: 'Assignment date from, inclusive (YYYY-MM-DD)' })
+export class QueryTransferLeadListDto {
+  @ApiPropertyOptional({ description: 'Transfer date from, inclusive (YYYY-MM-DD)' })
   @IsOptional() @IsString() declare dateFrom?: string;
 
-  @ApiPropertyOptional({ description: 'Assignment date to, inclusive (YYYY-MM-DD)' })
+  @ApiPropertyOptional({ description: 'Transfer date to, inclusive (YYYY-MM-DD)' })
   @IsOptional() @IsString() declare dateTo?: string;
 
-  @ApiPropertyOptional({ description: 'Filter by assigned-from user UUID' })
+  @ApiPropertyOptional({ description: 'Filter by transfer source user UUID' })
   @IsOptional() @IsString() declare fromUserId?: string;
 
-  @ApiPropertyOptional({ description: 'Filter by assigned-to user UUID' })
+  @ApiPropertyOptional({ description: 'Filter by transfer target user UUID' })
   @IsOptional() @IsString() declare toUserId?: string;
 
-  @ApiPropertyOptional({ description: 'Search lead ID/code, name, phone, and assignment note' })
+  @ApiPropertyOptional({ description: 'Search lead code, name, mobile, or transfer reason' })
   @IsOptional() @IsString() declare search?: string;
 
   @ApiPropertyOptional({ default: 1 })

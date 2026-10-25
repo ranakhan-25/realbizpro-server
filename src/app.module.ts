@@ -126,6 +126,9 @@ import { ProcurementSubcontractPackageModule } from './modules/procurement/confi
 import { ProcurementDashboardModule } from './modules/procurement/dashboard/procurement-dashboard.module';
 import { CommunicationStatusModule } from './modules/crm/configuration/communication-status/communication-status.module';
 import { LeadModule } from './modules/crm/lead/lead.module';
+import { TeamModule } from './modules/crm/configuration/teams/team.module';
+import { LeadCategoryModule } from './modules/crm/configuration/lead-category/lead-category.module';
+import { CampaignModule } from './modules/crm/configuration/campaigns/campaign.module';
 import { ProcurementSubCategoryModule } from './modules/procurement/configuration/products/sub-category/sub-category.module';
 import { ProcurementBrandModule } from './modules/procurement/configuration/products/brand/brand.module';
 import { ProcurementUnitModule } from './modules/procurement/configuration/products/unit/unit.module';
@@ -350,6 +353,9 @@ import { UnitPlotModule } from './modules/projects/unit_plot/unit_plot.module';
     ProcurementSubcontractPackageModule,
     ProcurementDashboardModule,
     CommunicationStatusModule,
+    TeamModule,
+    LeadCategoryModule,
+    CampaignModule,
     LeadModule,
     ProjectBudgetModule,
     ProjectCostModule,

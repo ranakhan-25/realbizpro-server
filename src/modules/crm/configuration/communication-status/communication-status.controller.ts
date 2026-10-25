@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateCommunicationStatusDto } from './dto/create-communication-status.dto';
 import { QueryCommunicationStatusDto } from './dto/query-communication-status.dto';
@@ -29,17 +29,17 @@ export class CommunicationStatusController {
 
   @Get(':uuid')
   @ApiOperation({ summary: 'Get communication status details' })
-  findOne(@Param('uuid') uuid: string) { return this.service.findOne(uuid); }
+  findOne(@Param('uuid', ParseUUIDPipe) uuid: string) { return this.service.findOne(uuid); }
 
   @Patch(':uuid')
   @ApiOperation({ summary: 'Update communication status' })
-  update(@Param('uuid') uuid: string, @Body() dto: UpdateCommunicationStatusDto) { return this.service.update(uuid, dto); }
+  update(@Param('uuid', ParseUUIDPipe) uuid: string, @Body() dto: UpdateCommunicationStatusDto) { return this.service.update(uuid, dto); }
 
   @Delete(':uuid')
   @ApiOperation({ summary: 'Soft delete communication status' })
-  remove(@Param('uuid') uuid: string) { return this.service.remove(uuid); }
+  remove(@Param('uuid', ParseUUIDPipe) uuid: string) { return this.service.remove(uuid); }
 
   @Patch(':uuid/restore')
   @ApiOperation({ summary: 'Restore soft-deleted communication status' })
-  restore(@Param('uuid') uuid: string) { return this.service.restore(uuid); }
+  restore(@Param('uuid', ParseUUIDPipe) uuid: string) { return this.service.restore(uuid); }
 }
