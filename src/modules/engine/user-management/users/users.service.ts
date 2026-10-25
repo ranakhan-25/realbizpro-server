@@ -179,7 +179,7 @@ export class UsersService {
   }
 
   async findBasicUser(id: number): Promise<any> {
-    const cacheKey = `user:basic:v4:${id}`;
+    const cacheKey = `user:basic:v5:${id}`;
 
     const cached =
       await this.redisService.get(cacheKey);
@@ -193,7 +193,11 @@ export class UsersService {
         attributes: [
           'id',
           'uuid',
+          'name',
           'isSuperUser',
+          'isOrgAdmin',
+          'orgId',
+          'orgUuid',
           'employeeId',
           'distributionId',
           'warehouseId',
@@ -213,53 +217,32 @@ export class UsersService {
         ],
         include: [
           {
-            association: 'distribution',
-            attributes: ['id', 'name'],
-          },
-          {
-            association: 'warehouse',
-            attributes: ['id', 'name'],
-          },
-          {
-            association: 'receivingPoint',
-            attributes: ['id', 'name'],
-          },
-          {
-            association: 'factory',
-            attributes: ['id', 'name'],
-          },
-          {
-            association: 'unit',
-            attributes: ['id', 'name'],
-          },
-          {
-            association: 'sections',
-            attributes: ['id', 'name'],
+            association: 'roles',
+            attributes: ['id', 'name', 'slug', 'isSystemRole'],
             through: { attributes: [] },
+            required: false,
           },
           {
-            association: 'designation',
-            attributes: ['id', 'name'],
-          },
-          {
-            association: 'employee',
-            attributes: [
-              'id',
-              'employeeCode',
-              'employeeName',
-              'employeeNameBn',
-              'officialEmail',
-              'officeId',
-              'floorId',
-              'sectionId',
-            ],
+            association: 'organization',
+            attributes: ['id', 'uuid', 'name', 'code', 'subscriptionStatus'],
+            required: false,
           },
         ],
       },
     );
 
     if (user) {
-      const plainUser = user.toJSON();
+      const plainUser = {
+        ...user.toJSON(),
+        distribution: null,
+        warehouse: null,
+        receivingPoint: null,
+        factory: null,
+        unit: null,
+        sections: [],
+        designation: null,
+        employee: null,
+      };
       await this.redisService.set(
         cacheKey,
         JSON.stringify(plainUser),

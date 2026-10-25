@@ -9,6 +9,8 @@ import type { SysUserToken } from '../models/system/sys_user_token.model';
 import type { SysUserPermission } from '../models/system/sys_user_permission.model';
 import type { SysCompany } from '../models/system/sys_company.model';
 import type { SysUserCompany } from '../models/system/sys_user_company.model';
+import type { SysOrganization } from '../models/system/sys_organization.model';
+import type { SysUserFeatureOverride } from '../models/system/sys_user_feature_override.model';
 import type { ProcurementRfq } from '../models/procurement/rfq/pr_rfq.model';
 import type { ProcurementAssetRfq } from '../models/procurement/rfq/pr_asset_rfq.model';
 import type { ProcurementMaterialRequisition } from '../models/procurement/requisition/pr_material_requisition.model';
@@ -59,6 +61,9 @@ export interface SysUserAttributes {
   passwordHash?: string | null;
   refreshToken?: string | null;
   lastLogoutAt?: Date | null;
+  orgId?: number | null;
+  orgUuid?: string | null;
+  isOrgAdmin?: boolean | null;
 
   // Relations
   avatar?: SysFileModel;
@@ -69,6 +74,8 @@ export interface SysUserAttributes {
   userPermissions?: SysUserPermission[];
   companies?: SysCompany[];
   userCompanies?: SysUserCompany[];
+  organization?: SysOrganization;
+  featureOverrides?: SysUserFeatureOverride[];
   procurementRfqs?: ProcurementRfq[];
   procurementAssetRfqs?: ProcurementAssetRfq[];
   procurementMaterialRequisitions?: ProcurementMaterialRequisition[];
@@ -117,6 +124,9 @@ export interface SysUserCreationAttributes {
   passwordHash?: string | null;
   refreshToken?: string | null;
   lastLogoutAt?: Date | null;
+  orgId?: number | null;
+  orgUuid?: string | null;
+  isOrgAdmin?: boolean | null;
 }
 
 export type SysUserUpdateAttributes = Partial<SysUserCreationAttributes>;
@@ -131,6 +141,8 @@ export interface SysUserWithRelations extends SysUserAttributes {
   userPermissions?: SysUserPermission[];
   companies?: SysCompany[];
   userCompanies?: SysUserCompany[];
+  organization?: SysOrganization;
+  featureOverrides?: SysUserFeatureOverride[];
   procurementRfqs?: ProcurementRfq[];
   procurementAssetRfqs?: ProcurementAssetRfq[];
   procurementMaterialRequisitions?: ProcurementMaterialRequisition[];

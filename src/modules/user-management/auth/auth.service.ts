@@ -22,6 +22,8 @@ import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { SysPermission } from '@/database/models/system/sys_permission.model';
 import { SysUserPermission } from '@/database/models/system/sys_user_permission.model';
+import { SysOrganization } from '@/database/models/system/sys_organization.model';
+import { SysRole } from '@/database/models/system/sys_role.model';
 
 @Injectable()
 export class AuthService {
@@ -34,6 +36,10 @@ export class AuthService {
     private permissionModel: typeof SysPermission,
     @InjectModel(SysUserPermission)
     private userPermissionModel: typeof SysUserPermission,
+    @InjectModel(SysOrganization)
+    private orgModel: typeof SysOrganization,
+    @InjectModel(SysRole)
+    private roleModel: typeof SysRole,
     private jwtService: JwtService,
     private cacheService: CacheService,
   ) {}
@@ -83,6 +89,23 @@ export class AuthService {
       throw new UnauthorizedException(
         'Invalid credentials',
       );
+    }
+
+    // Check organization lock & subscription status (unless super admin)
+    if (user.orgId && !user.isSuperUser) {
+      const org = await this.orgModel.findByPk(user.orgId);
+      if (org) {
+        if (org.isLocked) {
+          throw new UnauthorizedException(
+            org.lockReason || 'Organization account is currently locked. Please contact your administrator.',
+          );
+        }
+        if (org.subscriptionEndDate && new Date() > new Date(org.subscriptionEndDate)) {
+          throw new UnauthorizedException(
+            'Organization subscription has expired. Please renew your subscription to access.',
+          );
+        }
+      }
     }
 
     // Generate tokens
@@ -461,10 +484,30 @@ export class AuthService {
   ): Promise<AuthResponseDto> {
     const jti = randomBytes(16).toString('hex');
 
+    // Fetch user roles
+    const userWithRoles = await this.userModel.findByPk(user.id, {
+      include: [{ association: 'roles', attributes: ['id', 'name', 'slug'] }],
+    });
+    const roleSlugs = (userWithRoles?.roles || []).map((r) => r.slug);
+    const primaryRole = user.isSuperUser
+      ? 'super-admin'
+      : user.isOrgAdmin
+      ? 'org-admin'
+      : roleSlugs[0] || 'user';
+
     const payload = {
       sub: user.id,
+      userId: user.uuid,
+      id: user.id,
       email: user.email,
       username: user.username,
+      name: user.name,
+      orgId: user.orgId || null,
+      orgUuid: user.orgUuid || null,
+      role: primaryRole,
+      roles: roleSlugs,
+      isSuperUser: !!user.isSuperUser,
+      isOrgAdmin: !!user.isOrgAdmin,
       jti,
       authType: 'web',
     };
@@ -518,6 +561,19 @@ export class AuthService {
           : 3600,
       iat: decoded?.iat,
       exp: decoded?.exp,
+      user: {
+        id: user.id,
+        uuid: user.uuid,
+        name: user.name,
+        email: user.email,
+        username: user.username,
+        orgId: user.orgId || null,
+        orgUuid: user.orgUuid || null,
+        role: primaryRole,
+        roles: roleSlugs,
+        isSuperUser: !!user.isSuperUser,
+        isOrgAdmin: !!user.isOrgAdmin,
+      },
     };
   }
 
