@@ -89,7 +89,7 @@ export class PermissionsGuard extends AuthGuard(
       return false; // No user in request
     }
 
-    if (user.isSuperUser) {
+    if (user.isSuperUser || (user as any).isOrgAdmin) {
       console.log(
         '[PermissionsGuard] 🚀 Access granted: User is a superuser.',
       );

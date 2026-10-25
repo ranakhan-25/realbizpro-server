@@ -1355,84 +1355,11 @@ export class UsersService {
           through: { attributes: [] },
         },
         {
-          association: 'employee',
-          attributes: [
-            'id',
-            'employeeCode',
-            'employeeName',
-          ],
-          required: false,
-        },
-        {
-          association: 'designation',
-          attributes: ['id', 'name'],
-          required: false,
-        },
-        {
-          association: 'distribution',
-          attributes: ['id', 'name'],
-          required: false,
-        },
-        {
-          association: 'warehouse',
-          attributes: ['id', 'name'],
-          required: false,
-        },
-        {
-          association: 'factory',
-          attributes: ['id', 'name'],
-          required: false,
-        },
-        {
-          association: 'unit',
-          attributes: ['id', 'name'],
-          required: false,
-        },
-        {
-          association: 'sections',
-          attributes: ['id', 'name'],
-          through: { attributes: [] },
-          required: false,
-        },
-        {
-          association: 'receivingPoint',
-          attributes: ['id', 'name'],
-          required: false,
-        },
-        {
           association: 'companies',
           attributes: ['id', 'name', 'status'],
           through: { attributes: [] },
           required: false,
         },
-
-        // Only this is enough for office permissions
-        {
-          association: 'userOffices',
-          attributes: [
-            'officeId',
-            'officeTypeId',
-          ],
-          required: false,
-          include: [
-            {
-              association: 'office',
-              attributes: [
-                'id',
-                'name',
-                'slug',
-                'officeType',
-              ],
-              required: false,
-            },
-            {
-              association: 'officeType',
-              attributes: ['id', 'name', 'slug'],
-              required: false,
-            },
-          ],
-        },
-
         ...(withPermissions
           ? [
               {
@@ -1982,35 +1909,7 @@ export class UsersService {
               ]
             : []),
 
-          {
-            association: 'userOffices',
-            attributes: [
-              'officeId',
-              'officeTypeId',
-            ],
-            required: false,
-            include: [
-              {
-                association: 'office',
-                attributes: [
-                  'id',
-                  'name',
-                  'slug',
-                  'officeType',
-                ],
-                required: false,
-              },
-              {
-                association: 'officeType',
-                attributes: [
-                  'id',
-                  'name',
-                  'slug',
-                ],
-                required: false,
-              },
-            ],
-          },
+          // userOffices omitted if not associated on SysUser
 
           ...(sectionId
             ? [
