@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
@@ -26,45 +26,54 @@ export class OrgDetailsDto {
   code: string;
 
   @ApiPropertyOptional({ example: 'contact@apexholdings.com' })
+  @Transform(({ value }) => (typeof value === 'string' && value.trim() === '' ? undefined : typeof value === 'string' ? value.trim() : value))
   @IsEmail()
   @IsOptional()
   email?: string;
 
   @ApiPropertyOptional({ example: '+8801711000000' })
+  @Transform(({ value }) => (typeof value === 'string' && value.trim() === '' ? undefined : typeof value === 'string' ? value.trim() : value))
   @IsString()
   @IsOptional()
   phone?: string;
 
   @ApiPropertyOptional({ example: 'Gulshan 2, Dhaka, Bangladesh' })
+  @Transform(({ value }) => (typeof value === 'string' && value.trim() === '' ? undefined : typeof value === 'string' ? value.trim() : value))
   @IsString()
   @IsOptional()
   address?: string;
 
   @ApiPropertyOptional({ example: 1, description: 'ID or UUID of selected SysPlan' })
+  @Transform(({ value }) => (value === '' || value === null || value === 'null' ? undefined : value))
   @IsOptional()
   planId?: number | string;
 
   @ApiPropertyOptional({ example: 30, description: 'Duration in days' })
+  @Transform(({ value }) => (value !== undefined && value !== null && value !== '' ? Math.round(Number(value)) : undefined))
   @IsInt()
   @IsOptional()
   durationDays?: number;
 
   @ApiPropertyOptional({ example: 14, description: 'Trial period in days' })
+  @Transform(({ value }) => (value !== undefined && value !== null && value !== '' ? Math.round(Number(value)) : undefined))
   @IsInt()
   @IsOptional()
   trialDays?: number;
 
   @ApiPropertyOptional({ example: 20, description: 'Max allowed user accounts' })
+  @Transform(({ value }) => (value !== undefined && value !== null && value !== '' ? Math.round(Number(value)) : undefined))
   @IsInt()
   @IsOptional()
   maxUsers?: number;
 
   @ApiPropertyOptional({ example: 10, description: 'Max active projects' })
+  @Transform(({ value }) => (value !== undefined && value !== null && value !== '' ? Math.round(Number(value)) : undefined))
   @IsInt()
   @IsOptional()
   maxProjects?: number;
 
   @ApiPropertyOptional({ example: 20480, description: 'Storage quota in MB' })
+  @Transform(({ value }) => (value !== undefined && value !== null && value !== '' ? Math.round(Number(value)) : undefined))
   @IsInt()
   @IsOptional()
   maxStorageMb?: number;
@@ -82,6 +91,7 @@ export class OrgAdminUserDto {
   username: string;
 
   @ApiProperty({ example: 'admin@apexholdings.com', description: 'Admin email' })
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @IsEmail()
   @IsNotEmpty()
   email: string;
@@ -92,11 +102,13 @@ export class OrgAdminUserDto {
   password: string;
 
   @ApiPropertyOptional({ example: '+8801712345678' })
+  @Transform(({ value }) => (typeof value === 'string' && value.trim() === '' ? undefined : typeof value === 'string' ? value.trim() : value))
   @IsString()
   @IsOptional()
   mobile?: string;
 
   @ApiPropertyOptional({ example: 'Managing Director' })
+  @Transform(({ value }) => (typeof value === 'string' && value.trim() === '' ? undefined : typeof value === 'string' ? value.trim() : value))
   @IsString()
   @IsOptional()
   designationName?: string;
@@ -111,6 +123,7 @@ export class ModuleFeatureSelectionDto {
     example: [1, 2, 3],
     description: 'Array of feature IDs/UUIDs granted to this organization',
   })
+  @Transform(({ value }) => (Array.isArray(value) ? value.filter((v) => v !== undefined && v !== null && v !== '') : []))
   @IsArray()
   featureIds: Array<number | string>;
 }

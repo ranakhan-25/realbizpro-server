@@ -3,6 +3,7 @@
 
 import type { ProjectShareAssignment } from '../models/projects/project-share-assignment/pr_project_share_assignment.model';
 import type { Invoice } from '../models/projects/billing/pr_invoice.model';
+import type { Project } from '../models/projects/project/pr_project.model';
 import type { WorkOrder } from '../models/projects/billing/work-order/pr_work_order.model';
 import type { ProcurementRfq } from '../models/procurement/rfq/pr_rfq.model';
 import type { ProcurementAssetRfq } from '../models/procurement/rfq/pr_asset_rfq.model';
@@ -30,6 +31,7 @@ export interface ProjectTypeAttributes {
   // Relations
   shareAssignments?: ProjectShareAssignment[];
   invoices?: Invoice[];
+  projects?: Project[];
   workOrders?: WorkOrder[];
   procurementRfqs?: ProcurementRfq[];
   procurementAssetRfqs?: ProcurementAssetRfq[];
@@ -57,6 +59,7 @@ export type ProjectTypeUpdateAttributes = Partial<ProjectTypeCreationAttributes>
 export interface ProjectTypeWithRelations extends ProjectTypeAttributes {
   shareAssignments?: ProjectShareAssignment[];
   invoices?: Invoice[];
+  projects?: Project[];
   workOrders?: WorkOrder[];
   procurementRfqs?: ProcurementRfq[];
   procurementAssetRfqs?: ProcurementAssetRfq[];

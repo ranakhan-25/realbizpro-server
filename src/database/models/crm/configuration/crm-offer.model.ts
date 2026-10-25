@@ -2,8 +2,10 @@ import { BelongsTo, Column, DataType, ForeignKey, HasMany, Table } from 'sequeli
 import { BaseModel } from 'src/database/base.model';
 import { Lead } from 'src/database/models/crm/lead/crm-lead.model';
 
+import type { CrmOfferAttributes, CrmOfferCreationAttributes } from '../../../types/crmoffer.types';
+
 @Table({ tableName: 'crm_offers', timestamps: true, paranoid: true, underscored: true })
-export class CrmOffer extends BaseModel {
+export class CrmOffer extends BaseModel<CrmOfferAttributes, CrmOfferCreationAttributes> {
   @Column({ type: DataType.STRING(200), allowNull: false })
   declare name: string;
 
