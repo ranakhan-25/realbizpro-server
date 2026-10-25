@@ -25,6 +25,8 @@ import { SysUserSection } from './sys_user_section.model';
 import { SysUserToken } from './sys_user_token.model';
 import { SysCompany } from './sys_company.model';
 import { SysUserCompany } from './sys_user_company.model';
+import { SysOrganization } from './sys_organization.model';
+import { SysUserFeatureOverride } from './sys_user_feature_override.model';
 import { ProcurementRfq } from '../procurement/rfq/pr_rfq.model';
 import { ProcurementAssetRfq } from '../procurement/rfq/pr_asset_rfq.model';
 import { ProcurementMaterialRequisition } from '../procurement/requisition/pr_material_requisition.model';
@@ -310,6 +312,37 @@ export class SysUser
     field: 'last_logout_at',
   })
   declare lastLogoutAt?: Date | null;
+
+  @ForeignKey(() => SysOrganization)
+  @Column({
+    type: DataType.BIGINT,
+    allowNull: true,
+    field: 'org_id',
+    comment: 'Tenant organization id. Null for super admins.',
+  })
+  declare orgId?: number;
+
+  @Column({
+    type: DataType.UUID,
+    allowNull: true,
+    field: 'org_uuid',
+  })
+  declare orgUuid?: string;
+
+  @Column({
+    type: DataType.BOOLEAN,
+    allowNull: true,
+    defaultValue: false,
+    field: 'is_org_admin',
+    comment: 'True if user is the administrator of the tenant organization',
+  })
+  declare isOrgAdmin?: boolean;
+
+  @BelongsTo(() => SysOrganization, 'org_id')
+  declare organization?: SysOrganization;
+
+  @HasMany(() => SysUserFeatureOverride, 'user_id')
+  declare featureOverrides?: SysUserFeatureOverride[];
 
   // Helper method to check if refresh token is valid
   isRefreshTokenValid(): boolean {

@@ -42,4 +42,10 @@ export class AuthResponseDto {
     required: false,
   })
   exp?: number;
+
+  @ApiProperty({
+    description: 'Authenticated user profile and organization details',
+    required: false,
+  })
+  user?: any;
 }

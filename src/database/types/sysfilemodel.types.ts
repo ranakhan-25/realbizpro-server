@@ -1,5 +1,5 @@
 // Auto-generated types for SysFileModel
-// Source: src\database\models\system\sys_file.model.ts
+// Source: src/database/models/system/sys_file.model.ts
 
 import { CompressionType } from '../models/system/sys_file.model';
 import { FileStatus } from '../models/system/sys_file.model';

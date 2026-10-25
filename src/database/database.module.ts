@@ -25,6 +25,18 @@ import { ProcurementAssetCategory } from './models/procurement/configuration/ass
 import { ProcurementAssetItemEntry } from './models/procurement/configuration/asset/pr_asset_item_entry.model';
 import { ProjectAgreement } from './models/projects/project_aggrement/pr_project_aggrement_model';
 import { ProjectParty } from './models/projects/project_party/pr_project_party_model';
+import { SysPlan } from './models/system/sys_plan.model';
+import { SysOrganization } from './models/system/sys_organization.model';
+import { SysOrgEntitlement } from './models/system/sys_org_entitlement.model';
+import { SysRoleFeature } from './models/system/sys_role_feature.model';
+import { SysUserFeatureOverride } from './models/system/sys_user_feature_override.model';
+import {
+  SysTenantSite,
+  SysTenantMenu,
+  SysTenantMenuItem,
+  SysTenantPage,
+  SysTenantPageBlock,
+} from './models/cms';
 
 @Global()
 @Module({
@@ -56,6 +68,16 @@ import { ProjectParty } from './models/projects/project_party/pr_project_party_m
       ProcurementAssetItemEntry,
       ProjectAgreement,
       ProjectParty,
+      SysPlan,
+      SysOrganization,
+      SysOrgEntitlement,
+      SysRoleFeature,
+      SysUserFeatureOverride,
+      SysTenantSite,
+      SysTenantMenu,
+      SysTenantMenuItem,
+      SysTenantPage,
+      SysTenantPageBlock,
     ]),
   ],
   providers: [
