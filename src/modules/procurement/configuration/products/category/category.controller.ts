@@ -13,6 +13,7 @@ import {
 import {
   ApiBearerAuth,
   ApiOperation,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 
@@ -48,6 +49,20 @@ export class CategoryController {
   })
   findAll(@Query() query: QueryCategoryDto) {
     return this.categoryService.findAll(query);
+  }
+
+  @Get('dropdown')
+  @ApiOperation({ summary: 'Get active procurement categories for dropdowns' })
+  @ApiQuery({ name: 'type', required: false, description: 'Optional category type filter' })
+  dropdown(@Query('type') type?: string) {
+    return this.categoryService.dropdown(type);
+  }
+
+  @Get('combined-dropdown')
+  @ApiOperation({ summary: 'Get categories from Procurement and Project Billing without merging their stored records' })
+  @ApiQuery({ name: 'type', required: false, description: 'Optional category type filter' })
+  combinedDropdown(@Query('type') type?: string) {
+    return this.categoryService.combinedDropdown(type);
   }
 
   @Get(':uuid')

@@ -23,6 +23,8 @@ import { ProcurementUnit } from './models/procurement/configuration/products/pr_
 import { ProcurementItemEntry } from './models/procurement/configuration/products/pr_item_entry.model';
 import { ProcurementAssetCategory } from './models/procurement/configuration/asset/pr_asset_category.model';
 import { ProcurementAssetItemEntry } from './models/procurement/configuration/asset/pr_asset_item_entry.model';
+import { ProjectAgreement } from './models/projects/project_aggrement/pr_project_aggrement_model';
+import { ProjectParty } from './models/projects/project_party/pr_project_party_model';
 import { SysPlan } from './models/system/sys_plan.model';
 import { SysOrganization } from './models/system/sys_organization.model';
 import { SysOrgEntitlement } from './models/system/sys_org_entitlement.model';
@@ -64,6 +66,8 @@ import {
       ProcurementItemEntry,
       ProcurementAssetCategory,
       ProcurementAssetItemEntry,
+      ProjectAgreement,
+      ProjectParty,
       SysPlan,
       SysOrganization,
       SysOrgEntitlement,

@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { IdLogicModule } from '@easysofts/id-logic';
 import { Module } from '@nestjs/common';
 import {
@@ -126,6 +127,8 @@ import { AccountMappingModule } from './modules/procurement/configuration/produc
 import { ProcurementLaborTypeModule } from './modules/procurement/configuration/labor-type/labor-type.module';
 import { ProcurementSubcontractPackageModule } from './modules/procurement/configuration/subcontract-package/subcontract-package.module';
 import { ProcurementDashboardModule } from './modules/procurement/dashboard/procurement-dashboard.module';
+import { CommunicationStatusModule } from './modules/crm/configuration/communication-status/communication-status.module';
+import { LeadModule } from './modules/crm/lead/lead.module';
 import { ProcurementSubCategoryModule } from './modules/procurement/configuration/products/sub-category/sub-category.module';
 import { ProcurementBrandModule } from './modules/procurement/configuration/products/brand/brand.module';
 import { ProcurementUnitModule } from './modules/procurement/configuration/products/unit/unit.module';
@@ -150,6 +153,23 @@ import { HolidayModule } from './modules/hrm/configuration/holiday/holiday.modul
 import { LeaveTypeModule } from './modules/hrm/configuration/leave-type/leave-type.module';
 import { SalaryGradeItemModule } from './modules/hrm/configuration/salary-grade-item/salary-grade-item.module';
 import { ZkTecoDeviceModule } from './modules/hrm/configuration/zkteco-device/zkteco-device.module';
+import { FloorModule } from './modules/projects/floor/floor.module';
+
+import { ProjectAgreementModule } from './modules/projects/project_aggrement/project_aggrement.module';
+import { ProjectMilestoneModule } from './modules/projects/project_milestone/project_milestone.module';
+import { BuildingModule } from './modules/projects/building/building.module';
+import { ProjectPartyModule } from './modules/projects/project_party/project_party.module';
+import { ProjectTaskModule } from './modules/projects/projec_task/projec_task.module';
+import { ProjectBudgetModule } from './modules/projects/project_budget/project_budget.module';
+import { ProjectCostModule } from './modules/projects/project_cost/project_cost.module';
+import { ProjectProgressModule } from './modules/projects/project_progress/project_progress.module';
+import { ProjectControlModule } from './modules/projects/project_control/project_control.module';
+import { UnitPlotModule } from './modules/projects/unit_plot/unit_plot.module';
+
+
+
+
+
 
 @Module({
   imports: [
@@ -229,7 +249,19 @@ import { ZkTecoDeviceModule } from './modules/hrm/configuration/zkteco-device/zk
     ProjectTypeModule,
     ProjectSiteModule,
     ProjectModule,
-    UsersModule,
+    UsersModule, 
+    BuildingModule,
+    FloorModule,
+    UnitPlotModule,
+   
+    ProjectAgreementModule,
+    ProjectMilestoneModule,
+    ProjectPartyModule,
+    ProjectTaskModule,
+    ProjectBudgetModule,
+    ProjectCostModule,
+    ProjectProgressModule, 
+    ProjectControlModule,
     BoqModule,
     TaskModule,
     BoqComparisonModule,
@@ -323,6 +355,12 @@ import { ZkTecoDeviceModule } from './modules/hrm/configuration/zkteco-device/zk
     ProcurementLaborTypeModule,
     ProcurementSubcontractPackageModule,
     ProcurementDashboardModule,
+    CommunicationStatusModule,
+    LeadModule,
+    ProjectBudgetModule,
+    ProjectCostModule,
+    ProjectProgressModule,
+    ProjectControlModule,
   ],
   controllers: [AppController, HealthController],
   providers: [

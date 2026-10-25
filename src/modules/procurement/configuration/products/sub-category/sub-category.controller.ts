@@ -12,6 +12,7 @@ import {
   ApiBearerAuth,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { CreateProcurementSubCategoryDto } from './dto/create-sub-category.dto';
@@ -37,6 +38,20 @@ export class ProcurementSubCategoryController {
   @ApiOperation({ summary: 'Get procurement sub categories' })
   findAll(@Query() query: QueryProcurementSubCategoryDto) {
     return this.subCategoryService.findAll(query);
+  }
+
+  @Get('dropdown')
+  @ApiOperation({ summary: 'Get active procurement sub categories for dropdowns' })
+  @ApiQuery({ name: 'categoryId', required: false, description: 'Optional parent category UUID' })
+  dropdown(@Query('categoryId') categoryId?: string) {
+    return this.subCategoryService.dropdown(categoryId);
+  }
+
+  @Get('combined-dropdown')
+  @ApiOperation({ summary: 'Get sub categories from Procurement and Project Billing as a read-only combined list' })
+  @ApiQuery({ name: 'categoryId', required: false, description: 'Optional parent category UUID' })
+  combinedDropdown(@Query('categoryId') categoryId?: string) {
+    return this.subCategoryService.combinedDropdown(categoryId);
   }
 
   @Get(':uuid')
