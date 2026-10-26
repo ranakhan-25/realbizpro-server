@@ -11,6 +11,7 @@ import { Op } from 'sequelize';
 import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { QueryItemDto } from './dto/query-item.dto';
+
 import { Item } from 'src/database/models/projects/billing/pr_item.model';
 import { BillingCategory } from 'src/database/models/projects/billing/pr_category.model';
 import { BillingSubCategory } from 'src/database/models/projects/billing/pr_sub_category.model';
@@ -20,51 +21,88 @@ export class ItemService {
   constructor(
     @InjectModel(Item)
     private readonly itemModel: typeof Item,
+
     @InjectModel(BillingCategory)
     private readonly categoryModel: typeof BillingCategory,
+
     @InjectModel(BillingSubCategory)
     private readonly subCategoryModel: typeof BillingSubCategory,
   ) {}
 
+  // Create Item
   async create(dto: CreateItemDto) {
+    // Validate category UUID
     if (dto.categoryId) {
-      const cat =
-        await this.categoryModel.findByPk(
-          dto.categoryId,
-        );
-      if (!cat)
+      const category =
+        await this.categoryModel.findOne({
+          where: {
+            uuid: dto.categoryId,
+          },
+        });
+
+      if (!category) {
         throw new BadRequestException(
-          `Category not found`,
+          'Category not found',
         );
-    }
-    if (dto.subCategoryId) {
-      const sub =
-        await this.subCategoryModel.findByPk(
-          dto.subCategoryId,
-        );
-      if (!sub)
-        throw new BadRequestException(
-          `SubCategory not found`,
-        );
+      }
     }
 
-    return this.itemModel.create({ ...dto });
+    // Validate subcategory UUID
+    if (dto.subCategoryId) {
+      const subCategory =
+        await this.subCategoryModel.findOne({
+          where: {
+            uuid: dto.subCategoryId,
+          },
+        });
+
+      if (!subCategory) {
+        throw new BadRequestException(
+          'SubCategory not found',
+        );
+      }
+
+      // Ensure subcategory belongs to the selected category
+      if (
+        dto.categoryId &&
+        subCategory.categoryId !== dto.categoryId
+      ) {
+        throw new BadRequestException(
+          'SubCategory does not belong to the selected category',
+        );
+      }
+    }
+
+    return this.itemModel.create({
+      ...dto,
+    });
   }
 
+  // Get All Items with Pagination, Filtering and Search
   async findAll(query: QueryItemDto) {
-    const page = Number(query.page) || 1;
-    const limit = Number(query.limit) || 10;
+    const page = Math.max(
+      1,
+      Number(query.page) || 1,
+    );
+    const limit = Math.max(
+      1,
+      Number(query.limit) || 10,
+    );
+
     const skip =
       query.skip !== undefined
-        ? Number(query.skip)
+        ? Math.max(0, Number(query.skip) || 0)
         : (page - 1) * limit;
 
     const where: any = {};
 
-    if (query.categoryId)
+    if (query.categoryId) {
       where.categoryId = query.categoryId;
-    if (query.subCategoryId)
+    }
+
+    if (query.subCategoryId) {
       where.subCategoryId = query.subCategoryId;
+    }
 
     if (query.search) {
       where[Op.or] = [
@@ -104,9 +142,12 @@ export class ItemService {
     };
   }
 
+  // Get Single Item by UUID
   async findOne(uuid: string) {
     const item = await this.itemModel.findOne({
-      where: { uuid },
+      where: {
+        uuid,
+      },
       include: [
         {
           model: BillingCategory,
@@ -118,41 +159,106 @@ export class ItemService {
         },
       ],
     });
-    if (!item)
+
+    if (!item) {
       throw new NotFoundException(
         `Item "${uuid}" not found`,
       );
+    }
+
     return item;
   }
 
+  // Update Item by UUID
   async update(uuid: string, dto: UpdateItemDto) {
     const item = await this.findOne(uuid);
-    await item.update({ ...dto });
+
+    // Validate category UUID if supplied
+    if (dto.categoryId) {
+      const category =
+        await this.categoryModel.findOne({
+          where: {
+            uuid: dto.categoryId,
+          },
+        });
+
+      if (!category) {
+        throw new BadRequestException(
+          'Category not found',
+        );
+      }
+    }
+
+    // Validate subcategory UUID if supplied
+    if (dto.subCategoryId) {
+      const subCategory =
+        await this.subCategoryModel.findOne({
+          where: {
+            uuid: dto.subCategoryId,
+          },
+        });
+
+      if (!subCategory) {
+        throw new BadRequestException(
+          'SubCategory not found',
+        );
+      }
+
+      const categoryIdToCheck =
+        dto.categoryId ?? item.categoryId;
+
+      if (
+        categoryIdToCheck &&
+        subCategory.categoryId !==
+          categoryIdToCheck
+      ) {
+        throw new BadRequestException(
+          'SubCategory does not belong to the selected category',
+        );
+      }
+    }
+
+    await item.update({
+      ...dto,
+    });
+
     return item;
   }
 
+  // Soft Delete Item by UUID
   async remove(uuid: string) {
     const item = await this.findOne(uuid);
+
     await item.destroy();
+
     return {
       message: `Item "${uuid}" deleted successfully`,
     };
   }
 
+  // Restore Soft-Deleted Item by UUID
   async restore(uuid: string) {
     const item = await this.itemModel.findOne({
-      where: { uuid },
+      where: {
+        uuid,
+      },
       paranoid: false,
     });
-    if (!item)
+
+    if (!item) {
       throw new NotFoundException(
         `Item "${uuid}" not found`,
       );
-    if (!item.deletedAt)
+    }
+
+    if (!item.deletedAt) {
       throw new BadRequestException(
         'Item is not deleted',
       );
+    }
+
     await item.restore();
+
     return item;
   }
 }

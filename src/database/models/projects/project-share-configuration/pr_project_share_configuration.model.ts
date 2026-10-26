@@ -1,4 +1,7 @@
-import type { ProjectShareConfigurationAttributes, ProjectShareConfigurationCreationAttributes } from '../../../types/projectshareconfiguration.types';
+import type {
+  ProjectShareConfigurationAttributes,
+  ProjectShareConfigurationCreationAttributes,
+} from '../../../types/projectshareconfiguration.types';
 
 import {
   BelongsTo,
@@ -22,9 +25,15 @@ import { Project } from '../project/pr_project.model';
     },
   ],
 })
-export class ProjectShareConfiguration extends BaseModel<ProjectShareConfigurationAttributes, ProjectShareConfigurationCreationAttributes> {
+export class ProjectShareConfiguration extends BaseModel<
+  ProjectShareConfigurationAttributes,
+  ProjectShareConfigurationCreationAttributes
+> {
   @ForeignKey(() => Project)
-  @Column({ type: DataType.UUID, allowNull: false })
+  @Column({
+    type: DataType.UUID,
+    allowNull: false,
+  })
   declare projectId: string;
 
   @BelongsTo(() => Project, {
@@ -34,19 +43,35 @@ export class ProjectShareConfiguration extends BaseModel<ProjectShareConfigurati
   })
   declare project?: Project;
 
-  @Column({ type: DataType.STRING(255), allowNull: false })
+  @Column({
+    type: DataType.STRING(255),
+    allowNull: false,
+  })
   declare titleName: string;
 
-  @Column({ type: DataType.STRING(100), allowNull: false })
+  @Column({
+    type: DataType.STRING(100),
+    allowNull: false,
+  })
   declare shareType: string;
 
-  @Column({ type: DataType.STRING(255), allowNull: true })
+  @Column({
+    type: DataType.STRING(255),
+    allowNull: true,
+  })
   declare taskNames?: string;
 
-  @Column({ type: DataType.STRING(50), allowNull: false })
+  @Column({
+    type: DataType.STRING(50),
+    allowNull: false,
+  })
   declare assignType: string;
 
-  @Column({ type: DataType.DECIMAL(15, 2), allowNull: false, defaultValue: 0 })
+  @Column({
+    type: DataType.DECIMAL(15, 2),
+    allowNull: false,
+    defaultValue: 0,
+  })
   declare configurationAmount: number;
 
   @Column({
@@ -56,12 +81,21 @@ export class ProjectShareConfiguration extends BaseModel<ProjectShareConfigurati
   })
   declare status: 'active' | 'inactive';
 
-  @Column({ type: DataType.STRING, allowNull: true })
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
   declare createdBy?: string;
 
-  @Column({ type: DataType.STRING, allowNull: true })
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
   declare updatedBy?: string;
 
-  @Column({ type: DataType.STRING, allowNull: true })
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
   declare deletedBy?: string;
 }
