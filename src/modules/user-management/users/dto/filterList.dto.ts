@@ -174,4 +174,14 @@ export class QueryUserDto extends PartialType(
   @IsPositive()
   @IsOptional()
   companyId?: number;
+
+  @ApiPropertyOptional({
+    description: 'Filter by Organization ID (Super Admin only)',
+    type: Number,
+  })
+  @Type(() => Number)
+  @IsInt()
+  @IsPositive()
+  @IsOptional()
+  orgId?: number;
 }

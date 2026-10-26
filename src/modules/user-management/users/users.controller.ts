@@ -20,7 +20,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUserId } from '../../../common/decorators/auth.decorators';
+import { CurrentUser, CurrentUserId } from '../../../common/decorators/auth.decorators';
 import { Public } from '../../../common/decorators/public.decorator';
 import { Permissions } from '../../../common/decorators/permissions.decorator';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
@@ -59,10 +59,12 @@ export class UsersController {
   async create(
     @Body() createUserDto: CreateUserDto,
     @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
   ): Promise<any> {
     return this.usersService.create(
       createUserDto,
       userId,
+      currentUser,
     );
   }
 
@@ -112,10 +114,12 @@ export class UsersController {
   })
   async findAll(
     @Query() params: QueryUserDto,
+    @CurrentUser() currentUser: any,
   ): Promise<any> {
     const [users, total] =
       await this.usersService.findAndCount(
         params,
+        currentUser,
       );
     return PaginateHelper.response(users, total, {
       limit: params.limit ?? 20,

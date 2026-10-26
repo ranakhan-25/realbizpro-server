@@ -51,6 +51,8 @@ import { CompanyModule } from './modules/system/sys-company/sys-company.module';
 import { PlansModule } from './modules/system/plans/plans.module';
 import { OrganizationsModule } from './modules/system/organizations/organizations.module';
 import { TenantCmsModule } from './modules/system/cms/tenant-cms.module';
+import { UserAccessModule } from './modules/system/access/user-access.module';
+import { AdminDashboardModule } from './modules/system/dashboard/admin-dashboard.module';
 import { HmacAuthModule } from './modules/engine/hmac-auth/hmac-auth.module';
 import { BullBoardModule } from './modules/engine/queue-dashboard/bull-board.module';
 
@@ -275,6 +277,8 @@ import { UnitPlotModule } from './modules/projects/unit_plot/unit_plot.module';
     PlansModule,
     OrganizationsModule,
     TenantCmsModule,
+    UserAccessModule,
+    AdminDashboardModule,
     SysOfficeModule,
     S3minioModule,
     SysDivisionModule,

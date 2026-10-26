@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -108,10 +109,12 @@ export class RolesController {
   }
 
   @Get('dropdown')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Get roles dropdown list',
     description:
-      'Returns a simplified list of roles for dropdown/select components',
+      'Returns a simplified list of roles for dropdown/select components filtered by caller authority level',
   })
   @ApiResponse({
     status: 200,
@@ -124,13 +127,15 @@ export class RolesController {
         properties: {
           id: { type: 'number' },
           name: { type: 'string' },
+          slug: { type: 'string' },
           description: { type: 'string' },
+          roleLevel: { type: 'number' },
         },
       },
     },
   })
-  async getDropdown() {
-    return this.rolesService.getDropdown();
+  async getDropdown(@Req() req: any) {
+    return this.rolesService.getDropdown(req.user);
   }
 
   @Post(':roleId/permissions/bulk')

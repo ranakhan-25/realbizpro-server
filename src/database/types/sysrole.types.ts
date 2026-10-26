@@ -18,6 +18,7 @@ export interface SysRoleAttributes {
   orgId?: number | null;
   orgUuid?: string | null;
   isSystemRole: boolean;
+  roleLevel: number;
 
   // Relations
   organization?: SysOrganization;
@@ -33,6 +34,7 @@ export interface SysRoleCreationAttributes {
   orgId?: number | null;
   orgUuid?: string | null;
   isSystemRole?: boolean; // Has default value
+  roleLevel?: number; // Has default value
 }
 
 export type SysRoleUpdateAttributes = Partial<SysRoleCreationAttributes>;
