@@ -1,8 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserAccessController } from './user-access.controller';
 import { UserAccessService, UserAccessResponse } from './user-access.service';
+import { getModuleMenuTree, getFullMenuTree } from './module-menus';
 
-describe('UserAccessController', () => {
+describe('UserAccessController & ModuleMenus', () => {
   let controller: UserAccessController;
   let accessService: Partial<Record<keyof UserAccessService, jest.Mock>>;
 
@@ -29,6 +30,7 @@ describe('UserAccessController', () => {
         route: '/dashboard/crm',
         features: ['CRM_LEADS'],
         allowedRoutes: ['*'],
+        menuTree: getFullMenuTree('crm'),
       },
       {
         id: 2,
@@ -38,6 +40,7 @@ describe('UserAccessController', () => {
         route: '/dashboard/project',
         features: ['PRJ_MASTER'],
         allowedRoutes: ['*'],
+        menuTree: getFullMenuTree('project'),
       },
     ],
     entitledModuleKeys: ['crm', 'project'],
@@ -86,5 +89,18 @@ describe('UserAccessController', () => {
     expect(result).toEqual(mockResponse);
     expect(result.entitledModuleKeys).toContain('project');
     expect(result.entitledModuleKeys).not.toContain('accounts');
+    expect(result.accessibleModules[0].menuTree).toBeDefined();
+    expect(result.accessibleModules[0].menuTree?.length).toBeGreaterThan(0);
+  });
+
+  it('correctly prunes module menu trees based on allowedRoutes', () => {
+    const fullCrm = getFullMenuTree('crm');
+    expect(fullCrm.length).toBeGreaterThan(0);
+
+    // Pruned CRM with only 'lead'
+    const pruned = getModuleMenuTree('crm', ['lead', 'lead/pipeline']);
+    expect(pruned.length).toBeGreaterThan(0);
+    const hasLead = pruned.some((n) => n.slug === 'lead' || n.path.includes('lead'));
+    expect(hasLead).toBe(true);
   });
 });
