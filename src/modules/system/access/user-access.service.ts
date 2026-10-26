@@ -8,6 +8,7 @@ import { SysRole } from '../../../database/models/system/sys_role.model';
 import { SysRoleFeature } from '../../../database/models/system/sys_role_feature.model';
 import { SysUser } from '../../../database/models/system/sys_user.model';
 import { SysOrganization } from '../../../database/models/system/sys_organization.model';
+import { getModuleMenuTree, MenuNode } from './module-menus';
 
 export interface AccessibleModuleItem {
   id: number;
@@ -17,6 +18,7 @@ export interface AccessibleModuleItem {
   route: string;
   features: string[];
   allowedRoutes: string[];
+  menuTree?: MenuNode[];
 }
 
 export interface UserAccessResponse {
@@ -134,6 +136,7 @@ export class UserAccessService {
 
       for (const mod of allModules) {
         const key = normalizeModuleKey(mod.code, mod.name);
+        const menuTree = getModuleMenuTree(key, ['*']);
         accessibleModules.push({
           id: mod.id,
           key,
@@ -142,6 +145,7 @@ export class UserAccessService {
           route: `/dashboard/${key}`,
           features: ['*'],
           allowedRoutes: ['*'],
+          menuTree,
         });
       }
     } else if (isOrgAdmin && user.orgId) {
@@ -167,6 +171,7 @@ export class UserAccessService {
 
       for (const { mod, features } of moduleMap.values()) {
         const key = normalizeModuleKey(mod.code, mod.name);
+        const menuTree = getModuleMenuTree(key, ['*']);
         accessibleModules.push({
           id: mod.id,
           key,
@@ -175,6 +180,7 @@ export class UserAccessService {
           route: `/dashboard/${key}`,
           features,
           allowedRoutes: ['*'],
+          menuTree,
         });
       }
     } else if (user.orgId) {
@@ -215,6 +221,8 @@ export class UserAccessService {
         for (const mod of modules) {
           const key = normalizeModuleKey(mod.code, mod.name);
           const features = activeFeatureMap.get(Number(mod.id)) || [];
+          const allowedRoutes = features.map((f) => f.toLowerCase().replace(/_/g, '-'));
+          const menuTree = getModuleMenuTree(key, allowedRoutes);
           accessibleModules.push({
             id: mod.id,
             key,
@@ -222,7 +230,8 @@ export class UserAccessService {
             code: mod.code || key.toUpperCase(),
             route: `/dashboard/${key}`,
             features,
-            allowedRoutes: features.map((f) => f.toLowerCase().replace(/_/g, '-')),
+            allowedRoutes,
+            menuTree,
           });
         }
       }
