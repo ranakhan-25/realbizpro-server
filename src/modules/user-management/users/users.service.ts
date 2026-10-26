@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -925,6 +926,7 @@ export class UsersService {
   async create(
     createUserDto: CreateUserDto,
     createdById?: number,
+    currentUser?: any,
   ): Promise<any> {
     const transaction =
       await this.sequelize.transaction();
@@ -1006,6 +1008,53 @@ export class UsersService {
         }
       }
 
+      // Resolve orgId and orgUuid from creator if present
+      let orgId = (createUserDto as any).orgId;
+      let orgUuid = (createUserDto as any).orgUuid;
+
+      if (currentUser?.orgId) {
+        orgId = currentUser.orgId;
+        orgUuid = currentUser.orgUuid;
+      } else if (!orgId && createdById) {
+        const creator = await this.userModel.findByPk(createdById, {
+          attributes: ['id', 'orgId', 'orgUuid'],
+          transaction,
+        });
+        if (creator?.orgId) {
+          orgId = creator.orgId;
+          orgUuid = creator.orgUuid;
+        }
+      }
+
+      // Role level validation and privilege escalation prevention
+      let isOrgAdmin = false;
+      if (createUserDto.roleIds?.length) {
+        const targetRoles = await this.roleModel.findAll({
+          where: { id: createUserDto.roleIds },
+          attributes: ['id', 'name', 'slug', 'roleLevel', 'orgId'],
+          transaction,
+        });
+
+        if (currentUser && !currentUser.isSuperUser) {
+          for (const r of targetRoles) {
+            if ((r.roleLevel && r.roleLevel < 2) || r.slug === 'super-admin') {
+              throw new ForbiddenException(
+                'Privilege escalation denied: You cannot assign a role higher than your authority level',
+              );
+            }
+            if (r.orgId && r.orgId !== currentUser.orgId) {
+              throw new ForbiddenException(
+                'Cannot assign roles belonging to another organization',
+              );
+            }
+          }
+        }
+
+        isOrgAdmin = targetRoles.some(
+          (r) => r.slug === 'org-admin' || r.roleLevel === 2,
+        );
+      }
+
       // Hash password
       const passwordHash = await argon2.hash(
         createUserDto.password,
@@ -1029,6 +1078,9 @@ export class UsersService {
             createUserDto.isActive ?? true,
           createdById,
           isSuperUser: false,
+          isOrgAdmin,
+          orgId,
+          orgUuid,
           userType: createUserDto.userType,
           designationId:
             createUserDto.designationId,
@@ -1067,13 +1119,17 @@ export class UsersService {
       );
 
       return {
+        id: newUser.id,
         uuid: newUser.uuid,
+        name: newUser.name,
         email: newUser.email,
         firstName: newUser.firstName,
         lastName: newUser.lastName,
         username: newUser.username,
         userType: newUser.userType,
         isActive: newUser.isActive,
+        orgId: newUser.orgId,
+        orgUuid: newUser.orgUuid,
         message: 'User created successfully',
       };
     } catch (error: any) {
@@ -1703,6 +1759,7 @@ export class UsersService {
 
   async findAndCount(
     params: QueryUserDto,
+    currentUser?: any,
   ): Promise<[any[], number]> {
     const {
       search,
@@ -1724,6 +1781,12 @@ export class UsersService {
 
     const whereClause: any = {};
     const employeeWhereClause: any = {};
+
+    if (currentUser && !currentUser.isSuperUser) {
+      whereClause.orgId = currentUser.orgId;
+    } else if (currentUser?.isSuperUser && (params as any).orgId) {
+      whereClause.orgId = (params as any).orgId;
+    }
 
     if (search) {
       const searchTerm = search.trim();
@@ -1894,7 +1957,7 @@ export class UsersService {
         include: [
           {
             association: 'roles',
-            attributes: ['id', 'name', 'slug'],
+            attributes: ['id', 'name', 'slug', 'roleLevel'],
             through: { attributes: [] },
           },
 

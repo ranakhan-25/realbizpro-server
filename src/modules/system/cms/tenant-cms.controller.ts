@@ -10,6 +10,7 @@ import {
   Req,
   UseGuards,
   UnauthorizedException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
@@ -35,7 +36,7 @@ export class TenantCmsController {
     if (!user) {
       throw new UnauthorizedException('Authentication required');
     }
-    // If super admin and queryOrgId provided, allow switching tenant view
+    // If super admin and queryOrgId provided, allow switching tenant view (read-only)
     if (user.isSuperAdmin && queryOrgId) {
       return Number(queryOrgId);
     }
@@ -45,6 +46,25 @@ export class TenantCmsController {
     }
     // Fallback for platform root
     return 1;
+  }
+
+  private resolveMutationOrgId(req: any, queryOrgId?: number): number {
+    const user = req.user;
+    if (!user) {
+      throw new UnauthorizedException('Authentication required');
+    }
+    // Super Admins are explicitly restricted from modifying tenant organization CMS content
+    if (user.isSuperUser || user.isSuperAdmin) {
+      throw new ForbiddenException(
+        'Super Administrators cannot modify tenant organization CMS content. Organization websites are managed solely by their respective Organization Administrators.',
+      );
+    }
+    if (!user.orgId) {
+      throw new ForbiddenException(
+        'Only an organization administrator bound to a company can modify website CMS content.',
+      );
+    }
+    return Number(user.orgId);
   }
 
   // --- SITE SETTINGS ---
@@ -66,7 +86,7 @@ export class TenantCmsController {
     @Body() dto: UpdateTenantSiteDto,
     @Query('orgId') queryOrgId?: number,
   ) {
-    const orgId = this.resolveOrgId(req, queryOrgId);
+    const orgId = this.resolveMutationOrgId(req, queryOrgId);
     return this.cmsService.updateSite(orgId, dto);
   }
 
@@ -89,7 +109,7 @@ export class TenantCmsController {
     @Body() dto: CreateTenantMenuDto,
     @Query('orgId') queryOrgId?: number,
   ) {
-    const orgId = this.resolveOrgId(req, queryOrgId);
+    const orgId = this.resolveMutationOrgId(req, queryOrgId);
     return this.cmsService.createMenu(orgId, dto);
   }
 
@@ -102,7 +122,7 @@ export class TenantCmsController {
     @Body() dto: CreateTenantMenuItemDto,
     @Query('orgId') queryOrgId?: number,
   ) {
-    const orgId = this.resolveOrgId(req, queryOrgId);
+    const orgId = this.resolveMutationOrgId(req, queryOrgId);
     return this.cmsService.createMenuItem(orgId, dto);
   }
 
@@ -116,7 +136,7 @@ export class TenantCmsController {
     @Body() dto: UpdateTenantMenuItemDto,
     @Query('orgId') queryOrgId?: number,
   ) {
-    const orgId = this.resolveOrgId(req, queryOrgId);
+    const orgId = this.resolveMutationOrgId(req, queryOrgId);
     return this.cmsService.updateMenuItem(orgId, Number(id), dto);
   }
 
@@ -129,7 +149,7 @@ export class TenantCmsController {
     @Param('id') id: string,
     @Query('orgId') queryOrgId?: number,
   ) {
-    const orgId = this.resolveOrgId(req, queryOrgId);
+    const orgId = this.resolveMutationOrgId(req, queryOrgId);
     return this.cmsService.deleteMenuItem(orgId, Number(id));
   }
 
@@ -152,7 +172,7 @@ export class TenantCmsController {
     @Body() dto: CreateTenantPageDto,
     @Query('orgId') queryOrgId?: number,
   ) {
-    const orgId = this.resolveOrgId(req, queryOrgId);
+    const orgId = this.resolveMutationOrgId(req, queryOrgId);
     return this.cmsService.createPage(orgId, dto);
   }
 
@@ -166,7 +186,7 @@ export class TenantCmsController {
     @Body() dto: UpdateTenantPageDto,
     @Query('orgId') queryOrgId?: number,
   ) {
-    const orgId = this.resolveOrgId(req, queryOrgId);
+    const orgId = this.resolveMutationOrgId(req, queryOrgId);
     return this.cmsService.updatePage(orgId, Number(id), dto);
   }
 
@@ -179,7 +199,7 @@ export class TenantCmsController {
     @Body() dto: CreateTenantPageBlockDto,
     @Query('orgId') queryOrgId?: number,
   ) {
-    const orgId = this.resolveOrgId(req, queryOrgId);
+    const orgId = this.resolveMutationOrgId(req, queryOrgId);
     return this.cmsService.addPageBlock(orgId, dto);
   }
 
@@ -193,7 +213,7 @@ export class TenantCmsController {
     @Body() dto: UpdateTenantPageBlockDto,
     @Query('orgId') queryOrgId?: number,
   ) {
-    const orgId = this.resolveOrgId(req, queryOrgId);
+    const orgId = this.resolveMutationOrgId(req, queryOrgId);
     return this.cmsService.updatePageBlock(orgId, Number(id), dto);
   }
 
@@ -206,7 +226,7 @@ export class TenantCmsController {
     @Param('id') id: string,
     @Query('orgId') queryOrgId?: number,
   ) {
-    const orgId = this.resolveOrgId(req, queryOrgId);
+    const orgId = this.resolveMutationOrgId(req, queryOrgId);
     return this.cmsService.deletePageBlock(orgId, Number(id));
   }
 

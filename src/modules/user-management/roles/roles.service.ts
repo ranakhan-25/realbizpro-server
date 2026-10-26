@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
+import { Op } from 'sequelize';
 import { SysPermission } from '../../../database/models/system/sys_permission.model';
 import { SysRole } from '../../../database/models/system/sys_role.model';
 import { SysRolePermission } from '../../../database/models/system/sys_role_permission.model';
@@ -434,22 +435,45 @@ export class RolesService {
     });
   }
 
-  async getDropdown(): Promise<
+  async getDropdown(currentUser?: any): Promise<
     Array<{
       id: number;
       name: string;
+      slug: string;
       description: string | null;
+      roleLevel: number;
     }>
   > {
+    const whereConditions: any[] = [];
+
+    if (currentUser && !currentUser.isSuperUser) {
+      whereConditions.push({ roleLevel: { [Op.gte]: 2 } });
+      whereConditions.push({ slug: { [Op.ne]: 'super-admin' } });
+      if (currentUser.orgId) {
+        whereConditions.push({
+          [Op.or]: [
+            { orgId: currentUser.orgId },
+            { isSystemRole: true },
+          ],
+        });
+      }
+    }
+
     const roles = await this.roleModel.findAll({
-      attributes: ['id', 'name', 'description'],
-      order: [['name', 'ASC']],
+      where: whereConditions.length > 0 ? { [Op.and]: whereConditions } : undefined,
+      attributes: ['id', 'name', 'slug', 'description', 'roleLevel'],
+      order: [
+        ['roleLevel', 'ASC'],
+        ['name', 'ASC'],
+      ],
     });
 
     return roles.map((role) => ({
       id: role.id,
       name: role.name,
+      slug: role.slug,
       description: role.description,
+      roleLevel: role.roleLevel || 4,
     }));
   }
 

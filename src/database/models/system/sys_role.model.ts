@@ -78,6 +78,15 @@ export class SysRole extends BaseModel<
   })
   declare isSystemRole: boolean;
 
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+    defaultValue: 4,
+    field: 'role_level',
+    comment: 'Authority level: 1 = Super Admin, 2 = Org Admin, 3 = Manager, 4 = Staff, 5 = Viewer',
+  })
+  declare roleLevel: number;
+
   @BelongsTo(() => SysOrganization, 'org_id')
   declare organization?: SysOrganization;
 
