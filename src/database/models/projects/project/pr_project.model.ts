@@ -48,6 +48,7 @@ import { ProcurementHireBill } from '../../procurement/equipment-hire/pr_hire_bi
 import { ProjectType } from '../project-type/pr_project_type.model';
 import { LeadArea } from 'src/database/models/crm/lead/crm-lead-master-data.model';
 import { SysUser } from 'src/database/models/system/sys_user.model';
+import { CrmLeadPipeline } from 'src/database/models/crm/lead/crm-lead-pipeline.model';
 
 export enum ProjectStatus {
   ACTIVE = 'ACTIVE',
@@ -397,6 +398,9 @@ export class Project
     as: 'equipmentHireBills',
   })
   declare equipmentHireBills?: ProcurementHireBill[];
+
+  @HasMany(() => CrmLeadPipeline, { foreignKey: 'projectId', sourceKey: 'uuid', as: 'crmPipelines' })
+  declare crmPipelines?: CrmLeadPipeline[];
 
   @Column({
     type: DataType.STRING,

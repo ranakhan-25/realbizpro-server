@@ -27,6 +27,9 @@ import type { ProcurementHireIn } from '../models/procurement/equipment-hire/pr_
 import type { ProcurementHireOut } from '../models/procurement/equipment-hire/pr_hire_out.model';
 import type { ProcurementHireBill } from '../models/procurement/equipment-hire/pr_hire_bill.model';
 import type { ProcurementMaterialIssue } from '../models/procurement/material-issue/pr_material_issue.model';
+import type { CrmParty } from '../models/crm/lead/crm-party.model';
+import type { CrmPartyAssignment } from '../models/crm/lead/crm-party-assignment.model';
+import type { CrmPartyCommunication } from '../models/crm/lead/crm-party-communication.model';
 
 export interface SysUserAttributes {
   id: number;
@@ -94,6 +97,10 @@ export interface SysUserAttributes {
   equipmentHireBills?: ProcurementHireBill[];
   procurementMaterialIssues?: ProcurementMaterialIssue[];
   createdProcurementMaterialIssues?: ProcurementMaterialIssue[];
+  assignedCrmParties?: CrmParty[];
+  crmPartyAssignments?: CrmPartyAssignment[];
+  createdCrmPartyAssignments?: CrmPartyAssignment[];
+  crmPartyCommunications?: CrmPartyCommunication[];
 }
 
 export interface SysUserCreationAttributes {
@@ -161,4 +168,8 @@ export interface SysUserWithRelations extends SysUserAttributes {
   equipmentHireBills?: ProcurementHireBill[];
   procurementMaterialIssues?: ProcurementMaterialIssue[];
   createdProcurementMaterialIssues?: ProcurementMaterialIssue[];
+  assignedCrmParties?: CrmParty[];
+  crmPartyAssignments?: CrmPartyAssignment[];
+  createdCrmPartyAssignments?: CrmPartyAssignment[];
+  crmPartyCommunications?: CrmPartyCommunication[];
 }
