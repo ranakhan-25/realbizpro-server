@@ -37,6 +37,7 @@ import type { ProcurementWorkOrderMeasurement } from '../models/procurement/work
 import type { ProcurementWorkBill } from '../models/procurement/work-order/pr_work_bill.model';
 import type { ProcurementHireOrder } from '../models/procurement/equipment-hire/pr_hire_order.model';
 import type { ProcurementHireBill } from '../models/procurement/equipment-hire/pr_hire_bill.model';
+import type { CrmLeadPipeline } from '../models/crm/lead/crm-lead-pipeline.model';
 
 export interface ProjectAttributes {
   id: number;
@@ -100,6 +101,7 @@ export interface ProjectAttributes {
   procurementWorkBills?: ProcurementWorkBill[];
   equipmentHireOrders?: ProcurementHireOrder[];
   equipmentHireBills?: ProcurementHireBill[];
+  crmPipelines?: CrmLeadPipeline[];
 }
 
 export interface ProjectCreationAttributes {
@@ -163,4 +165,5 @@ export interface ProjectWithRelations extends ProjectAttributes {
   procurementWorkBills?: ProcurementWorkBill[];
   equipmentHireOrders?: ProcurementHireOrder[];
   equipmentHireBills?: ProcurementHireBill[];
+  crmPipelines?: CrmLeadPipeline[];
 }

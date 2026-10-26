@@ -43,6 +43,9 @@ import { ProcurementHireIn } from '../procurement/equipment-hire/pr_hire_in.mode
 import { ProcurementHireOut } from '../procurement/equipment-hire/pr_hire_out.model';
 import { ProcurementHireBill } from '../procurement/equipment-hire/pr_hire_bill.model';
 import { ProcurementAssetGrn } from '../procurement/grn/pr_asset_grn.model';
+import { CrmParty } from '../crm/lead/crm-party.model';
+import { CrmPartyAssignment } from '../crm/lead/crm-party-assignment.model';
+import { CrmPartyCommunication } from '../crm/lead/crm-party-communication.model';
 
 export enum UserTypeEnum {
   SHOWROOM = 'Showroom',
@@ -375,4 +378,8 @@ export class SysUser
   @HasMany(() => ProcurementHireBill, { foreignKey: 'added_by_id', sourceKey: 'id', as: 'equipmentHireBills' }) declare equipmentHireBills?: ProcurementHireBill[];
   @HasMany(() => ProcurementMaterialIssue, { foreignKey: 'issued_by_id', sourceKey: 'id', as: 'procurementMaterialIssues' }) declare procurementMaterialIssues?: ProcurementMaterialIssue[];
   @HasMany(() => ProcurementMaterialIssue, { foreignKey: 'added_by_id', sourceKey: 'id', as: 'createdProcurementMaterialIssues' }) declare createdProcurementMaterialIssues?: ProcurementMaterialIssue[];
+  @HasMany(() => CrmParty, { foreignKey: 'assignedToUuid', sourceKey: 'uuid', as: 'assignedCrmParties' }) declare assignedCrmParties?: CrmParty[];
+  @HasMany(() => CrmPartyAssignment, { foreignKey: 'assigneeUuid', sourceKey: 'uuid', as: 'crmPartyAssignments' }) declare crmPartyAssignments?: CrmPartyAssignment[];
+  @HasMany(() => CrmPartyAssignment, { foreignKey: 'assignedByUuid', sourceKey: 'uuid', as: 'createdCrmPartyAssignments' }) declare createdCrmPartyAssignments?: CrmPartyAssignment[];
+  @HasMany(() => CrmPartyCommunication, { foreignKey: 'loggedByUuid', sourceKey: 'uuid', as: 'crmPartyCommunications' }) declare crmPartyCommunications?: CrmPartyCommunication[];
 }

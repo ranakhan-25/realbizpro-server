@@ -129,6 +129,8 @@ import { ProcurementSubcontractPackageModule } from './modules/procurement/confi
 import { ProcurementDashboardModule } from './modules/procurement/dashboard/procurement-dashboard.module';
 import { CommunicationStatusModule } from './modules/crm/configuration/communication-status/communication-status.module';
 import { LeadModule } from './modules/crm/lead/lead.module';
+import { PipelineModule } from './modules/crm/pipeline/pipeline.module';
+import { CrmPartiesModule } from './modules/crm/parties/crm-parties.module';
 import { TeamModule } from './modules/crm/configuration/teams/team.module';
 import { LeadCategoryModule } from './modules/crm/configuration/lead-category/lead-category.module';
 import { CampaignModule } from './modules/crm/configuration/campaigns/campaign.module';
@@ -387,6 +389,8 @@ import { UnitPlotModule } from './modules/projects/unit_plot/unit_plot.module';
     TaskTypeModule,
     InternalTaskModule,
     LeadModule,
+    PipelineModule,
+    CrmPartiesModule,
     ProjectBudgetModule,
     ProjectCostModule,
     ProjectProgressModule,
