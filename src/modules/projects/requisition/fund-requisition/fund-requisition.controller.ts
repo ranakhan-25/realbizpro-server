@@ -9,11 +9,7 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,
 } from '@nestjs/common';
-import { Permissions } from 'src/common/decorators/permissions.decorator';
-import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
-import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 
 import {
   ApiBearerAuth,
@@ -30,14 +26,12 @@ import { QueryFundRequisitionDto } from './dto/query-fund-requisition.dto';
 @ApiTags('Project | Requisition | Fund Requisition')
 @ApiBearerAuth()
 @Controller('fund-requisition')
-@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class FundRequisitionController {
   constructor(
     private readonly fundRequisitionService: FundRequisitionService,
   ) {}
 
   @Post()
-  @Permissions('create_fund_requisition')
   @ApiOperation({
     summary: 'Create a new fund requisition',
   })
@@ -48,7 +42,6 @@ export class FundRequisitionController {
   }
 
   @Get('reports')
-  @Permissions('view_fund_requisition_reports')
   @ApiOperation({
     summary: 'Get fund requisition report rows (paginated and filterable)',
   })
@@ -61,7 +54,6 @@ export class FundRequisitionController {
   }
 
   @Get()
-  @Permissions('view_fund_requisitions')
   @ApiOperation({
     summary:
       'Get all fund requisitions (paginated)',
@@ -75,7 +67,6 @@ export class FundRequisitionController {
   }
 
   @Get(':uuid')
-  @Permissions('view_fund_requisition')
   @ApiOperation({
     summary: 'Get a fund requisition by UUID',
   })
@@ -86,7 +77,6 @@ export class FundRequisitionController {
   }
 
   @Patch(':uuid')
-  @Permissions('update_fund_requisition')
   @ApiOperation({
     summary: 'Update a fund requisition',
   })
@@ -101,7 +91,6 @@ export class FundRequisitionController {
   }
 
   @Delete(':uuid')
-  @Permissions('delete_fund_requisition')
   @ApiOperation({
     summary: 'Delete a fund requisition',
   })
@@ -112,7 +101,6 @@ export class FundRequisitionController {
   }
 
   @Patch(':uuid/restore')
-  @Permissions('restore_fund_requisition')
   @ApiOperation({
     summary: 'Restore a deleted fund requisition',
   })

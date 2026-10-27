@@ -10,11 +10,7 @@ import {
   Post,
   Query,
   Req,
-  UseGuards,
 } from '@nestjs/common';
-import { Permissions } from 'src/common/decorators/permissions.decorator';
-import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
-import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -35,14 +31,12 @@ type AuthenticatedRequest = Request & {
 @ApiTags('Project | Documents')
 @ApiBearerAuth()
 @Controller('project-documents')
-@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class ProjectDocumentController {
   constructor(
     private readonly projectDocumentService: ProjectDocumentService,
   ) {}
 
   @Post()
-  @Permissions('create_project_document')
   @ApiOperation({ summary: 'Create a project document record' })
   create(
     @Body() dto: CreateProjectDocumentDto,
@@ -52,21 +46,18 @@ export class ProjectDocumentController {
   }
 
   @Get()
-  @Permissions('view_project_documents')
   @ApiOperation({ summary: 'List project document records' })
   findAll(@Query() query: QueryProjectDocumentDto) {
     return this.projectDocumentService.findAll(query);
   }
 
   @Get(':uuid')
-  @Permissions('view_project_document')
   @ApiOperation({ summary: 'Get a project document record by UUID' })
   findOne(@Param('uuid', ParseUUIDPipe) uuid: string) {
     return this.projectDocumentService.findOne(uuid);
   }
 
   @Patch(':uuid')
-  @Permissions('update_project_document')
   @ApiOperation({ summary: 'Update a project document record' })
   update(
     @Param('uuid', ParseUUIDPipe) uuid: string,
@@ -81,7 +72,6 @@ export class ProjectDocumentController {
   }
 
   @Delete(':uuid')
-  @Permissions('delete_project_document')
   @ApiOperation({ summary: 'Soft-delete a project document record' })
   remove(@Param('uuid', ParseUUIDPipe) uuid: string) {
     return this.projectDocumentService.remove(uuid);

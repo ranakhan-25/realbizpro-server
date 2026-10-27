@@ -11,11 +11,7 @@ import {
   Post,
   Query,
   Req,
-  UseGuards,
 } from '@nestjs/common';
-import { Permissions } from 'src/common/decorators/permissions.decorator';
-import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
-import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { CreateFlatLandBookingDto } from './dto/create-flat-land-booking.dto';
@@ -28,12 +24,10 @@ type AuthenticatedRequest = Request & { user?: { id?: number } };
 @ApiTags('CRM | Property | Booking')
 @ApiBearerAuth()
 @Controller('flat-land-bookings')
-@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class FlatLandBookingController {
   constructor(private readonly bookingService: FlatLandBookingService) {}
 
   @Post()
-  @Permissions('create_flat_land_booking')
   @ApiOperation({ summary: 'Create a flat/land booking' })
   create(
     @Body() dto: CreateFlatLandBookingDto,
@@ -43,7 +37,6 @@ export class FlatLandBookingController {
   }
 
   @Get()
-  @Permissions('view_flat_land_bookings')
   @ApiOperation({ summary: 'List flat/land bookings' })
   findAll(@Query() query: QueryFlatLandBookingDto) {
     return this.bookingService.findAll(query);
@@ -54,14 +47,12 @@ export class FlatLandBookingController {
   dropdowns() { return this.bookingService.dropdowns(); }
 
   @Get(':uuid')
-  @Permissions('view_flat_land_booking')
   @ApiOperation({ summary: 'Get a flat/land booking by UUID' })
   findOne(@Param('uuid', ParseUUIDPipe) uuid: string) {
     return this.bookingService.findOne(uuid);
   }
 
   @Put(':uuid')
-  @Permissions('update_flat_land_booking')
   @ApiOperation({ summary: 'Update a flat/land booking (PUT)' })
   updatePut(
     @Param('uuid', ParseUUIDPipe) uuid: string,
@@ -72,7 +63,6 @@ export class FlatLandBookingController {
   }
 
   @Patch(':uuid')
-  @Permissions('update_flat_land_booking')
   @ApiOperation({ summary: 'Update a flat/land booking' })
   update(
     @Param('uuid', ParseUUIDPipe) uuid: string,
@@ -83,7 +73,6 @@ export class FlatLandBookingController {
   }
 
   @Delete(':uuid')
-  @Permissions('delete_flat_land_booking')
   @ApiOperation({ summary: 'Cancel a flat/land booking' })
   remove(@Param('uuid', ParseUUIDPipe) uuid: string) {
     return this.bookingService.remove(uuid);

@@ -10,11 +10,7 @@ import {
   ParseUUIDPipe,
   Query,
   Req,
-  UseGuards,
 } from '@nestjs/common';
-import { Permissions } from 'src/common/decorators/permissions.decorator';
-import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
-import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { QuotationService } from './quotation.service';
@@ -29,12 +25,10 @@ type AuthenticatedRequest = Request & {
 @ApiTags('Project | Quotations')
 @ApiBearerAuth()
 @Controller('quotation')
-@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class QuotationController {
   constructor(private readonly quotationService: QuotationService) {}
 
   @Post()
-  @Permissions('create_quotation')
   create(
     @Body() createQuotationDto: CreateQuotationDto,
     @Req() request: AuthenticatedRequest,
@@ -47,19 +41,16 @@ export class QuotationController {
   }
 
   @Get()
-  @Permissions('view_quotations')
   findAll(@Query() query: QueryQuotationDto) {
     return this.quotationService.findAll(query);
   }
 
   @Get(':uuid')
-  @Permissions('view_quotation')
   findOne(@Param('uuid', ParseUUIDPipe) uuid: string) {
     return this.quotationService.findOne(uuid);
   }
 
   @Patch(':uuid')
-  @Permissions('update_quotation')
   update(
     @Param('uuid', ParseUUIDPipe) uuid: string,
     @Body() updateQuotationDto: UpdateQuotationDto,
@@ -74,7 +65,6 @@ export class QuotationController {
   }
 
   @Delete(':uuid')
-  @Permissions('delete_quotation')
   remove(
     @Param('uuid', ParseUUIDPipe) uuid: string,
     @Req() request: AuthenticatedRequest,
@@ -87,7 +77,6 @@ export class QuotationController {
   }
 
   @Patch(':uuid/restore')
-  @Permissions('restore_quotation')
   restore(@Param('uuid', ParseUUIDPipe) uuid: string) {
     return this.quotationService.restore(uuid);
   }

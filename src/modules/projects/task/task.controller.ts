@@ -9,11 +9,7 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,
 } from '@nestjs/common';
-import { Permissions } from 'src/common/decorators/permissions.decorator';
-import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
-import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 
 import {
   ApiBearerAuth,
@@ -28,14 +24,12 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 @ApiTags('Project | Task')
 @ApiBearerAuth()
 @Controller('task')
-@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class TaskController {
   constructor(
     private readonly taskService: TaskService,
   ) {}
 
   @Post()
-  @Permissions('create_project_task')
   @ApiOperation({
     summary: 'Create a new task',
   })
@@ -47,7 +41,6 @@ export class TaskController {
   }
 
   @Get()
-  @Permissions('view_project_tasks')
   @ApiOperation({
     summary: 'Get all tasks (paginated)',
   })
@@ -59,7 +52,6 @@ export class TaskController {
   }
 
   @Get(':uuid')
-  @Permissions('view_project_task')
   @ApiOperation({
     summary: 'Get task by UUID',
   })
@@ -68,7 +60,6 @@ export class TaskController {
   }
 
   @Patch(':uuid')
-  @Permissions('update_project_task')
   @ApiOperation({
     summary: 'Update task',
   })
@@ -84,7 +75,6 @@ export class TaskController {
   }
 
   @Delete(':uuid')
-  @Permissions('delete_project_task')
   @ApiOperation({
     summary:
       'Soft delete task (status → delayed/inactive & destroy)',
@@ -94,7 +84,6 @@ export class TaskController {
   }
 
   @Patch(':uuid/restore')
-  @Permissions('restore_project_task')
   @ApiOperation({
     summary:
       'Restore soft-deleted task (status → in_progress)',

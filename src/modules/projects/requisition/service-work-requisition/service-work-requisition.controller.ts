@@ -9,11 +9,7 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,
 } from '@nestjs/common';
-import { Permissions } from 'src/common/decorators/permissions.decorator';
-import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
-import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 
 import {
   ApiBearerAuth,
@@ -30,14 +26,12 @@ import { QueryServiceWorkRequisitionDto } from './dto/query-service-work-requisi
 @ApiTags('Project | Requisition | Service Work Requisition')
 @ApiBearerAuth()
 @Controller('service-work-requisition')
-@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class ServiceWorkRequisitionController {
   constructor(
     private readonly serviceWorkRequisitionService: ServiceWorkRequisitionService,
   ) {}
 
   @Post()
-  @Permissions('create_service_work_requisition')
   @ApiOperation({
     summary:
       'Create a new service work requisition',
@@ -51,7 +45,6 @@ export class ServiceWorkRequisitionController {
   }
 
   @Get()
-  @Permissions('view_service_work_requisitions')
   @ApiOperation({
     summary:
       'Get all service work requisitions (paginated)',
@@ -66,7 +59,6 @@ export class ServiceWorkRequisitionController {
   }
 
   @Get(':uuid')
-  @Permissions('view_service_work_requisition')
   @ApiOperation({
     summary:
       'Get a service work requisition by UUID',
@@ -78,7 +70,6 @@ export class ServiceWorkRequisitionController {
   }
 
   @Patch(':uuid')
-  @Permissions('update_service_work_requisition')
   @ApiOperation({
     summary: 'Update a service work requisition',
   })
@@ -93,7 +84,6 @@ export class ServiceWorkRequisitionController {
   }
 
   @Delete(':uuid')
-  @Permissions('delete_service_work_requisition')
   @ApiOperation({
     summary: 'Delete a service work requisition',
   })
@@ -104,7 +94,6 @@ export class ServiceWorkRequisitionController {
   }
 
   @Patch(':uuid/restore')
-  @Permissions('restore_service_work_requisition')
   @ApiOperation({
     summary:
       'Restore a deleted service work requisition',

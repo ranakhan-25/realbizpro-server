@@ -9,7 +9,6 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -18,9 +17,6 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
-import { Permissions } from 'src/common/decorators/permissions.decorator';
-import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
-import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 
 import { BillInvoiceService } from './bill-invoice.service';
 import { CreateBillInvoiceDto } from './dto/create-bill-invoice.dto';
@@ -30,14 +26,12 @@ import { QueryBillInvoiceDto } from './dto/query-bill-invoice.dto';
 @ApiTags('Project | Billing | Bill Invoice')
 @ApiBearerAuth()
 @Controller('bill-invoice')
-@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class BillInvoiceController {
   constructor(
     private readonly billInvoiceService: BillInvoiceService,
   ) {}
 
   @Post()
-  @Permissions('create_bill_invoice')
   @ApiOperation({
     summary:
       'Create new bill / invoice (with items)',
@@ -47,7 +41,6 @@ export class BillInvoiceController {
   }
 
   @Get()
-  @Permissions('view_bill_invoices')
   @ApiOperation({
     summary: 'List bill / invoices (paginated)',
   })
@@ -56,7 +49,6 @@ export class BillInvoiceController {
   }
 
   @Get(':uuid')
-  @Permissions('view_bill_invoice')
   @ApiOperation({
     summary: 'Get bill / invoice by UUID',
   })
@@ -66,7 +58,6 @@ export class BillInvoiceController {
   }
 
   @Patch(':uuid')
-  @Permissions('update_bill_invoice')
   @ApiOperation({
     summary: 'Update bill / invoice by UUID',
   })
@@ -82,7 +73,6 @@ export class BillInvoiceController {
   }
 
   @Delete(':uuid')
-  @Permissions('delete_bill_invoice')
   @ApiOperation({
     summary: 'Delete bill / invoice by UUID',
   })
@@ -92,7 +82,6 @@ export class BillInvoiceController {
   }
 
   @Patch(':uuid/restore')
-  @Permissions('restore_bill_invoice')
   @ApiOperation({
     summary: 'Restore deleted bill / invoice',
   })

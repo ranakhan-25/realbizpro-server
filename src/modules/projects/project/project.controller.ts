@@ -11,11 +11,7 @@ import {
   Put,
   Query,
   Req,
-  UseGuards,
 } from '@nestjs/common';
-import { Permissions } from 'src/common/decorators/permissions.decorator';
-import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
-import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -38,7 +34,6 @@ type AuthenticatedRequest = Request & {
 @ApiTags('Projects')
 @ApiBearerAuth()
 @Controller('project')
-@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
 
@@ -48,63 +43,54 @@ export class ProjectController {
   //   return this.projectService.getDashboardSummary();
   // }
   @Get('reports/details')
-  @Permissions('view_project_reports')
   @ApiOperation({ summary: 'Project details report' })
   detailsReport() {
     return this.projectService.findReport('projects');
   }
 
   @Get('reports/summary')
-  @Permissions('view_project_reports')
   @ApiOperation({ summary: 'Project summary report' })
   summaryReport() {
     return this.projectService.findReport('projects');
   }
 
   @Get('reports/at-a-glance')
-  @Permissions('view_project_reports')
   @ApiOperation({ summary: 'Project at-a-glance report' })
   atAGlanceReport() {
     return this.projectService.findReport('projects');
   }
 
   @Get('reports/financial')
-  @Permissions('view_project_reports')
   @ApiOperation({ summary: 'Project budget report' })
   financialReport() {
     return this.projectService.findReport('projects');
   }
 
   @Get('reports/progress')
-  @Permissions('view_project_reports')
   @ApiOperation({ summary: 'Project progress report' })
   progressReport() {
     return this.projectService.findReport('projects');
   }
 
   @Get('reports/income/project-wise')
-  @Permissions('view_project_reports')
   @ApiOperation({ summary: 'Project-wise income report' })
   projectIncomeReport() {
     return this.projectService.findProjectIncomeReport();
   }
 
   @Get('reports/income/site-wise')
-  @Permissions('view_project_reports')
   @ApiOperation({ summary: 'Site-wise project report' })
   siteIncomeReport() {
     return this.projectService.findSiteIncomeReport();
   }
 
   @Get(':uuid/members')
-  @Permissions('view_project_members')
   @ApiOperation({ summary: 'List project team members' })
   findMembers(@Param('uuid', ParseUUIDPipe) uuid: string) {
     return this.projectService.findMembers(uuid);
   }
 
   @Post(':uuid/members')
-  @Permissions('create_project_member')
   @ApiOperation({ summary: 'Add a member to a project' })
   createMember(
     @Param('uuid', ParseUUIDPipe) uuid: string,
@@ -115,7 +101,6 @@ export class ProjectController {
   }
 
   @Patch(':uuid/members/:memberUuid')
-  @Permissions('update_project_member')
   @ApiOperation({ summary: 'Update a project team member' })
   updateMember(
     @Param('uuid', ParseUUIDPipe) uuid: string,
@@ -132,7 +117,6 @@ export class ProjectController {
   }
 
   @Delete(':uuid/members/:memberUuid')
-  @Permissions('delete_project_member')
   @ApiOperation({ summary: 'Remove a member from a project' })
   removeMember(
     @Param('uuid', ParseUUIDPipe) uuid: string,
@@ -142,7 +126,6 @@ export class ProjectController {
   }
 
   @Post()
-  @Permissions('create_project')
   @ApiOperation({ summary: 'Create a project' })
   create(
     @Body() dto: CreateProjectDto,
@@ -152,21 +135,18 @@ export class ProjectController {
   }
 
   @Get()
-  @Permissions('view_projects')
   @ApiOperation({ summary: 'List projects' })
   findAll(@Query() query: QueryProjectDto) {
     return this.projectService.findAll(query);
   }
 
   @Get(':uuid')
-  @Permissions('view_project')
   @ApiOperation({ summary: 'Get a project by UUID' })
   findOne(@Param('uuid', ParseUUIDPipe) uuid: string) {
     return this.projectService.findOne(uuid);
   }
 
   @Put(':uuid')
-  @Permissions('update_project')
   @ApiOperation({ summary: 'Update a project (PUT)' })
   updatePut(
     @Param('uuid', ParseUUIDPipe) uuid: string,
@@ -177,7 +157,6 @@ export class ProjectController {
   }
 
   @Patch(':uuid')
-  @Permissions('update_project')
   @ApiOperation({ summary: 'Update a project (PATCH)' })
   update(
     @Param('uuid', ParseUUIDPipe) uuid: string,
@@ -188,7 +167,6 @@ export class ProjectController {
   }
 
   @Delete(':uuid')
-  @Permissions('delete_project')
   @ApiOperation({ summary: 'Soft-delete a project' })
   remove(
     @Param('uuid', ParseUUIDPipe) uuid: string,
@@ -198,7 +176,6 @@ export class ProjectController {
   }
 
   @Patch(':uuid/restore')
-  @Permissions('restore_project')
   @ApiOperation({ summary: 'Restore a deleted project' })
   restore(@Param('uuid', ParseUUIDPipe) uuid: string) {
     return this.projectService.restore(uuid);

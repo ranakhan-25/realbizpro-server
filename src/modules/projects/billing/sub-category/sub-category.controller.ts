@@ -9,7 +9,6 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 
 import {
@@ -19,9 +18,6 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
-import { Permissions } from 'src/common/decorators/permissions.decorator';
-import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
-import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 
 import { CreateSubCategoryDto } from './dto/create-sub-category.dto';
 import { UpdateSubCategoryDto } from './dto/update-sub-category.dto';
@@ -31,7 +27,6 @@ import { SubCategoryService } from './sub-category.service';
 @ApiTags('Project | Billing | Sub Category')
 @ApiBearerAuth()
 @Controller('billing-sub-category')
-@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class SubCategoryController {
   constructor(
     private readonly billingSubCategoryService: SubCategoryService,
@@ -39,7 +34,6 @@ export class SubCategoryController {
 
   // CREATE
   @Post()
-  @Permissions('create_billing_sub_category')
   @ApiOperation({
     summary: 'Create a new billing sub category',
   })
@@ -51,7 +45,6 @@ export class SubCategoryController {
 
   // GET ALL
   @Get()
-  @Permissions('view_billing_sub_categories')
   @ApiOperation({
     summary: 'Get all billing sub categories',
   })
@@ -63,7 +56,6 @@ export class SubCategoryController {
 
   // GET ONE
   @Get(':uuid')
-  @Permissions('view_billing_sub_category')
   @ApiOperation({
     summary: 'Get billing sub category by UUID',
   })
@@ -79,7 +71,6 @@ export class SubCategoryController {
 
   // UPDATE
   @Patch(':uuid')
-  @Permissions('update_billing_sub_category')
   @ApiOperation({
     summary: 'Update billing sub category',
   })
@@ -99,7 +90,6 @@ export class SubCategoryController {
 
   // DELETE
   @Delete(':uuid')
-  @Permissions('delete_billing_sub_category')
   @ApiOperation({
     summary: 'Delete billing sub category',
   })
@@ -115,7 +105,6 @@ export class SubCategoryController {
 
   // RESTORE
   @Patch(':uuid/restore')
-  @Permissions('restore_billing_sub_category')
   @ApiOperation({
     summary:
       'Restore deleted billing sub category',

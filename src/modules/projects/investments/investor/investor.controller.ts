@@ -7,11 +7,7 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,
 } from '@nestjs/common';
-import { Permissions } from 'src/common/decorators/permissions.decorator';
-import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
-import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 
 import {
   ApiBearerAuth,
@@ -27,14 +23,12 @@ import { UpdateInvestorDto } from './dto/update-investor.dto';
 @ApiTags('Project | Investments | Investor')
 @ApiBearerAuth()
 @Controller('investor')
-@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class InvestorController {
   constructor(
     private readonly investorService: InvestorService,
   ) {}
 
   @Post()
-  @Permissions('create_investor')
   @ApiOperation({
     summary: 'Create a new investor',
   })
@@ -47,7 +41,6 @@ export class InvestorController {
   }
 
   @Get()
-  @Permissions('view_investors')
   @ApiOperation({
     summary: 'Get all investors (paginated)',
   })
@@ -56,7 +49,6 @@ export class InvestorController {
   }
 
   @Get(':uuid')
-  @Permissions('view_investor')
   @ApiOperation({
     summary: 'Get investor by UUID',
   })
@@ -65,7 +57,6 @@ export class InvestorController {
   }
 
   @Patch(':uuid')
-  @Permissions('update_investor')
   @ApiOperation({ summary: 'Update investor' })
   update(
     @Param('uuid') uuid: string,
@@ -78,7 +69,6 @@ export class InvestorController {
   }
 
   @Delete(':uuid')
-  @Permissions('delete_investor')
   @ApiOperation({
     summary:
       'Soft delete investor (status → inactive)',
@@ -88,7 +78,6 @@ export class InvestorController {
   }
 
   @Patch(':uuid/restore')
-  @Permissions('restore_investor')
   @ApiOperation({
     summary:
       'Restore soft-deleted investor (status → active)',

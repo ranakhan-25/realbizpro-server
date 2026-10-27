@@ -11,11 +11,7 @@ import {
   Post,
   Query,
   Req,
-  UseGuards,
 } from '@nestjs/common';
-import { Permissions } from 'src/common/decorators/permissions.decorator';
-import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
-import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { CreateFlatLandOfferDto } from './dto/create-flat-land-offer.dto';
@@ -28,12 +24,10 @@ type AuthenticatedRequest = Request & { user?: { id?: number } };
 @ApiTags('CRM | Property | Sale Offer')
 @ApiBearerAuth()
 @Controller('flat-land-offers')
-@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class FlatLandOfferController {
   constructor(private readonly offerService: FlatLandOfferService) {}
 
   @Post()
-  @Permissions('create_flat_land_offer')
   @ApiOperation({ summary: 'Create a flat/land sale offer' })
   create(
     @Body() dto: CreateFlatLandOfferDto,
@@ -43,7 +37,6 @@ export class FlatLandOfferController {
   }
 
   @Get()
-  @Permissions('view_flat_land_offers')
   @ApiOperation({ summary: 'List flat/land sale offers' })
   findAll(@Query() query: QueryFlatLandOfferDto) {
     return this.offerService.findAll(query);
@@ -54,14 +47,12 @@ export class FlatLandOfferController {
   dropdowns() { return this.offerService.dropdowns(); }
 
   @Get(':uuid')
-  @Permissions('view_flat_land_offer')
   @ApiOperation({ summary: 'Get a flat/land sale offer by UUID' })
   findOne(@Param('uuid', ParseUUIDPipe) uuid: string) {
     return this.offerService.findOne(uuid);
   }
 
   @Put(':uuid')
-  @Permissions('update_flat_land_offer')
   @ApiOperation({ summary: 'Update a flat/land sale offer (PUT)' })
   updatePut(
     @Param('uuid', ParseUUIDPipe) uuid: string,
@@ -72,7 +63,6 @@ export class FlatLandOfferController {
   }
 
   @Patch(':uuid')
-  @Permissions('update_flat_land_offer')
   @ApiOperation({ summary: 'Update a flat/land sale offer' })
   update(
     @Param('uuid', ParseUUIDPipe) uuid: string,
@@ -83,7 +73,6 @@ export class FlatLandOfferController {
   }
 
   @Delete(':uuid')
-  @Permissions('delete_flat_land_offer')
   @ApiOperation({ summary: 'Soft-delete a flat/land sale offer' })
   remove(@Param('uuid', ParseUUIDPipe) uuid: string) {
     return this.offerService.remove(uuid);

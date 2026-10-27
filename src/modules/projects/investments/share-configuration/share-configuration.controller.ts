@@ -9,11 +9,7 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,
 } from '@nestjs/common';
-import { Permissions } from 'src/common/decorators/permissions.decorator';
-import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
-import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 
 import {
   ApiBearerAuth,
@@ -32,14 +28,12 @@ import { UpdateShareConfigurationDto } from './dto/update-share-configuration.dt
 @ApiTags('Project | Investments | Share Configuration')
 @ApiBearerAuth()
 @Controller('share-configuration')
-@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class ShareConfigurationController {
   constructor(
     private readonly shareConfigurationService: ShareConfigurationService,
   ) {}
 
   @Post()
-  @Permissions('create_share_configuration')
   @ApiOperation({
     summary: 'Create a new share configuration',
   })
@@ -53,7 +47,6 @@ export class ShareConfigurationController {
   }
 
   @Get()
-  @Permissions('view_share_configurations')
   @ApiOperation({
     summary:
       'Get all share configurations (paginated)',
@@ -68,7 +61,6 @@ export class ShareConfigurationController {
   }
 
   @Get(':uuid')
-  @Permissions('view_share_configuration')
   @ApiOperation({
     summary: 'Get share configuration by UUID',
   })
@@ -79,7 +71,6 @@ export class ShareConfigurationController {
   }
 
   @Patch(':uuid')
-  @Permissions('update_share_configuration')
   @ApiOperation({
     summary: 'Update share configuration',
   })
@@ -95,7 +86,6 @@ export class ShareConfigurationController {
   }
 
   @Delete(':uuid')
-  @Permissions('delete_share_configuration')
   @ApiOperation({
     summary:
       'Soft delete share configuration (status → inactive)',
@@ -107,7 +97,6 @@ export class ShareConfigurationController {
   }
 
   @Patch(':uuid/restore')
-  @Permissions('restore_share_configuration')
   @ApiOperation({
     summary:
       'Restore soft-deleted share configuration (status → active)',

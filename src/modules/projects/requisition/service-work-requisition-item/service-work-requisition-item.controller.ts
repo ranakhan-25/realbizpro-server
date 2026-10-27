@@ -9,11 +9,7 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,
 } from '@nestjs/common';
-import { Permissions } from 'src/common/decorators/permissions.decorator';
-import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
-import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 
 import {
   ApiBearerAuth,
@@ -30,14 +26,12 @@ import { QueryServiceWorkRequisitionItemDto } from './dto/query-service-work-req
 @ApiTags('Project | Requisition | Service Work Requisition Item')
 @ApiBearerAuth()
 @Controller('service-work-requisition-item')
-@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class ServiceWorkRequisitionItemController {
   constructor(
     private readonly serviceWorkRequisitionItemService: ServiceWorkRequisitionItemService,
   ) {}
 
   @Post()
-  @Permissions('create_service_work_requisition_item')
   @ApiOperation({
     summary:
       'Create a new service work requisition item',
@@ -52,7 +46,6 @@ export class ServiceWorkRequisitionItemController {
   }
 
   @Get()
-  @Permissions('view_service_work_requisition_items')
   @ApiOperation({
     summary:
       'Get all service work requisition items (paginated)',
@@ -67,7 +60,6 @@ export class ServiceWorkRequisitionItemController {
   }
 
   @Get(':uuid')
-  @Permissions('view_service_work_requisition_item')
   @ApiOperation({
     summary:
       'Get a service work requisition item by UUID',
@@ -79,7 +71,6 @@ export class ServiceWorkRequisitionItemController {
   }
 
   @Patch(':uuid')
-  @Permissions('update_service_work_requisition_item')
   @ApiOperation({
     summary:
       'Update a service work requisition item',
@@ -96,7 +87,6 @@ export class ServiceWorkRequisitionItemController {
   }
 
   @Delete(':uuid')
-  @Permissions('delete_service_work_requisition_item')
   @ApiOperation({
     summary:
       'Delete a service work requisition item',
@@ -108,7 +98,6 @@ export class ServiceWorkRequisitionItemController {
   }
 
   @Patch(':uuid/restore')
-  @Permissions('restore_service_work_requisition_item')
   @ApiOperation({
     summary:
       'Restore a deleted service work requisition item',

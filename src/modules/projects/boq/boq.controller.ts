@@ -9,11 +9,7 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,
 } from '@nestjs/common';
-import { Permissions } from 'src/common/decorators/permissions.decorator';
-import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
-import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 
 import {
   ApiBearerAuth,
@@ -29,14 +25,12 @@ import { UpdateBoqDto } from './dto/update-boq.dto';
 @ApiTags('Projects | BOQ')
 @ApiBearerAuth()
 @Controller('boq')
-@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class BoqController {
   constructor(
     private readonly boqService: BoqService,
   ) {}
 
   @Post()
-  @Permissions('create_boq')
   @ApiOperation({
     summary: 'Create a new BOQ',
   })
@@ -50,7 +44,6 @@ export class BoqController {
   }
 
   @Get()
-  @Permissions('view_boqs')
   @ApiOperation({
     summary: 'Get all BOQs (paginated)',
   })
@@ -62,7 +55,6 @@ export class BoqController {
   }
 
   @Get(':uuid')
-  @Permissions('view_boq')
   @ApiOperation({
     summary: 'Get BOQ by UUID',
   })
@@ -71,7 +63,6 @@ export class BoqController {
   }
 
   @Patch(':uuid')
-  @Permissions('update_boq')
   @ApiOperation({
     summary: 'Update BOQ',
   })
@@ -87,7 +78,6 @@ export class BoqController {
   }
 
   @Delete(':uuid')
-  @Permissions('delete_boq')
   @ApiOperation({
     summary: 'Soft delete BOQ',
   })
@@ -96,7 +86,6 @@ export class BoqController {
   }
 
   @Patch(':uuid/restore')
-  @Permissions('restore_boq')
   @ApiOperation({
     summary: 'Restore soft-deleted BOQ',
   })
