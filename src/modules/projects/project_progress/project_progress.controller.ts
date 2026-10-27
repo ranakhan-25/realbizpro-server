@@ -9,7 +9,7 @@ import {
   Param, 
   Delete, 
   Query, 
-  ParseUUIDPipe 
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { ProjectProgressService } from './project_progress.service';
 import { CreateProjectProgressDto } from './dto/create-project_progress.dto';

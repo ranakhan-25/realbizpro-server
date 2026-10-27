@@ -4,9 +4,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Op, WhereOptions } from 'sequelize';
+import { FindAndCountOptions, Op, WhereOptions } from 'sequelize';
 
 import { WorkOrder } from 'src/database/models/projects/billing/work-order/pr_work_order.model';
+import { WorkOrderAttributes } from 'src/database/types/workorder.types';
 
 type AnyPayload = Record<string, any>;
 
@@ -279,7 +280,7 @@ export class WorkOrderService {
       100,
     );
 
-    const where: WhereOptions<WorkOrder> = {};
+    const where: WhereOptions<WorkOrderAttributes> = {};
 
     if (query.projectId) {
       Object.assign(where, {
@@ -304,14 +305,16 @@ export class WorkOrderService {
       });
     }
 
+    const options: FindAndCountOptions<WorkOrderAttributes> = {
+      where,
+      include: this.includes,
+      limit,
+      offset: (page - 1) * limit,
+      order: [['createdAt', 'DESC']],
+    };
+
     const { rows, count } =
-      await this.model.findAndCountAll({
-        where,
-        include: this.includes,
-        limit,
-        offset: (page - 1) * limit,
-        order: [['createdAt', 'DESC']],
-      });
+      await this.model.findAndCountAll(options);
 
     return {
       data: rows,

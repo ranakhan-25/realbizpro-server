@@ -13,11 +13,23 @@ import {
 export class FeatureNodeDto {
   @ApiPropertyOptional({ example: 1, description: 'Existing numeric ID or omit if creating fresh' })
   @IsOptional()
+  @IsInt()
   id?: number;
 
   @ApiPropertyOptional({ example: 'f3e2d1c0-ba98-7654-3210-fedcba987654' })
   @IsOptional()
+  @IsString()
   uuid?: string;
+
+  @ApiPropertyOptional({ example: 1, description: 'Parent module ID' })
+  @IsOptional()
+  @IsInt()
+  moduleId?: number;
+
+  @ApiPropertyOptional({ example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890' })
+  @IsOptional()
+  @IsString()
+  moduleUuid?: string;
 
   @ApiProperty({ example: 'Create Lead', description: 'Feature display title' })
   @IsString()
@@ -58,7 +70,13 @@ export class FeatureNodeDto {
 export class CreateModuleTreeDto {
   @ApiPropertyOptional({ example: 1, description: 'ID if updating an existing module tree' })
   @IsOptional()
+  @IsInt()
   id?: number;
+
+  @ApiPropertyOptional({ example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890' })
+  @IsOptional()
+  @IsString()
+  uuid?: string;
 
   @ApiProperty({ example: 'CRM & Sales', description: 'Module header name' })
   @IsString()

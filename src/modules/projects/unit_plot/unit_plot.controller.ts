@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 
 import { 
-  Controller, Get, Post, Body, Patch, Put, Param, Delete, Query, ParseUUIDPipe 
+  Controller, Get, Post, Body, Patch, Put, Param, Delete, Query, ParseUUIDPipe
 } from '@nestjs/common';
 import { UnitPlotService } from './unit_plot.service';
 import { CreateUnitPlotDto } from './dto/create-unit_plot.dto';

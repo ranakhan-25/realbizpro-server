@@ -9,7 +9,7 @@ import {
   Param, 
   Delete, 
   Query, 
-  ParseUUIDPipe 
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { ProjectControlService } from './project_control.service';
 import { CreateProjectControlDto } from './dto/create-project_control.dto';

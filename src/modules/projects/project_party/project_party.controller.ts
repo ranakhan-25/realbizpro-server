@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 
 import { 
-  Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseUUIDPipe 
+  Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseUUIDPipe
 } from '@nestjs/common';
 import { ProjectPartyService } from './project_party.service';
 import { CreateProjectPartyDto } from './dto/create-project_party.dto';

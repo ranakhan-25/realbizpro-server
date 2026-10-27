@@ -53,6 +53,7 @@ import { OrganizationsModule } from './modules/system/organizations/organization
 import { TenantCmsModule } from './modules/system/cms/tenant-cms.module';
 import { UserAccessModule } from './modules/system/access/user-access.module';
 import { AdminDashboardModule } from './modules/system/dashboard/admin-dashboard.module';
+import { AdminMenuModule } from './modules/system/admin-menu/admin-menu.module';
 import { HmacAuthModule } from './modules/engine/hmac-auth/hmac-auth.module';
 import { BullBoardModule } from './modules/engine/queue-dashboard/bull-board.module';
 
@@ -162,6 +163,7 @@ import { TeamSummaryReportModule } from './modules/crm/reports/team-summary-repo
 import { InterestedFlatLandReportModule } from './modules/crm/reports/interested-flat-land-report.module';
 import { RequirementsReportModule } from './modules/crm/reports/requirements-report.module';
 import { SalesProbabilityReportModule } from './modules/crm/reports/sales-probability-report.module';
+import { FlatLandSaleReportModule } from './modules/crm/reports/flat-land-sale-report.module';
 import { ProcurementSubCategoryModule } from './modules/procurement/configuration/products/sub-category/sub-category.module';
 import { ProcurementBrandModule } from './modules/procurement/configuration/products/brand/brand.module';
 import { ProcurementUnitModule } from './modules/procurement/configuration/products/unit/unit.module';
@@ -198,6 +200,11 @@ import { ProjectCostModule } from './modules/projects/project_cost/project_cost.
 import { ProjectProgressModule } from './modules/projects/project_progress/project_progress.module';
 import { ProjectControlModule } from './modules/projects/project_control/project_control.module';
 import { UnitPlotModule } from './modules/projects/unit_plot/unit_plot.module';
+import { CustomersAccountsModule } from './modules/accounts/contact/customers_accounts/customers_accounts.module';
+import { AssetsListModule } from './modules/assets/assets_list/assets_list.module';
+
+
+
 
 
 
@@ -310,6 +317,7 @@ import { UnitPlotModule } from './modules/projects/unit_plot/unit_plot.module';
     TenantCmsModule,
     UserAccessModule,
     AdminDashboardModule,
+    AdminMenuModule,
     SysOfficeModule,
     S3minioModule,
     SysDivisionModule,
@@ -355,7 +363,7 @@ import { UnitPlotModule } from './modules/projects/unit_plot/unit_plot.module';
     EmployeeListModule,
     EmployeeSalaryModule,
     EmployeeTypeModule,
-
+     CustomersAccountsModule,
     LoanModule,
     OvertimeModule,
     SalaryGradeModule,
@@ -420,6 +428,7 @@ import { UnitPlotModule } from './modules/projects/unit_plot/unit_plot.module';
     InterestedFlatLandReportModule,
     RequirementsReportModule,
     SalesProbabilityReportModule,
+    FlatLandSaleReportModule,
     LeadModule,
     PipelineModule,
     CrmPartiesModule,
@@ -427,6 +436,8 @@ import { UnitPlotModule } from './modules/projects/unit_plot/unit_plot.module';
     ProjectCostModule,
     ProjectProgressModule,
     ProjectControlModule,
+    AssetsListModule,
+ 
   ],
   controllers: [AppController, HealthController],
   providers: [
