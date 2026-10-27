@@ -12,7 +12,7 @@ import {
   CustomerAccountAttributes,
   CustomerAccountCreationAttributes,
   CustomerAccountUpdateAttributes,
-} from 'src/database/types/customeraccount.types';
+} from 'src/database/types/pr_customer_accounts.model.types';
 import { WorkOrder } from '../billing/work-order/pr_work_order.model';
 
 export enum CustomerAccountStatus {
