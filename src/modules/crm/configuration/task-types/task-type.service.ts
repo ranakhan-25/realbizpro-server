@@ -18,7 +18,7 @@ export class TaskTypeService {
     const name = dto.name.trim();
     await this.assertUniqueName(name);
     const row = await this.taskTypes.create({ name, code: dto.code?.trim() || null, createdBy } as any);
-    if (dto.status === 'Inactive') await row.destroy();
+    if (dto.status === 'Inactive') await row.destroy({ force: false });
     return this.findOne(row.uuid);
   }
 
@@ -60,7 +60,7 @@ export class TaskTypeService {
     if (dto.code !== undefined) changes.code = dto.code.trim() || null;
     if (updatedBy) changes.updatedBy = updatedBy;
     if (Object.keys(changes).length) await row.update(changes);
-    if (dto.status === 'Inactive' && !row.deletedAt) await row.destroy();
+    if (dto.status === 'Inactive' && !row.deletedAt) await row.destroy({ force: false });
     if (dto.status === 'Active' && row.deletedAt) await row.restore();
     return this.findOne(uuid);
   }
@@ -69,7 +69,7 @@ export class TaskTypeService {
     const row = await this.taskTypes.findOne({ where: { uuid } });
     if (!row) throw new NotFoundException(`Task type ${uuid} not found`);
     if (deletedBy) await row.update({ deletedBy });
-    await row.destroy();
+    await row.destroy({ force: false });
     return { message: `Task type ${uuid} deleted successfully` };
   }
 

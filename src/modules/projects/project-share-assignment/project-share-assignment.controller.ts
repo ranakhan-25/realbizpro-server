@@ -26,7 +26,7 @@ type AuthenticatedRequest = Request & {
   user?: { id?: number };
 };
 
-@ApiTags('Project | Project Share Assignments')
+@ApiTags('CRM | Property | Share/Package')
 @ApiBearerAuth()
 @Controller('project-share-assignments')
 export class ProjectShareAssignmentController {
@@ -90,6 +90,10 @@ export class ProjectShareAssignmentController {
     return this.assignmentService.findAll(query);
   }
 
+  @Get('dropdowns')
+  @ApiOperation({ summary: 'Get project, project type, and site dropdown data for share/package records' })
+  dropdowns() { return this.assignmentService.dropdowns(); }
+
   @Get(':uuid')
   @ApiOperation({
     summary: 'Get a share assignment by UUID',
@@ -125,4 +129,8 @@ export class ProjectShareAssignmentController {
   ) {
     return this.assignmentService.remove(uuid);
   }
+
+  @Patch(':uuid/restore')
+  @ApiOperation({ summary: 'Restore a deleted share/package assignment' })
+  restore(@Param('uuid', ParseUUIDPipe) uuid: string) { return this.assignmentService.restore(uuid); }
 }

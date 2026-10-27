@@ -30,6 +30,8 @@ import type { ProcurementMaterialIssue } from '../models/procurement/material-is
 import type { CrmParty } from '../models/crm/lead/crm-party.model';
 import type { CrmPartyAssignment } from '../models/crm/lead/crm-party-assignment.model';
 import type { CrmPartyCommunication } from '../models/crm/lead/crm-party-communication.model';
+import type { LeadCallAssignment } from '../models/crm/lead/crm-lead-call-assignment.model';
+import type { LeadActivity } from '../models/crm/lead/crm-lead-activity.model';
 
 export interface SysUserAttributes {
   id: number;
@@ -101,6 +103,9 @@ export interface SysUserAttributes {
   crmPartyAssignments?: CrmPartyAssignment[];
   createdCrmPartyAssignments?: CrmPartyAssignment[];
   crmPartyCommunications?: CrmPartyCommunication[];
+  crmCallAssignmentsCreated?: LeadCallAssignment[];
+  crmCallAssignmentsReceived?: LeadCallAssignment[];
+  conductedLeadActivities?: LeadActivity[];
 }
 
 export interface SysUserCreationAttributes {
@@ -172,4 +177,7 @@ export interface SysUserWithRelations extends SysUserAttributes {
   crmPartyAssignments?: CrmPartyAssignment[];
   createdCrmPartyAssignments?: CrmPartyAssignment[];
   crmPartyCommunications?: CrmPartyCommunication[];
+  crmCallAssignmentsCreated?: LeadCallAssignment[];
+  crmCallAssignmentsReceived?: LeadCallAssignment[];
+  conductedLeadActivities?: LeadActivity[];
 }

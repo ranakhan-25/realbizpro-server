@@ -74,7 +74,7 @@ export class PriceRangeService {
   async remove(uuid: string) {
     const row = await this.ranges.findOne({ where: { uuid } });
     if (!row) throw new NotFoundException(`Price range ${uuid} not found`);
-    await row.destroy();
+    await row.destroy({ force: false });
     return { message: `Price range ${uuid} deleted successfully` };
   }
 

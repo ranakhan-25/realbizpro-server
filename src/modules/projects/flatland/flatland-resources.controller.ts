@@ -21,7 +21,7 @@ import { FlatLandService } from './flatland.service';
 
 type AuthenticatedRequest = Request & { user?: { id?: number } };
 
-@ApiTags('Project | Flat Land | Flats')
+@ApiTags('CRM | Property | Flat')
 @ApiBearerAuth()
 @Controller('flat-land/flats')
 export class FlatRecordsController {
@@ -41,6 +41,10 @@ export class FlatRecordsController {
   findAll(@Query() query: QueryFlatLandDto) {
     return this.flatLandService.findAll(query, 'flat');
   }
+
+  @Get('dropdowns')
+  @ApiOperation({ summary: 'Get flat form filter and related entity dropdown data' })
+  dropdowns() { return this.flatLandService.dropdowns(); }
 
   @Get(':uuid')
   @ApiOperation({ summary: 'Get a flat by UUID' })
@@ -86,7 +90,7 @@ export class FlatRecordsController {
   }
 }
 
-@ApiTags('Flat Land | Land Details')
+@ApiTags('CRM | Property | Land')
 @ApiBearerAuth()
 @Controller('flat-land/lands')
 export class FlatLandDetailsController {
@@ -106,6 +110,10 @@ export class FlatLandDetailsController {
   findAll(@Query() query: QueryFlatLandDto) {
     return this.flatLandService.findAll(query, 'land');
   }
+
+  @Get('dropdowns')
+  @ApiOperation({ summary: 'Get land form project, site, road, block, and status dropdown data' })
+  dropdowns() { return this.flatLandService.dropdowns(); }
 
   @Get(':uuid')
   @ApiOperation({ summary: 'Get a land plot by UUID' })

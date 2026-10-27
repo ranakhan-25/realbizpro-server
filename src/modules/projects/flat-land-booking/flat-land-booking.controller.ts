@@ -21,7 +21,7 @@ import { FlatLandBookingService } from './flat-land-booking.service';
 
 type AuthenticatedRequest = Request & { user?: { id?: number } };
 
-@ApiTags('Project | Flat/Land Bookings')
+@ApiTags('CRM | Property | Booking')
 @ApiBearerAuth()
 @Controller('flat-land-bookings')
 export class FlatLandBookingController {
@@ -41,6 +41,10 @@ export class FlatLandBookingController {
   findAll(@Query() query: QueryFlatLandBookingDto) {
     return this.bookingService.findAll(query);
   }
+
+  @Get('dropdowns')
+  @ApiOperation({ summary: 'Get project, available property, and existing booking status dropdown data' })
+  dropdowns() { return this.bookingService.dropdowns(); }
 
   @Get(':uuid')
   @ApiOperation({ summary: 'Get a flat/land booking by UUID' })
@@ -73,4 +77,8 @@ export class FlatLandBookingController {
   remove(@Param('uuid', ParseUUIDPipe) uuid: string) {
     return this.bookingService.remove(uuid);
   }
+
+  @Patch(':uuid/restore')
+  @ApiOperation({ summary: 'Restore a deleted booking and reserve its property when available' })
+  restore(@Param('uuid', ParseUUIDPipe) uuid: string) { return this.bookingService.restore(uuid); }
 }

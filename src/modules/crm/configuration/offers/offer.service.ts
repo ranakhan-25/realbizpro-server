@@ -25,10 +25,7 @@ export class OfferService {
     const where: any = {};
     if (query.status) where.status = query.status;
     const search = query.search?.trim();
-    if (search) where[Op.or] = [
-      { name: { [Op.iLike]: `%${search}%` } },
-      { description: { [Op.iLike]: `%${search}%` } },
-    ];
+    if (search) where.name = { [Op.iLike]: `%${search}%` };
     const { rows, count } = await this.offers.findAndCountAll({
       where, limit, offset: (page - 1) * limit, order: [['createdAt', 'DESC']],
       paranoid: !query.withDeleted,
@@ -58,7 +55,7 @@ export class OfferService {
   async remove(uuid: string) {
     const row = await this.offers.findOne({ where: { uuid } });
     if (!row) throw new NotFoundException(`Offer ${uuid} not found`);
-    await row.destroy();
+    await row.destroy({ force: false });
     return { message: `Offer ${uuid} deleted successfully` };
   }
 
@@ -72,7 +69,7 @@ export class OfferService {
 
   async dropdown() {
     const rows = await this.offers.findAll({
-      where: { status: OfferStatus.ACTIVE }, attributes: ['uuid', 'name', 'description'], order: [['name', 'ASC']],
+      where: { status: OfferStatus.ACTIVE }, attributes: ['uuid', 'name'], order: [['name', 'ASC']],
     });
     return rows.map(row => {
       const result = row.toJSON() as Record<string, any>;

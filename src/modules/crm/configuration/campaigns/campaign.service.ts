@@ -76,7 +76,7 @@ export class CampaignService {
   async remove(uuid: string) {
     const campaign = await this.campaigns.findOne({ where: { uuid } });
     if (!campaign) throw new NotFoundException(`Campaign ${uuid} not found`);
-    await campaign.destroy();
+    await campaign.destroy({ force: false });
     return { message: `Campaign ${uuid} deleted successfully` };
   }
 

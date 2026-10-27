@@ -5,6 +5,8 @@ import { Sequelize } from 'sequelize-typescript';
 import { FlatLand } from 'src/database/models/projects/flatland/pr_flatland.model';
 import { FlatLandOffer } from 'src/database/models/projects/flat-land-offer/pr_flat_land_offer.model';
 import { Project } from 'src/database/models/projects/project/pr_project.model';
+import { ProjectTeamMember } from 'src/database/models/projects/project-team-member/pr_project_team_member.model';
+import { SysUser } from 'src/database/models/system/sys_user.model';
 import { CreateFlatLandOfferDto } from './dto/create-flat-land-offer.dto';
 import { QueryFlatLandOfferDto } from './dto/query-flat-land-offer.dto';
 import { UpdateFlatLandOfferDto } from './dto/update-flat-land-offer.dto';
@@ -18,6 +20,8 @@ export class FlatLandOfferService {
     private readonly flatLandModel: typeof FlatLand,
     @InjectModel(Project)
     private readonly projectModel: typeof Project,
+    @InjectModel(ProjectTeamMember) private readonly teamMembers: typeof ProjectTeamMember,
+    @InjectModel(SysUser) private readonly users: typeof SysUser,
     @InjectConnection()
     private readonly sequelize: Sequelize,
   ) {}
@@ -80,19 +84,25 @@ export class FlatLandOfferService {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const search = query.search?.trim();
-    const where: WhereOptions<FlatLandOffer> = search
-      ? {
-          [Op.or]: [
+    const where: WhereOptions<FlatLandOffer> = {
+      ...(query.projectId ? { projectId: query.projectId } : {}),
+      ...(query.salesBy ? { salesBy: { [Op.iLike]: `%${query.salesBy.trim()}%` } } : {}),
+      ...(query.dateFrom || query.dateTo ? { offerDate: { ...(query.dateFrom ? { [Op.gte]: query.dateFrom } : {}), ...(query.dateTo ? { [Op.lte]: query.dateTo } : {}) } } : {}),
+      ...(search ? { [Op.or]: [
             { code: { [Op.iLike]: `%${search}%` } },
             { customerName: { [Op.iLike]: `%${search}%` } },
             { salesBy: { [Op.iLike]: `%${search}%` } },
-          ],
-        }
-      : {};
+          ] } : {}),
+    } as WhereOptions<FlatLandOffer>;
+    if (query.teamId) {
+      const teamMember = await this.teamMembers.findOne({ where: { uuid: query.teamId } as WhereOptions<ProjectTeamMember>, attributes: ['projectId'] });
+      if (!teamMember) return { data: [], meta: { total: 0, page, limit, totalPages: 0 } };
+      Object.assign(where, { projectId: teamMember.projectId });
+    }
     const { rows, count } = await this.offerModel.findAndCountAll({
       where: where as WhereOptions<FlatLandOffer>,
       include: [
-        { model: this.projectModel, as: 'project', attributes: ['uuid', 'code', 'name'] },
+        { model: this.projectModel, as: 'project', attributes: ['uuid', 'code', 'name'], include: [{ association: 'sites', attributes: ['uuid', 'code', 'name'], required: false }] },
         { model: this.flatLandModel, as: 'flatLand', attributes: ['uuid', 'flatLandNo'] },
       ],
       limit,
@@ -105,11 +115,22 @@ export class FlatLandOfferService {
     };
   }
 
+  async dropdowns() {
+    const [projects, properties, statuses, teams, salesPeople] = await Promise.all([
+      this.projectModel.findAll({ attributes: ['uuid', 'code', 'name'], order: [['name', 'ASC']] }),
+      this.flatLandModel.findAll({ attributes: ['uuid', 'flatLandNo', 'propertyType', 'projectId', 'projectName'], order: [['flatLandNo', 'ASC']] }),
+      this.offerModel.findAll({ attributes: ['approvalStatus'], group: ['approvalStatus'], order: [['approvalStatus', 'ASC']] }),
+      this.teamMembers.findAll({ attributes: ['uuid', 'name', 'email', 'projectId'], order: [['name', 'ASC']] }),
+      this.users.findAll({ where: { isActive: true }, attributes: ['uuid', 'userCode', 'name'], order: [['name', 'ASC']] }),
+    ]);
+    return { projects, properties, teams, salesPeople, statuses: statuses.map(row => ({ value: row.approvalStatus ?? '', name: row.approvalStatus ?? 'Not set' })) };
+  }
+
   async findOne(uuid: string) {
     const offer = await this.offerModel.findOne({
       where: { uuid } as WhereOptions<FlatLandOffer>,
       include: [
-        { model: this.projectModel, as: 'project', attributes: ['uuid', 'code', 'name'] },
+        { model: this.projectModel, as: 'project', attributes: ['uuid', 'code', 'name'], include: [{ association: 'sites', attributes: ['uuid', 'code', 'name'], required: false }] },
         { model: this.flatLandModel, as: 'flatLand', attributes: ['uuid', 'flatLandNo'] },
       ],
     });
@@ -170,5 +191,13 @@ export class FlatLandOfferService {
     }
     await offer.destroy();
     return { message: `Flat/Land offer "${uuid}" deleted successfully` };
+  }
+
+  async restore(uuid: string) {
+    const offer = await this.offerModel.findOne({ where: { uuid } as WhereOptions<FlatLandOffer>, paranoid: false });
+    if (!offer) throw new NotFoundException(`Flat/Land offer "${uuid}" not found`);
+    if (!offer.deletedAt) throw new BadRequestException(`Flat/Land offer "${uuid}" is not deleted`);
+    await offer.restore();
+    return this.findOne(uuid);
   }
 }

@@ -9,6 +9,7 @@ import {
 import { BaseModel } from 'src/database/base.model';
 import { SysUser } from 'src/database/models/system/sys_user.model';
 import { LeadStage } from 'src/database/models/crm/configuration/crm-lead-stage.model';
+import { Project } from 'src/database/models/projects/project/pr_project.model';
 import { CrmOffer } from 'src/database/models/crm/configuration/crm-offer.model';
 import { LeadActivity } from './crm-lead-activity.model';
 import { LeadAttachment } from './crm-lead-attachment.model';
@@ -16,6 +17,7 @@ import { LeadCallAssignment } from './crm-lead-call-assignment.model';
 import { LeadPropertyInterest } from './crm-lead-property-interest.model';
 import { LeadRequirement } from './crm-lead-requirement.model';
 import { LeadTransferLog } from './crm-lead-transfer-log.model';
+import { CrmLeadNegotiation } from '../call-center/crm-lead-negotiation.model';
 import {
   LeadArea,
   LeadCampaign,
@@ -133,6 +135,7 @@ export class Lead extends BaseModel<LeadAttributes, LeadCreationAttributes> {
   @Column({ type: DataType.STRING, allowNull: true, field: 'deleted_by' })
   declare deletedBy?: string;
 
+  @ForeignKey(() => Project)
   @Column({ type: DataType.STRING, allowNull: true, field: 'project_id' })
   declare projectId?: string;
 
@@ -160,6 +163,9 @@ export class Lead extends BaseModel<LeadAttributes, LeadCreationAttributes> {
   @BelongsTo(() => LeadPriceRange, { foreignKey: 'priceRangeId', targetKey: 'id', as: 'priceRange' })
   declare priceRange?: LeadPriceRange;
 
+  @BelongsTo(() => Project, { foreignKey: 'projectId', targetKey: 'uuid', as: 'project' })
+  declare project?: Project;
+
   @BelongsTo(() => SysUser, { foreignKey: 'assignedTo', targetKey: 'uuid', as: 'assignedUser' })
   declare assignedUser?: SysUser;
 
@@ -183,4 +189,7 @@ export class Lead extends BaseModel<LeadAttributes, LeadCreationAttributes> {
 
   @HasMany(() => LeadTransferLog, { foreignKey: 'leadId', sourceKey: 'id', as: 'transferLogs' })
   declare transferLogs?: LeadTransferLog[];
+
+  @HasMany(() => CrmLeadNegotiation, { foreignKey: 'leadId', sourceKey: 'id', as: 'negotiations' })
+  declare negotiations?: CrmLeadNegotiation[];
 }

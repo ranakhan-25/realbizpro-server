@@ -72,7 +72,7 @@ export class LeadSourceService {
   async remove(uuid: string) {
     const row = await this.sources.findOne({ where: { uuid } });
     if (!row) throw new NotFoundException(`Lead source ${uuid} not found`);
-    await row.destroy();
+    await row.destroy({ force: false });
     return { message: `Lead source ${uuid} deleted successfully` };
   }
 
