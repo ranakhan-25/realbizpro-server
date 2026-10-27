@@ -12,6 +12,8 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../../common/guards/roles.guard';
+import { Roles } from '../../../common/decorators/roles.decorator';
 import {
   AdminMenuService,
   AdminMenuItemDto,
@@ -20,7 +22,7 @@ import {
 
 @ApiTags('System | Admin Menu CMS')
 @Controller('system/admin-menus')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth()
 export class AdminMenuController {
   constructor(private readonly adminMenuService: AdminMenuService) {}
@@ -32,13 +34,15 @@ export class AdminMenuController {
   }
 
   @Post()
-  @ApiOperation({ summary: 'Create new admin dashboard menu item' })
+  @Roles('super-admin')
+  @ApiOperation({ summary: 'Create new admin dashboard menu item (Super Admin only)' })
   async createMenuItem(@Body() dto: AdminMenuItemDto): Promise<AdminMenuItemDto> {
     return this.adminMenuService.createMenuItem(dto);
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Update admin dashboard menu item' })
+  @Roles('super-admin')
+  @ApiOperation({ summary: 'Update admin dashboard menu item (Super Admin only)' })
   async updateMenuItem(
     @Param('id') id: string,
     @Body() dto: Partial<AdminMenuItemDto>,
@@ -47,7 +51,8 @@ export class AdminMenuController {
   }
 
   @Put('reorder')
-  @ApiOperation({ summary: 'Batch reorder and reparent admin dashboard menu tree' })
+  @Roles('super-admin')
+  @ApiOperation({ summary: 'Batch reorder and reparent admin dashboard menu tree (Super Admin only)' })
   async reorderTree(
     @Body() body: { items: ReorderAdminMenuItemDto[] },
   ): Promise<{ success: boolean; count: number }> {
@@ -55,7 +60,8 @@ export class AdminMenuController {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Delete admin dashboard menu item' })
+  @Roles('super-admin')
+  @ApiOperation({ summary: 'Delete admin dashboard menu item (Super Admin only)' })
   async deleteMenuItem(
     @Param('id') id: string,
   ): Promise<{ success: boolean; message: string }> {
