@@ -85,6 +85,7 @@ export class RolesController {
   async createWithPermissions(
     @Body()
     createRoleWithPermissionsDto: CreateRoleWithPermissionsDto,
+    @Req() req: any,
   ) {
     return this.rolesService.createRoleWithPermissions(
       {
@@ -94,6 +95,9 @@ export class RolesController {
       },
       createRoleWithPermissionsDto.permissionIds ||
         [],
+      undefined,
+      req.user,
+      createRoleWithPermissionsDto.roleLevel,
     );
   }
 
@@ -104,8 +108,8 @@ export class RolesController {
     status: 200,
     description: 'Roles retrieved successfully',
   })
-  async findAll() {
-    return this.rolesService.findAll();
+  async findAll(@Req() req: any) {
+    return this.rolesService.findAll(req.user);
   }
 
   @Get('dropdown')
