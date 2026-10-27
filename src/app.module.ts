@@ -53,6 +53,7 @@ import { OrganizationsModule } from './modules/system/organizations/organization
 import { TenantCmsModule } from './modules/system/cms/tenant-cms.module';
 import { UserAccessModule } from './modules/system/access/user-access.module';
 import { AdminDashboardModule } from './modules/system/dashboard/admin-dashboard.module';
+import { AdminMenuModule } from './modules/system/admin-menu/admin-menu.module';
 import { HmacAuthModule } from './modules/engine/hmac-auth/hmac-auth.module';
 import { BullBoardModule } from './modules/engine/queue-dashboard/bull-board.module';
 
@@ -279,6 +280,7 @@ import { UnitPlotModule } from './modules/projects/unit_plot/unit_plot.module';
     TenantCmsModule,
     UserAccessModule,
     AdminDashboardModule,
+    AdminMenuModule,
     SysOfficeModule,
     S3minioModule,
     SysDivisionModule,
