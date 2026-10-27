@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 
 import { 
-  Controller, Get, Post, Body, Patch, Put, Param, Delete, Query, ParseUUIDPipe 
+  Controller, Get, Post, Body, Patch, Put, Param, Delete, Query, ParseUUIDPipe
 } from '@nestjs/common';
 import { ProjectAgreementService } from './project_aggrement.service';
 import { CreateProjectAgreementDto } from './dto/create-project_aggrement.dto';
