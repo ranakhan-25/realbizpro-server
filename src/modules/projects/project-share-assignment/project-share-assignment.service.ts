@@ -262,6 +262,15 @@ export class ProjectShareAssignmentService {
     return assignment;
   }
 
+  async dropdowns() {
+    const [projects, projectTypes, sites] = await Promise.all([
+      this.projectModel.findAll({ attributes: ['uuid', 'code', 'name'], order: [['name', 'ASC']] }),
+      this.projectTypeModel.findAll({ attributes: ['uuid', 'code', 'name'], order: [['name', 'ASC']] }),
+      this.siteModel.findAll({ attributes: ['uuid', 'code', 'name', 'projectId'], order: [['name', 'ASC']] }),
+    ]);
+    return { projects, projectTypes, sites, statuses: ['active', 'inactive', 'pending'].map(value => ({ value, name: value })) };
+  }
+
   async update(
     uuid: string,
     dto: UpdateProjectShareAssignmentDto,
@@ -387,6 +396,14 @@ export class ProjectShareAssignmentService {
     return {
       message: `Share assignment "${uuid}" deleted successfully`,
     };
+  }
+
+  async restore(uuid: string) {
+    const assignment = await this.assignmentModel.findOne({ where: { uuid } as WhereOptions<ProjectShareAssignment>, paranoid: false });
+    if (!assignment) throw new NotFoundException(`Share assignment "${uuid}" not found`);
+    if (!assignment.deletedAt) throw new BadRequestException(`Share assignment "${uuid}" is not deleted`);
+    await assignment.restore();
+    return this.findOne(uuid);
   }
 
   async findReport(

@@ -63,7 +63,7 @@ export class VisitStatusService {
     const row = await this.statuses.findOne({ where: { uuid } });
     if (!row) throw new NotFoundException(`Visit status ${uuid} not found`);
     if (deletedBy) await row.update({ deletedBy });
-    await row.destroy();
+    await row.destroy({ force: false });
     return { message: `Visit status ${uuid} deleted successfully` };
   }
 

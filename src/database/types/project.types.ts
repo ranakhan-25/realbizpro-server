@@ -38,6 +38,9 @@ import type { ProcurementWorkBill } from '../models/procurement/work-order/pr_wo
 import type { ProcurementHireOrder } from '../models/procurement/equipment-hire/pr_hire_order.model';
 import type { ProcurementHireBill } from '../models/procurement/equipment-hire/pr_hire_bill.model';
 import type { CrmLeadPipeline } from '../models/crm/lead/crm-lead-pipeline.model';
+import type { LeadPropertyInterest } from '../models/crm/lead/crm-lead-property-interest.model';
+import type { Lead } from '../models/crm/lead/crm-lead.model';
+import type { CrmLeadNegotiation } from '../models/crm/call-center/crm-lead-negotiation.model';
 
 export interface ProjectAttributes {
   id: number;
@@ -102,6 +105,9 @@ export interface ProjectAttributes {
   equipmentHireOrders?: ProcurementHireOrder[];
   equipmentHireBills?: ProcurementHireBill[];
   crmPipelines?: CrmLeadPipeline[];
+  crmLeadInterests?: LeadPropertyInterest[];
+  crmLeads?: Lead[];
+  crmNegotiations?: CrmLeadNegotiation[];
 }
 
 export interface ProjectCreationAttributes {
@@ -166,4 +172,7 @@ export interface ProjectWithRelations extends ProjectAttributes {
   equipmentHireOrders?: ProcurementHireOrder[];
   equipmentHireBills?: ProcurementHireBill[];
   crmPipelines?: CrmLeadPipeline[];
+  crmLeadInterests?: LeadPropertyInterest[];
+  crmLeads?: Lead[];
+  crmNegotiations?: CrmLeadNegotiation[];
 }

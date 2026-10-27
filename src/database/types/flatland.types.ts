@@ -6,6 +6,7 @@ import { FlatLandStatus } from '../models/projects/flatland/pr_flatland.model';
 import type { Project } from '../models/projects/project/pr_project.model';
 import type { FlatLandBooking } from '../models/projects/flat-land-booking/pr_flat_land_booking.model';
 import type { FlatLandOffer } from '../models/projects/flat-land-offer/pr_flat_land_offer.model';
+import type { CrmLeadNegotiation } from '../models/crm/call-center/crm-lead-negotiation.model';
 
 export interface FlatLandAttributes {
   id: number;
@@ -52,6 +53,7 @@ export interface FlatLandAttributes {
   project?: Project;
   bookings?: FlatLandBooking[];
   offers?: FlatLandOffer[];
+  crmNegotiations?: CrmLeadNegotiation[];
 }
 
 export interface FlatLandCreationAttributes {
@@ -98,4 +100,5 @@ export interface FlatLandWithRelations extends FlatLandAttributes {
   project?: Project;
   bookings?: FlatLandBooking[];
   offers?: FlatLandOffer[];
+  crmNegotiations?: CrmLeadNegotiation[];
 }

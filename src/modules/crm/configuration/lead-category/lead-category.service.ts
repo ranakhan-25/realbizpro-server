@@ -64,7 +64,7 @@ export class LeadCategoryService {
   async remove(uuid: string) {
     const row = await this.categories.findOne({ where: { uuid } });
     if (!row) throw new NotFoundException(`Lead category ${uuid} not found`);
-    await row.destroy();
+    await row.destroy({ force: false });
     return { message: `Lead category ${uuid} deleted successfully` };
   }
 

@@ -146,6 +146,11 @@ import { VisitPlaceModule } from './modules/crm/configuration/visit-places/visit
 import { VisitStatusModule } from './modules/crm/configuration/visit-statuses/visit-status.module';
 import { TaskTypeModule } from './modules/crm/configuration/task-types/task-type.module';
 import { InternalTaskModule } from './modules/crm/internal-tasks/internal-task.module';
+import { CallCenterFollowUpModule } from './modules/crm/call-center-follow-up/call-center-follow-up.module';
+import { CallAssignHistoryModule } from './modules/crm/call-center-assign-history/call-assign-history.module';
+import { CallCenterTaskVisitModule } from './modules/crm/call-center-task-visit/call-center-task-visit.module';
+import { DealNegotiationActivityModule } from './modules/crm/deal-negotiation-activity/deal-negotiation-activity.module';
+import { TaskVisitSummaryReportModule } from './modules/crm/task-visit-summary-report/task-visit-summary-report.module';
 import { ProcurementSubCategoryModule } from './modules/procurement/configuration/products/sub-category/sub-category.module';
 import { ProcurementBrandModule } from './modules/procurement/configuration/products/brand/brand.module';
 import { ProcurementUnitModule } from './modules/procurement/configuration/products/unit/unit.module';
@@ -388,6 +393,11 @@ import { UnitPlotModule } from './modules/projects/unit_plot/unit_plot.module';
     VisitStatusModule,
     TaskTypeModule,
     InternalTaskModule,
+    CallCenterFollowUpModule,
+    CallAssignHistoryModule,
+    CallCenterTaskVisitModule,
+    DealNegotiationActivityModule,
+    TaskVisitSummaryReportModule,
     LeadModule,
     PipelineModule,
     CrmPartiesModule,

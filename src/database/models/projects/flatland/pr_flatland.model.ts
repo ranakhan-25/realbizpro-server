@@ -12,6 +12,7 @@ import { BaseModel } from 'src/database/base.model';
 import { Project } from '../project/pr_project.model';
 import { FlatLandBooking } from '../flat-land-booking/pr_flat_land_booking.model';
 import { FlatLandOffer } from '../flat-land-offer/pr_flat_land_offer.model';
+import { CrmLeadNegotiation } from 'src/database/models/crm/call-center/crm-lead-negotiation.model';
 import {
   FlatLandAttributes,
   FlatLandCreationAttributes,
@@ -64,6 +65,9 @@ export class FlatLand
     as: 'offers',
   })
   declare offers?: FlatLandOffer[];
+
+  @HasMany(() => CrmLeadNegotiation, { foreignKey: 'flatLandId', sourceKey: 'flatLandNo', as: 'crmNegotiations' })
+  declare crmNegotiations?: CrmLeadNegotiation[];
 
   @Column({
     type: DataType.STRING,

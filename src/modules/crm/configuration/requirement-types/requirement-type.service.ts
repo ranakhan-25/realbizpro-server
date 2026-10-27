@@ -65,7 +65,7 @@ export class RequirementTypeService {
     const row = await this.types.findOne({ where: { uuid } });
     if (!row) throw new NotFoundException(`Requirement type ${uuid} not found`);
     if (deletedBy) await row.update({ deletedBy });
-    await row.destroy();
+    await row.destroy({ force: false });
     return { message: `Requirement type ${uuid} deleted successfully` };
   }
 

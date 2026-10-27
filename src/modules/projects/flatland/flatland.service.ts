@@ -10,6 +10,8 @@ import {
 import { Op, WhereOptions } from 'sequelize';
 import { Sequelize } from 'sequelize-typescript';
 import { Project } from 'src/database/models/projects/project/pr_project.model';
+import { Site } from 'src/database/models/projects/project-site/pr_project_site.model';
+import { LandInfrastructure, LandInfrastructureKind } from 'src/database/models/projects/land-infrastructure/pr_land_infrastructure.model';
 import {
   FlatLand,
   FlatLandStatus,
@@ -25,9 +27,21 @@ export class FlatLandService {
     private readonly flatLandModel: typeof FlatLand,
     @InjectModel(Project)
     private readonly projectModel: typeof Project,
+    @InjectModel(Site) private readonly siteModel: typeof Site,
+    @InjectModel(LandInfrastructure) private readonly infrastructureModel: typeof LandInfrastructure,
     @InjectConnection()
     private readonly sequelize: Sequelize,
   ) {}
+
+  async dropdowns() {
+    const [projects, sites, roads, blocks] = await Promise.all([
+      this.projectModel.findAll({ attributes: ['uuid', 'code', 'name'], order: [['name', 'ASC']] }),
+      this.siteModel.findAll({ attributes: ['uuid', 'code', 'name', 'projectId'], order: [['name', 'ASC']] }),
+      this.infrastructureModel.findAll({ where: { kind: LandInfrastructureKind.ROAD }, attributes: ['uuid', 'name', 'projectId'], order: [['name', 'ASC']] }),
+      this.infrastructureModel.findAll({ where: { kind: LandInfrastructureKind.BLOCK }, attributes: ['uuid', 'name', 'projectId'], order: [['name', 'ASC']] }),
+    ]);
+    return { projects, sites, roads, blocks, statuses: Object.values(FlatLandStatus).map(value => ({ value, name: value })) };
+  }
 
   async create(dto: CreateFlatLandDto, userId?: number) {
     const uuid = await this.sequelize.transaction(async (transaction) => {
@@ -71,6 +85,9 @@ export class FlatLandService {
     const search = query.search?.trim();
     const where: WhereOptions<FlatLand> = {
       ...(propertyType ? { propertyType } : {}),
+      ...(query.projectId ? { projectId: query.projectId } : {}),
+      ...(query.siteName ? { siteName: query.siteName } : {}),
+      ...(query.status ? { status: query.status } : {}),
       ...(search
         ? {
           [Op.or]: [
@@ -91,6 +108,9 @@ export class FlatLandService {
           model: this.projectModel,
           as: 'project',
           attributes: ['uuid', 'code', 'name'],
+          include: [
+            { association: 'sites', attributes: ['uuid', 'code', 'name'], required: false },
+          ],
         },
       ],
       limit,
@@ -120,6 +140,9 @@ export class FlatLandService {
           model: this.projectModel,
           as: 'project',
           attributes: ['uuid', 'code', 'name'],
+          include: [
+            { association: 'sites', attributes: ['uuid', 'code', 'name'], required: false },
+          ],
         },
       ],
     });
