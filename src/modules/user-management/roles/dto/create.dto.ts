@@ -82,6 +82,15 @@ export class CreateRoleWithPermissionsDto {
   @IsString()
   description?: string;
 
+  @ApiPropertyOptional({
+    description: 'Role authority level (1-5)',
+    example: 4,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  roleLevel?: number;
+
   @ApiProperty({
     description:
       'Array of permission IDs to assign to the role',

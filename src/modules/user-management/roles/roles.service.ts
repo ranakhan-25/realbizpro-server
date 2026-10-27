@@ -87,6 +87,8 @@ export class RolesService {
     createRoleDto: CreateRoleDto,
     permissionIds: number[] = [],
     moduleId?: number,
+    currentUser?: any,
+    roleLevel?: number,
   ): Promise<{
     role: SysRole;
     message: string;
@@ -108,7 +110,6 @@ export class RolesService {
       createRoleDto.name,
     );
 
-    let validatedModuleId = moduleId;
     let validatedPermissionIds: number[] = [];
 
     // Validate permissions if provided
@@ -132,22 +133,10 @@ export class RolesService {
         );
       }
 
-      // Get permissions with their feature/module information
+      // Get permissions to verify they exist
       const existingPermissions =
         await this.permissionModel.findAll({
           where: { id: validatedPermissionIds },
-          include: [
-            {
-              association: 'feature',
-              attributes: ['id', 'moduleId'],
-              include: [
-                {
-                  association: 'module',
-                  attributes: ['id', 'name'],
-                },
-              ],
-            },
-          ],
           attributes: ['id'],
         });
 
@@ -167,77 +156,13 @@ export class RolesService {
           `Permission IDs not found: ${missingIds.join(', ')}`,
         );
       }
-
-      // Extract unique module IDs from permissions
-      const permissionModuleIds = new Set(
-        existingPermissions
-          .map((p) => p.feature?.moduleId)
-          .filter(
-            (id): id is number =>
-              typeof id === 'number',
-          ),
-      );
-
-      // Validate module consistency
-      if (validatedModuleId) {
-        // If moduleId specified, ensure ALL permissions belong to that module
-        const invalidPermissions =
-          existingPermissions.filter(
-            (p) =>
-              p.feature?.moduleId !==
-              validatedModuleId,
-          );
-
-        if (invalidPermissions.length > 0) {
-          const moduleNames = existingPermissions
-            .filter(
-              (p) =>
-                p.feature?.moduleId ===
-                validatedModuleId,
-            )
-            .map((p) => p.feature?.module?.name)
-            .filter(
-              (name, index, arr) =>
-                name &&
-                arr.indexOf(name) === index,
-            );
-
-          throw new BadRequestException(
-            `Some permissions do not belong to module ${validatedModuleId}${moduleNames.length ? ` (${moduleNames.join(', ')})` : ''}. Invalid permission IDs: ${invalidPermissions.map((p) => p.id).join(', ')}`,
-          );
-        }
-      } else {
-        // If no moduleId provided, auto-detect or validate single module
-        if (permissionModuleIds.size === 0) {
-          throw new BadRequestException(
-            'Permissions must belong to at least one module',
-          );
-        } else if (
-          permissionModuleIds.size === 1
-        ) {
-          // Auto-detect module
-          validatedModuleId = Array.from(
-            permissionModuleIds,
-          )[0];
-          console.log(
-            `Auto-detected moduleId: ${validatedModuleId} for role creation`,
-          );
-        } else {
-          // Multiple modules - require explicit moduleId
-          const moduleNames = existingPermissions
-            .map((p) => p.feature?.module?.name)
-            .filter(
-              (name, index, arr) =>
-                name &&
-                arr.indexOf(name) === index,
-            );
-
-          throw new BadRequestException(
-            `Cannot assign permissions from multiple modules during role creation. Found permissions from modules: ${moduleNames.join(', ')}. Please specify a moduleId.`,
-          );
-        }
-      }
     }
+
+    // Determine tenant tenancy and role level
+    const targetOrgId = currentUser && !currentUser.isSuperUser ? currentUser.orgId : undefined;
+    const targetOrgUuid = currentUser && !currentUser.isSuperUser ? currentUser.orgUuid : undefined;
+    const targetIsSystemRole = currentUser && currentUser.isSuperUser ? true : false;
+    const targetRoleLevel = roleLevel || (currentUser && !currentUser.isSuperUser ? 4 : 4);
 
     // Use transaction for data consistency
     const sequelize = this.roleModel.sequelize;
@@ -262,6 +187,10 @@ export class RolesService {
                 slug: nameSlug,
                 description:
                   createRoleDto.description,
+                orgId: targetOrgId,
+                orgUuid: targetOrgUuid,
+                isSystemRole: targetIsSystemRole,
+                roleLevel: targetRoleLevel,
               },
               { transaction },
             );
@@ -339,7 +268,7 @@ export class RolesService {
       // Generate success message
       const permissionMessage =
         result.assignedCount > 0
-          ? ` with ${result.assignedCount} permissions${validatedModuleId ? ` from module ${validatedModuleId}` : ''}`
+          ? ` with ${result.assignedCount} permissions`
           : '';
 
       return {
@@ -401,12 +330,28 @@ export class RolesService {
     }
   }
 
-  async findAll(): Promise<SysRole[]> {
+  async findAll(currentUser?: any): Promise<SysRole[]> {
+    const whereConditions: any[] = [];
+
+    if (currentUser && !currentUser.isSuperUser) {
+      whereConditions.push({ slug: { [Op.ne]: 'super-admin' } });
+      if (currentUser.orgId) {
+        whereConditions.push({
+          [Op.or]: [
+            { orgId: currentUser.orgId },
+            { isSystemRole: true },
+            { orgId: null },
+          ],
+        });
+      }
+    }
+
     return this.roleModel.findAll({
+      where: whereConditions.length > 0 ? { [Op.and]: whereConditions } : undefined,
       include: [
         {
           association: 'permissions',
-          attributes: ['id', 'key', 'name'],
+          attributes: ['id', 'key', 'name', 'action'],
           through: { attributes: [] },
           include: [
             {
@@ -431,7 +376,10 @@ export class RolesService {
           ],
         },
       ],
-      order: [['name', 'ASC']],
+      order: [
+        ['roleLevel', 'ASC'],
+        ['name', 'ASC'],
+      ],
     });
   }
 
@@ -442,6 +390,7 @@ export class RolesService {
       slug: string;
       description: string | null;
       roleLevel: number;
+      orgId?: number;
     }>
   > {
     const whereConditions: any[] = [];
@@ -454,6 +403,7 @@ export class RolesService {
           [Op.or]: [
             { orgId: currentUser.orgId },
             { isSystemRole: true },
+            { orgId: null },
           ],
         });
       }
@@ -461,7 +411,7 @@ export class RolesService {
 
     const roles = await this.roleModel.findAll({
       where: whereConditions.length > 0 ? { [Op.and]: whereConditions } : undefined,
-      attributes: ['id', 'name', 'slug', 'description', 'roleLevel'],
+      attributes: ['id', 'name', 'slug', 'description', 'roleLevel', 'orgId'],
       order: [
         ['roleLevel', 'ASC'],
         ['name', 'ASC'],
@@ -474,6 +424,7 @@ export class RolesService {
       slug: role.slug,
       description: role.description,
       roleLevel: role.roleLevel || 4,
+      orgId: role.orgId,
     }));
   }
 
