@@ -7,7 +7,7 @@ import {
   Table,
 } from 'sequelize-typescript';
 import { BaseModel } from '../../../base.model';
-import { SupplierAccount } from './acc_supplier_accounts_model';
+
 
 export interface CustomerAccountAttributes {
   uuid?: string;
@@ -168,11 +168,6 @@ export class CustomerAccount
 
   @Column({ type: DataType.STRING, allowNull: true })
   declare deletedBy?: string; 
-  @HasMany(() => SupplierAccount, {
-    foreignKey: 'customerAccountId',
-    as: 'supplierAccounts',
-    onUpdate: 'CASCADE',
-    onDelete: 'SET NULL',
-  })
-  declare supplierAccounts: SupplierAccount[];
+
+
 }

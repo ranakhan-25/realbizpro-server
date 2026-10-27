@@ -53,6 +53,7 @@ import { OrganizationsModule } from './modules/system/organizations/organization
 import { TenantCmsModule } from './modules/system/cms/tenant-cms.module';
 import { UserAccessModule } from './modules/system/access/user-access.module';
 import { AdminDashboardModule } from './modules/system/dashboard/admin-dashboard.module';
+import { AdminMenuModule } from './modules/system/admin-menu/admin-menu.module';
 import { HmacAuthModule } from './modules/engine/hmac-auth/hmac-auth.module';
 import { BullBoardModule } from './modules/engine/queue-dashboard/bull-board.module';
 
@@ -190,7 +191,9 @@ import { ProjectProgressModule } from './modules/projects/project_progress/proje
 import { ProjectControlModule } from './modules/projects/project_control/project_control.module';
 import { UnitPlotModule } from './modules/projects/unit_plot/unit_plot.module';
 import { CustomersAccountsModule } from './modules/accounts/contact/customers_accounts/customers_accounts.module';
-import { SupplierAccountsModule } from './modules/accounts/supplier_accounts/supplier_accounts.module';
+import { AssetsListModule } from './modules/assets/assets_list/assets_list.module';
+
+
 
 
 
@@ -304,6 +307,7 @@ import { SupplierAccountsModule } from './modules/accounts/supplier_accounts/sup
     TenantCmsModule,
     UserAccessModule,
     AdminDashboardModule,
+    AdminMenuModule,
     SysOfficeModule,
     S3minioModule,
     SysDivisionModule,
@@ -412,6 +416,7 @@ import { SupplierAccountsModule } from './modules/accounts/supplier_accounts/sup
     ProjectCostModule,
     ProjectProgressModule,
     ProjectControlModule,
+    AssetsListModule,
  
   ],
   controllers: [AppController, HealthController],

@@ -22,6 +22,7 @@ import { SysUser } from '../../../database/models/system/sys_user.model';
 import { SysUserPermission } from '../../../database/models/system/sys_user_permission.model';
 import { SysUserRole } from '../../../database/models/system/sys_user_role.model';
 import { SysUserSection } from '../../../database/models/system/sys_user_section.model';
+import { SysOrganization } from '../../../database/models/system/sys_organization.model';
 import { RedisService } from '../../../database/redis.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserFilterDropdownDto } from './dto/filter-dropdown.dto';
@@ -1008,13 +1009,23 @@ export class UsersService {
         }
       }
 
-      // Resolve orgId and orgUuid from creator if present
+      // Resolve orgId and orgUuid
       let orgId = (createUserDto as any).orgId;
       let orgUuid = (createUserDto as any).orgUuid;
 
       if (currentUser?.orgId) {
+        // Enforce tenant isolation: non-super users can only provision in their own organization
         orgId = currentUser.orgId;
         orgUuid = currentUser.orgUuid;
+      } else if (orgId) {
+        // Super Admin assigned orgId directly
+        if (!orgUuid) {
+          const org = await SysOrganization.findByPk(orgId, {
+            attributes: ['id', 'uuid'],
+            transaction,
+          });
+          if (org) orgUuid = org.uuid;
+        }
       } else if (!orgId && createdById) {
         const creator = await this.userModel.findByPk(createdById, {
           attributes: ['id', 'orgId', 'orgUuid'],
@@ -1783,7 +1794,14 @@ export class UsersService {
     const employeeWhereClause: any = {};
 
     if (currentUser && !currentUser.isSuperUser) {
-      whereClause.orgId = currentUser.orgId;
+      if (currentUser.orgId) {
+        whereClause.orgId = currentUser.orgId;
+      } else {
+        // Safe fallback: non-super users without an orgId must never see other users
+        whereClause.id = currentUser.id;
+      }
+      // Never expose super admins to regular org admins / tenant users
+      whereClause.isSuperUser = { [Op.or]: [false, null] };
     } else if (currentUser?.isSuperUser && (params as any).orgId) {
       whereClause.orgId = (params as any).orgId;
     }
