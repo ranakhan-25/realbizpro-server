@@ -304,4 +304,17 @@ export class CreateUserDto {
   )
   @IsInt()
   employeeId?: number;
+
+  @ApiPropertyOptional({ example: 1, description: 'Organization ID for multi-tenant isolation' })
+  @IsOptional()
+  @Transform(({ value }) =>
+    value === '' || value === null || value === undefined ? undefined : Number(value),
+  )
+  @IsInt()
+  orgId?: number;
+
+  @ApiPropertyOptional({ description: 'Organization UUID' })
+  @IsOptional()
+  @IsString()
+  orgUuid?: string;
 }
