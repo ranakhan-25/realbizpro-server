@@ -78,7 +78,7 @@ export class VisitPlaceService {
     const row = await this.places.findOne({ where: { uuid } });
     if (!row) throw new NotFoundException(`Visit place ${uuid} not found`);
     if (deletedBy) await row.update({ deletedBy });
-    await row.destroy();
+    await row.destroy({ force: false });
     return { message: `Visit place ${uuid} deleted successfully` };
   }
 

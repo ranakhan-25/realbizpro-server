@@ -25,7 +25,7 @@ import { FlatLandOfferService } from './flat-land-offer.service';
 
 type AuthenticatedRequest = Request & { user?: { id?: number } };
 
-@ApiTags('Project | Flat/Land Sale Offers')
+@ApiTags('CRM | Property | Sale Offer')
 @ApiBearerAuth()
 @Controller('flat-land-offers')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
@@ -48,6 +48,10 @@ export class FlatLandOfferController {
   findAll(@Query() query: QueryFlatLandOfferDto) {
     return this.offerService.findAll(query);
   }
+
+  @Get('dropdowns')
+  @ApiOperation({ summary: 'Get project, flat/land property, and offer status dropdown data' })
+  dropdowns() { return this.offerService.dropdowns(); }
 
   @Get(':uuid')
   @Permissions('view_flat_land_offer')
@@ -84,4 +88,8 @@ export class FlatLandOfferController {
   remove(@Param('uuid', ParseUUIDPipe) uuid: string) {
     return this.offerService.remove(uuid);
   }
+
+  @Patch(':uuid/restore')
+  @ApiOperation({ summary: 'Restore a deleted flat/land sale offer' })
+  restore(@Param('uuid', ParseUUIDPipe) uuid: string) { return this.offerService.restore(uuid); }
 }

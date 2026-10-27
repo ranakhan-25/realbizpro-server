@@ -3,6 +3,7 @@ import { InjectConnection, InjectModel } from '@nestjs/sequelize';
 import { Op, WhereOptions } from 'sequelize';
 import { Sequelize } from 'sequelize-typescript';
 import { Project } from 'src/database/models/projects/project/pr_project.model';
+import { Site } from 'src/database/models/projects/project-site/pr_project_site.model';
 import {
   LandInfrastructure,
   LandInfrastructureKind,
@@ -18,6 +19,8 @@ export class LandInfrastructureService {
     private readonly infrastructureModel: typeof LandInfrastructure,
     @InjectModel(Project)
     private readonly projectModel: typeof Project,
+    @InjectModel(Site)
+    private readonly siteModel: typeof Site,
     @InjectConnection()
     private readonly sequelize: Sequelize,
   ) {}
@@ -64,7 +67,7 @@ export class LandInfrastructureService {
     };
     const { rows, count } = await this.infrastructureModel.findAndCountAll({
       where: where as WhereOptions<LandInfrastructure>,
-      include: [{ model: this.projectModel, as: 'project', attributes: ['uuid', 'code', 'name'] }],
+      include: [{ model: this.projectModel, as: 'project', attributes: ['uuid', 'code', 'name'], include: [{ association: 'sites', attributes: ['uuid', 'code', 'name'], required: false }] }],
       limit,
       offset: (page - 1) * limit,
       order: [['createdAt', 'DESC']],
@@ -78,7 +81,7 @@ export class LandInfrastructureService {
   async findOne(uuid: string) {
     const item = await this.infrastructureModel.findOne({
       where: { uuid } as WhereOptions<LandInfrastructure>,
-      include: [{ model: this.projectModel, as: 'project', attributes: ['uuid', 'code', 'name'] }],
+      include: [{ model: this.projectModel, as: 'project', attributes: ['uuid', 'code', 'name'], include: [{ association: 'sites', attributes: ['uuid', 'code', 'name'], required: false }] }],
     });
     if (!item) {
       throw new NotFoundException(`Land infrastructure "${uuid}" not found`);
@@ -89,12 +92,21 @@ export class LandInfrastructureService {
   async findOneByKind(uuid: string, kind: LandInfrastructureKind) {
     const item = await this.infrastructureModel.findOne({
       where: { uuid, kind } as WhereOptions<LandInfrastructure>,
-      include: [{ model: this.projectModel, as: 'project', attributes: ['uuid', 'code', 'name'] }],
+      include: [{ model: this.projectModel, as: 'project', attributes: ['uuid', 'code', 'name'], include: [{ association: 'sites', attributes: ['uuid', 'code', 'name'], required: false }] }],
     });
     if (!item) {
       throw new NotFoundException(`Land infrastructure "${uuid}" not found`);
     }
     return item;
+  }
+
+  async dropdowns(kind: LandInfrastructureKind) {
+    const [projects, sites, rows] = await Promise.all([
+      this.projectModel.findAll({ attributes: ['uuid', 'code', 'name'], order: [['name', 'ASC']] }),
+      this.siteModel.findAll({ attributes: ['uuid', 'code', 'name', 'projectId'], order: [['name', 'ASC']] }),
+      this.infrastructureModel.findAll({ where: { kind }, attributes: ['uuid', 'name', 'projectId'], order: [['name', 'ASC']] }),
+    ]);
+    return { projects, sites, [kind === LandInfrastructureKind.ROAD ? 'roads' : 'blocks']: rows };
   }
 
   async update(
@@ -141,5 +153,13 @@ export class LandInfrastructureService {
     }
     await item.destroy();
     return { message: `Land infrastructure "${uuid}" deleted successfully` };
+  }
+
+  async restore(uuid: string, kind?: LandInfrastructureKind) {
+    const item = await this.infrastructureModel.findOne({ where: { uuid, ...(kind ? { kind } : {}) } as WhereOptions<LandInfrastructure>, paranoid: false });
+    if (!item) throw new NotFoundException(`Land infrastructure "${uuid}" not found`);
+    if (!item.deletedAt) throw new BadRequestException(`Land infrastructure "${uuid}" is not deleted`);
+    await item.restore();
+    return kind ? this.findOneByKind(uuid, kind) : this.findOne(uuid);
   }
 }

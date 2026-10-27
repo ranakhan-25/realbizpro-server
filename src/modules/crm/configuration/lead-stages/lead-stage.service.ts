@@ -75,7 +75,7 @@ export class LeadStageService {
   async remove(uuid: string) {
     const row = await this.stages.findOne({ where: { uuid } });
     if (!row) throw new NotFoundException(`Lead stage ${uuid} not found`);
-    await row.destroy();
+    await row.destroy({ force: false });
     return { message: `Lead stage ${uuid} deleted successfully` };
   }
 

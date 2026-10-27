@@ -49,6 +49,9 @@ import { ProjectType } from '../project-type/pr_project_type.model';
 import { LeadArea } from 'src/database/models/crm/lead/crm-lead-master-data.model';
 import { SysUser } from 'src/database/models/system/sys_user.model';
 import { CrmLeadPipeline } from 'src/database/models/crm/lead/crm-lead-pipeline.model';
+import { LeadPropertyInterest } from 'src/database/models/crm/lead/crm-lead-property-interest.model';
+import { Lead } from 'src/database/models/crm/lead/crm-lead.model';
+import { CrmLeadNegotiation } from 'src/database/models/crm/call-center/crm-lead-negotiation.model';
 
 export enum ProjectStatus {
   ACTIVE = 'ACTIVE',
@@ -401,6 +404,15 @@ export class Project
 
   @HasMany(() => CrmLeadPipeline, { foreignKey: 'projectId', sourceKey: 'uuid', as: 'crmPipelines' })
   declare crmPipelines?: CrmLeadPipeline[];
+
+  @HasMany(() => LeadPropertyInterest, { foreignKey: 'projectId', sourceKey: 'uuid', as: 'crmLeadInterests' })
+  declare crmLeadInterests?: LeadPropertyInterest[];
+
+  @HasMany(() => Lead, { foreignKey: 'projectId', sourceKey: 'uuid', as: 'crmLeads' })
+  declare crmLeads?: Lead[];
+
+  @HasMany(() => CrmLeadNegotiation, { foreignKey: 'projectId', sourceKey: 'code', as: 'crmNegotiations' })
+  declare crmNegotiations?: CrmLeadNegotiation[];
 
   @Column({
     type: DataType.STRING,

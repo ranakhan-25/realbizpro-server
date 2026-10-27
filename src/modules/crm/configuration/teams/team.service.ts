@@ -67,7 +67,7 @@ export class TeamService {
 
   async remove(uuid: string) {
     const team = await this.getActive(uuid);
-    await team.destroy();
+    await team.destroy({ force: false });
     return { message: `Team ${uuid} deleted successfully` };
   }
 

@@ -56,7 +56,7 @@ export class AreaService {
   async remove(uuid: string) {
     const row = await this.areas.findOne({ where: { uuid } });
     if (!row) throw new NotFoundException(`Area ${uuid} not found`);
-    await row.destroy();
+    await row.destroy({ force: false });
     return { message: `Area ${uuid} deleted successfully` };
   }
 

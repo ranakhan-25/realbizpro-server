@@ -29,7 +29,7 @@ type AuthenticatedRequest = Request & { user?: { id?: number } };
 
 abstract class ScopedInfrastructureController {
   protected constructor(
-    private readonly service: LandInfrastructureService,
+    protected readonly service: LandInfrastructureService,
     private readonly kind: LandInfrastructureKind,
   ) {}
 
@@ -69,7 +69,7 @@ abstract class ScopedInfrastructureController {
   }
 }
 
-@ApiTags('Flat Land | Roads')
+@ApiTags('CRM | Property | Land | Road')
 @ApiBearerAuth()
 @Controller('land-infrastructure/roads')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
@@ -91,6 +91,10 @@ export class LandRoadsController extends ScopedInfrastructureController {
   findAll(@Query() query: QueryLandInfrastructureDto) {
     return this.listRecords(query);
   }
+
+  @Get('dropdowns')
+  @ApiOperation({ summary: 'Get related project and road dropdown data' })
+  dropdowns() { return this.service.dropdowns(LandInfrastructureKind.ROAD); }
 
   @Get(':uuid')
   @Permissions('view_land_road')
@@ -116,9 +120,13 @@ export class LandRoadsController extends ScopedInfrastructureController {
   remove(@Param('uuid', ParseUUIDPipe) uuid: string) {
     return this.deleteRecord(uuid);
   }
+
+  @Patch(':uuid/restore')
+  @ApiOperation({ summary: 'Restore a deleted project road' })
+  restore(@Param('uuid', ParseUUIDPipe) uuid: string) { return this.service.restore(uuid, LandInfrastructureKind.ROAD); }
 }
 
-@ApiTags('Flat Land | Blocks')
+@ApiTags('CRM | Property | Land | Block')
 @ApiBearerAuth()
 @Controller('land-infrastructure/blocks')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
@@ -140,6 +148,10 @@ export class LandBlocksController extends ScopedInfrastructureController {
   findAll(@Query() query: QueryLandInfrastructureDto) {
     return this.listRecords(query);
   }
+
+  @Get('dropdowns')
+  @ApiOperation({ summary: 'Get related project and block dropdown data' })
+  dropdowns() { return this.service.dropdowns(LandInfrastructureKind.BLOCK); }
 
   @Get(':uuid')
   @Permissions('view_land_block')
@@ -165,4 +177,8 @@ export class LandBlocksController extends ScopedInfrastructureController {
   remove(@Param('uuid', ParseUUIDPipe) uuid: string) {
     return this.deleteRecord(uuid);
   }
+
+  @Patch(':uuid/restore')
+  @ApiOperation({ summary: 'Restore a deleted project block' })
+  restore(@Param('uuid', ParseUUIDPipe) uuid: string) { return this.service.restore(uuid, LandInfrastructureKind.BLOCK); }
 }

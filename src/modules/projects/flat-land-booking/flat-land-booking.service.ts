@@ -10,6 +10,8 @@ import { Sequelize } from 'sequelize-typescript';
 import { FlatLand, FlatLandStatus } from 'src/database/models/projects/flatland/pr_flatland.model';
 import { FlatLandBooking } from 'src/database/models/projects/flat-land-booking/pr_flat_land_booking.model';
 import { Project } from 'src/database/models/projects/project/pr_project.model';
+import { ProjectTeamMember } from 'src/database/models/projects/project-team-member/pr_project_team_member.model';
+import { SysUser } from 'src/database/models/system/sys_user.model';
 import { CreateFlatLandBookingDto } from './dto/create-flat-land-booking.dto';
 import { QueryFlatLandBookingDto } from './dto/query-flat-land-booking.dto';
 import { UpdateFlatLandBookingDto } from './dto/update-flat-land-booking.dto';
@@ -23,6 +25,8 @@ export class FlatLandBookingService {
     private readonly flatLandModel: typeof FlatLand,
     @InjectModel(Project)
     private readonly projectModel: typeof Project,
+    @InjectModel(ProjectTeamMember) private readonly teamMembers: typeof ProjectTeamMember,
+    @InjectModel(SysUser) private readonly users: typeof SysUser,
     @InjectConnection()
     private readonly sequelize: Sequelize,
   ) {}
@@ -110,19 +114,25 @@ export class FlatLandBookingService {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const search = query.search?.trim();
-    const where: WhereOptions<FlatLandBooking> = search
-      ? {
-          [Op.or]: [
+    const where: WhereOptions<FlatLandBooking> = {
+      ...(query.projectId ? { projectId: query.projectId } : {}),
+      ...(query.salesBy ? { salesBy: { [Op.iLike]: `%${query.salesBy.trim()}%` } } : {}),
+      ...(query.dateFrom || query.dateTo ? { bookingDate: { ...(query.dateFrom ? { [Op.gte]: query.dateFrom } : {}), ...(query.dateTo ? { [Op.lte]: query.dateTo } : {}) } } : {}),
+      ...(search ? { [Op.or]: [
             { code: { [Op.iLike]: `%${search}%` } },
             { customerName: { [Op.iLike]: `%${search}%` } },
             { salesBy: { [Op.iLike]: `%${search}%` } },
-          ],
-        }
-      : {};
+          ] } : {}),
+    } as WhereOptions<FlatLandBooking>;
+    if (query.teamId) {
+      const teamMember = await this.teamMembers.findOne({ where: { uuid: query.teamId } as WhereOptions<ProjectTeamMember>, attributes: ['projectId'] });
+      if (!teamMember) return { data: [], meta: { total: 0, page, limit, totalPages: 0 } };
+      Object.assign(where, { projectId: teamMember.projectId });
+    }
     const { rows, count } = await this.bookingModel.findAndCountAll({
       where: where as WhereOptions<FlatLandBooking>,
       include: [
-        { model: this.projectModel, as: 'project', attributes: ['uuid', 'code', 'name'] },
+        { model: this.projectModel, as: 'project', attributes: ['uuid', 'code', 'name'], include: [{ association: 'sites', attributes: ['uuid', 'code', 'name'], required: false }] },
         { model: this.flatLandModel, as: 'flatLand', attributes: ['uuid', 'flatLandNo', 'projectName'] },
       ],
       limit,
@@ -133,6 +143,17 @@ export class FlatLandBookingService {
       data: rows,
       meta: { total: count, page, limit, totalPages: Math.ceil(count / limit) },
     };
+  }
+
+  async dropdowns() {
+    const [projects, properties, statuses, teams, salesPeople] = await Promise.all([
+      this.projectModel.findAll({ attributes: ['uuid', 'code', 'name'], order: [['name', 'ASC']] }),
+      this.flatLandModel.findAll({ where: { status: FlatLandStatus.AVAILABLE }, attributes: ['uuid', 'flatLandNo', 'propertyType', 'projectId', 'projectName', 'siteName'], order: [['flatLandNo', 'ASC']] }),
+      this.bookingModel.findAll({ attributes: ['status'], group: ['status'], order: [['status', 'ASC']] }),
+      this.teamMembers.findAll({ attributes: ['uuid', 'name', 'email', 'projectId'], order: [['name', 'ASC']] }),
+      this.users.findAll({ where: { isActive: true }, attributes: ['uuid', 'userCode', 'name'], order: [['name', 'ASC']] }),
+    ]);
+    return { projects, properties, teams, salesPeople, statuses: statuses.map(row => ({ value: row.status, name: row.status })) };
   }
 
   async findReport(
@@ -170,7 +191,7 @@ export class FlatLandBookingService {
     const { rows, count } = await this.bookingModel.findAndCountAll({
       where: where as WhereOptions<FlatLandBooking>,
       include: [
-        { model: this.projectModel, as: 'project', attributes: ['uuid', 'code', 'name'] },
+        { model: this.projectModel, as: 'project', attributes: ['uuid', 'code', 'name'], include: [{ association: 'sites', attributes: ['uuid', 'code', 'name'], required: false }] },
         { model: this.flatLandModel, as: 'flatLand', attributes: ['uuid', 'flatLandNo', 'projectName'] },
       ],
       limit,
@@ -204,7 +225,7 @@ export class FlatLandBookingService {
     const { rows, count } = await this.flatLandModel.findAndCountAll({
       where: where as WhereOptions<FlatLand>,
       include: [
-        { model: this.projectModel, as: 'project', attributes: ['uuid', 'code', 'name'] },
+        { model: this.projectModel, as: 'project', attributes: ['uuid', 'code', 'name'], include: [{ association: 'sites', attributes: ['uuid', 'code', 'name'], required: false }] },
       ],
       limit,
       offset: (page - 1) * limit,
@@ -220,7 +241,7 @@ export class FlatLandBookingService {
     const booking = await this.bookingModel.findOne({
       where: { uuid } as WhereOptions<FlatLandBooking>,
       include: [
-        { model: this.projectModel, as: 'project', attributes: ['uuid', 'code', 'name'] },
+        { model: this.projectModel, as: 'project', attributes: ['uuid', 'code', 'name'], include: [{ association: 'sites', attributes: ['uuid', 'code', 'name'], required: false }] },
         { model: this.flatLandModel, as: 'flatLand', attributes: ['uuid', 'flatLandNo', 'projectName'] },
       ],
     });
@@ -305,5 +326,19 @@ export class FlatLandBookingService {
       await booking.destroy({ transaction });
     });
     return { message: `Flat/Land booking "${uuid}" deleted successfully` };
+  }
+
+  async restore(uuid: string) {
+    await this.sequelize.transaction(async transaction => {
+      const booking = await this.bookingModel.findOne({ where: { uuid } as WhereOptions<FlatLandBooking>, paranoid: false, transaction });
+      if (!booking) throw new NotFoundException(`Flat/Land booking "${uuid}" not found`);
+      if (!booking.deletedAt) throw new BadRequestException(`Flat/Land booking "${uuid}" is not deleted`);
+      const property = await this.flatLandModel.findOne({ where: { uuid: booking.flatLandId } as WhereOptions<FlatLand>, transaction });
+      if (!property) throw new NotFoundException(`Booked property "${booking.flatLandId}" not found`);
+      if (property.status !== FlatLandStatus.AVAILABLE) throw new ConflictException('The property is no longer available for this booking');
+      await booking.restore({ transaction });
+      await property.update({ status: FlatLandStatus.BOOKED, customerName: booking.customerName }, { transaction });
+    });
+    return this.findOne(uuid);
   }
 }

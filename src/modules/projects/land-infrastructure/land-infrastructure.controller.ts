@@ -24,7 +24,7 @@ import { LandInfrastructureService } from './land-infrastructure.service';
 
 type AuthenticatedRequest = Request & { user?: { id?: number } };
 
-@ApiTags('Project | Flat/Land Roads and Blocks')
+@ApiTags('CRM | Property')
 @ApiBearerAuth()
 @Controller('land-infrastructure')
 @UseGuards(JwtAuthGuard, PermissionsGuard)

@@ -25,7 +25,7 @@ import { UpdateFlatLandDto } from './dto/update-flatland.dto';
 
 type RequestWithUser = Request & { user?: { id?: number } };
 
-@ApiTags('Project | Flat Land')
+@ApiTags('CRM | Property')
 @ApiBearerAuth()
 @Controller('flat-land')
 @UseGuards(JwtAuthGuard, PermissionsGuard)

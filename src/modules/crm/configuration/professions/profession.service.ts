@@ -56,7 +56,7 @@ export class ProfessionService {
   async remove(uuid: string) {
     const row = await this.professions.findOne({ where: { uuid } });
     if (!row) throw new NotFoundException(`Profession ${uuid} not found`);
-    await row.destroy();
+    await row.destroy({ force: false });
     return { message: `Profession ${uuid} deleted successfully` };
   }
 

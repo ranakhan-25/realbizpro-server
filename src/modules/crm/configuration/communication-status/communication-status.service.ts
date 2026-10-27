@@ -68,7 +68,7 @@ export class CommunicationStatusService {
   async remove(uuid: string): Promise<{ message: string }> {
     const row = await this.statusModel.findOne({ where: { uuid } as any });
     if (!row) throw new NotFoundException(`Communication status #${uuid} not found`);
-    await row.destroy();
+    await row.destroy({ force: false });
     return { message: `Communication status #${uuid} deleted successfully` };
   }
 

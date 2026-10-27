@@ -46,6 +46,8 @@ import { ProcurementAssetGrn } from '../procurement/grn/pr_asset_grn.model';
 import { CrmParty } from '../crm/lead/crm-party.model';
 import { CrmPartyAssignment } from '../crm/lead/crm-party-assignment.model';
 import { CrmPartyCommunication } from '../crm/lead/crm-party-communication.model';
+import { LeadCallAssignment } from '../crm/lead/crm-lead-call-assignment.model';
+import { LeadActivity } from '../crm/lead/crm-lead-activity.model';
 
 export enum UserTypeEnum {
   SHOWROOM = 'Showroom',
@@ -382,4 +384,7 @@ export class SysUser
   @HasMany(() => CrmPartyAssignment, { foreignKey: 'assigneeUuid', sourceKey: 'uuid', as: 'crmPartyAssignments' }) declare crmPartyAssignments?: CrmPartyAssignment[];
   @HasMany(() => CrmPartyAssignment, { foreignKey: 'assignedByUuid', sourceKey: 'uuid', as: 'createdCrmPartyAssignments' }) declare createdCrmPartyAssignments?: CrmPartyAssignment[];
   @HasMany(() => CrmPartyCommunication, { foreignKey: 'loggedByUuid', sourceKey: 'uuid', as: 'crmPartyCommunications' }) declare crmPartyCommunications?: CrmPartyCommunication[];
+  @HasMany(() => LeadCallAssignment, { foreignKey: 'assignedFrom', sourceKey: 'uuid', as: 'crmCallAssignmentsCreated' }) declare crmCallAssignmentsCreated?: LeadCallAssignment[];
+  @HasMany(() => LeadCallAssignment, { foreignKey: 'assignedTo', sourceKey: 'uuid', as: 'crmCallAssignmentsReceived' }) declare crmCallAssignmentsReceived?: LeadCallAssignment[];
+  @HasMany(() => LeadActivity, { foreignKey: 'conductedBy', sourceKey: 'uuid', as: 'conductedLeadActivities' }) declare conductedLeadActivities?: LeadActivity[];
 }
