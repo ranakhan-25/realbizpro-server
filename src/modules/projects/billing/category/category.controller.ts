@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 
 import {
@@ -17,6 +18,10 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
+
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 
 import { CategoryService } from './category.service';
 
@@ -27,6 +32,7 @@ import { QueryCategoryDto } from './dto/query-category.dto';
 @ApiTags('Project | Billing | Category')
 @ApiBearerAuth()
 @Controller('category')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class CategoryController {
   constructor(
     private readonly categoryService: CategoryService,
@@ -34,6 +40,7 @@ export class CategoryController {
 
   // CREATE
   @Post()
+  @Permissions('create_category')
   @ApiOperation({
     summary: 'Create a new category',
   })
@@ -43,6 +50,7 @@ export class CategoryController {
 
   // FIND ALL
   @Get()
+  @Permissions('view_categories')
   @ApiOperation({
     summary: 'Get all categories (paginated)',
   })
@@ -52,6 +60,7 @@ export class CategoryController {
 
   // FIND ONE
   @Get(':uuid')
+  @Permissions('view_category')
   @ApiOperation({
     summary: 'Get category by UUID',
   })
@@ -65,6 +74,7 @@ export class CategoryController {
 
   // UPDATE
   @Patch(':uuid')
+  @Permissions('update_category')
   @ApiOperation({
     summary: 'Update category by UUID',
   })
@@ -81,6 +91,7 @@ export class CategoryController {
 
   // DELETE
   @Delete(':uuid')
+  @Permissions('delete_category')
   @ApiOperation({
     summary: 'Delete category by UUID',
   })
@@ -94,6 +105,7 @@ export class CategoryController {
 
   // RESTORE
   @Patch(':uuid/restore')
+  @Permissions('restore_category')
   @ApiOperation({
     summary: 'Restore deleted category',
   })

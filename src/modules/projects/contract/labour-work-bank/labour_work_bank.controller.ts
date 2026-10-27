@@ -9,7 +9,11 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 
 import {
   ApiBearerAuth,
@@ -25,12 +29,14 @@ import { LabourWorkBankService } from './labour_work_bank.service';
 @ApiTags('Project | Contract | Labour Work Bank')
 @ApiBearerAuth()
 @Controller('labour-work-bank')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class LabourWorkBankController {
   constructor(
     private readonly labourWorkBankService: LabourWorkBankService,
   ) {}
 
   @Post()
+  @Permissions('create_labour_work_bank')
   @ApiOperation({
     summary: 'Create a new labour work bank',
   })
@@ -44,6 +50,7 @@ export class LabourWorkBankController {
   }
 
   @Get()
+  @Permissions('view_labour_work_banks')
   @ApiOperation({
     summary:
       'Get all labour work banks (paginated)',
@@ -58,6 +65,7 @@ export class LabourWorkBankController {
   }
 
   @Get(':uuid')
+  @Permissions('view_labour_work_bank')
   @ApiOperation({
     summary: 'Get labour work bank by UUID',
   })
@@ -68,6 +76,7 @@ export class LabourWorkBankController {
   }
 
   @Patch(':uuid')
+  @Permissions('update_labour_work_bank')
   @ApiOperation({
     summary: 'Update labour work bank',
   })
@@ -83,6 +92,7 @@ export class LabourWorkBankController {
   }
 
   @Delete(':uuid')
+  @Permissions('delete_labour_work_bank')
   @ApiOperation({
     summary:
       'Soft delete labour work bank (status → inactive)',
@@ -94,6 +104,7 @@ export class LabourWorkBankController {
   }
 
   @Patch(':uuid/restore')
+  @Permissions('restore_labour_work_bank')
   @ApiOperation({
     summary:
       'Restore soft-deleted labour work bank (status → active)',

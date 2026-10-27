@@ -10,9 +10,13 @@ import {
   Post,
   Query,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import {
   LandInfrastructureKind,
 } from 'src/database/models/projects/land-infrastructure/pr_land_infrastructure.model';
@@ -68,30 +72,35 @@ abstract class ScopedInfrastructureController {
 @ApiTags('Flat Land | Roads')
 @ApiBearerAuth()
 @Controller('land-infrastructure/roads')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class LandRoadsController extends ScopedInfrastructureController {
   constructor(service: LandInfrastructureService) {
     super(service, LandInfrastructureKind.ROAD);
   }
 
   @Post()
+  @Permissions('create_land_road')
   @ApiOperation({ summary: 'Create a project road' })
   create(@Body() dto: CreateLandInfrastructureDto, @Req() request: AuthenticatedRequest) {
     return this.createRecord(dto, request);
   }
 
   @Get()
+  @Permissions('view_land_roads')
   @ApiOperation({ summary: 'List project roads' })
   findAll(@Query() query: QueryLandInfrastructureDto) {
     return this.listRecords(query);
   }
 
   @Get(':uuid')
+  @Permissions('view_land_road')
   @ApiOperation({ summary: 'Get a project road by UUID' })
   findOne(@Param('uuid', ParseUUIDPipe) uuid: string) {
     return this.getRecord(uuid);
   }
 
   @Patch(':uuid')
+  @Permissions('update_land_road')
   @ApiOperation({ summary: 'Update a project road' })
   update(
     @Param('uuid', ParseUUIDPipe) uuid: string,
@@ -102,6 +111,7 @@ export class LandRoadsController extends ScopedInfrastructureController {
   }
 
   @Delete(':uuid')
+  @Permissions('delete_land_road')
   @ApiOperation({ summary: 'Delete a project road' })
   remove(@Param('uuid', ParseUUIDPipe) uuid: string) {
     return this.deleteRecord(uuid);
@@ -111,30 +121,35 @@ export class LandRoadsController extends ScopedInfrastructureController {
 @ApiTags('Flat Land | Blocks')
 @ApiBearerAuth()
 @Controller('land-infrastructure/blocks')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class LandBlocksController extends ScopedInfrastructureController {
   constructor(service: LandInfrastructureService) {
     super(service, LandInfrastructureKind.BLOCK);
   }
 
   @Post()
+  @Permissions('create_land_block')
   @ApiOperation({ summary: 'Create a project block' })
   create(@Body() dto: CreateLandInfrastructureDto, @Req() request: AuthenticatedRequest) {
     return this.createRecord(dto, request);
   }
 
   @Get()
+  @Permissions('view_land_blocks')
   @ApiOperation({ summary: 'List project blocks' })
   findAll(@Query() query: QueryLandInfrastructureDto) {
     return this.listRecords(query);
   }
 
   @Get(':uuid')
+  @Permissions('view_land_block')
   @ApiOperation({ summary: 'Get a project block by UUID' })
   findOne(@Param('uuid', ParseUUIDPipe) uuid: string) {
     return this.getRecord(uuid);
   }
 
   @Patch(':uuid')
+  @Permissions('update_land_block')
   @ApiOperation({ summary: 'Update a project block' })
   update(
     @Param('uuid', ParseUUIDPipe) uuid: string,
@@ -145,6 +160,7 @@ export class LandBlocksController extends ScopedInfrastructureController {
   }
 
   @Delete(':uuid')
+  @Permissions('delete_land_block')
   @ApiOperation({ summary: 'Delete a project block' })
   remove(@Param('uuid', ParseUUIDPipe) uuid: string) {
     return this.deleteRecord(uuid);

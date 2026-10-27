@@ -7,7 +7,11 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 
 import {
   ApiBearerAuth,
@@ -23,12 +27,14 @@ import { SupplierAccountsService } from './supplier_accounts.service';
 @ApiTags('Project | Contract | Supplier Accounts')
 @ApiBearerAuth()
 @Controller('supplier-accounts')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class SupplierAccountsController {
   constructor(
     private readonly supplierAccountsService: SupplierAccountsService,
   ) {}
 
   @Post()
+  @Permissions('create_supplier_account')
   @ApiOperation({
     summary: 'Create a new supplier account',
   })
@@ -42,6 +48,7 @@ export class SupplierAccountsController {
   }
 
   @Get()
+  @Permissions('view_supplier_accounts')
   @ApiOperation({
     summary:
       'Get all supplier accounts (paginated)',
@@ -56,6 +63,7 @@ export class SupplierAccountsController {
   }
 
   @Get(':uuid')
+  @Permissions('view_supplier_account')
   @ApiOperation({
     summary: 'Get supplier account by UUID',
   })
@@ -66,6 +74,7 @@ export class SupplierAccountsController {
   }
 
   @Patch(':uuid')
+  @Permissions('update_supplier_account')
   @ApiOperation({
     summary: 'Update supplier account',
   })
@@ -81,6 +90,7 @@ export class SupplierAccountsController {
   }
 
   @Delete(':uuid')
+  @Permissions('delete_supplier_account')
   @ApiOperation({
     summary:
       'Soft delete supplier account (status → inactive)',
@@ -92,6 +102,7 @@ export class SupplierAccountsController {
   }
 
   @Patch(':uuid/restore')
+  @Permissions('restore_supplier_account')
   @ApiOperation({
     summary:
       'Restore soft-deleted supplier account (status → active)',

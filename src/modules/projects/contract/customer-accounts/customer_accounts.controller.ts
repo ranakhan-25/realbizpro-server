@@ -7,7 +7,11 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 
 import {
   ApiBearerAuth,
@@ -23,12 +27,14 @@ import { CustomerAccountService } from './customer_accounts.service';
 @ApiTags('Project | Contract | Customer Account')
 @ApiBearerAuth()
 @Controller('customer-account')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class CustomerAccountController {
   constructor(
     private readonly customerAccountService: CustomerAccountService,
   ) {}
 
   @Post()
+  @Permissions('create_customer')
   @ApiOperation({
     summary: 'Create a new customer account',
   })
@@ -42,6 +48,7 @@ export class CustomerAccountController {
   }
 
   @Get()
+  @Permissions('view_customers')
   @ApiOperation({
     summary:
       'Get all customer accounts (paginated)',
@@ -56,6 +63,7 @@ export class CustomerAccountController {
   }
 
   @Get(':uuid')
+  @Permissions('view_customer')
   @ApiOperation({
     summary: 'Get customer account by UUID',
   })
@@ -66,6 +74,7 @@ export class CustomerAccountController {
   }
 
   @Patch(':uuid')
+  @Permissions('update_customer')
   @ApiOperation({
     summary: 'Update customer account',
   })
@@ -81,6 +90,7 @@ export class CustomerAccountController {
   }
 
   @Delete(':uuid')
+  @Permissions('delete_customer')
   @ApiOperation({
     summary:
       'Soft delete customer account (status → inactive)',
@@ -92,6 +102,7 @@ export class CustomerAccountController {
   }
 
   @Patch(':uuid/restore')
+  @Permissions('restore_customer')
   @ApiOperation({
     summary:
       'Restore soft-deleted customer account (status → active)',

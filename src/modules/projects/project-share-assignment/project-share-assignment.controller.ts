@@ -10,7 +10,11 @@ import {
   Post,
   Query,
   Req,
+  UseGuards,
 } from '@nestjs/common';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -29,12 +33,14 @@ type AuthenticatedRequest = Request & {
 @ApiTags('Project | Project Share Assignments')
 @ApiBearerAuth()
 @Controller('project-share-assignments')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class ProjectShareAssignmentController {
   constructor(
     private readonly assignmentService: ProjectShareAssignmentService,
   ) {}
 
   @Get('reports/collection')
+  @Permissions('view_project_share_assignment_reports')
   @ApiOperation({
     summary: 'List share collection report rows',
   })
@@ -45,6 +51,7 @@ export class ProjectShareAssignmentController {
   }
 
   @Get('reports/penalty')
+  @Permissions('view_project_share_assignment_reports')
   @ApiOperation({
     summary: 'List share penalty report rows',
   })
@@ -55,6 +62,7 @@ export class ProjectShareAssignmentController {
   }
 
   @Get('reports/holders-point')
+  @Permissions('view_project_share_assignment_reports')
   @ApiOperation({
     summary:
       'List shareholder points report rows',
@@ -66,6 +74,7 @@ export class ProjectShareAssignmentController {
   }
 
   @Post()
+  @Permissions('create_project_share_assignment')
   @ApiOperation({
     summary: 'Create a share assignment',
   })
@@ -80,6 +89,7 @@ export class ProjectShareAssignmentController {
   }
 
   @Get()
+  @Permissions('view_project_share_assignments')
   @ApiOperation({
     summary: 'List share assignments',
   })
@@ -91,6 +101,7 @@ export class ProjectShareAssignmentController {
   }
 
   @Get(':uuid')
+  @Permissions('view_project_share_assignment')
   @ApiOperation({
     summary: 'Get a share assignment by UUID',
   })
@@ -101,6 +112,7 @@ export class ProjectShareAssignmentController {
   }
 
   @Patch(':uuid')
+  @Permissions('update_project_share_assignment')
   @ApiOperation({
     summary: 'Update a share assignment',
   })
@@ -117,6 +129,7 @@ export class ProjectShareAssignmentController {
   }
 
   @Delete(':uuid')
+  @Permissions('delete_project_share_assignment')
   @ApiOperation({
     summary: 'Soft-delete a share assignment',
   })

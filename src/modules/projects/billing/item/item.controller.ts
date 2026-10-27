@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -16,6 +17,10 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
+
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 
 import { ItemService } from './item.service';
 import { CreateItemDto } from './dto/create-item.dto';
@@ -25,18 +30,21 @@ import { QueryItemDto } from './dto/query-item.dto';
 @ApiTags('Project | Billing | Item')
 @ApiBearerAuth()
 @Controller('item')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class ItemController {
   constructor(
     private readonly itemService: ItemService,
   ) {}
 
   @Post()
+  @Permissions('create_item')
   @ApiOperation({ summary: 'Create a new item' })
   create(@Body() dto: CreateItemDto) {
     return this.itemService.create(dto);
   }
 
   @Get()
+  @Permissions('view_items')
   @ApiOperation({
     summary: 'Get all items (paginated)',
   })
@@ -45,6 +53,7 @@ export class ItemController {
   }
 
   @Get(':uuid')
+  @Permissions('view_item')
   @ApiOperation({ summary: 'Get item by UUID' })
   @ApiParam({
     name: 'uuid',
@@ -55,6 +64,7 @@ export class ItemController {
   }
 
   @Patch(':uuid')
+  @Permissions('update_item')
   @ApiOperation({
     summary: 'Update item by UUID',
   })
@@ -67,6 +77,7 @@ export class ItemController {
   }
 
   @Delete(':uuid')
+  @Permissions('delete_item')
   @ApiOperation({
     summary: 'Delete item by UUID',
   })
@@ -76,6 +87,7 @@ export class ItemController {
   }
 
   @Patch(':uuid/restore')
+  @Permissions('restore_item')
   @ApiOperation({
     summary: 'Restore deleted item',
   })

@@ -10,7 +10,11 @@ import {
   ParseUUIDPipe,
   Query,
   Req,
+  UseGuards,
 } from '@nestjs/common';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import {
   ApiBearerAuth,
   ApiTags,
@@ -23,12 +27,14 @@ import { QueryMaterialRequisitionDto } from './dto/query-material-requisition.dt
 @ApiTags('Project | Requisition | Material Requisition')
 @ApiBearerAuth()
 @Controller('material-requisition')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class MaterialRequisitionController {
   constructor(
     private readonly requisitionService: MaterialRequisitionService,
   ) {}
 
   @Post()
+  @Permissions('create_material_requisition')
   create(
     @Body() dto: CreateMaterialRequisitionDto,
     @Req() req: any,
@@ -40,6 +46,7 @@ export class MaterialRequisitionController {
   }
 
   @Get()
+  @Permissions('view_material_requisitions')
   findAll(
     @Query() query: QueryMaterialRequisitionDto,
   ) {
@@ -47,6 +54,7 @@ export class MaterialRequisitionController {
   }
 
   @Get(':uuid')
+  @Permissions('view_material_requisition')
   findOne(
     @Param('uuid', new ParseUUIDPipe())
     uuid: string,
@@ -55,6 +63,7 @@ export class MaterialRequisitionController {
   }
 
   @Patch(':uuid')
+  @Permissions('update_material_requisition')
   update(
     @Param('uuid', new ParseUUIDPipe())
     uuid: string,
@@ -69,6 +78,7 @@ export class MaterialRequisitionController {
   }
 
   @Delete(':uuid')
+  @Permissions('delete_material_requisition')
   remove(
     @Param('uuid', new ParseUUIDPipe())
     uuid: string,

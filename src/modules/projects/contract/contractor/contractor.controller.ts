@@ -8,7 +8,11 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 
 import {
   ApiBearerAuth,
@@ -24,24 +28,28 @@ import { UpdateContractorDto } from './dto/update-contractor.dto';
 @ApiTags('Project | Contract | Contractor')
 @ApiBearerAuth()
 @Controller('contractor')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class ContractorController {
   constructor(
     private readonly contractorService: ContractorService,
   ) {}
 
   @Get('reports/at-a-glance')
+  @Permissions('view_contractor_reports')
   @ApiOperation({ summary: 'Contractor at-a-glance report' })
   atAGlanceReport(@Query() query: QueryContractorDto) {
     return this.contractorService.findAll(query);
   }
 
   @Get('reports/project-summary')
+  @Permissions('view_contractor_reports')
   @ApiOperation({ summary: 'Contractor summary report' })
   projectSummaryReport(@Query() query: QueryContractorDto) {
     return this.contractorService.findAll(query);
   }
 
   @Post()
+  @Permissions('create_contractor')
   @ApiOperation({
     summary: 'Create a new contractor',
   })
@@ -55,6 +63,7 @@ export class ContractorController {
   }
 
   @Get()
+  @Permissions('view_contractors')
   @ApiOperation({
     summary: 'Get all contractors (paginated)',
   })
@@ -66,6 +75,7 @@ export class ContractorController {
   }
 
   @Get(':uuid')
+  @Permissions('view_contractor')
   @ApiOperation({
     summary: 'Get contractor by UUID',
   })
@@ -74,6 +84,7 @@ export class ContractorController {
   }
 
   @Patch(':uuid')
+  @Permissions('update_contractor')
   @ApiOperation({
     summary: 'Update contractor',
   })
@@ -89,6 +100,7 @@ export class ContractorController {
   }
 
   @Delete(':uuid')
+  @Permissions('delete_contractor')
   @ApiOperation({
     summary:
       'Soft delete contractor (status → inactive)',
@@ -98,6 +110,7 @@ export class ContractorController {
   }
 
   @Patch(':uuid/restore')
+  @Permissions('restore_contractor')
   @ApiOperation({
     summary:
       'Restore soft-deleted contractor (status → active)',

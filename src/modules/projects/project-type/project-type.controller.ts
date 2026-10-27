@@ -10,7 +10,11 @@ import {
   Post,
   Query,
   Req,
+  UseGuards,
 } from '@nestjs/common';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -31,12 +35,14 @@ type AuthenticatedRequest = Request & {
 @ApiTags('Project | Types')
 @ApiBearerAuth()
 @Controller('project-type')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class ProjectTypeController {
   constructor(
     private readonly projectTypeService: ProjectTypeService,
   ) {}
 
   @Post()
+  @Permissions('create_project_type')
   @ApiOperation({ summary: 'Create a project type' })
   create(
     @Body() dto: CreateProjectTypeDto,
@@ -46,18 +52,21 @@ export class ProjectTypeController {
   }
 
   @Get()
+  @Permissions('view_project_types')
   @ApiOperation({ summary: 'List project types' })
   findAll(@Query() query: QueryProjectTypeDto) {
     return this.projectTypeService.findAll(query);
   }
 
   @Get(':uuid')
+  @Permissions('view_project_type')
   @ApiOperation({ summary: 'Get a project type by UUID' })
   findOne(@Param('uuid', ParseUUIDPipe) uuid: string) {
     return this.projectTypeService.findOne(uuid);
   }
 
   @Patch(':uuid')
+  @Permissions('update_project_type')
   @ApiOperation({ summary: 'Update a project type' })
   update(
     @Param('uuid', ParseUUIDPipe) uuid: string,
@@ -72,6 +81,7 @@ export class ProjectTypeController {
   }
 
   @Delete(':uuid')
+  @Permissions('delete_project_type')
   @ApiOperation({ summary: 'Soft-delete a project type' })
   remove(@Param('uuid', ParseUUIDPipe) uuid: string) {
     return this.projectTypeService.remove(uuid);

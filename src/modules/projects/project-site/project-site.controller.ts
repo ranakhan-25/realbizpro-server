@@ -10,7 +10,11 @@ import {
   Post,
   Query,
   Req,
+  UseGuards,
 } from '@nestjs/common';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -31,12 +35,14 @@ type AuthenticatedRequest = Request & {
 @ApiTags('Project | Sites')
 @ApiBearerAuth()
 @Controller('project-sites')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class ProjectSiteController {
   constructor(
     private readonly projectSiteService: ProjectSiteService,
   ) {}
 
   @Post()
+  @Permissions('create_project_site')
   @ApiOperation({ summary: 'Create a project site' })
   create(
     @Body() dto: CreateProjectSiteDto,
@@ -46,18 +52,21 @@ export class ProjectSiteController {
   }
 
   @Get()
+  @Permissions('view_project_sites')
   @ApiOperation({ summary: 'List project sites' })
   findAll(@Query() query: QueryProjectSiteDto) {
     return this.projectSiteService.findAll(query);
   }
 
   @Get(':uuid')
+  @Permissions('view_project_site')
   @ApiOperation({ summary: 'Get a project site by UUID' })
   findOne(@Param('uuid', ParseUUIDPipe) uuid: string) {
     return this.projectSiteService.findOne(uuid);
   }
 
   @Patch(':uuid')
+  @Permissions('update_project_site')
   @ApiOperation({ summary: 'Update a project site' })
   update(
     @Param('uuid', ParseUUIDPipe) uuid: string,
@@ -72,12 +81,14 @@ export class ProjectSiteController {
   }
 
   @Delete(':uuid')
+  @Permissions('delete_project_site')
   @ApiOperation({ summary: 'Soft-delete a project site' })
   remove(@Param('uuid', ParseUUIDPipe) uuid: string) {
     return this.projectSiteService.remove(uuid);
   }
 
   @Patch(':uuid/restore')
+  @Permissions('restore_project_site')
   @ApiOperation({ summary: 'Restore a deleted project site' })
   restore(@Param('uuid', ParseUUIDPipe) uuid: string) {
     return this.projectSiteService.restore(uuid);
