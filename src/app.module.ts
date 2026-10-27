@@ -189,6 +189,9 @@ import { ProjectCostModule } from './modules/projects/project_cost/project_cost.
 import { ProjectProgressModule } from './modules/projects/project_progress/project_progress.module';
 import { ProjectControlModule } from './modules/projects/project_control/project_control.module';
 import { UnitPlotModule } from './modules/projects/unit_plot/unit_plot.module';
+import { CustomersAccountsModule } from './modules/accounts/contact/customers_accounts/customers_accounts.module';
+import { SupplierAccountsModule } from './modules/accounts/supplier_accounts/supplier_accounts.module';
+
 
 
 
@@ -346,7 +349,7 @@ import { UnitPlotModule } from './modules/projects/unit_plot/unit_plot.module';
     EmployeeListModule,
     EmployeeSalaryModule,
     EmployeeTypeModule,
-
+     CustomersAccountsModule,
     LoanModule,
     OvertimeModule,
     SalaryGradeModule,
@@ -409,6 +412,7 @@ import { UnitPlotModule } from './modules/projects/unit_plot/unit_plot.module';
     ProjectCostModule,
     ProjectProgressModule,
     ProjectControlModule,
+ 
   ],
   controllers: [AppController, HealthController],
   providers: [
