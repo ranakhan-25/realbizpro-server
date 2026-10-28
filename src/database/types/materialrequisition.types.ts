@@ -1,5 +1,5 @@
 // Auto-generated types for MaterialRequisition
-// Source: src\database\models\projects\material-requisition\pr_material_requisition.model.ts
+// Source: src/database/models/projects/material-requisition/pr_material_requisition.model.ts
 
 import { ApprovalLayerStatus } from '../models/projects/material-requisition/pr_material_requisition.model';
 import { MaterialRequisitionStatus } from '../models/projects/material-requisition/pr_material_requisition.model';

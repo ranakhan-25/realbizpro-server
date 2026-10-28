@@ -1,5 +1,5 @@
 // Auto-generated types for Contractor
-// Source: src\database\models\projects\contract\pr_contractor.model.ts
+// Source: src/database/models/projects/contract/pr_contractor.model.ts
 
 import { ContractorUnderStatus } from '../models/projects/contract/pr_contractor.model';
 import { ContractorStatus } from '../models/projects/contract/pr_contractor.model';
