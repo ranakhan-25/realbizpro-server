@@ -129,6 +129,7 @@ export class CallCenterFollowUpService {
     });
     if (!lead) throw new NotFoundException(`Lead ${uuid} not found`);
     const activities = lead.activities ?? [];
+    const negotiations = await this.listNegotiations(uuid);
     const leadJson = lead.toJSON() as any;
     const interestProjects = await this.projectMap((lead.propertyInterests ?? []).map(item => item.projectId));
     const leadProjects = await this.projectMap([lead.projectId]);
@@ -143,7 +144,7 @@ export class CallCenterFollowUpService {
         upcomingPending: activities.filter(item => item.nextFollowupDate),
         requirements: lead.requirements ?? [],
         property: lead.propertyInterests ?? [],
-      negotiations: [],
+        negotiations,
         followUps: activities.filter(item => ['followup', 'call'].includes(item.activityType.toLowerCase())),
         visits: activities.filter(item => ['visit', 'task_visit'].includes(item.activityType.toLowerCase())),
         notes: activities.filter(item => item.activityType.toLowerCase() === 'note'),
@@ -211,7 +212,8 @@ export class CallCenterFollowUpService {
   }
   async listNegotiations(uuid: string) {
     const lead = await this.getLead(uuid);
-    return this.negotiations.findAll({ where: { leadId: lead.id }, include: ['project', 'flatLand', 'creator'], order: [['roundNo', 'DESC'], ['createdAt', 'DESC']] });
+    // `roundNo` is a virtual compatibility field, not a database column.
+    return this.negotiations.findAll({ where: { leadId: lead.id }, include: ['project', 'flatLand', 'creator'], order: [['createdAt', 'DESC']] });
   }
   async createNegotiation(uuid: string, dto: CreateNegotiationDto) {
     const lead = await this.getLead(uuid);

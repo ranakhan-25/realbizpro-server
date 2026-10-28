@@ -1,5 +1,5 @@
 // Auto-generated types for SysModules
-// Source: src/database/models/system/sys_module.model.ts
+// Source: src\database\models\system\sys_module.model.ts
 
 import type { SysMenu } from '../models/system/sys_menu.model';
 import type { SysFeatures } from '../models/system/sys_features.model';

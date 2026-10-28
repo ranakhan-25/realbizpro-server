@@ -22,6 +22,7 @@ export class LeadStageService {
     const row = await this.stages.create({
       name: dto.name.trim(), isActive: dto.status !== 'inactive', sortOrder,
       ...(dto.color !== undefined ? { color: dto.color } : {}),
+      ...(dto.salesProbability !== undefined ? { salesProbability: dto.salesProbability } : {}),
     } as any);
     return this.findOne(row.uuid);
   }
@@ -68,6 +69,7 @@ export class LeadStageService {
       ...(dto.name !== undefined ? { name: dto.name.trim() } : {}),
       ...(status !== undefined ? { isActive: status === 'active' } : {}),
       ...(sortBy !== undefined ? { sortOrder: sortBy } : {}),
+      ...(dto.salesProbability !== undefined ? { salesProbability: dto.salesProbability } : {}),
     } as any);
     return this.findOne(uuid);
   }
@@ -109,7 +111,7 @@ export class LeadStageService {
     data.status = data.isActive ? 'active' : 'inactive';
     data.sortBy = data.sortOrder;
     data.description = null;
-    data.salesProbability = null;
+    data.salesProbability = data.salesProbability == null ? null : Number(data.salesProbability);
     data.addedBy = data.createdBy ?? null;
     delete data.sortOrder;
     delete data.isActive;
@@ -129,9 +131,6 @@ export class LeadStageService {
   private ensureSupportedFields(dto: CreateLeadStageDto | UpdateLeadStageDto): void {
     if (dto.description !== undefined && dto.description !== '') {
       throw new ConflictException('The crm_lead_stages table has no description column; a schema change is required to save this field');
-    }
-    if (dto.salesProbability !== undefined) {
-      throw new ConflictException('The crm_lead_stages table has no sales_probability column; a schema change is required to save this field');
     }
   }
 }

@@ -6,7 +6,7 @@ import { CrmPartyCommunication } from './crm-party-communication.model';
 
 import type { CrmPartyAttributes, CrmPartyCreationAttributes } from '../../../types/crmparty.types';
 
-export enum CrmPartyType { CUSTOMER = 'Customer', INVESTOR = 'Investor', OTHER = 'Other' }
+export enum CrmPartyType { CUSTOMER = 'Customer', INVESTOR = 'Investor', VENDOR = 'Vendor', OTHER = 'Other' }
 export enum CrmPartyStatus { ACTIVE = 'active', INACTIVE = 'inactive' }
 
 @Table({ tableName: 'crm_parties', timestamps: true, paranoid: true, underscored: true })
