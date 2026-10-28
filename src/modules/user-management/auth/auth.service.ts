@@ -607,58 +607,17 @@ export class AuthService {
           through: { attributes: [] },
         },
         {
-          association: 'employee',
-          attributes: [
-            'id',
-            'employee_code',
-            'first_name',
-            'last_name',
-            'employee_name',
-            'employee_name_bn',
-            'official_email',
-          ],
-        },
-        {
-          association: 'warehouse',
-          attributes: [
-            'id',
-            'name',
-            'location',
-            'address',
-            'bnAddress',
-            'phone',
-          ],
-        },
-        {
-          association: 'factory',
-          attributes: ['id', 'name'],
-        },
-        {
-          association: 'unit',
-          attributes: ['id', 'name'],
-        },
-        {
-          association: 'designation',
-          attributes: [
-            'id',
-            'name',
-            'departmentId',
-          ],
-          include: [
-            {
-              association: 'department',
-              attributes: ['id', 'name'],
-            },
-          ],
-        },
-        {
-          association: 'sections',
-          attributes: ['id', 'name'],
+          association: 'permissions',
+          attributes: ['id', 'key', 'name'],
           through: { attributes: [] },
         },
         {
-          association: 'distribution',
-          attributes: ['id', 'name', 'code'],
+          association: 'avatar',
+          attributes: ['id', 'fileName', 'filePath', 'mimeType'],
+        },
+        {
+          association: 'organization',
+          attributes: ['id', 'name', 'code', 'email', 'phone'],
         },
         {
           association: 'companies',
@@ -673,23 +632,9 @@ export class AuthService {
       );
     }
 
-    // ✅ FETCH USER-SPECIFIC PERMISSIONS
-    const permissions =
-      await this.permissionModel.findAll({
-        attributes: ['id', 'key', 'name'],
-        include: [
-          {
-            model: this.userPermissionModel,
-            required: true, // INNER JOIN
-            where: { userId: user.id },
-            attributes: [],
-          },
-        ],
-      });
-
     return {
       ...user.toJSON(),
-      permissions,
+      permissions: user.permissions ?? [],
     };
   }
 
