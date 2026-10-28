@@ -38,7 +38,10 @@ export class FlatLandSaleReportService {
     const limit = query.limit ?? 10;
     const dateWhere: any = {};
     if (query.dateFrom || query.dateTo) dateWhere.bookingDate = { ...(query.dateFrom ? { [Op.gte]: query.dateFrom } : {}), ...(query.dateTo ? { [Op.lte]: query.dateTo } : {}) };
-    if (query.projectId) dateWhere.projectId = query.projectId;
+    if (query.projectId) {
+      const project = await this.projects.findOne({ where: { [Op.or]: [{ uuid: query.projectId }, { code: query.projectId }] } as any, attributes: ['uuid'] });
+      dateWhere.projectId = project?.uuid ?? query.projectId;
+    }
     if (query.salesBy) dateWhere.salesBy = { [Op.iLike]: `%${query.salesBy.trim()}%` };
 
     const [bookings, projects, flatLands, teams, users, agreements] = await Promise.all([
@@ -63,11 +66,12 @@ export class FlatLandSaleReportService {
       const project = projectMap.get(booking.projectId);
       const salesUser = userMap.get(booking.salesBy ?? '');
       const teamMatches = !selectedTeam || selectedTeam.projectId === booking.projectId || [selectedTeam.name, selectedTeam.email, selectedTeam.uuid].some(value => value?.toLowerCase() === booking.salesBy?.toLowerCase());
-      const values = [booking.id, project?.name, project?.code, booking.customerName, booking.code, property?.flatLandNo, property?.size, booking.rate, booking.grandTotal, booking.paid, booking.due, booking.salesBy, salesUser?.name];
+      const agreement = agreementMap.get(`${booking.projectId}:${property?.flatLandNo ?? ''}`);
+      const values = [booking.id, project?.name, project?.code, booking.customerName, booking.code, property?.flatLandNo, property?.size, booking.rate, booking.grandTotal, booking.paid, booking.due, booking.parking, booking.utilityCharge, booking.otherCost, booking.discount, agreement?.agreementDate, agreement?.handoverDate, booking.salesBy, salesUser?.name];
       return teamMatches && (!term || values.some(value => String(value ?? '').toLowerCase().includes(term)));
     });
     const data = filtered.slice((page - 1) * limit, page * limit).map((booking, index) => this.toRow(booking, index + (page - 1) * limit, projectMap, propertyMap, agreementMap, userMap));
-    const totals = filtered.reduce((sum, booking) => { const property = propertyMap.get(booking.flatLandId); sum.total += Number(property?.size ?? 0) * Number(booking.rate ?? 0); sum.parking += Number(booking.parking ?? 0); sum.utilityCharge += Number(booking.utilityCharge ?? 0); sum.otherCost += Number(booking.otherCost ?? 0); sum.discount += Number(booking.discount ?? 0); sum.grandTotal += Number(booking.grandTotal ?? 0); sum.paid += Number(booking.paid ?? 0); sum.due += Number(booking.due ?? 0); return sum; }, { total: 0, parking: 0, utilityCharge: 0, otherCost: 0, discount: 0, adjustment: 0, grandTotal: 0, paid: 0, due: 0 });
+    const totals = filtered.reduce((sum, booking) => { const property = propertyMap.get(booking.flatLandId); const size = this.number(property?.size); const rate = this.number(booking.rate); sum.sftSize += size; sum.rate += rate; sum.total += size * rate; sum.parking += this.number(booking.parking); sum.utilityCharge += this.number(booking.utilityCharge); sum.otherCost += this.number(booking.otherCost); sum.discount += this.number(booking.discount); sum.adjustment += 0; sum.grandTotal += this.number(booking.grandTotal); sum.paid += this.number(booking.paid); sum.due += this.number(booking.due); return sum; }, { sftSize: 0, rate: 0, total: 0, parking: 0, utilityCharge: 0, otherCost: 0, discount: 0, adjustment: 0, grandTotal: 0, paid: 0, due: 0 });
     return { data, totals, meta: { page, limit, total: filtered.length, totalPages: Math.ceil(filtered.length / limit) || 1, dateFrom: query.dateFrom ?? null, dateTo: query.dateTo ?? null, salesBy: query.salesBy ?? null, teamId: query.teamId ?? null, projectId: query.projectId ?? null } };
   }
 
@@ -76,7 +80,14 @@ export class FlatLandSaleReportService {
     const project = projectMap.get(booking.projectId);
     const agreement = agreementMap.get(`${booking.projectId}:${property?.flatLandNo ?? ''}`);
     const salesUser = userMap.get(booking.salesBy ?? '');
-    const size = Number(property?.size ?? 0);
-    return { id: booking.id, sl: index + 1, project: project?.name ?? property?.projectName ?? null, projectId: booking.projectId, customerName: booking.customerName, saleCode: booking.code, flatLandNo: property?.flatLandNo ?? null, flatLandId: booking.flatLandId, sftSize: property?.size ?? null, rate: Number(booking.rate ?? 0), total: size * Number(booking.rate ?? 0), parking: Number(booking.parking ?? 0), utilityCharge: Number(booking.utilityCharge ?? 0), otherCost: Number(booking.otherCost ?? 0), discount: Number(booking.discount ?? 0), adjustment: 0, grandTotal: Number(booking.grandTotal ?? 0), paid: Number(booking.paid ?? 0), due: Number(booking.due ?? 0), agreementDate: agreement?.agreementDate ?? null, handoverDate: agreement?.handoverDate ?? null, salesBy: salesUser?.name ?? booking.salesBy ?? null, salesById: salesUser?.uuid ?? booking.salesBy ?? null, bookingDate: booking.bookingDate, bookingId: booking.uuid };
+    const size = this.number(property?.size);
+    const rate = this.number(booking.rate);
+    return { id: booking.id, sl: index + 1, project: project?.name ?? property?.projectName ?? null, projectId: booking.projectId, customerName: booking.customerName, saleCode: booking.code, flatLandNo: property?.flatLandNo ?? null, flatLandId: booking.flatLandId, sftSize: size, rate, total: size * rate, parking: this.number(booking.parking), utilityCharge: this.number(booking.utilityCharge), otherCost: this.number(booking.otherCost), discount: this.number(booking.discount), adjustment: 0, grandTotal: this.number(booking.grandTotal), paid: this.number(booking.paid), due: this.number(booking.due), agreementDate: agreement?.agreementDate ?? null, handoverDate: agreement?.handoverDate ?? null, salesBy: salesUser?.name ?? booking.salesBy ?? null, salesById: salesUser?.uuid ?? booking.salesBy ?? null, bookingDate: booking.bookingDate, bookingId: booking.uuid };
+  }
+
+  private number(value: unknown): number {
+    if (typeof value === 'number' && Number.isFinite(value)) return value;
+    const parsed = Number.parseFloat(String(value ?? '').replace(/,/g, ''));
+    return Number.isFinite(parsed) ? parsed : 0;
   }
 }
