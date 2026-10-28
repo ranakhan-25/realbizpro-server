@@ -163,7 +163,13 @@ import { TeamSummaryReportModule } from './modules/crm/reports/team-summary-repo
 import { InterestedFlatLandReportModule } from './modules/crm/reports/interested-flat-land-report.module';
 import { RequirementsReportModule } from './modules/crm/reports/requirements-report.module';
 import { SalesProbabilityReportModule } from './modules/crm/reports/sales-probability-report.module';
+import { MissedFollowupVisitSummaryModule } from './modules/crm/reports/missed-followup-visit-summary.module';
 import { FlatLandSaleReportModule } from './modules/crm/reports/flat-land-sale-report.module';
+import { DealNegotiationReportModule } from './modules/crm/reports/deal-negotiation-report.module';
+import { CallLogReportModule } from './modules/crm/reports/call-log-report.module';
+import { CallLogDetailsReportModule } from './modules/crm/reports/call-log-details-report.module';
+import { SalesPipelineFunnelReportModule } from './modules/crm/reports/sales-pipeline-funnel-report.module';
+import { EmployeeKpiModule } from './modules/crm/kpi/employee-kpi/employee-kpi.module';
 import { ProcurementSubCategoryModule } from './modules/procurement/configuration/products/sub-category/sub-category.module';
 import { ProcurementBrandModule } from './modules/procurement/configuration/products/brand/brand.module';
 import { ProcurementUnitModule } from './modules/procurement/configuration/products/unit/unit.module';
@@ -429,7 +435,13 @@ import { ItemEntryModule } from './modules/accounts/assets/item_entry/item_entry
     InterestedFlatLandReportModule,
     RequirementsReportModule,
     SalesProbabilityReportModule,
+    MissedFollowupVisitSummaryModule,
     FlatLandSaleReportModule,
+    DealNegotiationReportModule,
+    CallLogReportModule,
+    CallLogDetailsReportModule,
+    SalesPipelineFunnelReportModule,
+    EmployeeKpiModule,
     LeadModule,
     PipelineModule,
     CrmPartiesModule,
