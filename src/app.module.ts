@@ -154,6 +154,16 @@ import { CallAssignHistoryModule } from './modules/crm/call-center-assign-histor
 import { CallCenterTaskVisitModule } from './modules/crm/call-center-task-visit/call-center-task-visit.module';
 import { DealNegotiationActivityModule } from './modules/crm/deal-negotiation-activity/deal-negotiation-activity.module';
 import { TaskVisitSummaryReportModule } from './modules/crm/task-visit-summary-report/task-visit-summary-report.module';
+import { CallReportsModule } from './modules/crm/reports/call-reports.module';
+import { FollowUpDetailsReportModule } from './modules/crm/reports/follow-up-details-report.module';
+import { UserWiseReportModule } from './modules/crm/reports/user-wise-report.module';
+import { UserActivityReportModule } from './modules/crm/reports/user-activity-report.module';
+import { SourceWiseLeadReportModule } from './modules/crm/reports/source-wise-lead-report.module';
+import { TeamSummaryReportModule } from './modules/crm/reports/team-summary-report.module';
+import { InterestedFlatLandReportModule } from './modules/crm/reports/interested-flat-land-report.module';
+import { RequirementsReportModule } from './modules/crm/reports/requirements-report.module';
+import { SalesProbabilityReportModule } from './modules/crm/reports/sales-probability-report.module';
+import { FlatLandSaleReportModule } from './modules/crm/reports/flat-land-sale-report.module';
 import { ProcurementSubCategoryModule } from './modules/procurement/configuration/products/sub-category/sub-category.module';
 import { ProcurementBrandModule } from './modules/procurement/configuration/products/brand/brand.module';
 import { ProcurementUnitModule } from './modules/procurement/configuration/products/unit/unit.module';
@@ -409,6 +419,16 @@ import { AssetsListModule } from './modules/assets/assets_list/assets_list.modul
     CallCenterTaskVisitModule,
     DealNegotiationActivityModule,
     TaskVisitSummaryReportModule,
+    CallReportsModule,
+    FollowUpDetailsReportModule,
+    UserWiseReportModule,
+    UserActivityReportModule,
+    SourceWiseLeadReportModule,
+    TeamSummaryReportModule,
+    InterestedFlatLandReportModule,
+    RequirementsReportModule,
+    SalesProbabilityReportModule,
+    FlatLandSaleReportModule,
     LeadModule,
     PipelineModule,
     CrmPartiesModule,
