@@ -76,6 +76,7 @@ export class LeadService {
       { association: 'source', attributes: ['id', 'name'], required: false }, { association: 'campaign', attributes: ['id', 'name'], required: false },
       { association: 'profession', attributes: ['id', 'name'], required: false }, { association: 'offer', attributes: ['uuid', 'name', 'status'], required: false }, { association: 'area', attributes: ['id', 'name'], required: false },
       { association: 'activities', required: false, separate: true, limit: 1, order: [['activityDate', 'DESC']] },
+      { association: 'propertyInterests', required: false, separate: true, limit: 1, order: [['createdAt', 'DESC']] },
     ];
     if (query.projectName) include.push({ association: 'propertyInterests', where: { projectName: { [Op.iLike]: `%${query.projectName}%` } }, required: true });
     const { rows, count } = await this.leads.findAndCountAll({ where, include, limit, offset: (page - 1) * limit, order: [['createdAt', 'DESC']], distinct: true, paranoid: !query.withDeleted });
@@ -232,9 +233,11 @@ export class LeadService {
   }
 
   async markJunk(dto: JunkLeadActionDto) {
+    const ids = await this.resolveLeadIds(dto.ids, dto.uuids);
+    if (!ids.length) throw new BadRequestException('ids or uuids are required');
     const [updated] = await this.leads.update(
       { status: 'junk', ...(dto.note ? { notes: dto.note } : {}) },
-      { where: { id: { [Op.in]: dto.ids }, status: { [Op.ne]: 'junk' } } },
+      { where: { id: { [Op.in]: ids }, status: { [Op.ne]: 'junk' } } },
     );
     return { markedAsJunk: updated };
   }
@@ -246,9 +249,10 @@ export class LeadService {
     return this.findOne(uuid);
   }
 
-  async bulkRestoreJunk(ids: number[]) {
-    if (!Array.isArray(ids) || !ids.length) throw new BadRequestException('ids are required');
-    const [restored] = await this.leads.update({ status: 'active' }, { where: { id: { [Op.in]: ids }, status: 'junk' } });
+  async bulkRestoreJunk(ids?: number[], uuids?: string[]) {
+    const leadIds = await this.resolveLeadIds(ids, uuids);
+    if (!leadIds.length) throw new BadRequestException('ids or uuids are required');
+    const [restored] = await this.leads.update({ status: 'active' }, { where: { id: { [Op.in]: leadIds }, status: 'junk' } });
     return { restored };
   }
 
@@ -259,13 +263,28 @@ export class LeadService {
     return { message: `Junk lead ${uuid} deleted successfully` };
   }
 
-  async bulkDeleteJunk(ids: number[]) {
-    if (!Array.isArray(ids) || !ids.length) throw new BadRequestException('ids are required');
-    const deleted = await this.leads.destroy({ where: { id: { [Op.in]: ids }, status: 'junk' } });
+  async bulkDeleteJunk(ids?: number[], uuids?: string[]) {
+    const leadIds = await this.resolveLeadIds(ids, uuids);
+    if (!leadIds.length) throw new BadRequestException('ids or uuids are required');
+    const deleted = await this.leads.destroy({ where: { id: { [Op.in]: leadIds }, status: 'junk' } });
     return { deleted };
   }
 
-  async update(uuid: string, dto: UpdateLeadDto) { const row = await this.getActive(uuid); const { offerUuid, ...leadChanges } = dto; const changes: Record<string, any> = { ...leadChanges }; if (offerUuid !== undefined) changes.offerId = offerUuid ? (await this.getActiveOffer(offerUuid)).id : null; await row.update(changes); return this.findOne(uuid); }
+  async update(uuid: string, dto: UpdateLeadDto) {
+    const row = await this.getActive(uuid);
+    const { offerUuid, projectName, ...leadChanges } = dto;
+    const changes: Record<string, any> = { ...leadChanges };
+    if (offerUuid !== undefined) changes.offerId = offerUuid ? (await this.getActiveOffer(offerUuid)).id : null;
+    await row.update(changes);
+    if (projectName !== undefined) {
+      const current = await LeadPropertyInterest.findOne({ where: { leadId: row.id }, order: [['createdAt', 'DESC']] });
+      if (projectName.trim()) {
+        if (current) await current.update({ projectName, projectId: dto.projectId ?? row.projectId });
+        else await LeadPropertyInterest.create({ leadId: row.id, projectName, projectId: dto.projectId ?? row.projectId } as any);
+      } else if (current) await current.destroy();
+    }
+    return this.findOne(uuid);
+  }
   async remove(uuid: string) { const row = await this.getActive(uuid); await row.destroy(); return { message: `Lead ${uuid} deleted successfully` }; }
   async restore(uuid: string) { const row = await this.leads.findOne({ where: { uuid }, paranoid: false }); if (!row) throw new NotFoundException(`Lead ${uuid} not found`); if (!row.deletedAt) throw new BadRequestException('Lead is not deleted'); await row.restore(); return this.findOne(uuid); }
 
@@ -307,25 +326,28 @@ export class LeadService {
   }
 
   async callAssign(dto: any) {
-    const ids: number[] = dto.leadIds ?? (dto.leadId ? [dto.leadId] : []);
-    if (!ids.length || !dto.assignedTo) throw new BadRequestException('leadIds and assignedTo are required');
+    const ids: number[] = await this.resolveLeadIds(dto.leadIds, dto.leadUuids, dto.leadId ? [dto.leadId] : undefined);
+    if (!ids.length) throw new BadRequestException('leadIds or leadUuids are required');
     const leads = await this.leads.findAll({ where: { id: { [Op.in]: ids } } });
     if (leads.length !== ids.length) throw new NotFoundException('One or more leads were not found');
     const date = dto.date ? new Date(dto.date) : new Date();
     return this.callAssignments.sequelize!.transaction(async transaction => {
       const result = [];
       for (const lead of leads) {
-        result.push(await this.callAssignments.create({ leadId: lead.id, assignedFrom: dto.assignedFrom ?? lead.assignedTo ?? dto.assignedTo, assignedTo: dto.assignedTo, assignmentDate: date, dueDate: dto.dueDate, instruction: dto.note, assignedUserType: dto.assignUserType ?? 'Officer/SR', status: 'pending', projectId: lead.projectId }, { transaction }));
-        await lead.update({ assignedTo: dto.assignedTo }, { transaction });
+        const assignedTo = dto.assignedTo ?? lead.assignedTo;
+        if (!assignedTo) throw new BadRequestException(`Lead ${lead.uuid} has no assigned user; assignedTo is required`);
+        result.push(await this.callAssignments.create({ leadId: lead.id, assignedFrom: dto.assignedFrom ?? lead.assignedTo ?? assignedTo, assignedTo, assignmentDate: date, dueDate: dto.dueDate, instruction: dto.note, assignedUserType: dto.assignUserType ?? 'Officer/SR', status: 'pending', projectId: lead.projectId }, { transaction }));
+        if (dto.assignedTo) await lead.update({ assignedTo }, { transaction });
       }
       return result;
     });
   }
 
   async transfer(dto: any) {
-    if (!Array.isArray(dto.leadIds) || !dto.leadIds.length || !Array.isArray(dto.assignments) || !dto.assignments.length) throw new BadRequestException('leadIds and assignments are required');
-    const leads = await this.leads.findAll({ where: { id: { [Op.in]: dto.leadIds } } });
-    if (leads.length !== dto.leadIds.length) throw new NotFoundException('One or more leads were not found');
+    const ids: number[] = await this.resolveLeadIds(dto.leadIds, dto.leadUuids);
+    if (!ids.length || !Array.isArray(dto.assignments) || !dto.assignments.length) throw new BadRequestException('leadIds/leadUuids and assignments are required');
+    const leads = await this.leads.findAll({ where: { id: { [Op.in]: ids } } });
+    if (leads.length !== ids.length) throw new NotFoundException('One or more leads were not found');
     const assignments = dto.assignments as Array<{ userId: string; quantity?: number }>;
     let cursor = 0;
     return this.leads.sequelize!.transaction(async transaction => {
@@ -343,7 +365,7 @@ export class LeadService {
     });
   }
 
-  async bulkDelete(ids: number[]) { if (!Array.isArray(ids) || !ids.length) throw new BadRequestException('ids are required'); const count = await this.leads.destroy({ where: { id: { [Op.in]: ids } } }); return { deleted: count }; }
+  async bulkDelete(ids: number[], uuids?: string[]) { const leadIds = await this.resolveLeadIds(ids, uuids); if (!leadIds.length) throw new BadRequestException('ids or uuids are required'); const count = await this.leads.destroy({ where: { id: { [Op.in]: leadIds } } }); return { deleted: count }; }
   async bulkImport(rows: CreateLeadDto[]) {
     if (!Array.isArray(rows) || !rows.length) throw new BadRequestException('rows are required');
     return this.leads.sequelize!.transaction(async transaction => {
@@ -358,6 +380,15 @@ export class LeadService {
     });
   }
   async addActivity(uuid: string, dto: any) { const lead = await this.getActive(uuid); const row = await this.activities.create({ ...dto, leadId: lead.id, activityDate: dto.activityDate ?? new Date(), projectId: lead.projectId }); return row; }
+
+  private async resolveLeadIds(ids?: Array<number | string>, uuids?: string[], fallback?: Array<number | string>) {
+    const numericIds = [...(ids ?? []), ...(fallback ?? [])].map(Number).filter(Number.isInteger);
+    const leadUuids = (uuids ?? []).filter(Boolean);
+    if (!leadUuids.length) return [...new Set(numericIds)];
+    const matches = await this.leads.findAll({ where: { uuid: { [Op.in]: leadUuids } }, attributes: ['id', 'uuid'] });
+    if (matches.length !== new Set(leadUuids).size) throw new NotFoundException('One or more leads were not found');
+    return [...new Set([...numericIds, ...matches.map((lead) => Number(lead.id))])];
+  }
 
   private async getActive(uuid: string) { const row = await this.leads.findOne({ where: { uuid } }); if (!row) throw new NotFoundException(`Lead ${uuid} not found`); return row; }
   private async getActiveOffer(uuid: string) { const offer = await this.offers.findOne({ where: { uuid, status: 'active' } }); if (!offer) throw new BadRequestException(`Active offer ${uuid} not found`); return offer; }

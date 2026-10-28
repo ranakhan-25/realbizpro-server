@@ -1,5 +1,5 @@
 // Auto-generated types for ShiftSchedule
-// Source: src/database/models/hrm/employee/hrm_shift_schedule_model.ts
+// Source: src\database\models\hrm\employee\hrm_shift_schedule_model.ts
 
 import { ShiftDayName } from '../models/hrm/employee/hrm_shift_schedule_model';
 

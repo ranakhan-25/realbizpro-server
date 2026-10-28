@@ -29,6 +29,9 @@ export class LeadStage extends BaseModel<LeadStageAttributes, LeadStageCreationA
   @Column({ type: DataType.STRING(50), allowNull: true })
   declare color?: string;
 
+  @Column({ type: DataType.DECIMAL(5, 2), allowNull: true, field: 'sales_probability' })
+  declare salesProbability?: number;
+
   @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false, field: 'is_system' })
   declare isSystem: boolean;
 
