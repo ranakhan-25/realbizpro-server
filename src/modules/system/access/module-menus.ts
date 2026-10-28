@@ -438,13 +438,20 @@ function pruneTree(nodes: MenuNode[], allowedPaths: Set<string>): MenuNode[] {
     const selfAllowed =
       allowedPaths.has('*') ||
       allowedPaths.has(cleanPath) ||
-      allowedPaths.has(n.slug.toLowerCase()) ||
       cleanPath === 'dashboard';
 
-    if (selfAllowed || (kids && kids.length > 0)) {
+    // A node is included if it has visible children, or if it is a leaf node that is allowed
+    const hasKids = kids && kids.length > 0;
+    const isLeaf = !n.children || n.children.length === 0;
+
+    if (hasKids) {
       out.push({
         ...n,
         children: kids,
+      });
+    } else if (isLeaf && selfAllowed) {
+      out.push({
+        ...n,
       });
     }
   }

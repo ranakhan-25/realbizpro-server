@@ -1,5 +1,5 @@
 // Auto-generated types for Loan
-// Source: src\database\models\hrm\employee\hrm_loan_model.ts
+// Source: src/database/models/hrm/employee/hrm_loan_model.ts
 
 import type { EmployeeList } from '../models/hrm/employee/hrm_employeeList_model';
 

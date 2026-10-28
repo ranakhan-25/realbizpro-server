@@ -1,5 +1,5 @@
 // Auto-generated types for SaturationDeduction
-// Source: src\database\models\hrm\employee\hrm_saturationdeduction_model.ts
+// Source: src/database/models/hrm/employee/hrm_saturationdeduction_model.ts
 
 import { PaymentType } from '../models/hrm/employee/hrm_payment_enum';
 

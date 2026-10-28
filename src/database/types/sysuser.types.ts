@@ -1,5 +1,5 @@
 // Auto-generated types for SysUser
-// Source: src\database\models\system\sys_user.model.ts
+// Source: src/database/models/system/sys_user.model.ts
 
 import type { SysFileModel } from '../models/system/sys_file.model';
 import type { SysRole } from '../models/system/sys_role.model';
