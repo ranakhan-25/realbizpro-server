@@ -1,5 +1,5 @@
 // Auto-generated types for Details
-// Source: src/database/models/projects/details/pr_details.model.ts
+// Source: src\database\models\projects\details\pr_details.model.ts
 
 export interface DetailsAttributes {
   id: number;
