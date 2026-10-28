@@ -202,6 +202,7 @@ import { ProjectControlModule } from './modules/projects/project_control/project
 import { UnitPlotModule } from './modules/projects/unit_plot/unit_plot.module';
 import { CustomersAccountsModule } from './modules/accounts/contact/customers_accounts/customers_accounts.module';
 import { AssetsListModule } from './modules/assets/assets_list/assets_list.module';
+import { ItemEntryModule } from './modules/accounts/assets/item_entry/item_entry.module';
 
 
 
@@ -437,6 +438,7 @@ import { AssetsListModule } from './modules/assets/assets_list/assets_list.modul
     ProjectProgressModule,
     ProjectControlModule,
     AssetsListModule,
+    ItemEntryModule,
  
   ],
   controllers: [AppController, HealthController],
