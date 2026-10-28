@@ -6,6 +6,8 @@ import { SysFeatures } from '../../../database/models/system/sys_features.model'
 import { SysUserRole } from '../../../database/models/system/sys_user_role.model';
 import { SysRole } from '../../../database/models/system/sys_role.model';
 import { SysRoleFeature } from '../../../database/models/system/sys_role_feature.model';
+import { SysRolePermission } from '../../../database/models/system/sys_role_permission.model';
+import { SysPermission } from '../../../database/models/system/sys_permission.model';
 import { SysUser } from '../../../database/models/system/sys_user.model';
 import { SysOrganization } from '../../../database/models/system/sys_organization.model';
 import { getModuleMenuTree, MenuNode } from './module-menus';
@@ -87,6 +89,10 @@ export class UserAccessService {
     private readonly roleModel: typeof SysRole,
     @InjectModel(SysRoleFeature)
     private readonly roleFeatureModel: typeof SysRoleFeature,
+    @InjectModel(SysRolePermission)
+    private readonly rolePermissionModel: typeof SysRolePermission,
+    @InjectModel(SysPermission)
+    private readonly permissionModel: typeof SysPermission,
     @InjectModel(SysUser)
     private readonly userModel: typeof SysUser,
     @InjectModel(SysOrganization)
@@ -158,20 +164,27 @@ export class UserAccessService {
         ],
       });
 
-      const moduleMap = new Map<number, { mod: SysModules; features: string[] }>();
+      const moduleMap = new Map<number, { mod: SysModules; features: string[]; routes: string[] }>();
       for (const ent of entitlements) {
         if (!ent.module) continue;
         if (!moduleMap.has(ent.moduleId)) {
-          moduleMap.set(ent.moduleId, { mod: ent.module, features: [] });
+          moduleMap.set(ent.moduleId, { mod: ent.module, features: [], routes: [] });
         }
-        if (ent.feature?.code) {
-          moduleMap.get(ent.moduleId)!.features.push(ent.feature.code);
+        if (ent.feature) {
+          if (ent.feature.code) {
+            moduleMap.get(ent.moduleId)!.features.push(ent.feature.code);
+          }
+          if (ent.feature.routePath) {
+            const clean = ent.feature.routePath.replace(new RegExp(`^/dashboard/[^/]+/?`, 'i'), '');
+            if (clean) moduleMap.get(ent.moduleId)!.routes.push(clean);
+          }
         }
       }
 
-      for (const { mod, features } of moduleMap.values()) {
+      for (const { mod, features, routes } of moduleMap.values()) {
         const key = normalizeModuleKey(mod.code, mod.name);
-        const menuTree = getModuleMenuTree(key, ['*']);
+        const allowedRoutes = routes.length > 0 ? routes : ['*'];
+        const menuTree = getModuleMenuTree(key, allowedRoutes);
         accessibleModules.push({
           id: mod.id,
           key,
@@ -179,12 +192,12 @@ export class UserAccessService {
           code: mod.code || key.toUpperCase(),
           route: `/dashboard/${key}`,
           features,
-          allowedRoutes: ['*'],
+          allowedRoutes,
           menuTree,
         });
       }
     } else if (user.orgId) {
-      // 3. Sub-Role User: Intersection of Org Entitlements & Role Features
+      // 3. Sub-Role User: Intersection of Org Entitlements & Role Permissions/Features
       const entitlements = await this.entitlementModel.findAll({
         where: { orgId: user.orgId, isEnabled: true },
         attributes: ['moduleId', 'featureId'],
@@ -193,6 +206,21 @@ export class UserAccessService {
       const entitledFeatureIds = new Set(entitlements.map((e) => Number(e.featureId)));
 
       const userRoleIds = (user.roles || []).map((r) => r.id);
+
+      // Collect features assigned via sys_role_permissions
+      const rolePermissions = userRoleIds.length
+        ? await this.rolePermissionModel.findAll({
+            where: { roleId: userRoleIds },
+            include: [
+              {
+                model: this.permissionModel,
+                include: [{ model: this.featureModel }],
+              },
+            ],
+          })
+        : [];
+
+      // Also collect features assigned via sys_role_features (if any)
       const roleFeatures = userRoleIds.length
         ? await this.roleFeatureModel.findAll({
             where: { roleId: userRoleIds },
@@ -200,28 +228,52 @@ export class UserAccessService {
           })
         : [];
 
-      // Intersect
-      const activeFeatureMap = new Map<number, string[]>(); // moduleId -> feature codes
+      const featuresById = new Map<number, SysFeatures>();
+      for (const rp of rolePermissions) {
+        const feat = rp.permission?.feature;
+        if (feat && feat.id) {
+          featuresById.set(Number(feat.id), feat);
+        }
+      }
       for (const rf of roleFeatures) {
-        if (!rf.feature) continue;
         const feat = rf.feature;
-        if (entitledFeatureIds.has(Number(feat.id)) && entitledModuleIds.has(Number(feat.moduleId))) {
-          if (!activeFeatureMap.has(Number(feat.moduleId))) {
-            activeFeatureMap.set(Number(feat.moduleId), []);
+        if (feat && feat.id) {
+          featuresById.set(Number(feat.id), feat);
+        }
+      }
+
+      // Intersect with Organization Entitlements
+      const activeFeatureMap = new Map<number, { codes: string[]; routes: string[] }>();
+      for (const feat of featuresById.values()) {
+        const mId = Number(feat.moduleId);
+        const fId = Number(feat.id);
+        const isOrgAllowed =
+          entitledFeatureIds.size === 0 ||
+          entitledFeatureIds.has(fId) ||
+          entitledModuleIds.has(mId);
+
+        if (isOrgAllowed) {
+          if (!activeFeatureMap.has(mId)) {
+            activeFeatureMap.set(mId, { codes: [], routes: [] });
           }
-          if (feat.code) activeFeatureMap.get(Number(feat.moduleId))!.push(feat.code);
+          if (feat.code) activeFeatureMap.get(mId)!.codes.push(feat.code);
+          if (feat.routePath) {
+            const clean = feat.routePath.replace(new RegExp(`^/dashboard/[^/]+/?`, 'i'), '');
+            if (clean) activeFeatureMap.get(mId)!.routes.push(clean);
+          }
         }
       }
 
       if (activeFeatureMap.size > 0) {
         const modules = await this.moduleModel.findAll({
           where: { id: Array.from(activeFeatureMap.keys()) },
+          order: [['id', 'ASC']],
         });
 
         for (const mod of modules) {
           const key = normalizeModuleKey(mod.code, mod.name);
-          const features = activeFeatureMap.get(Number(mod.id)) || [];
-          const allowedRoutes = features.map((f) => f.toLowerCase().replace(/_/g, '-'));
+          const fData = activeFeatureMap.get(Number(mod.id)) || { codes: [], routes: [] };
+          const allowedRoutes = fData.routes.length > 0 ? fData.routes : fData.codes.map((f) => f.toLowerCase().replace(/_/g, '-'));
           const menuTree = getModuleMenuTree(key, allowedRoutes);
           accessibleModules.push({
             id: mod.id,
@@ -229,7 +281,7 @@ export class UserAccessService {
             name: mod.name,
             code: mod.code || key.toUpperCase(),
             route: `/dashboard/${key}`,
-            features,
+            features: fData.codes,
             allowedRoutes,
             menuTree,
           });

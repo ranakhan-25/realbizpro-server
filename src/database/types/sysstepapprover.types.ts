@@ -1,5 +1,5 @@
 // Auto-generated types for SysStepApprover
-// Source: src\database\models\deligation\sys_step_approvers.model.ts
+// Source: src/database/models/deligation/sys_step_approvers.model.ts
 
 import { ApproverType } from '../models/deligation/sys_step_approvers.model';
 import { ConditionOperator } from '../models/deligation/sys_step_approvers.model';
