@@ -209,6 +209,9 @@ import { UnitPlotModule } from './modules/projects/unit_plot/unit_plot.module';
 import { CustomersAccountsModule } from './modules/accounts/contact/customers_accounts/customers_accounts.module';
 import { AssetsListModule } from './modules/assets/assets_list/assets_list.module';
 import { ItemEntryModule } from './modules/accounts/assets/item_entry/item_entry.module';
+import { BalanceSummuryModule } from './modules/accounts/reports/balance_summury/balance_summury.module';
+import { PayableReportModule } from './modules/accounts/reports/payeble_report/payeble_report.module';
+import { ExpenseReportsModule } from './modules/accounts/reports/expense_reports/expense_reports.module';
 
 
 
@@ -451,6 +454,9 @@ import { ItemEntryModule } from './modules/accounts/assets/item_entry/item_entry
     ProjectControlModule,
     AssetsListModule,
     ItemEntryModule,
+    BalanceSummuryModule,
+    PayableReportModule,
+    ExpenseReportsModule,
  
   ],
   controllers: [AppController, HealthController],
