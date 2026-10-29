@@ -1,7 +1,9 @@
+/* eslint-disable prettier/prettier */
 import {
   BadRequestException,
   ConflictException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -18,12 +20,18 @@ import {
   RefreshTokenDto,
   UpdateProfileDto,
 } from './dto/common.dto';
+import { DemoBookDto } from './dto/demo-book.dto';
+import {
+  DemoBookQueryDto,
+  UpdateDemoBookMeetingTimeDto,
+} from './dto/demo-book-query.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { SysPermission } from '@/database/models/system/sys_permission.model';
 import { SysUserPermission } from '@/database/models/system/sys_user_permission.model';
 import { SysOrganization } from '@/database/models/system/sys_organization.model';
 import { SysRole } from '@/database/models/system/sys_role.model';
+import { DemoBook } from '@/database/models/system/sys_demo_book.model';
 
 @Injectable()
 export class AuthService {
@@ -40,6 +48,8 @@ export class AuthService {
     private orgModel: typeof SysOrganization,
     @InjectModel(SysRole)
     private roleModel: typeof SysRole,
+    @InjectModel(DemoBook)
+    private demoBookModel: typeof DemoBook,
     private jwtService: JwtService,
     private cacheService: CacheService,
   ) {}
@@ -93,14 +103,21 @@ export class AuthService {
 
     // Check organization lock & subscription status (unless super admin)
     if (user.orgId && !user.isSuperUser) {
-      const org = await this.orgModel.findByPk(user.orgId);
+      const org = await this.orgModel.findByPk(
+        user.orgId,
+      );
       if (org) {
         if (org.isLocked) {
           throw new UnauthorizedException(
-            org.lockReason || 'Organization account is currently locked. Please contact your administrator.',
+            org.lockReason ||
+              'Organization account is currently locked. Please contact your administrator.',
           );
         }
-        if (org.subscriptionEndDate && new Date() > new Date(org.subscriptionEndDate)) {
+        if (
+          org.subscriptionEndDate &&
+          new Date() >
+            new Date(org.subscriptionEndDate)
+        ) {
           throw new UnauthorizedException(
             'Organization subscription has expired. Please renew your subscription to access.',
           );
@@ -124,6 +141,100 @@ export class AuthService {
     });
 
     return tokens;
+  }
+
+  async createDemoBook(
+    dto: DemoBookDto,
+  ): Promise<DemoBook> {
+    return this.demoBookModel.create({
+      ...dto,
+    });
+  }
+
+  async findAllDemoBooks(
+    query: DemoBookQueryDto,
+  ) {
+    const {
+      page = 1,
+      limit = 10,
+      search,
+      dateFrom,
+      dateTo,
+    } = query;
+    const offset = (page - 1) * limit;
+
+    const where: any = {};
+
+    if (search) {
+      const like = `%${search}%`;
+      where[Op.or] = [
+        { organizationName: { [Op.like]: like } },
+        {
+          organizationEmail: { [Op.like]: like },
+        },
+        {
+          contactPersonName: { [Op.like]: like },
+        },
+        { tradeLicense: { [Op.like]: like } },
+      ];
+    }
+
+    if (dateFrom || dateTo) {
+      where.demoDate = {};
+      if (dateFrom) {
+        where.demoDate[Op.gte] = dateFrom;
+      }
+      if (dateTo) {
+        where.demoDate[Op.lte] = dateTo;
+      }
+    }
+
+    const { rows, count } =
+      await this.demoBookModel.findAndCountAll({
+        where,
+        limit,
+        offset,
+        order: [['createdAt', 'DESC']],
+      });
+
+    return {
+      data: rows,
+      meta: {
+        total: count,
+        page,
+        limit,
+        totalPages: Math.ceil(count / limit),
+      },
+    };
+  }
+
+  async findOneDemoBook(uuid: string) {
+    const booking =
+      await this.demoBookModel.findOne({
+        where: { uuid },
+      });
+
+    if (!booking) {
+      throw new NotFoundException(
+        'Demo booking not found',
+      );
+    }
+
+    return booking;
+  }
+
+  async updateDemoBookMeetingTime(
+    uuid: string,
+    updateDto: UpdateDemoBookMeetingTimeDto,
+  ) {
+    const booking =
+      await this.findOneDemoBook(uuid);
+
+    await booking.update({
+      meetingTime: updateDto.meetingTime,
+    });
+
+    return booking.reload();
   }
 
   async register(
@@ -271,13 +382,34 @@ export class AuthService {
     return tokens;
   }
 
+  // ─────────────────────────────────────────────
+  // ✅ UPDATED: oldPassword + newPassword + confirmPassword
+  // ─────────────────────────────────────────────
   async changePassword(
     userId: number,
-    changePasswordDto: ChangePasswordDto,
+    dto: ChangePasswordDto,
   ): Promise<void> {
-    const { currentPassword, newPassword } =
-      changePasswordDto;
+    const {
+      oldPassword,
+      newPassword,
+      confirmPassword,
+    } = dto;
 
+    // 1. Confirm match (DTO validator already checks, extra safety)
+    if (newPassword !== confirmPassword) {
+      throw new BadRequestException(
+        'New password and confirm password do not match',
+      );
+    }
+
+    // 2. Old != new
+    if (oldPassword === newPassword) {
+      throw new BadRequestException(
+        'New password must be different from old password',
+      );
+    }
+
+    // 3. Find user
     const user =
       await this.userModel.findByPk(userId);
     if (!user) {
@@ -286,41 +418,37 @@ export class AuthService {
       );
     }
 
-    // Verify current password
-    const isCurrentPasswordValid =
-      await argon2.verify(
-        user.password ||
-          (user as any).passwordHash,
-        currentPassword,
-      );
-    if (!isCurrentPasswordValid) {
+    // 4. Verify old password (argon2)
+    const storedHash =
+      user.passwordHash || user.password;
+    const isOldValid = await argon2.verify(
+      storedHash,
+      oldPassword,
+    );
+    if (!isOldValid) {
       throw new UnauthorizedException(
-        'Current password is incorrect',
+        'Old password is incorrect',
       );
     }
 
-    // Hash new password
+    // 5. Hash new password
     const newPasswordHash =
       await argon2.hash(newPassword);
 
-    // Update password and revoke all refresh tokens
+    // 6. Save + revoke sessions
     await user.update({
       passwordHash: newPasswordHash,
       refreshToken: null,
       refreshTokenExpiresAt: null,
     });
 
-    // Revoke all DB tokens
     await this.userTokenModel.destroy({
       where: { userId },
     });
 
-    // Clear refresh token from cache
     await this.cacheService.del(
       this.getRefreshTokenKey(userId),
-      {
-        prefix: 'auth',
-      },
+      { prefix: 'auth' },
     );
   }
 
@@ -485,15 +613,23 @@ export class AuthService {
     const jti = randomBytes(16).toString('hex');
 
     // Fetch user roles
-    const userWithRoles = await this.userModel.findByPk(user.id, {
-      include: [{ association: 'roles', attributes: ['id', 'name', 'slug'] }],
-    });
-    const roleSlugs = (userWithRoles?.roles || []).map((r) => r.slug);
+    const userWithRoles =
+      await this.userModel.findByPk(user.id, {
+        include: [
+          {
+            association: 'roles',
+            attributes: ['id', 'name', 'slug'],
+          },
+        ],
+      });
+    const roleSlugs = (
+      userWithRoles?.roles || []
+    ).map((r) => r.slug);
     const primaryRole = user.isSuperUser
       ? 'super-admin'
       : user.isOrgAdmin
-      ? 'org-admin'
-      : roleSlugs[0] || 'user';
+        ? 'org-admin'
+        : roleSlugs[0] || 'user';
 
     const payload = {
       sub: user.id,
@@ -613,11 +749,22 @@ export class AuthService {
         },
         {
           association: 'avatar',
-          attributes: ['id', 'fileName', 'filePath', 'mimeType'],
+          attributes: [
+            'id',
+            'fileName',
+            'filePath',
+            'mimeType',
+          ],
         },
         {
           association: 'organization',
-          attributes: ['id', 'name', 'code', 'email', 'phone'],
+          attributes: [
+            'id',
+            'name',
+            'code',
+            'email',
+            'phone',
+          ],
         },
         {
           association: 'companies',

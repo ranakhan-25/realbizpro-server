@@ -10,7 +10,10 @@ import { SysOrganization } from './sys_organization.model';
 import { SysModules } from './sys_module.model';
 import { SysFeatures } from './sys_features.model';
 
-import type { SysOrgEntitlementAttributes, SysOrgEntitlementCreationAttributes } from '../../types/sysorgentitlement.types';
+import type {
+  SysOrgEntitlementAttributes,
+  SysOrgEntitlementCreationAttributes,
+} from '../../types/sysorgentitlement.types';
 
 @Table({
   tableName: 'sys_org_entitlements',
@@ -18,11 +21,17 @@ import type { SysOrgEntitlementAttributes, SysOrgEntitlementCreationAttributes }
   paranoid: true,
   underscored: true,
   indexes: [
-    { fields: ['org_id', 'feature_id'], unique: true },
+    {
+      fields: ['org_id', 'feature_id'],
+      unique: true,
+    },
     { fields: ['org_id', 'module_id'] },
   ],
 })
-export class SysOrgEntitlement extends BaseModel<SysOrgEntitlementAttributes, SysOrgEntitlementCreationAttributes> {
+export class SysOrgEntitlement extends BaseModel<
+  SysOrgEntitlementAttributes,
+  SysOrgEntitlementCreationAttributes
+> {
   @ForeignKey(() => SysOrganization)
   @Column({
     type: DataType.BIGINT,

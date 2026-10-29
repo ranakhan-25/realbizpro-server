@@ -20,6 +20,7 @@ import { SysUserPermission } from '@/database/models/system/sys_user_permission.
 import { SysOrganization } from '@/database/models/system/sys_organization.model';
 import { SysRole } from '@/database/models/system/sys_role.model';
 import { SysUserRole } from '@/database/models/system/sys_user_role.model';
+import { DemoBook } from '@/database/models/system/sys_demo_book.model';
 import { MenuModule } from '../../menu/menu.module';
 import { UsersModule } from '../../engine/user-management/users/users.module';
 import { AuthController } from './auth.controller';
@@ -38,6 +39,7 @@ import { SysPermission } from '@/database/models/system/sys_permission.model';
       SysOrganization,
       SysRole,
       SysUserRole,
+      DemoBook,
     ]),
 
     PassportModule.register({

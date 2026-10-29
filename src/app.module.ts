@@ -215,14 +215,6 @@ import { BalanceSummuryModule } from './modules/accounts/reports/balance_summury
 import { PayableReportModule } from './modules/accounts/reports/payeble_report/payeble_report.module';
 import { ExpenseReportsModule } from './modules/accounts/reports/expense_reports/expense_reports.module';
 
-
-
-
-
-
-
-
-
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -301,18 +293,18 @@ import { ExpenseReportsModule } from './modules/accounts/reports/expense_reports
     ProjectTypeModule,
     ProjectSiteModule,
     ProjectModule,
-    UsersModule, 
+    UsersModule,
     BuildingModule,
     FloorModule,
     UnitPlotModule,
-   
+
     ProjectAgreementModule,
     ProjectMilestoneModule,
     ProjectPartyModule,
     ProjectTaskModule,
     ProjectBudgetModule,
     ProjectCostModule,
-    ProjectProgressModule, 
+    ProjectProgressModule,
     ProjectControlModule,
     BoqModule,
     TaskModule,
@@ -375,7 +367,7 @@ import { ExpenseReportsModule } from './modules/accounts/reports/expense_reports
     EmployeeListModule,
     EmployeeSalaryModule,
     EmployeeTypeModule,
-     CustomersAccountsModule,
+    CustomersAccountsModule,
     LoanModule,
     OvertimeModule,
     SalaryGradeModule,
@@ -461,7 +453,6 @@ import { ExpenseReportsModule } from './modules/accounts/reports/expense_reports
     BalanceSummuryModule,
     PayableReportModule,
     ExpenseReportsModule,
- 
   ],
   controllers: [AppController, HealthController],
   providers: [
