@@ -382,6 +382,10 @@ export class FeaturesService {
     return allFeatures.map((feature) => ({
       id: feature.id.toString(),
       name: feature.name,
+      code: feature.code ?? null,
+      routePath: feature.routePath ?? null,
+      actionType: feature.actionType ?? 'read',
+      displayOrder: feature.displayOrder ?? 0,
       moduleId: feature?.moduleId,
       module: feature.module
         ? {
