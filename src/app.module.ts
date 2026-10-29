@@ -170,6 +170,8 @@ import { CallLogReportModule } from './modules/crm/reports/call-log-report.modul
 import { CallLogDetailsReportModule } from './modules/crm/reports/call-log-details-report.module';
 import { SalesPipelineFunnelReportModule } from './modules/crm/reports/sales-pipeline-funnel-report.module';
 import { EmployeeKpiModule } from './modules/crm/kpi/employee-kpi/employee-kpi.module';
+import { EmployeeKpiCallReportModule } from './modules/crm/reports/employee-kpi-call-report.module';
+import { TeamKpiReportModule } from './modules/crm/reports/team-kpi-report.module';
 import { ProcurementSubCategoryModule } from './modules/procurement/configuration/products/sub-category/sub-category.module';
 import { ProcurementBrandModule } from './modules/procurement/configuration/products/brand/brand.module';
 import { ProcurementUnitModule } from './modules/procurement/configuration/products/unit/unit.module';
@@ -208,6 +210,10 @@ import { ProjectControlModule } from './modules/projects/project_control/project
 import { UnitPlotModule } from './modules/projects/unit_plot/unit_plot.module';
 import { CustomersAccountsModule } from './modules/accounts/contact/customers_accounts/customers_accounts.module';
 import { AssetsListModule } from './modules/assets/assets_list/assets_list.module';
+import { ItemEntryModule } from './modules/accounts/assets/item_entry/item_entry.module';
+import { BalanceSummuryModule } from './modules/accounts/reports/balance_summury/balance_summury.module';
+import { PayableReportModule } from './modules/accounts/reports/payeble_report/payeble_report.module';
+import { ExpenseReportsModule } from './modules/accounts/reports/expense_reports/expense_reports.module';
 
 
 
@@ -441,6 +447,8 @@ import { AssetsListModule } from './modules/assets/assets_list/assets_list.modul
     CallLogDetailsReportModule,
     SalesPipelineFunnelReportModule,
     EmployeeKpiModule,
+    EmployeeKpiCallReportModule,
+    TeamKpiReportModule,
     LeadModule,
     PipelineModule,
     CrmPartiesModule,
@@ -449,6 +457,10 @@ import { AssetsListModule } from './modules/assets/assets_list/assets_list.modul
     ProjectProgressModule,
     ProjectControlModule,
     AssetsListModule,
+    ItemEntryModule,
+    BalanceSummuryModule,
+    PayableReportModule,
+    ExpenseReportsModule,
  
   ],
   controllers: [AppController, HealthController],

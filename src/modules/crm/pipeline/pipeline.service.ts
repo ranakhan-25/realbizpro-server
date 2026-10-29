@@ -49,7 +49,9 @@ export class PipelineService {
       offset: (page - 1) * limit,
     });
     const metrics = await this.getMetrics(rows);
-    const data = rows.map(project => this.toPublic(project, metrics.get(project.uuid)));
+    const pipelineRows = await this.pipelineRecords.findAll({ where: { projectId: { [Op.in]: rows.map(project => project.uuid) } } as any });
+    const byProject = new Map(pipelineRows.map(row => [row.projectId, row]));
+    const data = rows.map(project => this.toPublic(project, metrics.get(project.uuid), byProject.get(project.uuid)));
     return {
       data,
       meta: { page, limit, total: count, totalPages: Math.ceil(count / limit) || 1 },
@@ -60,7 +62,8 @@ export class PipelineService {
     const project = await this.projects.findOne({ where: { uuid: projectUuid } as any, attributes: ['uuid', 'code', 'name', 'status'] });
     if (!project) throw new NotFoundException(`Project ${projectUuid} not found`);
     const metrics = await this.getMetrics([project]);
-    return this.toPublic(project, metrics.get(project.uuid));
+    const pipelineRecord = await this.pipelineRecords.findOne({ where: { projectId: project.uuid } as any });
+    return this.toPublic(project, metrics.get(project.uuid), pipelineRecord ?? undefined);
   }
 
   async create(dto: CreatePipelineDto, actorUuid?: string) {
@@ -152,13 +155,15 @@ export class PipelineService {
     return result;
   }
 
-  private toPublic(project: Project, metrics?: ProjectMetrics) {
+  private toPublic(project: Project, metrics?: ProjectMetrics, pipelineRecord?: CrmLeadPipeline) {
     const estimatedPipelineValue = metrics?.estimatedPipelineValue ?? 0;
     return {
       projectUuid: project.uuid,
       projectCode: project.code,
       projectName: project.name,
       projectStatus: project.status,
+      pipelineUuid: pipelineRecord?.uuid ?? null,
+      initialLeadsCount: pipelineRecord?.initialLeadsCount ?? 0,
       totalLeads: metrics?.totalLeads ?? 0,
       activeDeals: metrics?.activeDeals ?? 0,
       newThisQuarter: metrics?.newThisQuarter ?? 0,
