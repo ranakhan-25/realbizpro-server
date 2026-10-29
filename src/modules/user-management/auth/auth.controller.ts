@@ -1,9 +1,11 @@
+/* eslint-disable prettier/prettier */
 import {
   Body,
   Controller,
   Get,
   HttpCode,
   HttpStatus,
+  Param,
   Patch,
   Post,
   Query,
@@ -32,6 +34,11 @@ import {
   RefreshTokenDto,
   UpdateProfileDto,
 } from './dto/common.dto';
+import { DemoBookDto } from './dto/demo-book.dto';
+import {
+  DemoBookQueryDto,
+  UpdateDemoBookMeetingTimeDto,
+} from './dto/demo-book-query.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 
@@ -101,6 +108,93 @@ export class AuthController {
     return this.authService.register(
       registerDto,
       { ipAddress, userAgent },
+    );
+  }
+
+  @Public()
+  @Post('demobook')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Book a demo (public)',
+  })
+  @ApiResponse({
+    status: 201,
+    description:
+      'Demo booking submitted successfully',
+  })
+  async createDemoBook(
+    @Body() demoBookDto: DemoBookDto,
+  ) {
+    return this.authService.createDemoBook(
+      demoBookDto,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('demobook')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary:
+      'Get demo bookings list (paginated, with search & date filter)',
+  })
+  @ApiResponse({
+    status: 200,
+    description:
+      'Demo bookings retrieved successfully',
+  })
+  async findAllDemoBooks(
+    @Query() query: DemoBookQueryDto,
+  ) {
+    return this.authService.findAllDemoBooks(
+      query,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('demobook/:uuid')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get a single demo booking by uuid',
+  })
+  @ApiResponse({
+    status: 200,
+    description:
+      'Demo booking retrieved successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Demo booking not found',
+  })
+  async findOneDemoBook(
+    @Param('uuid') uuid: string,
+  ) {
+    return this.authService.findOneDemoBook(uuid);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('demobook/:uuid')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary:
+      'Set/update meeting time for a demo booking',
+  })
+  @ApiResponse({
+    status: 200,
+    description:
+      'Meeting time updated successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Demo booking not found',
+  })
+  async updateDemoBookMeetingTime(
+    @Param('uuid') uuid: string,
+    @Body()
+    updateDto: UpdateDemoBookMeetingTimeDto,
+  ) {
+    return this.authService.updateDemoBookMeetingTime(
+      uuid,
+      updateDto,
     );
   }
 
@@ -194,8 +288,7 @@ export class AuthController {
     @Query('moduleId') moduleId?: string,
     @Query('location')
     location?:
-      | SysMenuLocation
-      | SysMenuLocation[],
+      SysMenuLocation | SysMenuLocation[],
   ): Promise<ModuleWithMenuTreeResponseDto[]> {
     const moduleIdNumber = moduleId
       ? +moduleId

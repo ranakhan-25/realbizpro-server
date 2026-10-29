@@ -8,12 +8,37 @@ import {
   IsOptional,
   IsString,
   MinLength,
+  Validate,
+  ValidationArguments,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
 } from 'class-validator';
 import {
   IsBangladeshPhone,
   IsNormalizedUsername,
   IsPassword,
 } from '../../../../common/decorators/validation.decorators';
+
+// ─────────────────────────────────────────────
+// Custom validator: confirmPassword === newPassword
+// ─────────────────────────────────────────────
+@ValidatorConstraint({
+  name: 'MatchPassword',
+  async: false,
+})
+export class MatchPasswordConstraint implements ValidatorConstraintInterface {
+  validate(
+    confirmPassword: string,
+    args: ValidationArguments,
+  ) {
+    const obj = args.object as any;
+    return confirmPassword === obj.newPassword;
+  }
+
+  defaultMessage() {
+    return 'Confirm password must match new password';
+  }
+}
 
 export class RefreshTokenDto {
   @ApiProperty({
@@ -76,12 +101,12 @@ export class UpdateProfileDto {
 
 export class ChangePasswordDto {
   @ApiProperty({
-    description: 'Current password',
-    example: 'CurrentPassword@123',
+    description: 'Current (old) password',
+    example: 'OldPassword@123',
   })
   @IsString()
   @IsNotEmpty()
-  currentPassword: string;
+  oldPassword: string;
 
   @ApiProperty({
     description:
@@ -93,4 +118,15 @@ export class ChangePasswordDto {
   @IsPassword()
   @MinLength(8)
   newPassword: string;
+
+  @ApiProperty({
+    description:
+      'Confirm new password (must match newPassword)',
+    example: 'NewPassword@456',
+    minLength: 8,
+  })
+  @IsString()
+  @IsNotEmpty()
+  @Validate(MatchPasswordConstraint)
+  confirmPassword: string;
 }

@@ -323,7 +323,8 @@ export class SysUser
     type: DataType.BIGINT,
     allowNull: true,
     field: 'org_id',
-    comment: 'Tenant organization id. Null for super admins.',
+    comment:
+      'Tenant organization id. Null for super admins.',
   })
   declare orgId?: number;
 
@@ -339,14 +340,18 @@ export class SysUser
     allowNull: true,
     defaultValue: false,
     field: 'is_org_admin',
-    comment: 'True if user is the administrator of the tenant organization',
+    comment:
+      'True if user is the administrator of the tenant organization',
   })
   declare isOrgAdmin?: boolean;
 
   @BelongsTo(() => SysOrganization, 'org_id')
   declare organization?: SysOrganization;
 
-  @HasMany(() => SysUserFeatureOverride, 'user_id')
+  @HasMany(
+    () => SysUserFeatureOverride,
+    'user_id',
+  )
   declare featureOverrides?: SysUserFeatureOverride[];
 
   // Helper method to check if refresh token is valid
@@ -362,29 +367,154 @@ export class SysUser
     );
   }
 
-  @HasMany(() => ProcurementRfq, { foreignKey: 'added_by_id', sourceKey: 'id', as: 'procurementRfqs' }) declare procurementRfqs?: ProcurementRfq[];
-  @HasMany(() => ProcurementAssetRfq, { foreignKey: 'added_by_id', sourceKey: 'id', as: 'procurementAssetRfqs' }) declare procurementAssetRfqs?: ProcurementAssetRfq[];
-  @HasMany(() => ProcurementMaterialRequisition, { foreignKey: 'added_by_id', sourceKey: 'id', as: 'procurementMaterialRequisitions' }) declare procurementMaterialRequisitions?: ProcurementMaterialRequisition[];
-  @HasMany(() => ProcurementAssetRequisition, { foreignKey: 'added_by_id', sourceKey: 'id', as: 'procurementAssetRequisitions' }) declare procurementAssetRequisitions?: ProcurementAssetRequisition[];
-  @HasMany(() => ProcurementPurchaseOrder, { foreignKey: 'added_by_id', sourceKey: 'id', as: 'procurementPurchaseOrders' }) declare procurementPurchaseOrders?: ProcurementPurchaseOrder[];
-  @HasMany(() => ProcurementAssetPurchaseOrder, { foreignKey: 'added_by_id', sourceKey: 'id', as: 'procurementAssetPurchaseOrders' }) declare procurementAssetPurchaseOrders?: ProcurementAssetPurchaseOrder[];
-  @HasMany(() => ProcurementGrn, { foreignKey: 'added_by_id', sourceKey: 'id', as: 'procurementGrns' }) declare procurementGrns?: ProcurementGrn[];
-  @HasMany(() => ProcurementPurchaseBill, { foreignKey: 'added_by_id', sourceKey: 'id', as: 'procurementPurchaseBills' }) declare procurementPurchaseBills?: ProcurementPurchaseBill[];
-  @HasMany(() => ProcurementAssetGrn, { foreignKey: 'added_by_id', sourceKey: 'id', as: 'procurementAssetGrns' }) declare procurementAssetGrns?: ProcurementAssetGrn[];
-  @HasMany(() => ProcurementAssetPurchaseBill, { foreignKey: 'added_by_id', sourceKey: 'id', as: 'procurementAssetPurchaseBills' }) declare procurementAssetPurchaseBills?: ProcurementAssetPurchaseBill[];
-  @HasMany(() => ProcurementBoq, { foreignKey: 'responsible_user_id', sourceKey: 'id', as: 'responsibleProcurementBoqs' }) declare responsibleProcurementBoqs?: ProcurementBoq[];
-  @HasMany(() => ProcurementBoq, { foreignKey: 'added_by_id', sourceKey: 'id', as: 'createdProcurementBoqs' }) declare createdProcurementBoqs?: ProcurementBoq[];
-  @HasMany(() => ProcurementHireOrder, { foreignKey: 'added_by_id', sourceKey: 'id', as: 'createdEquipmentHireOrders' }) declare createdEquipmentHireOrders?: ProcurementHireOrder[];
-  @HasMany(() => ProcurementHireIn, { foreignKey: 'received_by_id', sourceKey: 'id', as: 'equipmentHireIns' }) declare equipmentHireIns?: ProcurementHireIn[];
-  @HasMany(() => ProcurementHireOut, { foreignKey: 'returned_by_id', sourceKey: 'id', as: 'equipmentHireOuts' }) declare equipmentHireOuts?: ProcurementHireOut[];
-  @HasMany(() => ProcurementHireBill, { foreignKey: 'added_by_id', sourceKey: 'id', as: 'equipmentHireBills' }) declare equipmentHireBills?: ProcurementHireBill[];
-  @HasMany(() => ProcurementMaterialIssue, { foreignKey: 'issued_by_id', sourceKey: 'id', as: 'procurementMaterialIssues' }) declare procurementMaterialIssues?: ProcurementMaterialIssue[];
-  @HasMany(() => ProcurementMaterialIssue, { foreignKey: 'added_by_id', sourceKey: 'id', as: 'createdProcurementMaterialIssues' }) declare createdProcurementMaterialIssues?: ProcurementMaterialIssue[];
-  @HasMany(() => CrmParty, { foreignKey: 'assignedToUuid', sourceKey: 'uuid', as: 'assignedCrmParties' }) declare assignedCrmParties?: CrmParty[];
-  @HasMany(() => CrmPartyAssignment, { foreignKey: 'assigneeUuid', sourceKey: 'uuid', as: 'crmPartyAssignments' }) declare crmPartyAssignments?: CrmPartyAssignment[];
-  @HasMany(() => CrmPartyAssignment, { foreignKey: 'assignedByUuid', sourceKey: 'uuid', as: 'createdCrmPartyAssignments' }) declare createdCrmPartyAssignments?: CrmPartyAssignment[];
-  @HasMany(() => CrmPartyCommunication, { foreignKey: 'loggedByUuid', sourceKey: 'uuid', as: 'crmPartyCommunications' }) declare crmPartyCommunications?: CrmPartyCommunication[];
-  @HasMany(() => LeadCallAssignment, { foreignKey: 'assignedFrom', sourceKey: 'uuid', as: 'crmCallAssignmentsCreated' }) declare crmCallAssignmentsCreated?: LeadCallAssignment[];
-  @HasMany(() => LeadCallAssignment, { foreignKey: 'assignedTo', sourceKey: 'uuid', as: 'crmCallAssignmentsReceived' }) declare crmCallAssignmentsReceived?: LeadCallAssignment[];
-  @HasMany(() => LeadActivity, { foreignKey: 'conductedBy', sourceKey: 'uuid', as: 'conductedLeadActivities' }) declare conductedLeadActivities?: LeadActivity[];
+  @HasMany(() => ProcurementRfq, {
+    foreignKey: 'added_by_id',
+    sourceKey: 'id',
+    as: 'procurementRfqs',
+  })
+  declare procurementRfqs?: ProcurementRfq[];
+  @HasMany(() => ProcurementAssetRfq, {
+    foreignKey: 'added_by_id',
+    sourceKey: 'id',
+    as: 'procurementAssetRfqs',
+  })
+  declare procurementAssetRfqs?: ProcurementAssetRfq[];
+  @HasMany(() => ProcurementMaterialRequisition, {
+    foreignKey: 'added_by_id',
+    sourceKey: 'id',
+    as: 'procurementMaterialRequisitions',
+  })
+  declare procurementMaterialRequisitions?: ProcurementMaterialRequisition[];
+  @HasMany(() => ProcurementAssetRequisition, {
+    foreignKey: 'added_by_id',
+    sourceKey: 'id',
+    as: 'procurementAssetRequisitions',
+  })
+  declare procurementAssetRequisitions?: ProcurementAssetRequisition[];
+  @HasMany(() => ProcurementPurchaseOrder, {
+    foreignKey: 'added_by_id',
+    sourceKey: 'id',
+    as: 'procurementPurchaseOrders',
+  })
+  declare procurementPurchaseOrders?: ProcurementPurchaseOrder[];
+  @HasMany(() => ProcurementAssetPurchaseOrder, {
+    foreignKey: 'added_by_id',
+    sourceKey: 'id',
+    as: 'procurementAssetPurchaseOrders',
+  })
+  declare procurementAssetPurchaseOrders?: ProcurementAssetPurchaseOrder[];
+  @HasMany(() => ProcurementGrn, {
+    foreignKey: 'added_by_id',
+    sourceKey: 'id',
+    as: 'procurementGrns',
+  })
+  declare procurementGrns?: ProcurementGrn[];
+  @HasMany(() => ProcurementPurchaseBill, {
+    foreignKey: 'added_by_id',
+    sourceKey: 'id',
+    as: 'procurementPurchaseBills',
+  })
+  declare procurementPurchaseBills?: ProcurementPurchaseBill[];
+  @HasMany(() => ProcurementAssetGrn, {
+    foreignKey: 'added_by_id',
+    sourceKey: 'id',
+    as: 'procurementAssetGrns',
+  })
+  declare procurementAssetGrns?: ProcurementAssetGrn[];
+  @HasMany(() => ProcurementAssetPurchaseBill, {
+    foreignKey: 'added_by_id',
+    sourceKey: 'id',
+    as: 'procurementAssetPurchaseBills',
+  })
+  declare procurementAssetPurchaseBills?: ProcurementAssetPurchaseBill[];
+  @HasMany(() => ProcurementBoq, {
+    foreignKey: 'responsible_user_id',
+    sourceKey: 'id',
+    as: 'responsibleProcurementBoqs',
+  })
+  declare responsibleProcurementBoqs?: ProcurementBoq[];
+  @HasMany(() => ProcurementBoq, {
+    foreignKey: 'added_by_id',
+    sourceKey: 'id',
+    as: 'createdProcurementBoqs',
+  })
+  declare createdProcurementBoqs?: ProcurementBoq[];
+  @HasMany(() => ProcurementHireOrder, {
+    foreignKey: 'added_by_id',
+    sourceKey: 'id',
+    as: 'createdEquipmentHireOrders',
+  })
+  declare createdEquipmentHireOrders?: ProcurementHireOrder[];
+  @HasMany(() => ProcurementHireIn, {
+    foreignKey: 'received_by_id',
+    sourceKey: 'id',
+    as: 'equipmentHireIns',
+  })
+  declare equipmentHireIns?: ProcurementHireIn[];
+  @HasMany(() => ProcurementHireOut, {
+    foreignKey: 'returned_by_id',
+    sourceKey: 'id',
+    as: 'equipmentHireOuts',
+  })
+  declare equipmentHireOuts?: ProcurementHireOut[];
+  @HasMany(() => ProcurementHireBill, {
+    foreignKey: 'added_by_id',
+    sourceKey: 'id',
+    as: 'equipmentHireBills',
+  })
+  declare equipmentHireBills?: ProcurementHireBill[];
+  @HasMany(() => ProcurementMaterialIssue, {
+    foreignKey: 'issued_by_id',
+    sourceKey: 'id',
+    as: 'procurementMaterialIssues',
+  })
+  declare procurementMaterialIssues?: ProcurementMaterialIssue[];
+  @HasMany(() => ProcurementMaterialIssue, {
+    foreignKey: 'added_by_id',
+    sourceKey: 'id',
+    as: 'createdProcurementMaterialIssues',
+  })
+  declare createdProcurementMaterialIssues?: ProcurementMaterialIssue[];
+  @HasMany(() => CrmParty, {
+    foreignKey: 'assignedToUuid',
+    sourceKey: 'uuid',
+    as: 'assignedCrmParties',
+  })
+  declare assignedCrmParties?: CrmParty[];
+  @HasMany(() => CrmPartyAssignment, {
+    foreignKey: 'assigneeUuid',
+    sourceKey: 'uuid',
+    as: 'crmPartyAssignments',
+  })
+  declare crmPartyAssignments?: CrmPartyAssignment[];
+  @HasMany(() => CrmPartyAssignment, {
+    foreignKey: 'assignedByUuid',
+    sourceKey: 'uuid',
+    as: 'createdCrmPartyAssignments',
+  })
+  declare createdCrmPartyAssignments?: CrmPartyAssignment[];
+  @HasMany(() => CrmPartyCommunication, {
+    foreignKey: 'loggedByUuid',
+    sourceKey: 'uuid',
+    as: 'crmPartyCommunications',
+  })
+  declare crmPartyCommunications?: CrmPartyCommunication[];
+  @HasMany(() => LeadCallAssignment, {
+    foreignKey: 'assignedFrom',
+    sourceKey: 'uuid',
+    as: 'crmCallAssignmentsCreated',
+  })
+  declare crmCallAssignmentsCreated?: LeadCallAssignment[];
+  @HasMany(() => LeadCallAssignment, {
+    foreignKey: 'assignedTo',
+    sourceKey: 'uuid',
+    as: 'crmCallAssignmentsReceived',
+  })
+  declare crmCallAssignmentsReceived?: LeadCallAssignment[];
+  @HasMany(() => LeadActivity, {
+    foreignKey: 'conductedBy',
+    sourceKey: 'uuid',
+    as: 'conductedLeadActivities',
+  })
+  declare conductedLeadActivities?: LeadActivity[];
 }
