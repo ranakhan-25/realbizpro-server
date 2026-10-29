@@ -206,22 +206,33 @@ export class OrganizationsService {
   async createWizard(dto: CreateOrganizationWizardDto): Promise<OrganizationResponseDto> {
     const { organization: orgDto, adminUser: userDto, moduleFeatureAccess } = dto;
 
-    // Check duplicate org code
+    // Check duplicate org code (case-insensitive)
     const existingOrg = await this.orgModel.findOne({
-      where: { code: orgDto.code },
+      where: { code: { [Op.iLike]: orgDto.code.trim() } },
     });
     if (existingOrg) {
-      throw new ConflictException(`Organization code "${orgDto.code}" already exists`);
+      throw new ConflictException(`Organization code "${orgDto.code}" is already in use. Please choose a different organization code.`);
     }
 
-    // Check duplicate user credentials
+    // Check duplicate user credentials (case-insensitive)
     const existingUser = await this.userModel.findOne({
       where: {
-        [Op.or]: [{ email: userDto.email }, { username: userDto.username }],
+        [Op.or]: [
+          { email: { [Op.iLike]: userDto.email.trim() } },
+          { username: { [Op.iLike]: userDto.username.trim() } },
+        ],
       },
     });
     if (existingUser) {
-      throw new ConflictException(`User with email "${userDto.email}" or username "${userDto.username}" already exists`);
+      const emailTaken = existingUser.email?.toLowerCase() === userDto.email.trim().toLowerCase();
+      const usernameTaken = existingUser.username?.toLowerCase() === userDto.username.trim().toLowerCase();
+      if (emailTaken && usernameTaken) {
+        throw new ConflictException(`Both email "${userDto.email}" and username "${userDto.username}" are already registered. Please provide different admin credentials.`);
+      } else if (emailTaken) {
+        throw new ConflictException(`Email address "${userDto.email}" is already registered. Please provide a different admin email.`);
+      } else {
+        throw new ConflictException(`Username "${userDto.username}" is already taken. Please choose a different admin username.`);
+      }
     }
 
     // Resolve plan if provided
