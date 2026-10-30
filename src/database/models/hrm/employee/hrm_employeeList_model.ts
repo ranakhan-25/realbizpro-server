@@ -32,6 +32,7 @@ import { Attendance } from './hrm_attendance_model';
 import { BonusGenerate } from './hrm_bonus_generate_model';
 import { Shift } from './hrm_shift_model';
 import { AttendanceReconciliation } from '../attendance/attendance_reconciliation_model';
+import { LeaveApplication } from '../leaveapplication/leaveapplication_modes';
 
 export enum EmployeeListStatus {
   ACTIVE = 'active',
@@ -492,4 +493,10 @@ export class EmployeeList
     as: 'attendanceReconciliations',
   })
   declare attendanceReconciliations?: AttendanceReconciliation[];
+  @HasMany(() => LeaveApplication, {
+    foreignKey: 'employeeId',
+    sourceKey: 'uuid',
+    as: 'leaveApplications',
+  })
+  declare leaveApplications?: LeaveApplication[];
 }

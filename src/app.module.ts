@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import { IdLogicModule } from '@easysofts/id-logic';
 import { Module } from '@nestjs/common';
 import {
@@ -214,6 +213,7 @@ import { ItemEntryModule } from './modules/accounts/assets/item_entry/item_entry
 import { BalanceSummuryModule } from './modules/accounts/reports/balance_summury/balance_summury.module';
 import { PayableReportModule } from './modules/accounts/reports/payeble_report/payeble_report.module';
 import { ExpenseReportsModule } from './modules/accounts/reports/expense_reports/expense_reports.module';
+import { LeaveApplicationModule } from './modules/hrm/leaveapplication/leave-application.module';
 
 @Module({
   imports: [
@@ -453,6 +453,7 @@ import { ExpenseReportsModule } from './modules/accounts/reports/expense_reports
     BalanceSummuryModule,
     PayableReportModule,
     ExpenseReportsModule,
+    LeaveApplicationModule,
   ],
   controllers: [AppController, HealthController],
   providers: [
