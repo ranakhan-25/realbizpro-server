@@ -19,6 +19,7 @@ import { Attendance } from 'src/database/models/hrm/employee/hrm_attendance_mode
 import { BonusGenerate } from 'src/database/models/hrm/employee/hrm_bonus_generate_model';
 import { Shift } from 'src/database/models/hrm/employee/hrm_shift_model';
 import { AttendanceReconciliation } from 'src/database/models/hrm/attendance/attendance_reconciliation_model';
+import { LeaveApplication } from 'src/database/models/hrm/leaveapplication/leaveapplication_modes';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { AttendanceReconciliation } from 'src/database/models/hrm/attendance/att
       Attendance,
       BonusGenerate,
       AttendanceReconciliation,
+      LeaveApplication,
     ]), // relation: employee-er 8 ta relation model
   ],
 
