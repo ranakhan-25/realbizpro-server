@@ -61,15 +61,7 @@ export interface FeatureTreeNode {
     name?: string | undefined;
     description: string | null | undefined;
   };
-  permissions: {
-    id: string;
-    key: string;
-    name?: string;
-    description: string | null | undefined;
-    resource: string;
-    action: string;
-    context: string;
-  }[];
+  actions: string[];
 }
 
 @Injectable()
@@ -91,6 +83,9 @@ export class FeaturesService {
   ) {}
 
   async create(dto: CreateFeatureDto) {
+    // Ensure actions array exists – default to all actions if omitted
+    const actions = dto.actions?.length ? dto.actions : ['read', 'write', 'update', 'delete'];
+
     // Check if name already exists
     const existing =
       await this.featuresModel.findOne({
@@ -115,7 +110,10 @@ export class FeaturesService {
       }
     }
 
-    return this.featuresModel.create(dto);
+    return this.featuresModel.create({
+      ...dto,
+      actions,
+    });
   }
 
   async findAll(moduleId?: number) {
@@ -384,7 +382,7 @@ export class FeaturesService {
       name: feature.name,
       code: feature.code ?? null,
       routePath: feature.routePath ?? null,
-      actionType: feature.actionType ?? 'read',
+      actions: feature.actions ?? ['read','write','update','delete'],
       displayOrder: feature.displayOrder ?? 0,
       moduleId: feature?.moduleId,
       module: feature.module

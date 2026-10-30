@@ -56,12 +56,12 @@ export class SysFeatures extends BaseModel<
   declare routePath?: string;
 
   @Column({
-    type: DataType.STRING(50),
-    allowNull: true,
-    field: 'action_type',
-    defaultValue: 'read',
+    type: DataType.JSONB,
+    allowNull: false,
+    field: 'actions',
+    defaultValue: ['read', 'write', 'update', 'delete'],
   })
-  declare actionType?: string;
+  declare actions: string[];
 
   @Column({
     type: DataType.INTEGER,
