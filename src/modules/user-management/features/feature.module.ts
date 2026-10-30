@@ -8,6 +8,9 @@ import { SysPermission } from '../../../database/models/system/sys_permission.mo
 import { SysRole } from '../../../database/models/system/sys_role.model';
 import { SysRolePermission } from '../../../database/models/system/sys_role_permission.model';
 import { SysModules } from '../../../database/models/system/sys_module.model';
+import { SysOrgEntitlement } from '../../../database/models/system/sys_org_entitlement.model';
+import { SysOrganization } from '../../../database/models/system/sys_organization.model';
+import { SysPlan } from '../../../database/models/system/sys_plan.model';
 import { UsersModule } from '../users/users.module';
 @Module({
   imports: [
@@ -17,6 +20,9 @@ import { UsersModule } from '../users/users.module';
       SysRole,
       SysRolePermission,
       SysModules,
+      SysOrgEntitlement,
+      SysOrganization,
+      SysPlan,
     ]),
     UsersModule,
   ],
