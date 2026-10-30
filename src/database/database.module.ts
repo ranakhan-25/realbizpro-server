@@ -37,6 +37,7 @@ import {
   SysTenantPage,
   SysTenantPageBlock,
 } from './models/cms';
+import { LeadPropertyInterest } from './models/crm/lead/crm-lead-property-interest.model';
 
 @Global()
 @Module({

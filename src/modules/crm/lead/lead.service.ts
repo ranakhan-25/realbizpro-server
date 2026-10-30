@@ -118,6 +118,8 @@ export class LeadService {
     const leadInclude: any = {
       association: 'lead',
       required: !!search,
+      // Transfer history must retain lead identity after its source lead is soft-deleted.
+      paranoid: false,
       include: [{ association: 'activities', required: false, separate: true, limit: 1, order: [['activityDate', 'DESC']] }],
     };
     if (search) {
@@ -173,7 +175,7 @@ export class LeadService {
   async transferLeadListDetails(uuid: string) {
     const record = await this.transferLogs.findOne({ where: { uuid },
       include: [
-        { association: 'lead', include: [{ association: 'activities', required: false, separate: true, order: [['activityDate', 'DESC']] }] },
+        { association: 'lead', paranoid: false, include: [{ association: 'activities', required: false, separate: true, order: [['activityDate', 'DESC']] }] },
       ],
     });
     if (!record) throw new NotFoundException(`Transfer record ${uuid} not found`);
