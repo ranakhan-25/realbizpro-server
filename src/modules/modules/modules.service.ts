@@ -126,7 +126,7 @@ export class ModulesService {
       name: raw.name,
       code: raw.code || `FEAT_${raw.id}`,
       routePath: raw.routePath,
-      actionType: raw.actionType || 'read',
+      actions: raw.actions ?? ['read','write','update','delete'],
       displayOrder: raw.displayOrder || 0,
       isActive: raw.isActive ?? true,
     };
@@ -198,6 +198,14 @@ export class ModulesService {
       if (module) {
         await module.update(modulePayload, { transaction: tx });
       } else {
+        // Ensure name uniqueness before creating a new module
+        const nameExists = await this.menuModulesModel.findOne({
+          where: { name: dto.name },
+          transaction: tx,
+        });
+        if (nameExists) {
+          throw new ConflictException('Module name already exists');
+        }
         module = await this.menuModulesModel.create(modulePayload as any, {
           transaction: tx,
         });

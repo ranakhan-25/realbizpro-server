@@ -16,7 +16,7 @@ export interface SysFeaturesAttributes {
   name: string;
   code?: string | null;
   routePath?: string | null;
-  actionType?: string | null;
+  actions: string[];
   displayOrder: number;
   isActive: boolean;
   description?: string | null;
@@ -34,7 +34,7 @@ export interface SysFeaturesCreationAttributes {
   name: string;
   code?: string | null;
   routePath?: string | null;
-  actionType?: string | null;
+  actions?: string[]; // Has default value
   displayOrder?: number; // Has default value
   isActive?: boolean; // Has default value
   description?: string | null;

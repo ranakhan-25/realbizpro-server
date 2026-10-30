@@ -145,10 +145,13 @@ export class FeatureNodeResponseDto {
   @ApiProperty({ example: 'write', nullable: true })
   actionType?: string;
 
-  @ApiProperty({ example: 1 })
+  @ApiProperty({ example: ['read','write','update','delete'], description: 'Action list for the feature' })
+  actions: string[];
+
+  @ApiProperty({ example: 1, description: 'Display order for the feature' })
   displayOrder: number;
 
-  @ApiProperty({ example: true })
+  @ApiProperty({ example: true, description: 'Whether the feature is active' })
   isActive: boolean;
 }
 
