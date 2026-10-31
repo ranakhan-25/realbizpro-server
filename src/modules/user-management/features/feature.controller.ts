@@ -21,6 +21,7 @@ import {
   Paginate,
   PaginateParams,
 } from '../../../common/decorators/paginate.decorator';
+import { CurrentUser } from '../../../common/decorators/auth.decorators';
 import { Permissions } from '../../../common/decorators/permissions.decorator';
 import { PaginateDto } from '../../../common/dto/paginate.dto';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
@@ -73,19 +74,33 @@ export class FeaturesController {
       'Optional module ID to filter features',
     type: Number,
   })
+  @ApiQuery({
+    name: 'orgId',
+    required: false,
+    description:
+      'Optional organization ID to filter features (super admin only)',
+    type: Number,
+  })
   @ApiResponse({
     status: 200,
     description:
       'Features tree retrieved successfully',
   })
   async findAllTreeWithPermissions(
+    @CurrentUser() currentUser: any,
     @Query('moduleId') moduleId?: string,
+    @Query('orgId') orgId?: string,
   ) {
     const moduleIdNumber = moduleId
       ? +moduleId
       : undefined;
+    const targetOrgIdNumber = orgId
+      ? +orgId
+      : undefined;
     return this.featuresService.findAllTreeWithPermissions(
       moduleIdNumber,
+      currentUser,
+      targetOrgIdNumber,
     );
   }
 

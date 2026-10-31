@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import type {
   LeaveTypeAttributes,
   LeaveTypeCreationAttributes,
@@ -8,9 +7,11 @@ import type {
 import {
   Column,
   DataType,
+  HasMany,
   Table,
 } from 'sequelize-typescript';
 import { BaseModel } from 'src/database/base.model';
+import { LeaveApplication } from '../leaveapplication/leaveapplication_modes';
 
 export enum LeaveTypeStatus {
   ACTIVE = 'active',
@@ -86,4 +87,10 @@ export class LeaveType extends BaseModel<
     allowNull: true,
   })
   declare deletedBy?: string;
+  @HasMany(() => LeaveApplication, {
+    foreignKey: 'leaveTypeId',
+    sourceKey: 'uuid',
+    as: 'leaveApplications',
+  })
+  declare leaveApplications?: LeaveApplication[];
 }

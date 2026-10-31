@@ -22,6 +22,7 @@ import type { Increment } from '../models/hrm/employee/hrm_increment_model';
 import type { Attendance } from '../models/hrm/employee/hrm_attendance_model';
 import type { BonusGenerate } from '../models/hrm/employee/hrm_bonus_generate_model';
 import type { AttendanceReconciliation } from '../models/hrm/attendance/attendance_reconciliation_model';
+import type { LeaveApplication } from '../models/hrm/leaveapplication/leaveapplication_modes';
 
 export interface EmployeeListAttributes {
   id: number;
@@ -88,6 +89,7 @@ export interface EmployeeListAttributes {
   attendances?: Attendance[];
   bonusGenerates?: BonusGenerate[];
   attendanceReconciliations?: AttendanceReconciliation[];
+  leaveApplications?: LeaveApplication[];
 }
 
 export interface EmployeeListCreationAttributes {
@@ -154,4 +156,5 @@ export interface EmployeeListWithRelations extends EmployeeListAttributes {
   attendances?: Attendance[];
   bonusGenerates?: BonusGenerate[];
   attendanceReconciliations?: AttendanceReconciliation[];
+  leaveApplications?: LeaveApplication[];
 }

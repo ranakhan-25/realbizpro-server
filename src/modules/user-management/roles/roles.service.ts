@@ -916,28 +916,8 @@ export class RolesService {
           );
         }
       } else {
-        // If no moduleId provided, check if permissions belong to multiple modules
-        if (moduleIds.size > 1) {
-          const moduleNames = existingPermissions
-            .map((p) => p.feature?.module?.name)
-            .filter(
-              (name, index, arr) =>
-                name &&
-                arr.indexOf(name) === index,
-            );
-
-          throw new BadRequestException(
-            `Cannot assign permissions from multiple modules in a single request. Found permissions from modules: ${moduleNames.join(', ')}. Please specify a moduleId or use separate requests for each module.`,
-          );
-        }
-
-        // If all permissions belong to the same module, auto-detect moduleId
-        if (moduleIds.size === 1) {
-          moduleId = Array.from(moduleIds)[0];
-          console.log(
-            `Auto-detected moduleId: ${moduleId} for permissions`,
-          );
-        }
+        // When moduleId is not specified, permissions can span multiple modules
+        // The assignment will operate globally across all modules
       }
     } else if (moduleId) {
       // Delete only permissions for this specific module
