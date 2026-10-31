@@ -214,6 +214,8 @@ import { ItemEntryModule } from './modules/accounts/assets/item_entry/item_entry
 import { BalanceSummuryModule } from './modules/accounts/reports/balance_summury/balance_summury.module';
 import { PayableReportModule } from './modules/accounts/reports/payeble_report/payeble_report.module';
 import { ExpenseReportsModule } from './modules/accounts/reports/expense_reports/expense_reports.module';
+import { ChatsOfGroupeModule } from './modules/accounts/configuration/chats_of_groupe/chats_of_groupe.module';
+import { ChatsOfAccountsModule } from './modules/accounts/configuration/chats_of_accounts/chats_of_accounts.module';
 
 @Module({
   imports: [
@@ -453,6 +455,8 @@ import { ExpenseReportsModule } from './modules/accounts/reports/expense_reports
     BalanceSummuryModule,
     PayableReportModule,
     ExpenseReportsModule,
+    ChatsOfGroupeModule,
+    ChatsOfAccountsModule,
   ],
   controllers: [AppController, HealthController],
   providers: [

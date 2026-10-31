@@ -37,6 +37,8 @@ import {
   SysTenantPage,
   SysTenantPageBlock,
 } from './models/cms';
+import { ChartOfGroup } from './models/accounts/configuration/acc_chats_of_group_model';
+import { ChartOfAccount } from './models/accounts/configuration/acc_chats_of_accounts_model';
 
 @Global()
 @Module({
@@ -78,6 +80,8 @@ import {
       SysTenantMenuItem,
       SysTenantPage,
       SysTenantPageBlock,
+      ChartOfAccount,
+      ChartOfGroup,
     ]),
   ],
   providers: [
