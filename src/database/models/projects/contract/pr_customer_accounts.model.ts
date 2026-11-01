@@ -8,12 +8,9 @@ import {
 } from 'sequelize-typescript';
 import { BaseModel } from 'src/database/base.model';
 
-import {
-  CustomerAccountAttributes,
-  CustomerAccountCreationAttributes,
-  CustomerAccountUpdateAttributes,
-} from 'src/database/types/pr_customer_accounts.model.types';
+
 import { WorkOrder } from '../billing/work-order/pr_work_order.model';
+import { CustomerAccountAttributes, CustomerAccountCreationAttributes, CustomerAccountUpdateAttributes } from 'src/database/types/customeraccount.types';
 
 export enum CustomerAccountStatus {
   ACTIVE = 'active',

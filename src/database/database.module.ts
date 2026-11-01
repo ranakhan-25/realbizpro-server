@@ -37,6 +37,8 @@ import {
   SysTenantPage,
   SysTenantPageBlock,
 } from './models/cms';
+import { ChartOfGroup } from './models/accounts/configuration/acc_chats_of_group_model';
+import { ChartOfAccount } from './models/accounts/configuration/acc_chats_of_accounts_model';
 import { LeadPropertyInterest } from './models/crm/lead/crm-lead-property-interest.model';
 
 @Global()
@@ -79,6 +81,9 @@ import { LeadPropertyInterest } from './models/crm/lead/crm-lead-property-intere
       SysTenantMenuItem,
       SysTenantPage,
       SysTenantPageBlock,
+      ChartOfAccount,
+      ChartOfGroup, 
+      LeadPropertyInterest,
     ]),
   ],
   providers: [

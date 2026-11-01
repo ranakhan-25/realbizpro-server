@@ -1,12 +1,11 @@
 /* eslint-disable prettier/prettier */
 
 import { PartialType, OmitType } from '@nestjs/mapped-types';
-
+import { CreateChartOfAccountDto } from './create-chats_of_account.dto';
 import { IsString, IsOptional } from 'class-validator';
-import { CreateCustomerAccountDto } from './create-customers_account.dto';
 
-export class UpdateCustomerAccountDto extends PartialType(
-  OmitType(CreateCustomerAccountDto, ['code', 'addedBy', 'addedById'] as const)
+export class UpdateChartOfAccountDto extends PartialType(
+  OmitType(CreateChartOfAccountDto, ['code', 'addedBy', 'addedById'] as const)
 ) {
   @IsString()
   @IsOptional()

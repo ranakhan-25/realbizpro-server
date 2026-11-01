@@ -4,25 +4,21 @@ import {
   IsString, 
   IsOptional, 
   IsNumberString,
-  IsIn
+  IsUUID
 } from 'class-validator';
 
-export class QueryCustomerAccountDto {
+export class QueryChartOfAccountDto {
   @IsString()
   @IsOptional()
   search?: string;
 
   @IsString()
   @IsOptional()
-  status?: string;
+  under?: string;
 
-  @IsIn(['code', 'name', 'mobile', 'email', 'under', 'createdAt'])
+  @IsUUID()
   @IsOptional()
-  sortBy?: string = 'createdAt';
-
-  @IsIn(['ASC', 'DESC'])
-  @IsOptional()
-  sortOrder?: 'ASC' | 'DESC' = 'DESC';
+  chartOfGroupUuid?: string;
 
   @IsNumberString()
   @IsOptional()
