@@ -207,7 +207,7 @@ import { ProjectCostModule } from './modules/projects/project_cost/project_cost.
 import { ProjectProgressModule } from './modules/projects/project_progress/project_progress.module';
 import { ProjectControlModule } from './modules/projects/project_control/project_control.module';
 import { UnitPlotModule } from './modules/projects/unit_plot/unit_plot.module';
-import { CustomersAccountsModule } from './modules/accounts/contact/customers_accounts/customers_accounts.module';
+
 import { AssetsListModule } from './modules/assets/assets_list/assets_list.module';
 import { ItemEntryModule } from './modules/accounts/assets/item_entry/item_entry.module';
 import { BalanceSummuryModule } from './modules/accounts/reports/balance_summury/balance_summury.module';
@@ -370,7 +370,7 @@ import { LeaveApplicationModule } from './modules/hrm/leaveapplication/leave-app
     EmployeeListModule,
     EmployeeSalaryModule,
     EmployeeTypeModule,
-    CustomersAccountsModule,
+
     LoanModule,
     OvertimeModule,
     SalaryGradeModule,
