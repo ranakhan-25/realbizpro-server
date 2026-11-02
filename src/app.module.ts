@@ -66,6 +66,8 @@ import { MenuModule } from './modules/menu/menu.module';
 import { ModuleUserModule } from './modules/module-user/module-user.module';
 import { ApprovalsModule } from './modules/approvals/approvals.module';
 import { ProjectTypeModule } from './modules/projects/project-type/project-type.module';
+import { ShareUserModule } from './modules/share-user/share-user.module';
+import { ShareProjectModule } from './modules/share-project/share-project.module';
 
 import { ProjectSiteModule } from './modules/projects/project-site/project-site.module';
 import { CustomerAccountModule } from './modules/projects/contract/customer-accounts/customer_accounts.module';
@@ -294,6 +296,8 @@ import { LeaveApplicationModule } from './modules/hrm/leaveapplication/leave-app
     EmailModule,
     MaterialRequisitionModule,
     ProjectTypeModule,
+    ShareUserModule,
+    ShareProjectModule,
     ProjectSiteModule,
     ProjectModule,
     UsersModule,

@@ -40,6 +40,14 @@ import {
 import { ChartOfGroup } from './models/accounts/configuration/acc_chats_of_group_model';
 import { ChartOfAccount } from './models/accounts/configuration/acc_chats_of_accounts_model';
 import { LeadPropertyInterest } from './models/crm/lead/crm-lead-property-interest.model';
+import { ShareUser } from './models/share-user/share-user.model';
+import { ShareProject } from './models/share-project/share-project.model';
+import { ShareProjectCategory } from './models/share-project/share-project-category.model';
+import { ShareProjectImage } from './models/share-project/share-project-image.model';
+import { ShareProjectDocument } from './models/share-project/share-project-document.model';
+import { ShareProjectSubmission } from './models/share-project/share-project-submission.model';
+import { ShareProjectReview } from './models/share-project/share-project-review.model';
+import { ShareProjectStatusHistory } from './models/share-project/share-project-status-history.model';
 
 @Global()
 @Module({
@@ -84,6 +92,14 @@ import { LeadPropertyInterest } from './models/crm/lead/crm-lead-property-intere
       ChartOfAccount,
       ChartOfGroup, 
       LeadPropertyInterest,
+      ShareUser,
+      ShareProject,
+      ShareProjectCategory,
+      ShareProjectImage,
+      ShareProjectDocument,
+      ShareProjectSubmission,
+      ShareProjectReview,
+      ShareProjectStatusHistory,
     ]),
   ],
   providers: [
