@@ -80,6 +80,22 @@ export class AssetService {
     const updateData: any = { ...dto };
     if (dto.acquisitionDate) updateData.acquisitionDate = new Date(dto.acquisitionDate);
 
+    const originalValue =
+      dto.originalValue !== undefined ? Number(dto.originalValue) : Number(asset.originalValue);
+    const notDepreciableValue =
+      dto.notDepreciableValue !== undefined
+        ? Number(dto.notDepreciableValue)
+        : Number(asset.notDepreciableValue);
+
+    if (
+      dto.originalValue !== undefined ||
+      dto.notDepreciableValue !== undefined
+    ) {
+      updateData.bookValue = dto.bookValue ?? originalValue;
+      updateData.depreciableValue =
+        dto.depreciableValue ?? Math.max(originalValue - notDepreciableValue, 0);
+    }
+
     return asset.update(updateData);
   }
 

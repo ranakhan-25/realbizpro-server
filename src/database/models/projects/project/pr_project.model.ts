@@ -101,7 +101,7 @@ export class Project
 
   @ForeignKey(() => ProjectType)
   @Column({
-    type: DataType.STRING,
+    type: DataType.UUID,
     allowNull: true,
   })
   declare projectType?: string;

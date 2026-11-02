@@ -66,7 +66,10 @@ export class ItemEntryService {
   }
 
   async findOne(uuid: string): Promise<ItemEntry> {
-    const item = await this.itemModel.findOne({ where: { uuid } });
+    const item = await this.itemModel.findOne({
+      where: { uuid },
+      paranoid: false,
+    });
     if (!item) throw new NotFoundException(`Item ${uuid} not found`);
     return item;
   }
@@ -75,6 +78,14 @@ export class ItemEntryService {
     const item = await this.findOne(uuid);
     const updateData: any = { ...dto };
     if (dto.acquisitionDate) updateData.acquisitionDate = new Date(dto.acquisitionDate);
+    const originalValue =
+      dto.originalValue !== undefined ? Number(dto.originalValue) : Number(item.originalValue);
+    if (dto.originalValue !== undefined || dto.bookValue !== undefined) {
+      updateData.bookValue = dto.bookValue ?? originalValue;
+    }
+    if (dto.originalValue !== undefined || dto.depreciableValue !== undefined) {
+      updateData.depreciableValue = dto.depreciableValue ?? originalValue;
+    }
     return item.update(updateData);
   }
 
