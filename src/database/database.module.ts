@@ -53,6 +53,14 @@ import { ContraVoucherItem } from './models/accounts/vouchers/acc_contra-voucher
 import { BankReconciliation } from './models/accounts/bank-reconciliation/acc_bank-reconciliation.model';
 import { Cheque } from './models/accounts/bank-reconciliation/acc_cheque.model';
 import { ChequeRange } from './models/accounts/bank-reconciliation/acc_cheque-range.model';
+import { ShareUser } from './models/share-user/share-user.model';
+import { ShareProject } from './models/share-project/share-project.model';
+import { ShareProjectCategory } from './models/share-project/share-project-category.model';
+import { ShareProjectImage } from './models/share-project/share-project-image.model';
+import { ShareProjectDocument } from './models/share-project/share-project-document.model';
+import { ShareProjectSubmission } from './models/share-project/share-project-submission.model';
+import { ShareProjectReview } from './models/share-project/share-project-review.model';
+import { ShareProjectStatusHistory } from './models/share-project/share-project-status-history.model';
 
 @Global()
 @Module({
@@ -111,6 +119,14 @@ import { ChequeRange } from './models/accounts/bank-reconciliation/acc_cheque-ra
       Cheque,
       ChequeRange,
       
+      ShareUser,
+      ShareProject,
+      ShareProjectCategory,
+      ShareProjectImage,
+      ShareProjectDocument,
+      ShareProjectSubmission,
+      ShareProjectReview,
+      ShareProjectStatusHistory,
     ]),
   ],
   providers: [
