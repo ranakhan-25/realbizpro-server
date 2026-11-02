@@ -42,11 +42,11 @@ export class SequelizeConfigService implements SequelizeOptionsFactory {
       timezone: databaseConfig.timezone,
       define: databaseConfig.define,
       pool: {
-        max: databaseConfig.maxConnections,
-        min: 0,
-        idle: databaseConfig.idleTimeout,
-        acquire: databaseConfig.connectionTimeout,
-        evict: 1000,
+        max: databaseConfig.maxConnections || 50,
+        min: databaseConfig.pool?.min ?? 5,
+        idle: databaseConfig.idleTimeout || 30000,
+        acquire: databaseConfig.connectionTimeout || 60000,
+        evict: databaseConfig.pool?.evict ?? 15000,
       },
     };
 

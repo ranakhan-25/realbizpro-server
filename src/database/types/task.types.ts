@@ -1,5 +1,5 @@
 // Auto-generated types for Task
-// Source: src\database\models\projects\task\pr_task.model.ts
+// Source: src/database/models/projects/task/pr_task.model.ts
 
 import { TaskPriority } from '../models/projects/task/pr_task.model';
 import { TaskStatus } from '../models/projects/task/pr_task.model';

@@ -170,6 +170,23 @@ export class CreateUserDto {
   moduleIds?: number[];
 
   @ApiProperty({
+    type: () => [Object],
+    required: false,
+    default: [],
+  })
+  @IsOptional()
+  @IsArray()
+  featureOverrides?: Array<{
+    featureId: number;
+    isGranted?: boolean;
+    canView?: boolean;
+    canCreate?: boolean;
+    canEdit?: boolean;
+    canDelete?: boolean;
+    canApprove?: boolean;
+  }>;
+
+  @ApiProperty({
     example: [5, 10, 15],
     type: [Number],
     required: false,

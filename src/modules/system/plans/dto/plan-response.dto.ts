@@ -23,6 +23,9 @@ export class PlanResponseDto {
   @ApiProperty({ example: 990.0, description: 'Yearly rate' })
   yearlyPrice: number;
 
+  @ApiProperty({ example: '$', description: 'Currency symbol or code (e.g. $, ৳, €, USD)' })
+  currency?: string;
+
   @ApiProperty({ enum: PlanBillingCycle, example: PlanBillingCycle.MONTHLY })
   billingCycle: PlanBillingCycle;
 

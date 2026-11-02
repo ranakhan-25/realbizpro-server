@@ -29,8 +29,10 @@ import { UserFilterDropdownDto } from './dto/filter-dropdown.dto';
 import { QueryUserDto } from './dto/filterList.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { SysUserCompany } from '../../../database/models/system/sys_user_company.model';
+import { SysUserFeatureOverride } from '../../../database/models/system/sys_user_feature_override.model';
 import { UserTypeEnum } from '../../../database/models/system/sys_user.model';
 import type { SysUserAttributes } from '../../../database/types/sysuser.types';
+import { UpdateUserFeatureAccessDto } from './dto/user-feature-access.dto';
 
 const DEFAULT_EMPLOYEE_USER_PASSWORD = '123456';
 
@@ -89,6 +91,8 @@ export class UsersService {
     private permissionModel: typeof SysPermission,
     @InjectModel(SysRole)
     private roleModel: typeof SysRole,
+    @InjectModel(SysUserFeatureOverride)
+    private userFeatureOverrideModel: typeof SysUserFeatureOverride,
     private sequelize: Sequelize,
     private readonly redisService: RedisService,
   ) {}
@@ -512,6 +516,22 @@ export class UsersService {
       );
     }
 
+    if (createUserDto.featureOverrides?.length) {
+      await this.userFeatureOverrideModel.bulkCreate(
+        createUserDto.featureOverrides.map((fo) => ({
+          userId,
+          featureId: fo.featureId,
+          isGranted: fo.isGranted ?? true,
+          canView: fo.canView ?? true,
+          canCreate: fo.canCreate ?? true,
+          canEdit: fo.canEdit ?? true,
+          canDelete: fo.canDelete ?? false,
+          canApprove: fo.canApprove ?? false,
+        })),
+        { transaction, ignoreDuplicates: true },
+      );
+    }
+
     if (createUserDto.sectionIds?.length) {
       await this.userSectionModel.bulkCreate(
         createUserDto.sectionIds.map(
@@ -754,6 +774,31 @@ export class UsersService {
               transaction,
               ignoreDuplicates: true,
             },
+          );
+        }
+      }
+
+      // ✅ Update feature overrides
+      if (updateUserDto.featureOverrides !== undefined) {
+        await this.userFeatureOverrideModel.destroy({
+          where: { userId },
+          force: true,
+          transaction,
+        });
+
+        if (updateUserDto.featureOverrides.length > 0) {
+          await this.userFeatureOverrideModel.bulkCreate(
+            updateUserDto.featureOverrides.map((fo) => ({
+              userId,
+              featureId: fo.featureId,
+              isGranted: fo.isGranted ?? true,
+              canView: fo.canView ?? true,
+              canCreate: fo.canCreate ?? true,
+              canEdit: fo.canEdit ?? true,
+              canDelete: fo.canDelete ?? false,
+              canApprove: fo.canApprove ?? false,
+            })),
+            { transaction, ignoreDuplicates: true },
           );
         }
       }
@@ -1267,6 +1312,7 @@ export class UsersService {
         updateUserDto.permissionIds !==
           undefined ||
         updateUserDto.moduleIds !== undefined ||
+        updateUserDto.featureOverrides !== undefined ||
         updateUserDto.categoryIds !== undefined ||
         updateUserDto.sectionIds !== undefined ||
         updateUserDto.officeIds !== undefined ||
@@ -1281,6 +1327,7 @@ export class UsersService {
       delete basicUpdateDto.roleIds;
       delete basicUpdateDto.permissionIds;
       delete basicUpdateDto.moduleIds;
+      delete (basicUpdateDto as any).featureOverrides;
       delete basicUpdateDto.categoryIds;
       delete basicUpdateDto.sectionIds;
       delete (basicUpdateDto as any).officeIds;
@@ -1290,7 +1337,7 @@ export class UsersService {
       delete (basicUpdateDto as any).company_ids;
 
       // Update basic user data
-      await user.update(
+      await (user as any).update(
         {
           ...basicUpdateDto,
           ...(passwordHash
@@ -2018,18 +2065,7 @@ export class UsersService {
                   through: { attributes: [] },
                 },
               ]
-            : [
-                {
-                  association: 'companies',
-                  attributes: [
-                    'id',
-                    'name',
-                    'status',
-                  ],
-                  through: { attributes: [] },
-                  required: false,
-                },
-              ]),
+            : []),
         ],
         order,
         offset: (page - 1) * limit,
@@ -2564,4 +2600,120 @@ export class UsersService {
       return false;
     }
   }
+
+  async getUserFeatureAccess(userIdOrUuid: string | number) {
+    const isNum = !isNaN(Number(userIdOrUuid));
+    const user = await this.userModel.findOne({
+      where: isNum ? { id: Number(userIdOrUuid) } : { uuid: String(userIdOrUuid) },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User ${userIdOrUuid} not found`);
+    }
+
+    const [modules, overrides] = await Promise.all([
+      this.moduleToUser.findAll({
+        where: { userId: user.id },
+        attributes: ['moduleId'],
+      }),
+      this.userFeatureOverrideModel.findAll({
+        where: { userId: user.id },
+      }),
+    ]);
+
+    return {
+      userId: user.id,
+      userUuid: user.uuid,
+      moduleIds: modules.map((m) => Number(m.moduleId)),
+      featureOverrides: overrides.map((o) => ({
+        featureId: Number(o.featureId),
+        isGranted: o.isGranted,
+        canView: o.canView,
+        canCreate: o.canCreate,
+        canEdit: o.canEdit,
+        canDelete: o.canDelete,
+        canApprove: o.canApprove,
+      })),
+    };
+  }
+
+  async updateUserFeatureAccess(
+    userIdOrUuid: string | number,
+    dto: UpdateUserFeatureAccessDto,
+  ) {
+    const isNum = !isNaN(Number(userIdOrUuid));
+    const user = await this.userModel.findOne({
+      where: isNum ? { id: Number(userIdOrUuid) } : { uuid: String(userIdOrUuid) },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User ${userIdOrUuid} not found`);
+    }
+
+    const transaction = await this.sequelize.transaction();
+    try {
+      if (dto.moduleIds !== undefined) {
+        await this.moduleToUser.destroy({
+          where: { userId: user.id },
+          force: true,
+          transaction,
+        });
+
+        if (dto.moduleIds.length > 0) {
+          await this.moduleToUser.bulkCreate(
+            dto.moduleIds.map((moduleId) => ({
+              userId: user.id,
+              moduleId: Number(moduleId),
+            })),
+            { transaction, ignoreDuplicates: true },
+          );
+        }
+      }
+
+      if (dto.featureOverrides !== undefined) {
+        await this.userFeatureOverrideModel.destroy({
+          where: { userId: user.id },
+          force: true,
+          transaction,
+        });
+
+        if (dto.featureOverrides.length > 0) {
+          await this.userFeatureOverrideModel.bulkCreate(
+            dto.featureOverrides.map((fo) => ({
+              userId: user.id,
+              featureId: Number(fo.featureId),
+              isGranted: fo.isGranted ?? true,
+              canView: fo.canView ?? true,
+              canCreate: fo.canCreate ?? true,
+              canEdit: fo.canEdit ?? true,
+              canDelete: fo.canDelete ?? false,
+              canApprove: fo.canApprove ?? false,
+            })),
+            { transaction, ignoreDuplicates: true },
+          );
+        }
+      }
+
+      await transaction.commit();
+
+      if (this.redisService) {
+        try {
+          await this.redisService.del(`user:${user.uuid}:permissions`);
+          await this.redisService.del(`user:${user.id}:permissions`);
+        } catch (e) {
+          // ignore
+        }
+      }
+
+      return {
+        success: true,
+        message: 'User module and feature access updated successfully',
+        data: await this.getUserFeatureAccess(user.id),
+      };
+    } catch (err) {
+      await transaction.rollback();
+      throw err;
+    }
+  }
 }
+

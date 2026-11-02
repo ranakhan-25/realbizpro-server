@@ -43,6 +43,9 @@ const DEFAULT_SUPER_ADMIN_MENUS: AdminMenuItemDto[] = [
       { title: 'Menu Management', url: '/admin/menus', icon: 'Menu', order: 3, role: 'super-admin' },
       { title: 'Web Management', url: '/admin/web-settings', icon: 'Settings', order: 4, role: 'all' },
       { title: 'User Organization', url: '/admin/organization', icon: 'User', order: 5, role: 'all' },
+      { title: 'Permissions', url: '/admin/permissions', icon: 'KeyRound', order: 6, role: 'super-admin' },
+      { title: 'Features', url: '/admin/features', icon: 'FileCog', order: 7, role: 'super-admin' },
+      { title: 'Modules', url: '/admin/modules', icon: 'Boxes', order: 8, role: 'super-admin' },
     ],
   },
   {
@@ -54,9 +57,6 @@ const DEFAULT_SUPER_ADMIN_MENUS: AdminMenuItemDto[] = [
     children: [
       { title: 'Users', url: '/admin/users', icon: 'Users', order: 1, role: 'all' },
       { title: 'Roles', url: '/admin/roles', icon: 'ShieldCheck', order: 2, role: 'all' },
-      { title: 'Permissions', url: '/admin/permissions', icon: 'KeyRound', order: 3, role: 'super-admin' },
-      { title: 'Features', url: '/admin/features', icon: 'FileCog', order: 4, role: 'super-admin' },
-      { title: 'Modules', url: '/admin/modules', icon: 'Boxes', order: 5, role: 'super-admin' },
     ],
   },
   {
@@ -85,12 +85,18 @@ const DEFAULT_SUPER_ADMIN_MENUS: AdminMenuItemDto[] = [
 
 @Injectable()
 export class AdminMenuService {
+  private hasCheckedSeed = false;
+  private readonly menuCache = new Map<string, { data: AdminMenuItemDto[]; expiresAt: number }>();
+
   constructor(
     @InjectModel(SysMenu)
     private readonly menuModel: typeof SysMenu,
   ) {}
 
   private async seedDefaultAdminMenus(): Promise<void> {
+    if (this.hasCheckedSeed) return;
+    this.hasCheckedSeed = true;
+
     const existing = await this.menuModel.count();
     if (existing > 0) return;
 
@@ -125,9 +131,18 @@ export class AdminMenuService {
   }
 
   async getMenuTree(role?: string): Promise<AdminMenuItemDto[]> {
-    await this.seedDefaultAdminMenus();
-
     const normalizedRole = (role || 'super-admin').toLowerCase();
+
+    // Check high-speed cache (TTL: 5 minutes)
+    const cached = this.menuCache.get(normalizedRole);
+    if (cached) {
+      if (Date.now() < cached.expiresAt) {
+        return cached.data;
+      }
+      this.menuCache.delete(normalizedRole);
+    }
+
+    await this.seedDefaultAdminMenus();
 
     const allMenus = await this.menuModel.findAll({
       where: {
@@ -177,10 +192,17 @@ export class AdminMenuService {
       }
     }
 
+    // Cache tree for 5 minutes
+    this.menuCache.set(normalizedRole, {
+      data: roots,
+      expiresAt: Date.now() + 300000,
+    });
+
     return roots;
   }
 
   async createMenuItem(dto: AdminMenuItemDto): Promise<AdminMenuItemDto> {
+    this.menuCache.clear();
     const created = await this.menuModel.create({
       title: dto.title,
       url: dto.url || null,
@@ -209,6 +231,7 @@ export class AdminMenuService {
   }
 
   async updateMenuItem(id: number, dto: Partial<AdminMenuItemDto>): Promise<AdminMenuItemDto> {
+    this.menuCache.clear();
     const item = await this.menuModel.findByPk(id);
     if (!item) throw new NotFoundException('Menu item not found');
 
@@ -239,6 +262,7 @@ export class AdminMenuService {
   }
 
   async reorderTree(reorderList: ReorderAdminMenuItemDto[]): Promise<{ success: boolean; count: number }> {
+    this.menuCache.clear();
     for (const item of reorderList) {
       await this.menuModel.update(
         {
@@ -255,6 +279,7 @@ export class AdminMenuService {
   }
 
   async deleteMenuItem(id: number): Promise<{ success: boolean; message: string }> {
+    this.menuCache.clear();
     const item = await this.menuModel.findByPk(id);
     if (!item) throw new NotFoundException('Menu item not found');
 

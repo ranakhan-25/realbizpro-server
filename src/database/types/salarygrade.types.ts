@@ -1,5 +1,5 @@
 // Auto-generated types for SalaryGrade
-// Source: src\database\models\hrm\employee\hrm_salary_grade_model.ts
+// Source: src/database/models/hrm/employee/hrm_salary_grade_model.ts
 
 import { SalaryGradeStatus } from '../models/hrm/employee/hrm_salary_grade_model';
 
