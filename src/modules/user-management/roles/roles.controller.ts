@@ -54,11 +54,12 @@ export class RolesController {
   })
   async create(
     @Body() createRoleDto: CreateRoleDto,
+    @Req() req: any,
   ) {
     return this.rolesService.create({
       name: createRoleDto.name,
       description: createRoleDto.description,
-    });
+    }, req.user);
   }
 
   @Post('with-permissions')
@@ -104,12 +105,30 @@ export class RolesController {
   @Get()
   @Permissions('view_roles')
   @ApiOperation({ summary: 'Get all roles' })
+  @ApiQuery({
+    name: 'orgId',
+    required: false,
+    description: 'Filter by organization ID (Super Admin only)',
+  })
+  @ApiQuery({
+    name: 'scope',
+    required: false,
+    description: 'Scope: "system" (default for super admin), "all", or "tenant"',
+  })
   @ApiResponse({
     status: 200,
     description: 'Roles retrieved successfully',
   })
-  async findAll(@Req() req: any) {
-    return this.rolesService.findAll(req.user);
+  async findAll(
+    @Req() req: any,
+    @Query('orgId') orgId?: string,
+    @Query('scope') scope?: string,
+  ) {
+    return this.rolesService.findAll(
+      req.user,
+      orgId ? Number(orgId) : undefined,
+      scope,
+    );
   }
 
   @Get('dropdown')
@@ -176,6 +195,7 @@ export class RolesController {
   async assignMultiplePermissions(
     @Param('roleId') roleId: string,
     @Body() dto: AssignMultiplePermissionsDto,
+    @Req() req: any,
   ) {
     const result =
       await this.rolesService.assignMultiplePermissions(
@@ -185,6 +205,7 @@ export class RolesController {
         dto.name,
         dto.description,
         true,
+        req.user,
       );
 
     return {
@@ -209,8 +230,8 @@ export class RolesController {
     status: 404,
     description: 'Role not found',
   })
-  async findOne(@Param('id') id: string) {
-    return this.rolesService.findOne(id);
+  async findOne(@Param('id') id: string, @Req() req: any) {
+    return this.rolesService.findOne(id, req.user);
   }
 
   @Patch(':id')
@@ -231,10 +252,12 @@ export class RolesController {
   async update(
     @Param('id') id: string,
     @Body() updateRoleDto: UpdateRoleDto,
+    @Req() req: any,
   ) {
     return this.rolesService.update(
       id,
       updateRoleDto,
+      req.user,
     );
   }
 
@@ -256,8 +279,9 @@ export class RolesController {
   })
   async remove(
     @Param('id') id: string,
+    @Req() req: any,
   ): Promise<any> {
-    return this.rolesService.remove(id);
+    return this.rolesService.remove(id, req.user);
   }
 
   @Post(':roleId/permissions/:permissionId')
@@ -341,11 +365,8 @@ export class RolesController {
   async getRolePermissions(
     @Param('id') id: string,
     @Query('moduleId') moduleId?: string,
+    @Req() req?: any,
   ) {
-    console.log({
-      moduleId,
-    });
-
     let moduleIdNumber: number | undefined =
       undefined;
     if (moduleId) {
@@ -355,6 +376,7 @@ export class RolesController {
       await this.rolesService.getRolePermissions(
         id,
         moduleIdNumber,
+        req?.user,
       );
     return permissions;
   }

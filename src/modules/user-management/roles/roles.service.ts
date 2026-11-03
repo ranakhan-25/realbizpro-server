@@ -32,30 +32,46 @@ export class RolesService {
 
   async create(
     createRoleDto: CreateRoleDto,
+    currentUser?: any,
   ): Promise<SysRole> {
-    // Check if role name already exists
+    const isSuper = Boolean(currentUser?.isSuperUser);
+    const targetOrgId = isSuper ? null : (currentUser?.orgId ?? null);
+    const targetOrgUuid = isSuper ? null : (currentUser?.orgUuid ?? null);
+    const targetIsSystem = isSuper;
+    const targetRoleLevel = isSuper ? 1 : 4;
+
+    // Check if role name already exists within this tenant/system scope
+    const nameWhere: any = { name: createRoleDto.name };
+    if (isSuper) {
+      nameWhere[Op.or] = [{ orgId: null }, { isSystemRole: true }];
+    } else if (targetOrgId) {
+      nameWhere.orgId = targetOrgId;
+    }
+
     const existingRole =
       await this.roleModel.findOne({
-        where: { name: createRoleDto.name },
+        where: nameWhere,
       });
 
     if (existingRole) {
       throw new ConflictException(
-        'Role with this name already exists',
+        'Role with this name already exists in this scope',
       );
     }
 
-    //slug generated from name
-    const nameSlug = createRoleDto.name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
+    const nameSlug = this.generateUniqueSlug(
+      createRoleDto.name,
+    );
 
     try {
       return await this.roleModel.create({
         name: createRoleDto.name,
         slug: nameSlug,
         description: createRoleDto.description,
+        orgId: targetOrgId,
+        orgUuid: targetOrgUuid,
+        isSystemRole: targetIsSystem,
+        roleLevel: targetRoleLevel,
       });
     } catch (error) {
       throw new BadRequestException(
@@ -94,15 +110,28 @@ export class RolesService {
     message: string;
     assignedCount: number;
   }> {
-    // Validate role name uniqueness
+    const isSuper = Boolean(currentUser?.isSuperUser);
+    const targetOrgId = isSuper ? undefined : currentUser?.orgId;
+    const targetOrgUuid = isSuper ? undefined : currentUser?.orgUuid;
+    const targetIsSystemRole = isSuper;
+    const targetRoleLevel = roleLevel || (isSuper ? 1 : 4);
+
+    // Validate role name uniqueness within tenant/system scope
+    const nameWhere: any = { name: createRoleDto.name };
+    if (isSuper) {
+      nameWhere[Op.or] = [{ orgId: null }, { isSystemRole: true }];
+    } else if (targetOrgId) {
+      nameWhere.orgId = targetOrgId;
+    }
+
     const existingRole =
       await this.roleModel.findOne({
-        where: { name: createRoleDto.name },
+        where: nameWhere,
       });
 
     if (existingRole) {
       throw new ConflictException(
-        'Role with this name already exists',
+        'Role with this name already exists in this scope',
       );
     }
 
@@ -158,11 +187,6 @@ export class RolesService {
       }
     }
 
-    // Determine tenant tenancy and role level
-    const targetOrgId = currentUser && !currentUser.isSuperUser ? currentUser.orgId : undefined;
-    const targetOrgUuid = currentUser && !currentUser.isSuperUser ? currentUser.orgUuid : undefined;
-    const targetIsSystemRole = currentUser && currentUser.isSuperUser ? true : false;
-    const targetRoleLevel = roleLevel || (currentUser && !currentUser.isSuperUser ? 4 : 4);
 
     // Use transaction for data consistency
     const sequelize = this.roleModel.sequelize;
@@ -330,19 +354,35 @@ export class RolesService {
     }
   }
 
-  async findAll(currentUser?: any): Promise<SysRole[]> {
+  async findAll(
+    currentUser?: any,
+    targetOrgId?: number,
+    scope?: string,
+  ): Promise<SysRole[]> {
     const whereConditions: any[] = [];
 
-    if (currentUser && !currentUser.isSuperUser) {
-      whereConditions.push({ slug: { [Op.ne]: 'super-admin' } });
-      if (currentUser.orgId) {
+    if (currentUser?.isSuperUser) {
+      if (targetOrgId) {
+        // Super admin explicitly inspecting a specific organization
+        whereConditions.push({ orgId: targetOrgId });
+      } else if (scope === 'all') {
+        // Super admin explicitly requesting all roles across the entire system
+      } else {
+        // Default Super Admin view: Roles created by Super Admin (system roles)
         whereConditions.push({
           [Op.or]: [
-            { orgId: currentUser.orgId },
-            { isSystemRole: true },
             { orgId: null },
+            { isSystemRole: true },
           ],
         });
+      }
+    } else if (currentUser && !currentUser.isSuperUser) {
+      // Particular Org Admin / tenant user: Strictly isolated to their organization
+      whereConditions.push({ slug: { [Op.ne]: 'super-admin' } });
+      if (currentUser.orgId) {
+        whereConditions.push({ orgId: currentUser.orgId });
+      } else {
+        whereConditions.push({ id: -1 });
       }
     }
 
@@ -374,17 +414,27 @@ export class RolesService {
   > {
     const whereConditions: any[] = [];
 
-    if (currentUser && !currentUser.isSuperUser) {
+    if (currentUser && currentUser.isSuperUser) {
+      // Super Admin: Only show roles made by Super Admin (system roles)
+      whereConditions.push({
+        [Op.or]: [
+          { orgId: null },
+          { isSystemRole: true },
+        ],
+      });
+    } else if (currentUser && !currentUser.isSuperUser) {
+      // Org Admin: See their organization's custom roles plus assignable tenant template roles
       whereConditions.push({ roleLevel: { [Op.gte]: 2 } });
       whereConditions.push({ slug: { [Op.ne]: 'super-admin' } });
       if (currentUser.orgId) {
         whereConditions.push({
           [Op.or]: [
             { orgId: currentUser.orgId },
-            { isSystemRole: true },
-            { orgId: null },
+            { isSystemRole: true, orgId: null },
           ],
         });
+      } else {
+        whereConditions.push({ isSystemRole: true, orgId: null });
       }
     }
 
@@ -407,14 +457,13 @@ export class RolesService {
     }));
   }
 
-  async findOne(id: string): Promise<SysRole> {
+  async findOne(id: string, currentUser?: any): Promise<SysRole> {
     const role = await this.roleModel.findByPk(
       id,
       {
         include: [
           {
             association: 'permissions',
-            // include: [Permission],
           },
         ],
       },
@@ -426,12 +475,20 @@ export class RolesService {
       );
     }
 
+    // Tenant isolation check
+    if (currentUser && !currentUser.isSuperUser) {
+      if (role.orgId && role.orgId !== currentUser.orgId) {
+        throw new NotFoundException(`Role with ID ${id} not found`);
+      }
+    }
+
     return role;
   }
 
   async update(
     id: string,
     updateRoleDto: UpdateRoleDto,
+    currentUser?: any,
   ): Promise<SysRole> {
     const role =
       await this.roleModel.findByPk(id);
@@ -442,19 +499,39 @@ export class RolesService {
       );
     }
 
+    // Tenant isolation check
+    if (currentUser && !currentUser.isSuperUser) {
+      if (role.isSystemRole || (role.orgId && role.orgId !== currentUser.orgId)) {
+        throw new BadRequestException(
+          'You do not have permission to modify this role',
+        );
+      }
+    }
+
     // Check name uniqueness if name is being updated
     if (
       updateRoleDto.name &&
       updateRoleDto.name !== role.name
     ) {
+      const isSuper = Boolean(currentUser?.isSuperUser);
+      const nameWhere: any = {
+        name: updateRoleDto.name,
+        id: { [Op.ne]: role.id },
+      };
+      if (isSuper) {
+        nameWhere[Op.or] = [{ orgId: null }, { isSystemRole: true }];
+      } else if (currentUser?.orgId) {
+        nameWhere.orgId = currentUser.orgId;
+      }
+
       const existingRole =
         await this.roleModel.findOne({
-          where: { name: updateRoleDto.name },
+          where: nameWhere,
         });
 
       if (existingRole) {
         throw new ConflictException(
-          'Role with this name already exists',
+          'Role with this name already exists in this scope',
         );
       }
     }
@@ -477,6 +554,7 @@ export class RolesService {
 
   async remove(
     id: string,
+    currentUser?: any,
   ): Promise<{ message: string }> {
     const role =
       await this.roleModel.findByPk(id);
@@ -485,6 +563,20 @@ export class RolesService {
       throw new NotFoundException(
         `Role with ID ${id} not found`,
       );
+    }
+
+    // Prevent deletion of core protected system roles
+    if (['super-admin', 'org-admin'].includes(role.slug)) {
+      throw new BadRequestException('Cannot delete core protected system roles');
+    }
+
+    // Tenant isolation check
+    if (currentUser && !currentUser.isSuperUser) {
+      if (role.isSystemRole || (role.orgId && role.orgId !== currentUser.orgId)) {
+        throw new BadRequestException(
+          'You do not have permission to delete this role',
+        );
+      }
     }
 
     // Remove all associated permissions from pivot table
@@ -552,12 +644,8 @@ export class RolesService {
   async getRolePermissions(
     roleId: string,
     moduleId?: number,
+    currentUser?: any,
   ): Promise<any> {
-    console.log({
-      roleId,
-      moduleId,
-    });
-
     const role = await this.roleModel.findByPk(
       roleId,
       {
@@ -566,6 +654,8 @@ export class RolesService {
           'name',
           'slug',
           'description',
+          'orgId',
+          'isSystemRole',
         ],
         include: [
           {
@@ -610,6 +700,13 @@ export class RolesService {
       throw new NotFoundException(
         `Role with ID ${roleId} not found`,
       );
+    }
+
+    // Tenant isolation check
+    if (currentUser && !currentUser.isSuperUser) {
+      if (role.orgId && role.orgId !== currentUser.orgId) {
+        throw new NotFoundException(`Role with ID ${roleId} not found`);
+      }
     }
 
     // Group permissions by feature, with optional moduleId filter
@@ -797,6 +894,7 @@ export class RolesService {
     name?: string,
     description?: string,
     renewAllUserPermissions = false,
+    currentUser?: any,
   ): Promise<{
     message: string;
     assignedCount: number;
@@ -812,17 +910,37 @@ export class RolesService {
       );
     }
 
+    // Tenant isolation check
+    if (currentUser && !currentUser.isSuperUser) {
+      if (role.isSystemRole || (role.orgId && role.orgId !== currentUser.orgId)) {
+        throw new BadRequestException(
+          'You do not have permission to modify permissions for this role',
+        );
+      }
+    }
+
     if (name || description) {
       // Check name uniqueness if name is being updated
       if (name && name !== role.name) {
+        const isSuper = Boolean(currentUser?.isSuperUser);
+        const nameWhere: any = {
+          name,
+          id: { [Op.ne]: role.id },
+        };
+        if (isSuper) {
+          nameWhere[Op.or] = [{ orgId: null }, { isSystemRole: true }];
+        } else if (currentUser?.orgId) {
+          nameWhere.orgId = currentUser.orgId;
+        }
+
         const existingRole =
           await this.roleModel.findOne({
-            where: { name },
+            where: nameWhere,
           });
 
         if (existingRole) {
           throw new ConflictException(
-            'Role with this name already exists',
+            'Role with this name already exists in this scope',
           );
         }
       }
