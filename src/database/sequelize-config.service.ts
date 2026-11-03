@@ -5,6 +5,12 @@ import {
   SequelizeOptionsFactory,
 } from '@nestjs/sequelize';
 import { DatabaseConfig } from 'src/common/types/databaseConfig.type';
+import { Expense } from './models/accounts/vouchers/acc_expence_list_model';
+import { ExpenseItem } from './models/accounts/vouchers/acc_expense-item.model';
+import { Voucher } from './models/accounts/vouchers/acc_voucher.model';
+import { VoucherEntry } from './models/accounts/vouchers/acc_voucher-entry.model';
+import { PaymentVoucher } from './models/accounts/vouchers/acc_payment-voucher.model';
+import { PaymentVoucherEntry } from './models/accounts/vouchers/acc_payment-voucher-entry.model';
 
 @Injectable()
 export class SequelizeConfigService implements SequelizeOptionsFactory {
@@ -35,6 +41,14 @@ export class SequelizeConfigService implements SequelizeOptionsFactory {
       autoLoadModels:
         databaseConfig.autoLoadModels,
       repositoryMode: true,
+      models: [
+        Expense,
+        ExpenseItem,
+        Voucher,
+        VoucherEntry,
+        PaymentVoucher,
+        PaymentVoucherEntry,
+      ],
       logging: databaseConfig.logging
         ? this.getLoggingFunction()
         : false,

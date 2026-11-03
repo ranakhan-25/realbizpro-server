@@ -97,7 +97,21 @@ export function setupGlobalConfig(
               const constraints = Object.values(
                 error.constraints || {},
               );
-              return constraints.join(', ');
+              const constraintMessage =
+                constraints.join(', ');
+              const childrenMessage =
+                (error.children || []).length > 0
+                  ? createMessage(error.children || [])
+                  : '';
+
+              return [
+                constraintMessage,
+                childrenMessage
+                  ? `${error.property}: ${childrenMessage}`
+                  : '',
+              ]
+                .filter(Boolean)
+                .join('; ');
             })
             .filter(Boolean)
             .join('; ');

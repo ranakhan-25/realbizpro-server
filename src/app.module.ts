@@ -218,6 +218,14 @@ import { ExpenseReportsModule } from './modules/accounts/reports/expense_reports
 import { ChatsOfGroupeModule } from './modules/accounts/configuration/chats_of_groupe/chats_of_groupe.module';
 import { ChatsOfAccountsModule } from './modules/accounts/configuration/chats_of_accounts/chats_of_accounts.module';
 import { LeaveApplicationModule } from './modules/hrm/leaveapplication/leave-application.module';
+import { ExpenseListModule } from './modules/accounts/vouchers/expense_list/expense_list.module';
+import { ReceivedVouchersModule } from './modules/accounts/vouchers/received-vouchers/received-vouchers.module';
+import { PaymentVouchersModule } from './modules/accounts/vouchers/payment-vouchers/payment-vouchers.module';
+import { JournalVoucherModule } from './modules/accounts/vouchers/journal_vouchers/journal_vouchers.module';
+import { ContraVoucherModule } from './modules/accounts/vouchers/contra_vouchers/contra_vouchers.module';
+import { BankReconciliationStatementModule } from './modules/accounts/bank-reconciliation/bank-reconciliation_statement/bank-reconciliation_statement.module';
+import { ListOfChequeRangeModule } from './modules/accounts/bank-reconciliation/list_of_cheque_range/list_of_cheque_range.module';
+import { ListOfChequeModule } from './modules/accounts/bank-reconciliation/list_of_cheque/list_of_cheque.module';
 
 
 @Module({
@@ -463,6 +471,14 @@ import { LeaveApplicationModule } from './modules/hrm/leaveapplication/leave-app
     ChatsOfGroupeModule,
     ChatsOfAccountsModule,
     LeaveApplicationModule,
+    ExpenseListModule,
+    ReceivedVouchersModule,
+    PaymentVouchersModule,
+    JournalVoucherModule,
+    ContraVoucherModule,
+    BankReconciliationStatementModule,
+    ListOfChequeRangeModule,
+    ListOfChequeModule,
   ],
   controllers: [AppController, HealthController],
   providers: [
