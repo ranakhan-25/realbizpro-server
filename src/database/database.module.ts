@@ -40,6 +40,19 @@ import {
 import { ChartOfGroup } from './models/accounts/configuration/acc_chats_of_group_model';
 import { ChartOfAccount } from './models/accounts/configuration/acc_chats_of_accounts_model';
 import { LeadPropertyInterest } from './models/crm/lead/crm-lead-property-interest.model';
+import { ExpenseItem } from './models/accounts/vouchers/acc_expense-item.model';
+import { Expense } from './models/accounts/vouchers/acc_expence_list_model';
+import { Voucher } from './models/accounts/vouchers/acc_voucher.model';
+import { VoucherEntry } from './models/accounts/vouchers/acc_voucher-entry.model';
+import { PaymentVoucher } from './models/accounts/vouchers/acc_payment-voucher.model';
+import { PaymentVoucherEntry } from './models/accounts/vouchers/acc_payment-voucher-entry.model';
+import { JournalVoucher } from './models/accounts/vouchers/acc_journal-voucher.model';
+import { JournalVoucherItem } from './models/accounts/vouchers/acc_journal-voucher-item.model';
+import { ContraVoucher } from './models/accounts/vouchers/acc_contra-voucher.model';
+import { ContraVoucherItem } from './models/accounts/vouchers/acc_contra-voucher-item.model';
+import { BankReconciliation } from './models/accounts/bank-reconciliation/acc_bank-reconciliation.model';
+import { Cheque } from './models/accounts/bank-reconciliation/acc_cheque.model';
+import { ChequeRange } from './models/accounts/bank-reconciliation/acc_cheque-range.model';
 import { ShareUser } from './models/share-user/share-user.model';
 import { ShareProject } from './models/share-project/share-project.model';
 import { ShareProjectCategory } from './models/share-project/share-project-category.model';
@@ -92,6 +105,20 @@ import { ShareProjectStatusHistory } from './models/share-project/share-project-
       ChartOfAccount,
       ChartOfGroup, 
       LeadPropertyInterest,
+      ExpenseItem, 
+      Expense,
+      Voucher,
+      VoucherEntry,
+      PaymentVoucher,
+      PaymentVoucherEntry,
+      JournalVoucher,
+      JournalVoucherItem,
+      ContraVoucher,
+      ContraVoucherItem, 
+      BankReconciliation, 
+      Cheque,
+      ChequeRange,
+      
       ShareUser,
       ShareProject,
       ShareProjectCategory,

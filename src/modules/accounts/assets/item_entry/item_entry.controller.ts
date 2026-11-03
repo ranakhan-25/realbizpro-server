@@ -1,9 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseUUIDPipe } from '@nestjs/common';
 import { ItemEntryService } from './item_entry.service';
 import { CreateItemEntryDto } from './dto/create-item_entry.dto';
 import { QueryItemEntryDto } from './dto/query-item_entry.dto';
 import { UpdateItemEntryDto } from './dto/update-item_entry.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiParam, ApiTags } from '@nestjs/swagger';
 @ApiTags('Accounts | assets| item_entry')
 @Controller('item-entry')
 export class ItemEntryController {
@@ -19,18 +19,21 @@ export class ItemEntryController {
     return this.itemEntryService.findAll(query);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.itemEntryService.findOne(id);
+  @Get(':uuid')
+  @ApiParam({ name: 'uuid', required: true, type: String, format: 'uuid' })
+  findOne(@Param('uuid', ParseUUIDPipe) uuid: string) {
+    return this.itemEntryService.findOne(uuid);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateItemEntryDto: UpdateItemEntryDto) {
-    return this.itemEntryService.update(id, updateItemEntryDto);
+  @Patch(':uuid')
+  @ApiParam({ name: 'uuid', required: true, type: String, format: 'uuid' })
+  update(@Param('uuid', ParseUUIDPipe) uuid: string, @Body() updateItemEntryDto: UpdateItemEntryDto) {
+    return this.itemEntryService.update(uuid, updateItemEntryDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.itemEntryService.remove(id);
+  @Delete(':uuid')
+  @ApiParam({ name: 'uuid', required: true, type: String, format: 'uuid' })
+  remove(@Param('uuid', ParseUUIDPipe) uuid: string) {
+    return this.itemEntryService.remove(uuid);
   }
 }
