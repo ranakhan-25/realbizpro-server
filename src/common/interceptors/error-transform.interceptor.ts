@@ -55,15 +55,32 @@ export class ErrorTransformInterceptor implements NestInterceptor {
           SequelizeValidationError
         ) {
           statusCode = HttpStatus.BAD_REQUEST;
-          message =
-            error.message || 'Validation error';
-          errors = error.errors.map(
+          const detailedItems = (error.errors || []).map(
             (item: any) => ({
               field: item.path,
               message: item.message,
               value: item.value,
             }),
           );
+          errors = detailedItems;
+          const reasons = detailedItems
+            .map((item: any) => {
+              const valStr =
+                item.value !== undefined && item.value !== null
+                  ? ` ("${item.value}")`
+                  : '';
+              return item.field &&
+                !item.message
+                  ?.toLowerCase()
+                  .includes(item.field.toLowerCase())
+                ? `${item.field}: ${item.message}${valStr}`
+                : `${item.message}${valStr}`;
+            })
+            .filter(Boolean);
+          message =
+            reasons.length > 0
+              ? reasons.join('; ')
+              : error.message || 'Validation error';
         } else {
           // Handle non-HTTP, unexpected errors
           statusCode =

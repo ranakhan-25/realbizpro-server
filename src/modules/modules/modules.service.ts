@@ -226,6 +226,34 @@ export class ModulesService {
       };
 
       if (module) {
+        if (dto.name && dto.name !== module.name) {
+          const duplicateName = await this.menuModulesModel.findOne({
+            where: {
+              name: dto.name,
+              id: { [Op.ne]: module.id },
+            },
+            transaction: tx,
+          });
+          if (duplicateName) {
+            throw new ConflictException(
+              `Module name "${dto.name}" is already taken by another module.`,
+            );
+          }
+        }
+        if (dto.code && dto.code !== module.code) {
+          const duplicateCode = await this.menuModulesModel.findOne({
+            where: {
+              code: dto.code,
+              id: { [Op.ne]: module.id },
+            },
+            transaction: tx,
+          });
+          if (duplicateCode) {
+            throw new ConflictException(
+              `Module code "${dto.code}" is already taken by another module.`,
+            );
+          }
+        }
         await module.update(modulePayload, { transaction: tx });
       } else {
         // Ensure name uniqueness before creating a new module
@@ -253,9 +281,29 @@ export class ModulesService {
             });
           }
 
+          if (!feature && featDto.uuid) {
+            feature = await this.featureModel.findOne({
+              where: { uuid: featDto.uuid },
+              transaction: tx,
+            });
+          }
+
           if (!feature && featDto.code) {
             feature = await this.featureModel.findOne({
-              where: { code: featDto.code },
+              where: {
+                moduleId: module.id,
+                code: featDto.code,
+              },
+              transaction: tx,
+            });
+          }
+
+          if (!feature && featDto.name) {
+            feature = await this.featureModel.findOne({
+              where: {
+                moduleId: module.id,
+                name: featDto.name,
+              },
               transaction: tx,
             });
           }
@@ -274,9 +322,25 @@ export class ModulesService {
           if (feature) {
             await feature.update(featPayload, { transaction: tx });
           } else {
-            await this.featureModel.create(featPayload as any, {
+            const nameConflict = await this.featureModel.findOne({
+              where: { name: featPayload.name },
               transaction: tx,
             });
+
+            if (nameConflict) {
+              if (Number(nameConflict.moduleId) === Number(module.id)) {
+                await nameConflict.update(featPayload, { transaction: tx });
+                feature = nameConflict;
+              } else {
+                throw new ConflictException(
+                  `Feature "${featPayload.name}" is already registered under another module.`,
+                );
+              }
+            } else {
+              feature = await this.featureModel.create(featPayload as any, {
+                transaction: tx,
+              });
+            }
           }
 
           // Auto-sync feature into sys_menus for seamless sidebar navigation
