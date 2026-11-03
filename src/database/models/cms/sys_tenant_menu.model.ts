@@ -22,7 +22,7 @@ export enum TenantMenuLocation {
 @Table({
   tableName: 'sys_tenant_menus',
   timestamps: true,
-  paranoid: true,
+  paranoid: false,
   underscored: true,
 })
 export class SysTenantMenu extends BaseModel<SysTenantMenuAttributes, SysTenantMenuCreationAttributes> {

@@ -18,7 +18,7 @@ import type {
 @Table({
   tableName: 'sys_modules',
   timestamps: true,
-  paranoid: true,
+  paranoid: false,
   underscored: true,
   indexes: [
     { fields: ['name'], unique: true },
