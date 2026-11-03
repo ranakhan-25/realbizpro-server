@@ -1,5 +1,5 @@
 // Auto-generated types for SysRole
-// Source: src/database/models/system/sys_role.model.ts
+// Source: src\database\models\system\sys_role.model.ts
 
 import type { SysOrganization } from '../models/system/sys_organization.model';
 import type { SysRoleFeature } from '../models/system/sys_role_feature.model';

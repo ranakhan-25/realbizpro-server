@@ -1,5 +1,5 @@
 // Auto-generated types for Increment
-// Source: src/database/models/hrm/employee/hrm_increment_model.ts
+// Source: src\database\models\hrm\employee\hrm_increment_model.ts
 
 import { IncrementStatus } from '../models/hrm/employee/hrm_increment_model';
 
