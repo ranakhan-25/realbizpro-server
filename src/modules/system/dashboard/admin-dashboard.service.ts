@@ -46,6 +46,8 @@ export interface DashboardStatsResponse {
 
 @Injectable()
 export class AdminDashboardService {
+  private readonly statsCache = new Map<string, { data: DashboardStatsResponse; expiresAt: number }>();
+
   constructor(
     @InjectModel(SysOrganization)
     private readonly orgModel: typeof SysOrganization,
@@ -71,20 +73,32 @@ export class AdminDashboardService {
     const isSuperUser = Boolean(currentUser.isSuperUser);
     const isOrgAdmin = Boolean(currentUser.isOrgAdmin);
 
+    const cacheKey = isSuperUser ? 'super-admin' : `org-admin:${currentUser.orgId || 'default'}`;
+    const cached = this.statsCache.get(cacheKey);
+    if (cached) {
+      if (Date.now() < cached.expiresAt) {
+        return cached.data;
+      }
+      this.statsCache.delete(cacheKey);
+    }
+
+    let stats: DashboardStatsResponse;
     if (isSuperUser) {
-      return this.getSuperAdminStats();
+      stats = await this.getSuperAdminStats();
+    } else if (isOrgAdmin && currentUser.orgId) {
+      stats = await this.getOrgAdminStats(Number(currentUser.orgId));
+    } else if (currentUser.orgId) {
+      stats = await this.getOrgAdminStats(Number(currentUser.orgId));
+    } else {
+      stats = await this.getSuperAdminStats();
     }
 
-    if (isOrgAdmin && currentUser.orgId) {
-      return this.getOrgAdminStats(Number(currentUser.orgId));
-    }
+    this.statsCache.set(cacheKey, {
+      data: stats,
+      expiresAt: Date.now() + 30000,
+    });
 
-    // Default fallback to org admin view if user has orgId
-    if (currentUser.orgId) {
-      return this.getOrgAdminStats(Number(currentUser.orgId));
-    }
-
-    return this.getSuperAdminStats();
+    return stats;
   }
 
   private async getSuperAdminStats(): Promise<DashboardStatsResponse> {

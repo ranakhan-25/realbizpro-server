@@ -30,7 +30,9 @@ import {
   EntitledModuleSummaryDto,
   OrganizationResponseDto,
 } from './dto/organization-response.dto';
+import { QueryOrganizationDto } from './dto/query-organization.dto';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { PaginateResult } from '@/common/decorators/paginate.decorator';
 
 @ApiTags('System | Organizations & Multi-Tenant')
 @Controller(['system/organizations', 'organizations'])
@@ -42,22 +44,16 @@ export class OrganizationsController {
   @Get()
   @ApiOperation({
     summary: 'List all organizations (Super Admin)',
-    description: 'Returns all tenants with their subscription package, user limits, lock status, and active users count.',
+    description: 'Returns tenants with optional pagination, subscription package, user limits, lock status, and active users count.',
   })
-  @ApiQuery({ name: 'status', required: false, enum: ['trial', 'active', 'past_due', 'expired', 'locked', 'canceled'] })
-  @ApiQuery({ name: 'isLocked', required: false, type: Boolean })
-  @ApiQuery({ name: 'search', required: false, type: String })
   @ApiResponse({
     status: 200,
     description: 'Organizations retrieved successfully',
-    type: [OrganizationResponseDto],
   })
   async findAll(
-    @Query('status') status?: string,
-    @Query('isLocked') isLocked?: boolean,
-    @Query('search') search?: string,
-  ): Promise<OrganizationResponseDto[]> {
-    return this.orgService.findAll({ status, isLocked, search });
+    @Query() query: QueryOrganizationDto,
+  ): Promise<PaginateResult<OrganizationResponseDto> | OrganizationResponseDto[]> {
+    return this.orgService.findAll(query);
   }
 
   @Get('dropdown')

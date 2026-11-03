@@ -36,6 +36,9 @@ import {
   EntitledModuleSummaryDto,
   OrganizationResponseDto,
 } from './dto/organization-response.dto';
+import { QueryOrganizationDto } from './dto/query-organization.dto';
+import { PaginateHelper } from '@/common/helper/paginate.helper';
+import { PaginateResult } from '@/common/decorators/paginate.decorator';
 
 @Injectable()
 export class OrganizationsService {
@@ -132,6 +135,7 @@ export class OrganizationsService {
             description: raw.plan.description,
             monthlyPrice: Number(raw.plan.monthlyPrice) || 0,
             yearlyPrice: Number(raw.plan.yearlyPrice) || 0,
+            currency: raw.plan.currency || '$',
             billingCycle: raw.plan.billingCycle,
             durationDays: raw.plan.durationDays,
             trialDays: raw.plan.trialDays,
@@ -159,29 +163,233 @@ export class OrganizationsService {
     };
   }
 
-  async findAll(query?: {
-    status?: string;
-    isLocked?: boolean;
-    search?: string;
-  }): Promise<OrganizationResponseDto[]> {
+  private async formatOrgsBatch(
+    orgs: SysOrganization[],
+    includeEntitlements: boolean = false,
+  ): Promise<OrganizationResponseDto[]> {
+    if (!orgs.length) return [];
+
+    const orgIds = orgs.map((o) => o.id);
+
+    // 1. Batch user counts (1 query)
+    // 2. Batch admin users (1 query)
+    // 3. Batch entitlements (only if explicitly requested; 0 queries for fast table lists)
+    const [userCounts, adminUsers, entitlements] = await Promise.all([
+      this.userModel.findAll({
+        attributes: [
+          'orgId',
+          [this.sequelize.fn('COUNT', this.sequelize.col('id')), 'count'],
+        ],
+        where: { orgId: orgIds },
+        group: ['orgId'],
+        raw: true,
+      }),
+      this.userModel.findAll({
+        where: { orgId: orgIds, isOrgAdmin: true },
+        attributes: ['id', 'orgId', 'username', 'name', 'email', 'mobile'],
+        raw: true,
+      }),
+      includeEntitlements
+        ? this.entitlementModel.findAll({
+            where: { orgId: orgIds, isEnabled: true },
+            include: [
+              {
+                model: this.moduleModel,
+                as: 'module',
+                attributes: ['id', 'code', 'name'],
+              },
+              {
+                model: this.featureModel,
+                as: 'feature',
+                attributes: ['id', 'code', 'name', 'routePath'],
+              },
+            ],
+          })
+        : Promise.resolve([]),
+    ]);
+
+    // Build lookup maps
+    const countMap = new Map<number, number>();
+    for (const uc of userCounts as any[]) {
+      countMap.set(Number(uc.orgId), Number(uc.count) || 0);
+    }
+
+    const adminMap = new Map<number, any>();
+    for (const au of adminUsers as any[]) {
+      if (!adminMap.has(Number(au.orgId))) {
+        adminMap.set(Number(au.orgId), au);
+      }
+    }
+
+    const entMap = new Map<number, Map<number, EntitledModuleSummaryDto>>();
+    for (const ent of entitlements) {
+      const oId = Number(ent.orgId);
+      const mod = ent.module;
+      const feat = ent.feature;
+      if (!mod || !feat) continue;
+
+      if (!entMap.has(oId)) {
+        entMap.set(oId, new Map());
+      }
+      const moduleMap = entMap.get(oId)!;
+      if (!moduleMap.has(mod.id)) {
+        moduleMap.set(mod.id, {
+          moduleId: mod.id,
+          moduleCode: mod.code || `MOD_${mod.id}`,
+          moduleName: mod.name,
+          features: [],
+        });
+      }
+      moduleMap.get(mod.id)!.features.push({
+        featureId: feat.id,
+        featureCode: feat.code || `FEAT_${feat.id}`,
+        featureName: feat.name,
+        routePath: feat.routePath,
+      });
+    }
+
+    // Assemble response
+    return orgs.map((org) => {
+      const raw = org.get({ plain: true });
+      const userCount = countMap.get(org.id) || 0;
+      const adminUser = adminMap.get(org.id);
+      const orgEntMap = entMap.get(org.id);
+      const entitledModules = orgEntMap
+        ? Array.from(orgEntMap.values())
+        : [];
+
+      return {
+        id: raw.id,
+        uuid: raw.uuid,
+        name: raw.name,
+        code: raw.code,
+        email: raw.email,
+        phone: raw.phone,
+        address: raw.address,
+        subscriptionStatus: raw.subscriptionStatus,
+        subscriptionStartDate: raw.subscriptionStartDate,
+        subscriptionEndDate: raw.subscriptionEndDate,
+        trialEndsAt: raw.trialEndsAt,
+        maxUsers: raw.maxUsers,
+        maxProjects: raw.maxProjects,
+        maxStorageMb: raw.maxStorageMb,
+        isLocked: raw.isLocked,
+        lockReason: raw.lockReason,
+        userCount,
+        plan: raw.plan
+          ? {
+              id: raw.plan.id,
+              uuid: raw.plan.uuid,
+              name: raw.plan.name,
+              code: raw.plan.code,
+              description: raw.plan.description,
+              monthlyPrice: Number(raw.plan.monthlyPrice) || 0,
+              yearlyPrice: Number(raw.plan.yearlyPrice) || 0,
+              currency: raw.plan.currency || '$',
+              billingCycle: raw.plan.billingCycle,
+              durationDays: raw.plan.durationDays,
+              trialDays: raw.plan.trialDays,
+              maxUsers: raw.plan.maxUsers,
+              maxProjects: raw.plan.maxProjects,
+              maxStorageMb: raw.plan.maxStorageMb,
+              features: raw.plan.features,
+              status: raw.plan.status,
+              subscribersCount: raw.plan.subscribersCount,
+              createdAt: raw.plan.createdAt,
+              updatedAt: raw.plan.updatedAt,
+            }
+          : undefined,
+        adminUser: adminUser
+          ? {
+              id: adminUser.id,
+              username: adminUser.username || adminUser.email,
+              name: adminUser.name,
+              email: adminUser.email,
+              mobile: adminUser.mobile,
+            }
+          : undefined,
+        entitledModules,
+        createdAt: raw.createdAt,
+      };
+    });
+  }
+
+  async findAll(
+    query?: QueryOrganizationDto,
+  ): Promise<PaginateResult<OrganizationResponseDto> | OrganizationResponseDto[]> {
     const where: any = {};
-    if (query?.status) where.subscriptionStatus = query.status;
-    if (typeof query?.isLocked === 'boolean') where.isLocked = query.isLocked;
-    if (query?.search) {
+
+    if (query?.status && query.status !== 'all') {
+      if (query.status === 'suspended') {
+        where[Op.or] = [
+          { isLocked: true },
+          { subscriptionStatus: 'locked' },
+        ];
+      } else {
+        where.subscriptionStatus = query.status;
+      }
+    }
+
+    if (typeof query?.isLocked === 'boolean') {
+      where.isLocked = query.isLocked;
+    }
+
+    if (query?.search && query.search.trim()) {
+      const term = `%${query.search.trim()}%`;
       where[Op.or] = [
-        { name: { [Op.iLike]: `%${query.search}%` } },
-        { code: { [Op.iLike]: `%${query.search}%` } },
-        { email: { [Op.iLike]: `%${query.search}%` } },
+        { name: { [Op.iLike]: term } },
+        { code: { [Op.iLike]: term } },
+        { email: { [Op.iLike]: term } },
       ];
     }
 
-    const orgs = await this.orgModel.findAll({
+    const planInclude: any = {
+      model: this.planModel,
+      as: 'plan',
+    };
+
+    if (query?.plan && query.plan !== 'all') {
+      planInclude.where = {
+        [Op.or]: [
+          { name: { [Op.iLike]: `%${query.plan.trim()}%` } },
+          { code: { [Op.iLike]: `%${query.plan.trim()}%` } },
+        ],
+      };
+      planInclude.required = true;
+    }
+
+    const isPaginated =
+      !query?.all &&
+      (query?.page !== undefined || query?.limit !== undefined);
+
+    if (!isPaginated) {
+      const orgs = await this.orgModel.findAll({
+        where,
+        include: [planInclude],
+        order: [['id', 'DESC']],
+      });
+      return this.formatOrgsBatch(orgs, query?.includeEntitlements === true);
+    }
+
+    const page = Math.max(1, Number(query?.page) || 1);
+    const limit = Math.max(1, Number(query?.limit) || 10);
+    const offset = (page - 1) * limit;
+
+    const { rows, count } = await this.orgModel.findAndCountAll({
       where,
-      include: [{ model: this.planModel, as: 'plan' }],
+      include: [planInclude],
       order: [['id', 'DESC']],
+      offset,
+      limit,
+      distinct: true,
     });
 
-    return Promise.all(orgs.map((o) => this.formatOrgResponse(o)));
+    const formatted = await this.formatOrgsBatch(
+      rows,
+      query?.includeEntitlements === true,
+    );
+
+    return PaginateHelper.response(formatted, count, { page, limit });
   }
 
   async findOne(identifier: string | number): Promise<OrganizationResponseDto> {
@@ -478,27 +686,39 @@ export class OrganizationsService {
     if (!org) throw new NotFoundException(`Organization "${identifier}" not found`);
 
     await this.sequelize.transaction(async (tx) => {
-      // Clear existing entitlements
+      // Clear existing entitlements permanently so new entries can be inserted cleanly
       await this.entitlementModel.destroy({
         where: { orgId: org.id },
+        force: true,
         transaction: tx,
       });
 
-      // Insert new entitlements
+      // Insert new entitlements with deduplication protection via high-performance bulkCreate
+      const seenFeatures = new Set<number>();
+      const recordsToInsert: any[] = [];
       for (const item of dto.moduleFeatureAccess) {
         const modId = Number(item.moduleId);
+        if (!item.featureIds || !Array.isArray(item.featureIds)) continue;
+
         for (const featId of item.featureIds) {
-          await this.entitlementModel.create(
-            {
-              orgId: org.id,
-              orgUuid: org.uuid,
-              moduleId: modId,
-              featureId: Number(featId),
-              isEnabled: true,
-            } as any,
-            { transaction: tx },
-          );
+          const numFeatId = Number(featId);
+          if (isNaN(numFeatId) || seenFeatures.has(numFeatId)) continue;
+          seenFeatures.add(numFeatId);
+
+          recordsToInsert.push({
+            orgId: org.id,
+            orgUuid: org.uuid,
+            moduleId: modId,
+            featureId: numFeatId,
+            isEnabled: true,
+          });
         }
+      }
+
+      if (recordsToInsert.length > 0) {
+        await this.entitlementModel.bulkCreate(recordsToInsert, {
+          transaction: tx,
+        });
       }
     });
 

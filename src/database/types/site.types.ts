@@ -1,5 +1,5 @@
 // Auto-generated types for Site
-// Source: src\database\models\projects\project-site\pr_project_site.model.ts
+// Source: src/database/models/projects/project-site/pr_project_site.model.ts
 
 import type { Project } from '../models/projects/project/pr_project.model';
 import type { MaterialRequisition } from '../models/projects/material-requisition/pr_material_requisition.model';

@@ -1,5 +1,5 @@
 // Auto-generated types for SysUserSection
-// Source: src\database\models\system\sys_user_section.model.ts
+// Source: src/database/models/system/sys_user_section.model.ts
 
 import type { SysUser } from '../models/system/sys_user.model';
 

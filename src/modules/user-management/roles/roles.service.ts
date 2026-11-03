@@ -353,27 +353,6 @@ export class RolesService {
           association: 'permissions',
           attributes: ['id', 'key', 'name', 'action'],
           through: { attributes: [] },
-          include: [
-            {
-              association: 'feature',
-              attributes: [
-                'id',
-                'name',
-                'description',
-                'moduleId',
-              ],
-              include: [
-                {
-                  association: 'module',
-                  attributes: [
-                    'id',
-                    'name',
-                    'description',
-                  ],
-                },
-              ],
-            },
-          ],
         },
       ],
       order: [

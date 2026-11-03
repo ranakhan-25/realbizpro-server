@@ -12,6 +12,8 @@ import { Op } from 'sequelize';
 
 @Injectable()
 export class PlansService {
+  private readonly plansCache = new Map<string, { data: PlanResponseDto[]; expiresAt: number }>();
+
   constructor(
     @InjectModel(SysPlan)
     private readonly planModel: typeof SysPlan,
@@ -27,6 +29,7 @@ export class PlansService {
       description: raw.description,
       monthlyPrice: Number(raw.monthlyPrice) || 0,
       yearlyPrice: Number(raw.yearlyPrice) || 0,
+      currency: raw.currency || '$',
       billingCycle: raw.billingCycle,
       durationDays: raw.durationDays,
       trialDays: raw.trialDays,
@@ -42,6 +45,15 @@ export class PlansService {
   }
 
   async findAll(query?: { status?: string; search?: string }): Promise<PlanResponseDto[]> {
+    const cacheKey = JSON.stringify(query || {});
+    const cached = this.plansCache.get(cacheKey);
+    if (cached) {
+      if (Date.now() < cached.expiresAt) {
+        return cached.data;
+      }
+      this.plansCache.delete(cacheKey);
+    }
+
     const where: any = {};
     if (query?.status) {
       where.status = query.status;
@@ -56,7 +68,12 @@ export class PlansService {
       where,
       order: [['id', 'ASC']],
     });
-    return plans.map((p) => this.toResponseDto(p));
+    const result = plans.map((p) => this.toResponseDto(p));
+    this.plansCache.set(cacheKey, {
+      data: result,
+      expiresAt: Date.now() + 300000,
+    });
+    return result;
   }
 
   async findOne(identifier: string | number): Promise<PlanResponseDto> {
@@ -73,6 +90,7 @@ export class PlansService {
   }
 
   async create(dto: CreatePlanDto): Promise<PlanResponseDto> {
+    this.plansCache.clear();
     const existing = await this.planModel.findOne({
       where: { code: dto.code },
     });
@@ -85,6 +103,7 @@ export class PlansService {
   }
 
   async update(identifier: string | number, dto: UpdatePlanDto): Promise<PlanResponseDto> {
+    this.plansCache.clear();
     const isNumeric = !isNaN(Number(identifier));
     const where: any = isNumeric
       ? { id: Number(identifier) }
@@ -109,6 +128,7 @@ export class PlansService {
   }
 
   async remove(identifier: string | number): Promise<{ message: string; id: number | string }> {
+    this.plansCache.clear();
     const isNumeric = !isNaN(Number(identifier));
     const where: any = isNumeric
       ? { id: Number(identifier) }

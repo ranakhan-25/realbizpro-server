@@ -51,6 +51,15 @@ export class CreatePlanDto {
   @Min(0)
   yearlyPrice: number;
 
+  @ApiPropertyOptional({
+    description: 'Currency symbol or code (e.g. $, ৳, €, USD)',
+    example: '$',
+    default: '$',
+  })
+  @IsString()
+  @IsOptional()
+  currency?: string;
+
   @ApiProperty({
     description: 'Billing cycle interval',
     enum: PlanBillingCycle,

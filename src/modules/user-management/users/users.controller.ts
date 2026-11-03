@@ -9,6 +9,7 @@ import {
   Param,
   Patch,
   Post,
+  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -33,6 +34,7 @@ import { UserFilterDropdownDto } from './dto/filter-dropdown.dto';
 import { QueryUserDto } from './dto/filterList.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
+import { UpdateUserFeatureAccessDto } from './dto/user-feature-access.dto';
 import { UsersService } from './users.service';
 
 @ApiTags('System | Users')
@@ -220,6 +222,23 @@ export class UsersController {
       body.userId,
       body.permissionIds,
     );
+  }
+
+  @Get(':id/feature-access')
+  @Permissions('view_users')
+  @ApiOperation({ summary: 'Get user module and feature access entitlements' })
+  async getUserFeatureAccess(@Param('id') id: string) {
+    return this.usersService.getUserFeatureAccess(id);
+  }
+
+  @Put(':id/feature-access')
+  @Permissions('manage_users')
+  @ApiOperation({ summary: 'Update user module and feature access entitlements' })
+  async updateUserFeatureAccess(
+    @Param('id') id: string,
+    @Body() body: UpdateUserFeatureAccessDto,
+  ) {
+    return this.usersService.updateUserFeatureAccess(id, body);
   }
 
   @Get(':uuid')

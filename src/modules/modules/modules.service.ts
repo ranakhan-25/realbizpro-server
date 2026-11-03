@@ -22,6 +22,9 @@ import {
 
 @Injectable()
 export class ModulesService {
+  private treeCache: { data: ModuleTreeNodeResponseDto[]; expiresAt: number } | null = null;
+  private modulesListCache: { data: ModuleResponseDto[]; expiresAt: number } | null = null;
+
   constructor(
     @InjectModel(SysModules)
     private readonly menuModulesModel: typeof SysModules,
@@ -33,7 +36,13 @@ export class ModulesService {
     private readonly sequelize: Sequelize,
   ) {}
 
+  private clearCache(): void {
+    this.treeCache = null;
+    this.modulesListCache = null;
+  }
+
   async create(dto: CreateModuleDto): Promise<ModuleResponseDto> {
+    this.clearCache();
     const exists = await this.menuModulesModel.findOne({
       where: { name: dto.name },
     });
@@ -46,10 +55,19 @@ export class ModulesService {
   }
 
   async findAll(): Promise<ModuleResponseDto[]> {
+    if (this.modulesListCache && Date.now() < this.modulesListCache.expiresAt) {
+      return this.modulesListCache.data;
+    }
+
     const modules = await this.menuModulesModel.findAll({
       order: [['id', 'ASC']],
     });
-    return modules.map((m) => this.toResponseDto(m));
+    const result = modules.map((m) => this.toResponseDto(m));
+    this.modulesListCache = {
+      data: result,
+      expiresAt: Date.now() + 300000,
+    };
+    return result;
   }
 
   async getDropdown(): Promise<
@@ -78,6 +96,7 @@ export class ModulesService {
   }
 
   async update(id: number, dto: UpdateModuleDto): Promise<ModuleResponseDto> {
+    this.clearCache();
     const module = await this.menuModulesModel.findByPk(id);
     if (!module) throw new NotFoundException('Module not found');
 
@@ -95,6 +114,7 @@ export class ModulesService {
   }
 
   async remove(id: number): Promise<{ message: string }> {
+    this.clearCache();
     const module = await this.menuModulesModel.findByPk(id);
     if (!module) throw new NotFoundException('Module not found');
 
@@ -151,6 +171,10 @@ export class ModulesService {
   }
 
   async getTree(): Promise<ModuleTreeNodeResponseDto[]> {
+    if (this.treeCache && Date.now() < this.treeCache.expiresAt) {
+      return this.treeCache.data;
+    }
+
     const modules = await this.menuModulesModel.findAll({
       include: [
         {
@@ -167,10 +191,16 @@ export class ModulesService {
       ],
     });
 
-    return modules.map((m) => this.mapModuleTreeNode(m));
+    const result = modules.map((m) => this.mapModuleTreeNode(m));
+    this.treeCache = {
+      data: result,
+      expiresAt: Date.now() + 300000,
+    };
+    return result;
   }
 
   async saveTree(dto: CreateModuleTreeDto): Promise<ModuleTreeNodeResponseDto> {
+    this.clearCache();
     return this.sequelize.transaction(async (tx) => {
       let module: SysModules | null = null;
 

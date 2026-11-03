@@ -14,6 +14,8 @@ import { SysUserRole } from '../../../database/models/system/sys_user_role.model
 import { SysUserSection } from '../../../database/models/system/sys_user_section.model';
 import { SysCompany } from '../../../database/models/system/sys_company.model';
 import { SysUserCompany } from '@/database/models/system/sys_user_company.model';
+import { SysUserFeatureOverride } from '../../../database/models/system/sys_user_feature_override.model';
+import { SysFeatures } from '../../../database/models/system/sys_features.model';
 
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
@@ -35,6 +37,8 @@ import { UsersService } from './users.service';
       SysUserPermission,
       SysCompany,
       SysUserCompany,
+      SysUserFeatureOverride,
+      SysFeatures,
     ]),
   ],
   controllers: [UsersController],

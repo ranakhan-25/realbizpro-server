@@ -57,12 +57,14 @@ export class PermissionsGuard extends AuthGuard(
       return true;
     }
 
-    // JWT validation first
-    const jwtValid = (await super.canActivate(
-      context,
-    )) as boolean;
-    if (!jwtValid) {
-      return false;
+    // JWT validation if not already authenticated by an upstream guard
+    if (!request.user) {
+      const jwtValid = (await super.canActivate(
+        context,
+      )) as boolean;
+      if (!jwtValid) {
+        return false;
+      }
     }
 
     // Get required permissions

@@ -1,5 +1,5 @@
 // Auto-generated types for SysModuleToUser
-// Source: src\database\models\system\sys_module_to_user.model.ts
+// Source: src/database/models/system/sys_module_to_user.model.ts
 
 export interface SysModuleToUserAttributes {
   id: number;
