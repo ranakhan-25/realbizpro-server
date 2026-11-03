@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
 import { SysMenu, SysMenuLocation } from '../../../database/models/system/sys_menu.model';
+import { SysModules } from '../../../database/models/system/sys_module.model';
+import { SysFeatures } from '../../../database/models/system/sys_features.model';
 
 export interface AdminMenuItemDto {
   id?: number;
@@ -92,6 +94,10 @@ export class AdminMenuService {
   constructor(
     @InjectModel(SysMenu)
     private readonly menuModel: typeof SysMenu,
+    @InjectModel(SysModules)
+    private readonly moduleModel: typeof SysModules,
+    @InjectModel(SysFeatures)
+    private readonly featureModel: typeof SysFeatures,
   ) {}
 
   private async seedDefaultAdminMenus(): Promise<void> {
@@ -315,5 +321,126 @@ export class AdminMenuService {
 
     await item.destroy();
     return { success: true, message: 'Menu item deleted successfully' };
+  }
+
+  async syncFromModules(targetModuleId?: string | number): Promise<{
+    success: boolean;
+    syncedModules: number;
+    createdCount: number;
+    updatedCount: number;
+    message: string;
+  }> {
+    this.menuCache.clear();
+
+    const moduleWhere: any = {};
+    if (targetModuleId && targetModuleId !== 'admin' && targetModuleId !== 'all') {
+      moduleWhere.id = Number(targetModuleId);
+    }
+
+    const modules = await this.moduleModel.findAll({
+      where: moduleWhere,
+      include: [
+        {
+          model: this.featureModel,
+          as: 'features',
+          required: false,
+        },
+      ],
+      order: [['id', 'ASC']],
+    });
+
+    const moduleIds = modules.map((m) => m.id);
+    if (moduleIds.length === 0) {
+      return {
+        success: true,
+        syncedModules: 0,
+        createdCount: 0,
+        updatedCount: 0,
+        message: 'No modules found to synchronize.',
+      };
+    }
+
+    // 1. Fetch all existing menus for these modules in 1 fast query
+    const existingMenus = await this.menuModel.findAll({
+      where: {
+        moduleId: moduleIds,
+      },
+    });
+
+    // 2. Build fast in-memory lookup indexes
+    const urlMap = new Map<string, SysMenu>();
+    const titleMap = new Map<string, SysMenu>();
+
+    for (const menu of existingMenus) {
+      if (menu.url) {
+        urlMap.set(`${menu.moduleId}:${menu.url.trim()}`, menu);
+      }
+      if (menu.title) {
+        titleMap.set(`${menu.moduleId}:${menu.title.trim()}`, menu);
+      }
+    }
+
+    const toCreate: any[] = [];
+    let updatedCount = 0;
+
+    for (const mod of modules) {
+      const features = (mod as any).features || [];
+      for (const feat of features) {
+        if (!feat.routePath || !feat.routePath.trim()) continue;
+        const trimmedUrl = feat.routePath.trim();
+        const trimmedTitle = (feat.name || '').trim();
+
+        const existing =
+          urlMap.get(`${mod.id}:${trimmedUrl}`) ||
+          titleMap.get(`${mod.id}:${trimmedTitle}`);
+
+        if (existing) {
+          let needsUpdate = false;
+          if (existing.title !== feat.name) {
+            existing.title = feat.name;
+            needsUpdate = true;
+          }
+          if (existing.url !== trimmedUrl) {
+            existing.url = trimmedUrl;
+            needsUpdate = true;
+          }
+          if (existing.isVisible !== (feat.isActive ?? true)) {
+            existing.isVisible = feat.isActive ?? true;
+            needsUpdate = true;
+          }
+          if (needsUpdate) {
+            await existing.save();
+            updatedCount++;
+          }
+        } else {
+          toCreate.push({
+            moduleId: mod.id,
+            title: feat.name,
+            url: trimmedUrl,
+            target: '_self',
+            location: [SysMenuLocation.SIDEBAR],
+            icon: mod.icon || 'LayoutDashboard',
+            order: feat.displayOrder || 1,
+            isVisible: feat.isActive ?? true,
+            elementClass: 'all',
+          });
+          // Track in map so duplicate features within same sync don't create multiple menus
+          titleMap.set(`${mod.id}:${trimmedTitle}`, {} as any);
+          urlMap.set(`${mod.id}:${trimmedUrl}`, {} as any);
+        }
+      }
+    }
+
+    if (toCreate.length > 0) {
+      await this.menuModel.bulkCreate(toCreate);
+    }
+
+    return {
+      success: true,
+      syncedModules: modules.length,
+      createdCount: toCreate.length,
+      updatedCount,
+      message: `Successfully synchronized ${modules.length} module(s): ${toCreate.length} created, ${updatedCount} updated.`,
+    };
   }
 }

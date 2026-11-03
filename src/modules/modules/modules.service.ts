@@ -7,7 +7,7 @@ import { InjectConnection, InjectModel } from '@nestjs/sequelize';
 import { Sequelize } from 'sequelize-typescript';
 import { Op } from 'sequelize';
 
-import { SysMenu } from '../../database/models/system/sys_menu.model';
+import { SysMenu, SysMenuLocation } from '../../database/models/system/sys_menu.model';
 import { SysModules } from '../../database/models/system/sys_module.model';
 import { SysFeatures } from '../../database/models/system/sys_features.model';
 import { CreateModuleDto } from './dto/create-module.dto';
@@ -278,6 +278,48 @@ export class ModulesService {
               transaction: tx,
             });
           }
+
+          // Auto-sync feature into sys_menus for seamless sidebar navigation
+          if (featPayload.routePath && featPayload.routePath.trim()) {
+            const trimmedUrl = featPayload.routePath.trim();
+            const existingMenu = await this.menuModel.findOne({
+              where: {
+                moduleId: module.id,
+                [Op.or]: [
+                  { url: trimmedUrl },
+                  { title: featPayload.name },
+                ],
+              },
+              transaction: tx,
+            });
+
+            if (existingMenu) {
+              await existingMenu.update(
+                {
+                  title: featPayload.name,
+                  url: trimmedUrl,
+                  order: featPayload.displayOrder,
+                  isVisible: featPayload.isActive,
+                },
+                { transaction: tx },
+              );
+            } else {
+              await this.menuModel.create(
+                {
+                  moduleId: module.id,
+                  title: featPayload.name,
+                  url: trimmedUrl,
+                  target: '_self',
+                  location: [SysMenuLocation.SIDEBAR],
+                  icon: module.icon || 'LayoutDashboard',
+                  order: featPayload.displayOrder,
+                  isVisible: featPayload.isActive,
+                  elementClass: 'all',
+                } as any,
+                { transaction: tx },
+              );
+            }
+          }
         }
       }
 
@@ -315,12 +357,57 @@ export class ModulesService {
       isActive: dto.isActive ?? true,
     } as any);
 
+    // Auto-sync created feature into sys_menus
+    if (dto.routePath && dto.routePath.trim()) {
+      const trimmedUrl = dto.routePath.trim();
+      const existingMenu = await this.menuModel.findOne({
+        where: {
+          moduleId: module.id,
+          [Op.or]: [
+            { url: trimmedUrl },
+            { title: dto.name },
+          ],
+        },
+      });
+
+      if (existingMenu) {
+        await existingMenu.update({
+          title: dto.name,
+          url: trimmedUrl,
+          order: dto.displayOrder ?? existingMenu.order,
+          isVisible: dto.isActive ?? true,
+        });
+      } else {
+        await this.menuModel.create({
+          moduleId: module.id,
+          title: dto.name,
+          url: trimmedUrl,
+          target: '_self',
+          location: [SysMenuLocation.SIDEBAR],
+          icon: module.icon || 'LayoutDashboard',
+          order: dto.displayOrder ?? 99,
+          isVisible: dto.isActive ?? true,
+          elementClass: 'all',
+        } as any);
+      }
+    }
+
     return this.mapFeatureNode(created);
   }
 
   async deleteFeature(featureId: number): Promise<{ message: string; id: number }> {
     const feature = await this.featureModel.findByPk(featureId);
     if (!feature) throw new NotFoundException('Feature not found');
+
+    // Auto-remove corresponding menu link from sys_menus
+    if (feature.routePath) {
+      await this.menuModel.destroy({
+        where: {
+          moduleId: feature.moduleId,
+          url: feature.routePath.trim(),
+        },
+      });
+    }
 
     await feature.destroy();
     return {

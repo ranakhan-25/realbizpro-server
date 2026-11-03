@@ -114,4 +114,24 @@ export class AdminMenuController {
       Number(id),
     );
   }
+
+  @Post('sync-from-modules')
+  @Roles('super-admin')
+  @ApiOperation({
+    summary:
+      'Synchronize sidebar navigation menus from configured system modules and features (Super Admin only)',
+  })
+  async syncFromModules(
+    @Query('moduleId') moduleId?: string,
+  ): Promise<{
+    success: boolean;
+    syncedModules: number;
+    createdCount: number;
+    updatedCount: number;
+    message: string;
+  }> {
+    return this.adminMenuService.syncFromModules(
+      moduleId,
+    );
+  }
 }
