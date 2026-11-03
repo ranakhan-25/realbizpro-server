@@ -36,13 +36,15 @@ export class AdminMenuController {
   @Get()
   @ApiOperation({
     summary:
-      'Get dynamic admin dashboard sidebar menus by role',
+      'Get dynamic admin dashboard sidebar menus by role and optional moduleId',
   })
   async getMenuTree(
     @Query('role') role?: string,
+    @Query('moduleId') moduleId?: string,
   ): Promise<AdminMenuItemDto[]> {
     return this.adminMenuService.getMenuTree(
       role,
+      moduleId,
     );
   }
 

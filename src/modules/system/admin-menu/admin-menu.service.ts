@@ -12,6 +12,7 @@ export interface AdminMenuItemDto {
   icon?: string;
   order?: number;
   parentId?: number | null;
+  moduleId?: number | null;
   isVisible?: boolean;
   role?: 'super-admin' | 'org-admin' | 'all';
   children?: AdminMenuItemDto[];
@@ -130,24 +131,40 @@ export class AdminMenuService {
     }
   }
 
-  async getMenuTree(role?: string): Promise<AdminMenuItemDto[]> {
+  async getMenuTree(role?: string, moduleId?: string): Promise<AdminMenuItemDto[]> {
     const normalizedRole = (role || 'super-admin').toLowerCase();
+    const cacheKey = `${normalizedRole}:${moduleId || 'admin'}`;
 
     // Check high-speed cache (TTL: 5 minutes)
-    const cached = this.menuCache.get(normalizedRole);
+    const cached = this.menuCache.get(cacheKey);
     if (cached) {
       if (Date.now() < cached.expiresAt) {
         return cached.data;
       }
-      this.menuCache.delete(normalizedRole);
+      this.menuCache.delete(cacheKey);
     }
 
     await this.seedDefaultAdminMenus();
 
+    const whereClause: any = {
+      isVisible: true,
+    };
+
+    if (moduleId === 'admin' || !moduleId) {
+      // Admin dashboard menus (null moduleId or /admin/... URLs)
+      whereClause[Op.or] = [
+        { moduleId: null },
+        { url: { [Op.like]: '/admin/%' } },
+      ];
+    } else if (moduleId === 'all') {
+      // Explicitly return all menus
+    } else {
+      // Scope to specific module
+      whereClause.moduleId = Number(moduleId);
+    }
+
     const allMenus = await this.menuModel.findAll({
-      where: {
-        isVisible: true,
-      },
+      where: whereClause,
       order: [
         ['order', 'ASC'],
         ['id', 'ASC'],
@@ -175,6 +192,7 @@ export class AdminMenuService {
         icon: m.icon || 'LayoutDashboard',
         order: m.order || 1,
         parentId: m.parentId ? Number(m.parentId) : null,
+        moduleId: m.moduleId ? Number(m.moduleId) : null,
         isVisible: m.isVisible,
         role: (m.elementClass as any) || 'all',
         children: [],
@@ -193,7 +211,7 @@ export class AdminMenuService {
     }
 
     // Cache tree for 5 minutes
-    this.menuCache.set(normalizedRole, {
+    this.menuCache.set(cacheKey, {
       data: roots,
       expiresAt: Date.now() + 300000,
     });
@@ -211,6 +229,7 @@ export class AdminMenuService {
       icon: dto.icon || 'LayoutDashboard',
       order: dto.order ?? 99,
       parentId: dto.parentId || null,
+      moduleId: dto.moduleId !== undefined && dto.moduleId !== null ? Number(dto.moduleId) : null,
       elementClass: dto.role || 'all',
       isVisible: dto.isVisible ?? true,
     } as any);
@@ -224,6 +243,7 @@ export class AdminMenuService {
       icon: created.icon || 'LayoutDashboard',
       order: created.order,
       parentId: created.parentId ? Number(created.parentId) : null,
+      moduleId: created.moduleId ? Number(created.moduleId) : null,
       isVisible: created.isVisible,
       role: (created.elementClass as any) || 'all',
       children: [],
@@ -242,6 +262,9 @@ export class AdminMenuService {
     if (dto.icon !== undefined) updatePayload.icon = dto.icon;
     if (dto.order !== undefined) updatePayload.order = dto.order;
     if (dto.parentId !== undefined) updatePayload.parentId = dto.parentId || null;
+    if (dto.moduleId !== undefined) {
+      updatePayload.moduleId = dto.moduleId !== null ? Number(dto.moduleId) : null;
+    }
     if (dto.isVisible !== undefined) updatePayload.isVisible = dto.isVisible;
     if (dto.role !== undefined) updatePayload.elementClass = dto.role;
 
@@ -256,6 +279,7 @@ export class AdminMenuService {
       icon: item.icon || 'LayoutDashboard',
       order: item.order,
       parentId: item.parentId ? Number(item.parentId) : null,
+      moduleId: item.moduleId ? Number(item.moduleId) : null,
       isVisible: item.isVisible,
       role: (item.elementClass as any) || 'all',
     };
