@@ -226,6 +226,34 @@ export class ModulesService {
       };
 
       if (module) {
+        if (dto.name && dto.name !== module.name) {
+          const duplicateName = await this.menuModulesModel.findOne({
+            where: {
+              name: dto.name,
+              id: { [Op.ne]: module.id },
+            },
+            transaction: tx,
+          });
+          if (duplicateName) {
+            throw new ConflictException(
+              `Module name "${dto.name}" is already taken by another module.`,
+            );
+          }
+        }
+        if (dto.code && dto.code !== module.code) {
+          const duplicateCode = await this.menuModulesModel.findOne({
+            where: {
+              code: dto.code,
+              id: { [Op.ne]: module.id },
+            },
+            transaction: tx,
+          });
+          if (duplicateCode) {
+            throw new ConflictException(
+              `Module code "${dto.code}" is already taken by another module.`,
+            );
+          }
+        }
         await module.update(modulePayload, { transaction: tx });
       } else {
         // Ensure name uniqueness before creating a new module
@@ -241,84 +269,218 @@ export class ModulesService {
         });
       }
 
-      // Upsert nested features
+      // Upsert nested features with bulk preloading to eliminate N+1 network latency
       if (dto.features && dto.features.length > 0) {
+        // 1. Preload all existing features for this module in ONE fast query
+        const existingFeatures = await this.featureModel.findAll({
+          where: { moduleId: module.id },
+          transaction: tx,
+        });
+
+        const featById = new Map<number, SysFeatures>();
+        const featByUuid = new Map<string, SysFeatures>();
+        const featByCode = new Map<string, SysFeatures>();
+        const featByName = new Map<string, SysFeatures>();
+
+        for (const f of existingFeatures) {
+          if (f.id) featById.set(Number(f.id), f);
+          if (f.uuid) featByUuid.set(f.uuid, f);
+          if (f.code) featByCode.set(f.code.trim().toUpperCase(), f);
+          if (f.name) featByName.set(f.name.trim().toLowerCase(), f);
+        }
+
+        // 2. Preload all existing menus for this module in ONE fast query
+        const existingMenus = await this.menuModel.findAll({
+          where: { moduleId: module.id },
+          transaction: tx,
+        });
+
+        const menuByUrl = new Map<string, SysMenu>();
+        const menuByTitle = new Map<string, SysMenu>();
+
+        for (const m of existingMenus) {
+          if (m.url) menuByUrl.set(m.url.trim().toLowerCase(), m);
+          if (m.title) menuByTitle.set(m.title.trim().toLowerCase(), m);
+        }
+
+        // 3. Process features using in-memory lookups
+        const featuresToCreate: any[] = [];
+        const featuresToUpdate: { feature: SysFeatures; payload: any }[] = [];
+        const menusToCreate: any[] = [];
+        const menusToUpdate: { menu: SysMenu; payload: any }[] = [];
+
+        const normStr = (v: any) =>
+          v === null || v === undefined ? '' : String(v).trim();
+        const normNum = (v: any) =>
+          v === null || v === undefined ? 0 : Number(v);
+        const normBool = (v: any) => Boolean(v);
+
         for (let i = 0; i < dto.features.length; i++) {
           const featDto = dto.features[i];
+          const cleanName = featDto.name.trim();
+          const cleanCode = (featDto.code || `FEAT_${i + 1}`).trim().toUpperCase();
+
           let feature: SysFeatures | null = null;
-
-          if (featDto.id) {
-            feature = await this.featureModel.findByPk(featDto.id, {
-              transaction: tx,
-            });
-          }
-
-          if (!feature && featDto.code) {
-            feature = await this.featureModel.findOne({
-              where: { code: featDto.code },
-              transaction: tx,
-            });
+          if (featDto.id && featById.has(Number(featDto.id))) {
+            feature = featById.get(Number(featDto.id))!;
+          } else if (featDto.uuid && featByUuid.has(featDto.uuid)) {
+            feature = featByUuid.get(featDto.uuid)!;
+          } else if (cleanCode && featByCode.has(cleanCode)) {
+            feature = featByCode.get(cleanCode)!;
+          } else if (cleanName && featByName.has(cleanName.toLowerCase())) {
+            feature = featByName.get(cleanName.toLowerCase())!;
           }
 
           const featPayload = {
             moduleId: module.id,
-            name: featDto.name,
-            code: featDto.code,
-            routePath: featDto.routePath,
+            name: cleanName,
+            code: cleanCode,
+            routePath: featDto.routePath?.trim() || null,
             actionType: featDto.actionType || 'read',
-            description: featDto.description,
+            description: featDto.description?.trim() || null,
             displayOrder: featDto.displayOrder ?? i + 1,
             isActive: featDto.isActive ?? true,
           };
 
           if (feature) {
-            await feature.update(featPayload, { transaction: tx });
+            let changed = false;
+            if (normStr(feature.name) !== normStr(featPayload.name)) changed = true;
+            if (normStr(feature.code) !== normStr(featPayload.code)) changed = true;
+            if (normStr(feature.routePath) !== normStr(featPayload.routePath)) changed = true;
+            if (normStr(feature.description) !== normStr(featPayload.description)) changed = true;
+            if (normNum(feature.displayOrder) !== normNum(featPayload.displayOrder)) changed = true;
+            if (normBool(feature.isActive) !== normBool(featPayload.isActive)) changed = true;
+            if (changed) {
+              featuresToUpdate.push({ feature, payload: featPayload });
+            }
           } else {
-            await this.featureModel.create(featPayload as any, {
+            featuresToCreate.push(featPayload);
+          }
+
+          // In-memory matching for sys_menus
+          if (featPayload.routePath) {
+            const trimmedUrl = featPayload.routePath.toLowerCase();
+            const trimmedTitle = featPayload.name.toLowerCase();
+            const existingMenu =
+              menuByUrl.get(trimmedUrl) || menuByTitle.get(trimmedTitle);
+
+            const menuPayload = {
+              moduleId: module.id,
+              title: featPayload.name,
+              url: featPayload.routePath,
+              target: '_self',
+              location: [SysMenuLocation.SIDEBAR],
+              icon: module.icon || 'LayoutDashboard',
+              order: featPayload.displayOrder,
+              isVisible: featPayload.isActive,
+              elementClass: 'all',
+            };
+
+            if (existingMenu && existingMenu.id) {
+              let menuChanged = false;
+              if (normStr(existingMenu.title) !== normStr(menuPayload.title)) menuChanged = true;
+              if (normStr(existingMenu.url) !== normStr(menuPayload.url)) menuChanged = true;
+              if (normBool(existingMenu.isVisible) !== normBool(menuPayload.isVisible))
+                menuChanged = true;
+              if (menuChanged) {
+                menusToUpdate.push({ menu: existingMenu, payload: menuPayload });
+              }
+            } else if (!existingMenu) {
+              menusToCreate.push(menuPayload);
+              menuByUrl.set(trimmedUrl, {} as any);
+              menuByTitle.set(trimmedTitle, {} as any);
+            }
+          }
+        }
+
+        // 4. Batch updates and bulk creates in single queries
+        if (featuresToCreate.length > 0) {
+          await this.featureModel.bulkCreate(featuresToCreate as any, {
+            transaction: tx,
+          });
+        }
+
+        if (featuresToUpdate.length > 0) {
+          if (featuresToUpdate.length <= 2) {
+            for (const { feature, payload } of featuresToUpdate) {
+              await feature.update(payload, { transaction: tx });
+            }
+          } else {
+            const placeholders: string[] = [];
+            const replacements: Record<string, any> = {};
+            featuresToUpdate.forEach(({ feature, payload }, idx) => {
+              placeholders.push(
+                `(:id_${idx}::bigint, :name_${idx}::varchar, :code_${idx}::varchar, :routePath_${idx}::varchar, :desc_${idx}::text, :order_${idx}::int, :isActive_${idx}::boolean)`
+              );
+              replacements[`id_${idx}`] = feature.id;
+              replacements[`name_${idx}`] = payload.name;
+              replacements[`code_${idx}`] = payload.code;
+              replacements[`routePath_${idx}`] = payload.routePath;
+              replacements[`desc_${idx}`] = payload.description;
+              replacements[`order_${idx}`] = payload.displayOrder;
+              replacements[`isActive_${idx}`] = payload.isActive;
+            });
+
+            const sql = `
+              UPDATE sys_features AS f
+              SET
+                name = v.name,
+                code = v.code,
+                route_path = v.route_path,
+                description = v.description,
+                display_order = v.display_order,
+                is_active = v.is_active,
+                updated_at = NOW()
+              FROM (VALUES ${placeholders.join(', ')}) AS v(id, name, code, route_path, description, display_order, is_active)
+              WHERE f.id = v.id
+            `;
+            await this.featureModel.sequelize!.query(sql, {
+              replacements,
               transaction: tx,
             });
           }
+        }
 
-          // Auto-sync feature into sys_menus for seamless sidebar navigation
-          if (featPayload.routePath && featPayload.routePath.trim()) {
-            const trimmedUrl = featPayload.routePath.trim();
-            const existingMenu = await this.menuModel.findOne({
-              where: {
-                moduleId: module.id,
-                [Op.or]: [
-                  { url: trimmedUrl },
-                  { title: featPayload.name },
-                ],
-              },
-              transaction: tx,
+        if (menusToCreate.length > 0) {
+          await this.menuModel.bulkCreate(menusToCreate as any, {
+            transaction: tx,
+          });
+        }
+
+        if (menusToUpdate.length > 0) {
+          if (menusToUpdate.length <= 2) {
+            for (const { menu, payload } of menusToUpdate) {
+              await menu.update(payload, { transaction: tx });
+            }
+          } else {
+            const placeholders: string[] = [];
+            const replacements: Record<string, any> = {};
+            menusToUpdate.forEach(({ menu, payload }, idx) => {
+              placeholders.push(
+                `(:id_${idx}::bigint, :title_${idx}::varchar, :url_${idx}::varchar, :order_${idx}::int, :isVisible_${idx}::boolean)`
+              );
+              replacements[`id_${idx}`] = menu.id;
+              replacements[`title_${idx}`] = payload.title;
+              replacements[`url_${idx}`] = payload.url || null;
+              replacements[`order_${idx}`] = payload.order ?? 0;
+              replacements[`isVisible_${idx}`] = payload.isVisible ?? true;
             });
 
-            if (existingMenu) {
-              await existingMenu.update(
-                {
-                  title: featPayload.name,
-                  url: trimmedUrl,
-                  order: featPayload.displayOrder,
-                  isVisible: featPayload.isActive,
-                },
-                { transaction: tx },
-              );
-            } else {
-              await this.menuModel.create(
-                {
-                  moduleId: module.id,
-                  title: featPayload.name,
-                  url: trimmedUrl,
-                  target: '_self',
-                  location: [SysMenuLocation.SIDEBAR],
-                  icon: module.icon || 'LayoutDashboard',
-                  order: featPayload.displayOrder,
-                  isVisible: featPayload.isActive,
-                  elementClass: 'all',
-                } as any,
-                { transaction: tx },
-              );
-            }
+            const sql = `
+              UPDATE sys_menus AS m
+              SET
+                title = v.title,
+                url = v.url,
+                "order" = v.order,
+                is_visible = v.is_visible,
+                updated_at = NOW()
+              FROM (VALUES ${placeholders.join(', ')}) AS v(id, title, url, "order", is_visible)
+              WHERE m.id = v.id
+            `;
+            await this.menuModel.sequelize!.query(sql, {
+              replacements,
+              transaction: tx,
+            });
           }
         }
       }

@@ -11,6 +11,7 @@ import { SysPermission } from '../../../database/models/system/sys_permission.mo
 import { SysUser } from '../../../database/models/system/sys_user.model';
 import { SysOrganization } from '../../../database/models/system/sys_organization.model';
 import { getModuleMenuTree, MenuNode } from './module-menus';
+import { AdminMenuService, AdminMenuItemDto } from '../admin-menu/admin-menu.service';
 
 export interface AccessibleModuleItem {
   id: number;
@@ -61,7 +62,7 @@ function titleCase(text: string): string {
     .join(' ');
 }
 
-const CORE_MODULE_KEYS: Record<number, string> = {
+export const CORE_MODULE_KEYS: Record<number, string> = {
   10: 'project',
   11: 'inventory',
   12: 'accounts',
@@ -72,9 +73,24 @@ const CORE_MODULE_KEYS: Record<number, string> = {
   17: 'procurement',
 };
 
+// Map duplicate module IDs to their canonical core module ID
+export const MODULE_CANONICAL_ID_MAP: Record<number, number> = {
+  19: 14, // CRM -> Customer Relationship Management
+  23: 10, // Project -> Project Management
+  24: 17, // Procurement -> Procurement Management
+  27: 13, // HRM -> Human Resource Management
+  28: 10, // Projects -> Project Management
+  29: 10, // Project Billing -> Project Management
+};
+
+export function getCanonicalModuleId(id: number): number {
+  return MODULE_CANONICAL_ID_MAP[id] || id;
+}
+
 export function getModuleKey(mod: { id: number; code?: string; name?: string; pathRoute?: string }): string {
-  if (CORE_MODULE_KEYS[mod.id]) {
-    return CORE_MODULE_KEYS[mod.id];
+  const canonicalId = getCanonicalModuleId(Number(mod.id));
+  if (CORE_MODULE_KEYS[canonicalId]) {
+    return CORE_MODULE_KEYS[canonicalId];
   }
   let base = '';
   if (mod.pathRoute) base = slugify(mod.pathRoute);
@@ -82,12 +98,63 @@ export function getModuleKey(mod: { id: number; code?: string; name?: string; pa
   if (!base && mod.name) base = slugify(mod.name);
   if (!base) base = 'module';
   if (base === 'projects') base = 'project';
-
-  const coreSlugs = Object.values(CORE_MODULE_KEYS);
-  if (coreSlugs.includes(base)) {
-    return `${base}-${mod.id}`;
-  }
   return base;
+}
+
+export function convertAdminMenuToMenuNode(
+  item: AdminMenuItemDto,
+  moduleKey: string,
+): MenuNode {
+  let path = (item.url || '').trim();
+  const modPrefix = `/dashboard/${moduleKey}`;
+  if (path.startsWith(modPrefix)) {
+    path = path.slice(modPrefix.length).replace(/^\/+/, '');
+  } else if (path.startsWith('/dashboard/')) {
+    const segments = path.replace(/^\/dashboard\//, '').split('/');
+    segments.shift();
+    path = segments.join('/');
+  } else if (path.startsWith('/')) {
+    path = path.replace(/^\/+/, '');
+  }
+
+  const slug =
+    path.split('/').filter(Boolean).pop() ||
+    slugify(item.title) ||
+    'item';
+
+  return {
+    label: item.title,
+    slug,
+    path: path || slug,
+    children:
+      item.children && item.children.length > 0
+        ? item.children.map((child) =>
+            convertAdminMenuToMenuNode(child, moduleKey),
+          )
+        : undefined,
+  };
+}
+
+export function pruneMenuTree(nodes: MenuNode[], allowedRoutes: string[]): MenuNode[] {
+  if (!allowedRoutes || allowedRoutes.includes('*')) return nodes;
+  const allowedSet = new Set(allowedRoutes.map((r) => r.toLowerCase().replace(/^\/+|\/+$/g, '')));
+  const result: MenuNode[] = [];
+
+  for (const n of nodes) {
+    const kids = n.children ? pruneMenuTree(n.children, allowedRoutes) : undefined;
+    const cleanPath = n.path.toLowerCase().replace(/^\/+|\/+$/g, '');
+    const isSelfAllowed =
+      allowedSet.has(cleanPath) ||
+      Array.from(allowedSet).some((allowed) => cleanPath.startsWith(`${allowed}/`) || cleanPath === allowed);
+
+    if (isSelfAllowed || (kids && kids.length > 0)) {
+      result.push({
+        ...n,
+        children: kids,
+      });
+    }
+  }
+  return result;
 }
 
 function cleanTree(nodes: MenuNode[]): MenuNode[] {
@@ -251,7 +318,40 @@ export class UserAccessService {
     private readonly userModel: typeof SysUser,
     @InjectModel(SysOrganization)
     private readonly orgModel: typeof SysOrganization,
+    private readonly adminMenuService: AdminMenuService,
   ) {}
+
+  private async resolveModuleMenuTree(
+    modId: number,
+    moduleKey: string,
+    roleSlug: string,
+    featList: SysFeatures[],
+    allowedRoutes: string[] = ['*'],
+  ): Promise<MenuNode[]> {
+    const canonicalId = getCanonicalModuleId(modId);
+
+    try {
+      const adminMenus = await this.adminMenuService.getMenuTree(
+        roleSlug,
+        String(canonicalId),
+      );
+      if (adminMenus && adminMenus.length > 0) {
+        let tree = adminMenus.map((item) =>
+          convertAdminMenuToMenuNode(item, moduleKey),
+        );
+        if (!allowedRoutes.includes('*')) {
+          tree = pruneMenuTree(tree, allowedRoutes);
+        }
+        if (tree && tree.length > 0) {
+          return tree;
+        }
+      }
+    } catch (err) {
+      console.warn(`Could not load sys_menus for module ${canonicalId}:`, err);
+    }
+
+    return buildDynamicMenuTree(featList, moduleKey, allowedRoutes);
+  }
 
   async getUserAccess(currentUser: any): Promise<UserAccessResponse> {
     if (!currentUser || !currentUser.id) {
@@ -307,10 +407,27 @@ export class UserAccessService {
         ],
       });
 
+      // Sort so that canonical core modules (10-17) come first
+      allModules.sort((a, b) => {
+        const aCore = CORE_MODULE_KEYS[Number(a.id)] ? 0 : 1;
+        const bCore = CORE_MODULE_KEYS[Number(b.id)] ? 0 : 1;
+        return aCore - bCore;
+      });
+
+      const seenKeys = new Set<string>();
       for (const mod of allModules) {
         const key = getModuleKey(mod);
+        if (seenKeys.has(key)) continue;
+        seenKeys.add(key);
+
         const featList = (mod.features || []).filter((f) => f.isActive !== false);
-        const menuTree = buildDynamicMenuTree(featList, key, ['*']);
+        const menuTree = await this.resolveModuleMenuTree(
+          Number(mod.id),
+          key,
+          roleSlug,
+          featList,
+          ['*'],
+        );
         const featCodes = featList.map((f) => f.code || `FEAT_${f.id}`).filter(Boolean);
 
         accessibleModules.push({
@@ -352,8 +469,12 @@ export class UserAccessService {
         }
       }
 
+      const seenKeys = new Set<string>();
       for (const { mod, features, codes, routes } of moduleMap.values()) {
         const key = getModuleKey(mod);
+        if (seenKeys.has(key)) continue;
+        seenKeys.add(key);
+
         const allowedRoutes = routes.length > 0 ? routes : ['*'];
 
         let featList = features;
@@ -364,7 +485,13 @@ export class UserAccessService {
           });
         }
 
-        const menuTree = buildDynamicMenuTree(featList, key, allowedRoutes);
+        const menuTree = await this.resolveModuleMenuTree(
+          Number(mod.id),
+          key,
+          roleSlug,
+          featList,
+          allowedRoutes,
+        );
         accessibleModules.push({
           id: mod.id,
           key,
@@ -451,11 +578,21 @@ export class UserAccessService {
           order: [['displayOrder', 'ASC'], ['id', 'ASC']],
         });
 
+        const seenKeys = new Set<string>();
         for (const mod of modules) {
           const key = getModuleKey(mod);
+          if (seenKeys.has(key)) continue;
+          seenKeys.add(key);
+
           const fData = activeFeatureMap.get(Number(mod.id)) || { features: [], codes: [], routes: [] };
           const allowedRoutes = fData.routes.length > 0 ? fData.routes : fData.codes.map((f) => f.toLowerCase().replace(/_/g, '-'));
-          const menuTree = buildDynamicMenuTree(fData.features, key, allowedRoutes);
+          const menuTree = await this.resolveModuleMenuTree(
+            Number(mod.id),
+            key,
+            roleSlug,
+            fData.features,
+            allowedRoutes,
+          );
           accessibleModules.push({
             id: mod.id,
             key,

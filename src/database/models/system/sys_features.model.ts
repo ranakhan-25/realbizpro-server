@@ -21,7 +21,7 @@ import type {
 @Table({
   tableName: 'sys_features',
   timestamps: true,
-  paranoid: true,
+  paranoid: false,
   underscored: true,
   indexes: [
     { fields: ['name'], unique: true },

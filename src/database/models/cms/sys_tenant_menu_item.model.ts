@@ -15,7 +15,7 @@ import type { SysTenantMenuItemAttributes, SysTenantMenuItemCreationAttributes }
 @Table({
   tableName: 'sys_tenant_menu_items',
   timestamps: true,
-  paranoid: true,
+  paranoid: false,
   underscored: true,
 })
 export class SysTenantMenuItem extends BaseModel<SysTenantMenuItemAttributes, SysTenantMenuItemCreationAttributes> {

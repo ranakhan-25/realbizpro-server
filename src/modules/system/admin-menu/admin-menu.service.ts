@@ -293,18 +293,45 @@ export class AdminMenuService {
 
   async reorderTree(reorderList: ReorderAdminMenuItemDto[]): Promise<{ success: boolean; count: number }> {
     this.menuCache.clear();
-    for (const item of reorderList) {
-      await this.menuModel.update(
-        {
-          order: item.order,
-          parentId: item.parentId || null,
-        },
-        {
-          where: { id: item.id },
-        },
-      );
+    if (!reorderList || reorderList.length === 0) {
+      return { success: true, count: 0 };
     }
 
+    if (reorderList.length <= 2) {
+      for (const item of reorderList) {
+        await this.menuModel.update(
+          {
+            order: item.order,
+            parentId: item.parentId || null,
+          },
+          {
+            where: { id: item.id },
+          },
+        );
+      }
+      return { success: true, count: reorderList.length };
+    }
+
+    const placeholders: string[] = [];
+    const replacements: Record<string, any> = {};
+    reorderList.forEach((item, idx) => {
+      placeholders.push(`(:id_${idx}::bigint, :order_${idx}::int, :parentId_${idx}::bigint)`);
+      replacements[`id_${idx}`] = item.id;
+      replacements[`order_${idx}`] = item.order ?? 0;
+      replacements[`parentId_${idx}`] = item.parentId ? Number(item.parentId) : null;
+    });
+
+    const sql = `
+      UPDATE sys_menus AS m
+      SET
+        "order" = v.order,
+        parent_id = v.parent_id,
+        updated_at = NOW()
+      FROM (VALUES ${placeholders.join(', ')}) AS v(id, "order", parent_id)
+      WHERE m.id = v.id
+    `;
+
+    await this.menuModel.sequelize!.query(sql, { replacements });
     return { success: true, count: reorderList.length };
   }
 
@@ -373,15 +400,15 @@ export class AdminMenuService {
 
     for (const menu of existingMenus) {
       if (menu.url) {
-        urlMap.set(`${menu.moduleId}:${menu.url.trim()}`, menu);
+        urlMap.set(`${menu.moduleId}:${menu.url.trim().toLowerCase()}`, menu);
       }
       if (menu.title) {
-        titleMap.set(`${menu.moduleId}:${menu.title.trim()}`, menu);
+        titleMap.set(`${menu.moduleId}:${menu.title.trim().toLowerCase()}`, menu);
       }
     }
 
     const toCreate: any[] = [];
-    let updatedCount = 0;
+    const menusToUpdate: SysMenu[] = [];
 
     for (const mod of modules) {
       const features = (mod as any).features || [];
@@ -391,8 +418,8 @@ export class AdminMenuService {
         const trimmedTitle = (feat.name || '').trim();
 
         const existing =
-          urlMap.get(`${mod.id}:${trimmedUrl}`) ||
-          titleMap.get(`${mod.id}:${trimmedTitle}`);
+          urlMap.get(`${mod.id}:${trimmedUrl.toLowerCase()}`) ||
+          titleMap.get(`${mod.id}:${trimmedTitle.toLowerCase()}`);
 
         if (existing) {
           let needsUpdate = false;
@@ -409,8 +436,7 @@ export class AdminMenuService {
             needsUpdate = true;
           }
           if (needsUpdate) {
-            await existing.save();
-            updatedCount++;
+            menusToUpdate.push(existing);
           }
         } else {
           toCreate.push({
@@ -425,8 +451,8 @@ export class AdminMenuService {
             elementClass: 'all',
           });
           // Track in map so duplicate features within same sync don't create multiple menus
-          titleMap.set(`${mod.id}:${trimmedTitle}`, {} as any);
-          urlMap.set(`${mod.id}:${trimmedUrl}`, {} as any);
+          titleMap.set(`${mod.id}:${trimmedTitle.toLowerCase()}`, {} as any);
+          urlMap.set(`${mod.id}:${trimmedUrl.toLowerCase()}`, {} as any);
         }
       }
     }
@@ -434,6 +460,40 @@ export class AdminMenuService {
     if (toCreate.length > 0) {
       await this.menuModel.bulkCreate(toCreate);
     }
+
+    if (menusToUpdate.length > 0) {
+      if (menusToUpdate.length <= 2) {
+        for (const item of menusToUpdate) {
+          await item.save();
+        }
+      } else {
+        const placeholders: string[] = [];
+        const replacements: Record<string, any> = {};
+        menusToUpdate.forEach((menu, idx) => {
+          placeholders.push(
+            `(:id_${idx}::bigint, :title_${idx}::varchar, :url_${idx}::varchar, :isVisible_${idx}::boolean)`,
+          );
+          replacements[`id_${idx}`] = menu.id;
+          replacements[`title_${idx}`] = menu.title;
+          replacements[`url_${idx}`] = menu.url || null;
+          replacements[`isVisible_${idx}`] = menu.isVisible ?? true;
+        });
+
+        const sql = `
+          UPDATE sys_menus AS m
+          SET
+            title = v.title,
+            url = v.url,
+            is_visible = v.is_visible,
+            updated_at = NOW()
+          FROM (VALUES ${placeholders.join(', ')}) AS v(id, title, url, is_visible)
+          WHERE m.id = v.id
+        `;
+        await this.menuModel.sequelize!.query(sql, { replacements });
+      }
+    }
+
+    const updatedCount = menusToUpdate.length;
 
     return {
       success: true,
