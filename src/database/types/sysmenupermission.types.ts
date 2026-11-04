@@ -1,5 +1,5 @@
 // Auto-generated types for SysMenuPermission
-// Source: src/database/models/system/sys_menu_permission.model.ts
+// Source: src\database\models\system\sys_menu_permission.model.ts
 
 import type { SysMenu } from '../models/system/sys_menu.model';
 import type { SysPermission } from '../models/system/sys_permission.model';

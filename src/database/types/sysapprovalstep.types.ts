@@ -1,5 +1,5 @@
 // Auto-generated types for SysApprovalStep
-// Source: src/database/models/deligation/sys_approval_steps.model.ts
+// Source: src\database\models\deligation\sys_approval_steps.model.ts
 
 import type { SysApprovalWorkflow } from '../models/deligation/sys_approval_workflows.model';
 import type { SysStepApprover } from '../models/deligation/sys_step_approvers.model';
