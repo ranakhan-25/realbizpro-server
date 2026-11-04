@@ -12,7 +12,7 @@ export class ShareProjectImage extends BaseModel<ShareProjectImageAttributes, Sh
   @BelongsTo(() => ShareProject, { foreignKey: 'projectId', targetKey: 'uuid' })
   declare project?: ShareProject;
 
-  @Column({ type: DataType.STRING(255), allowNull: false })
+  @Column({ type: DataType.TEXT, allowNull: false })
   declare url: string;
   @Column({ type: DataType.STRING(255), allowNull: true })
   declare altText?: string;
