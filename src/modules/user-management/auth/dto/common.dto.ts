@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {
   ApiProperty,
   ApiPropertyOptional,
@@ -100,6 +101,15 @@ export class UpdateProfileDto {
 }
 
 export class ChangePasswordDto {
+  // ✅ NEW: Identifier added
+  @ApiProperty({
+    description: 'Email or Username to identify the user',
+    example: 'fleek_bd',
+  })
+  @IsString()
+  @IsNotEmpty()
+  identifier: string;
+
   @ApiProperty({
     description: 'Current (old) password',
     example: 'OldPassword@123',

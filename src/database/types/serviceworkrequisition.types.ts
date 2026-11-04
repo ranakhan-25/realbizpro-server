@@ -1,5 +1,5 @@
 // Auto-generated types for ServiceWorkRequisition
-// Source: src/database/models/projects/service-work-requisition/pr_service_work_requisition.model.ts
+// Source: src\database\models\projects\service-work-requisition\pr_service_work_requisition.model.ts
 
 import { ServiceWorkRequisitionStatus } from '../models/projects/service-work-requisition/pr_service_work_requisition.model';
 

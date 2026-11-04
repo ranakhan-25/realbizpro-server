@@ -1,5 +1,5 @@
 // Auto-generated types for MaterialRequisitionItem
-// Source: src/database/models/projects/material-requisition-item/pr_material_requisition_item.model.ts
+// Source: src\database\models\projects\material-requisition-item\pr_material_requisition_item.model.ts
 
 import type { MaterialRequisition } from '../models/projects/material-requisition/pr_material_requisition.model';
 

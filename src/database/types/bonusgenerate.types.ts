@@ -1,5 +1,5 @@
 // Auto-generated types for BonusGenerate
-// Source: src/database/models/hrm/employee/hrm_bonus_generate_model.ts
+// Source: src\database\models\hrm\employee\hrm_bonus_generate_model.ts
 
 import { BonusGenerateStatus } from '../models/hrm/employee/hrm_bonus_generate_model';
 

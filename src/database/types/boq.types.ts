@@ -1,5 +1,5 @@
 // Auto-generated types for Boq
-// Source: src/database/models/projects/boq/pr_boq.model.ts
+// Source: src\database\models\projects\boq\pr_boq.model.ts
 
 import type { Project } from '../models/projects/project/pr_project.model';
 
