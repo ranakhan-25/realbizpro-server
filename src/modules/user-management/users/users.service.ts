@@ -1442,6 +1442,7 @@ export class UsersService {
       attributes: [
         'id',
         'uuid',
+        'name',
         'userType',
         'warehouseId',
         'factoryId',
@@ -1452,12 +1453,25 @@ export class UsersService {
         'username',
         'email',
         'phone',
+        'mobile',
+        'designationName',
+        'designationId',
+        'orgId',
+        'orgUuid',
+        'isOrgAdmin',
         'isActive',
         'lastLoginAt',
         'lastLogoutAt',
         'isSuperUser',
+        'createdAt',
+        'updatedAt',
       ],
       include: [
+        {
+          association: 'organization',
+          attributes: ['id', 'uuid', 'name'],
+          required: false,
+        },
         {
           association: 'modules',
           attributes: ['id', 'name'],
@@ -2016,9 +2030,25 @@ export class UsersService {
     const { rows, count } =
       await this.userModel.findAndCountAll({
         where: whereClause,
-        attributes: {
-          exclude: ['passwordHash'],
-        },
+        attributes: [
+          'id',
+          'uuid',
+          'name',
+          'firstName',
+          'lastName',
+          'username',
+          'email',
+          'phone',
+          'mobile',
+          'userType',
+          'designationName',
+          'orgId',
+          'orgUuid',
+          'isOrgAdmin',
+          'isSuperUser',
+          'isActive',
+          'createdAt',
+        ],
         include: [
           {
             association: 'roles',
