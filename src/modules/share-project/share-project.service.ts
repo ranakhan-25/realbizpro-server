@@ -2,7 +2,7 @@ import { BadRequestException, ForbiddenException, Injectable, NotFoundException 
 import { InjectModel } from '@nestjs/sequelize';
 import { Op, Transaction } from 'sequelize';
 import { Sequelize } from 'sequelize-typescript';
-import { ShareUser, ShareUserRole } from '../../database/models/share-user/share-user.model';
+import { ShareUser, ShareUserRole, ShareUserStatus } from '../../database/models/share-user/share-user.model';
 import { ShareProject, ShareProjectStatus } from '../../database/models/share-project/share-project.model';
 import { ShareProjectCategory } from '../../database/models/share-project/share-project-category.model';
 import { ShareProjectImage } from '../../database/models/share-project/share-project-image.model';
@@ -17,7 +17,11 @@ import {
   RejectShareProjectDto,
   UpdateShareProjectCategoryDto,
   UpdateShareProjectDto,
+  PublicCreateShareProjectDto,
+  PublicInvestmentRequestDto,
 } from './dto/share-project.dto';
+import { EmailService } from '../email/email.service';
+import * as argon2 from 'argon2';
 
 @Injectable()
 export class ShareProjectService {
@@ -32,7 +36,16 @@ export class ShareProjectService {
     @InjectModel(ShareProjectStatusHistory) private readonly historyModel: typeof ShareProjectStatusHistory,
     @InjectModel(ShareProjectInvestment) private readonly investmentModel: typeof ShareProjectInvestment,
     private readonly sequelize: Sequelize,
+    private readonly emailService: EmailService,
   ) {}
+
+  private generateCode(prefix: string, name: string) {
+    const letters = name.replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 2).padEnd(2, 'X');
+    const now = new Date();
+    const date = `${String(now.getDate()).padStart(2, '0')}${String(now.getMonth() + 1).padStart(2, '0')}${now.getFullYear()}`;
+    const random = Math.random().toString(36).slice(2, 6).toUpperCase();
+    return `${prefix}-${letters}-${date}-${random}`;
+  }
 
   private async ensureCategory(categoryId: number) {
     const category = await this.categoryModel.findByPk(categoryId);
@@ -73,14 +86,16 @@ export class ShareProjectService {
 
   async create(ownerId: number, dto: CreateShareProjectDto) {
     await this.ensureCategory(dto.categoryId);
-    return this.sequelize.transaction(async (transaction) => {
-      const project = await this.projectModel.create({
+    const transaction = await this.sequelize.transaction();
+    let project: ShareProject;
+    try {
+      project = await this.projectModel.create({
         ownerId,
         categoryId: dto.categoryId,
         name: dto.name,
         description: dto.description,
         location: dto.location,
-        thumbnailUrl: dto.thumbnailUrl,
+        thumbnailUrl: dto.thumbnailUrl || dto.images?.[0]?.url || null,
         totalInvestmentAmount: dto.totalInvestmentAmount,
         totalShares: dto.totalShares,
         pricePerShare: dto.pricePerShare,
@@ -92,8 +107,12 @@ export class ShareProjectService {
       } as any, { transaction });
       await this.syncAssets(project.uuid, dto, transaction);
       await this.historyModel.create({ projectId: project.uuid, fromStatus: ShareProjectStatus.DRAFT, toStatus: ShareProjectStatus.DRAFT, changedBy: ownerId, note: 'Draft created' }, { transaction });
-      return project.reload({ transaction });
-    });
+      await transaction.commit();
+      return project.reload();
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
   }
 
   async update(ownerId: number, uuid: string, dto: UpdateShareProjectDto) {
@@ -107,7 +126,7 @@ export class ShareProjectService {
         name: dto.name,
         description: dto.description,
         location: dto.location,
-        thumbnailUrl: dto.thumbnailUrl,
+        thumbnailUrl: dto.thumbnailUrl || dto.images?.[0]?.url || null,
         totalInvestmentAmount: dto.totalInvestmentAmount,
         totalShares: dto.totalShares,
         pricePerShare: dto.pricePerShare,
@@ -235,8 +254,13 @@ export class ShareProjectService {
     return { investments: rows, shares: rows, payments: [], profits: [], reports: [] };
   }
 
-  async adminInvestments(page = 1, limit = 10) {
+  async adminInvestments(page = 1, limit = 10, projectUuid?: string) {
+    const where: any = {};
+    if (projectUuid) {
+      where.projectId = projectUuid;
+    }
     const { rows, count } = await this.investmentModel.findAndCountAll({
+      where,
       limit,
       offset: (page - 1) * limit,
       order: [['createdAt', 'DESC']],
@@ -254,9 +278,15 @@ export class ShareProjectService {
     const projectByUuid = new Map(projects.map((project) => [project.uuid, project]));
     const investorById = new Map(investors.map((investor) => [investor.id, investor]));
     const data = rows.map((row) => ({
+      id: row.id,
       uuid: row.uuid,
+      code: row.code,
+      projectUuid: row.projectId,
       project: projectByUuid.get(row.projectId) || null,
       investor: investorById.get(row.investorId) || null,
+      investorName: row.investorName || investorById.get(row.investorId)?.name || null,
+      investorEmail: row.investorEmail || investorById.get(row.investorId)?.email || null,
+      investorPhone: row.investorPhone || investorById.get(row.investorId)?.phone || null,
       quantity: row.quantity,
       sharePrice: row.sharePrice,
       shareValue: row.shareValue,
@@ -304,15 +334,40 @@ export class ShareProjectService {
   }
 
   async adminDetails(uuid: string) {
-    const project = await this.projectModel.findOne({ where: { uuid }, include: this.projectIncludes(), paranoid: false });
+    const project = await this.projectModel.findOne({ where: { uuid }, paranoid: false });
     if (!project) throw new NotFoundException('Share Project not found');
-    return project;
+    const owner = project.ownerId ? await this.shareUserModel.findByPk(project.ownerId) : null;
+    const category = project.categoryId ? await this.categoryModel.findByPk(project.categoryId) : null;
+    const item = project.toJSON() as any;
+    item.owner = owner
+      ? {
+          id: owner.id,
+          uuid: owner.uuid,
+          name: owner.name,
+          email: owner.email,
+          phone: owner.phone,
+          role: owner.role,
+          status: owner.status,
+        }
+      : null;
+    if (!item.owner && (project.creatorName || project.creatorEmail)) {
+      item.owner = {
+        name: project.creatorName,
+        email: project.creatorEmail,
+        phone: project.creatorPhone,
+        companyName: project.companyName,
+        role: 'project-owner',
+        status: 'active',
+      };
+    }
+    item.category = category ? { id: category.id, uuid: category.uuid, name: category.name, code: category.code } : null;
+    return item;
   }
 
   async transition(uuid: string, reviewerId: number, nextStatus: ShareProjectStatus, reason?: string) {
     const project = await this.projectModel.findOne({ where: { uuid } });
     if (!project) throw new NotFoundException('Share Project not found');
-    return this.sequelize.transaction(async (transaction) => {
+    const updated = await this.sequelize.transaction(async (transaction) => {
       const fromStatus = project.status;
       if (nextStatus === ShareProjectStatus.REJECTED) {
         if (!reason?.trim()) throw new BadRequestException('Rejection reason is required');
@@ -332,6 +387,15 @@ export class ShareProjectService {
       await this.historyModel.create({ projectId: uuid, fromStatus, toStatus: nextStatus, changedBy: reviewerId, note: reason || undefined }, { transaction });
       return project.reload({ transaction });
     });
+    if (project.creatorEmail) {
+      const statusLabel = nextStatus === ShareProjectStatus.PUBLISHED ? 'published' : nextStatus === ShareProjectStatus.APPROVED ? 'approved' : nextStatus === ShareProjectStatus.REJECTED ? 'rejected' : nextStatus;
+      await this.emailService.sendMail({
+        to: project.creatorEmail,
+        subject: `Project ${statusLabel} - ${project.name}`,
+        html: `<p>Your project <strong>${project.name}</strong> (${project.code || updated.uuid}) has been <strong>${statusLabel}</strong>.</p>${reason ? `<p>Reason: ${reason}</p>` : ''}`,
+      } as any);
+    }
+    return updated;
   }
 
   async softDelete(uuid: string, deletedBy: number) {
@@ -363,6 +427,134 @@ export class ShareProjectService {
       data: trash,
       meta: { total: trash.length, page, limit, totalPages: Math.ceil(trash.length / limit) },
     };
+  }
+
+  async publicCreateProject(dto: PublicCreateShareProjectDto) {
+    await this.ensureCategory(dto.categoryId);
+    let owner = await this.shareUserModel.findOne({ where: { email: dto.creatorEmail } });
+    if (!owner) {
+      owner = await this.shareUserModel.create({
+        name: dto.creatorName,
+        email: dto.creatorEmail,
+        phone: dto.creatorPhone,
+        passwordHash: await argon2.hash(dto.creatorPassword),
+        role: ShareUserRole.OWNER,
+        status: ShareUserStatus.PENDING,
+        emailVerified: false,
+      } as any);
+    }
+    const transaction = await this.sequelize.transaction();
+    let project: ShareProject;
+    try {
+    project = await this.projectModel.create({
+      ownerId: owner.id,
+      categoryId: dto.categoryId,
+      name: dto.name,
+      description: dto.description,
+      location: dto.location,
+      totalInvestmentAmount: dto.totalInvestmentAmount.toString(),
+      totalShares: dto.totalShares,
+      pricePerShare: dto.pricePerShare.toString(),
+      minimumInvestment: dto.minimumInvestment.toString(),
+      expectedAnnualReturn: dto.expectedAnnualReturn?.toString(),
+      startDate: dto.startDate,
+      endDate: dto.endDate,
+      thumbnailUrl: dto.thumbnailUrl || dto.images?.[0]?.url || null,
+      status: ShareProjectStatus.PENDING,
+      submittedAt: new Date(),
+      code: this.generateCode('SP', dto.name),
+      creatorName: dto.creatorName,
+      creatorEmail: dto.creatorEmail,
+      creatorPhone: dto.creatorPhone,
+      companyName: dto.companyName,
+    } as any, { transaction });
+    await this.syncAssets(project.uuid, dto, transaction);
+    await transaction.commit();
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
+    await this.emailService.sendMail({
+      to: dto.creatorEmail,
+      subject: `Project submitted - ${project.name} (${(project as any).code})`,
+      html: `<p>Your project <strong>${project.name}</strong> has been submitted and is pending Super Admin review.</p><p>Project code: <strong>${(project as any).code}</strong></p>`,
+    } as any);
+    return project;
+  }
+
+  async publicInvestmentRequest(dto: PublicInvestmentRequestDto) {
+    if (!Number.isInteger(dto.quantity) || dto.quantity < 1) throw new BadRequestException('Share quantity must be a positive integer');
+    const project = await this.projectModel.findOne({ where: { uuid: dto.projectUuid, status: ShareProjectStatus.PUBLISHED } });
+    if (!project) throw new NotFoundException('Published Share Project not found');
+    if (dto.quantity > project.totalShares) throw new BadRequestException('Requested quantity exceeds available project shares');
+    let investor = await this.shareUserModel.findOne({ where: { [Op.or]: [{ email: dto.email }, ...(dto.phone ? [{ phone: dto.phone }] : [])] } });
+    if (!investor) {
+      investor = await this.shareUserModel.create({
+        name: dto.name, email: dto.email, phone: dto.phone, passwordHash: await argon2.hash(dto.password),
+        role: ShareUserRole.OWNER, status: ShareUserStatus.PENDING, emailVerified: false,
+      } as any);
+    }
+    const sharePrice = Number(project.pricePerShare);
+    const shareValue = sharePrice * dto.quantity;
+    const serviceFee = Math.round(shareValue * 0.01 * 100) / 100;
+    const investment = await this.investmentModel.create({
+      projectId: project.uuid,
+      investorId: investor.id,
+      code: this.generateCode('IN', project.name),
+      investorName: dto.name,
+      investorEmail: dto.email,
+      investorPhone: dto.phone,
+      quantity: dto.quantity,
+      sharePrice: sharePrice.toFixed(2),
+      shareValue: shareValue.toFixed(2),
+      serviceFee: serviceFee.toFixed(2),
+      totalAmount: (shareValue + serviceFee).toFixed(2),
+      status: ShareProjectInvestmentStatus.PREPARED,
+    } as any);
+    await this.emailService.sendMail({
+      to: dto.email,
+      subject: `Investment request pending - ${project.name} (${(investment as any).code})`,
+      html: `<p>Your investment request for <strong>${project.name}</strong> is pending Super Admin approval.</p><p>Investment code: <strong>${(investment as any).code}</strong></p><p>Quantity: ${dto.quantity}<br>Total: ${(investment as any).totalAmount}</p>`,
+    } as any);
+    return investment;
+  }
+
+  async reviewInvestment(uuid: string, reviewerId: number, approved: boolean, reason?: string) {
+    const investment = await this.investmentModel.findOne({ where: { uuid } });
+    if (!investment) throw new NotFoundException('Investment request not found');
+    if (investment.status !== ShareProjectInvestmentStatus.PREPARED) {
+      throw new BadRequestException('Only prepared investment requests can be reviewed');
+    }
+    if (!approved && !reason?.trim()) {
+      throw new BadRequestException('Rejection reason is required');
+    }
+
+    await investment.update({
+      status: approved ? ShareProjectInvestmentStatus.CONFIRMED : ShareProjectInvestmentStatus.CANCELLED,
+    });
+
+    const project = await this.projectModel.findOne({ where: { uuid: investment.projectId } });
+    const projectName = project?.name || 'Share Project';
+
+    let recipientEmail = investment.investorEmail;
+    if (!recipientEmail && investment.investorId) {
+      const investor = await this.shareUserModel.findByPk(investment.investorId);
+      recipientEmail = investor?.email;
+    }
+
+    if (recipientEmail) {
+      try {
+        await this.emailService.sendMail({
+          to: recipientEmail,
+          subject: `Investment ${approved ? 'approved' : 'rejected'} - ${projectName}`,
+          html: `<p>Your investment request <strong>${investment.code || ''}</strong> for <strong>${projectName}</strong> has been ${approved ? 'approved' : 'rejected'}.</p>${!approved && reason ? `<p>Reason: ${reason}</p>` : ''}`,
+        } as any);
+      } catch (mailError) {
+        console.error('Failed to send investment review email:', mailError);
+      }
+    }
+
+    return investment;
   }
 
   async publicList(page = 1, limit = 10) {
