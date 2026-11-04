@@ -227,7 +227,6 @@ import { BankReconciliationStatementModule } from './modules/accounts/bank-recon
 import { ListOfChequeRangeModule } from './modules/accounts/bank-reconciliation/list_of_cheque_range/list_of_cheque_range.module';
 import { ListOfChequeModule } from './modules/accounts/bank-reconciliation/list_of_cheque/list_of_cheque.module';
 
-
 @Module({
   imports: [
     ConfigModule.forRoot({
