@@ -20,6 +20,7 @@ import { SysUserRole } from '@/database/models/system/sys_user_role.model';
 import { SysModules } from '@/database/models/system/sys_module.model';
 import { SysFeatures } from '@/database/models/system/sys_features.model';
 import { SysOrgEntitlement } from '@/database/models/system/sys_org_entitlement.model';
+import { SysUserFeatureOverride } from '@/database/models/system/sys_user_feature_override.model';
 
 import {
   CreateOrganizationWizardDto,
@@ -59,6 +60,8 @@ export class OrganizationsService {
     private readonly featureModel: typeof SysFeatures,
     @InjectModel(SysOrgEntitlement)
     private readonly entitlementModel: typeof SysOrgEntitlement,
+    @InjectModel(SysUserFeatureOverride)
+    private readonly userFeatureOverrideModel: typeof SysUserFeatureOverride,
     @InjectConnection()
     private readonly sequelize: Sequelize,
   ) {}
@@ -77,12 +80,23 @@ export class OrganizationsService {
       attributes: ['id', 'username', 'name', 'email', 'mobile'],
     });
 
+    // Query admin user overrides if admin user exists
+    let overrideMap = new Map<number, SysUserFeatureOverride>();
+    if (adminUser) {
+      const adminOverrides = await this.userFeatureOverrideModel.findAll({
+        where: { userId: adminUser.id },
+      });
+      for (const ov of adminOverrides) {
+        overrideMap.set(Number(ov.featureId), ov);
+      }
+    }
+
     // Get entitled modules & features
     const entitlements = await this.entitlementModel.findAll({
       where: { orgId: org.id, isEnabled: true },
       include: [
         { model: this.moduleModel, as: 'module', attributes: ['id', 'code', 'name'] },
-        { model: this.featureModel, as: 'feature', attributes: ['id', 'code', 'name', 'routePath'] },
+        { model: this.featureModel, as: 'feature', attributes: ['id', 'code', 'name', 'routePath', 'actions'] },
       ],
     });
 
@@ -100,11 +114,18 @@ export class OrganizationsService {
           features: [],
         });
       }
+
+      const ov = overrideMap.get(Number(feat.id));
       moduleMap.get(mod.id)!.features.push({
         featureId: feat.id,
         featureCode: feat.code || `FEAT_${feat.id}`,
         featureName: feat.name,
         routePath: feat.routePath,
+        actions: feat.actions || ['read', 'write', 'delete'],
+        canView: ov ? (ov.canView ?? true) : true,
+        canCreate: ov ? (ov.canCreate ?? true) : true,
+        canEdit: ov ? (ov.canEdit ?? true) : true,
+        canDelete: ov ? (ov.canDelete ?? false) : false,
       });
     }
 
@@ -201,7 +222,7 @@ export class OrganizationsService {
               {
                 model: this.featureModel,
                 as: 'feature',
-                attributes: ['id', 'code', 'name', 'routePath'],
+                attributes: ['id', 'code', 'name', 'routePath', 'actions'],
               },
             ],
           })
@@ -245,6 +266,7 @@ export class OrganizationsService {
         featureCode: feat.code || `FEAT_${feat.id}`,
         featureName: feat.name,
         routePath: feat.routePath,
+        actions: feat.actions || ['read', 'write', 'delete'],
       });
     }
 
@@ -719,6 +741,38 @@ export class OrganizationsService {
         await this.entitlementModel.bulkCreate(recordsToInsert, {
           transaction: tx,
         });
+      }
+
+      // If granular featureOverrides are provided, persist them for the organization's admin user
+      if (dto.featureOverrides !== undefined && Array.isArray(dto.featureOverrides)) {
+        const adminUser = await this.userModel.findOne({
+          where: { orgId: org.id, isOrgAdmin: true },
+          transaction: tx,
+        });
+
+        if (adminUser) {
+          await this.userFeatureOverrideModel.destroy({
+            where: { userId: adminUser.id },
+            force: true,
+            transaction: tx,
+          });
+
+          if (dto.featureOverrides.length > 0) {
+            await this.userFeatureOverrideModel.bulkCreate(
+              dto.featureOverrides.map((fo) => ({
+                userId: adminUser.id,
+                featureId: Number(fo.featureId),
+                isGranted: fo.isGranted ?? true,
+                canView: fo.canView ?? true,
+                canCreate: fo.canCreate ?? true,
+                canEdit: fo.canEdit ?? true,
+                canDelete: fo.canDelete ?? false,
+                canApprove: fo.canApprove ?? false,
+              })),
+              { transaction: tx, ignoreDuplicates: true },
+            );
+          }
+        }
       }
     });
 
