@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
   Query,
   Req,
@@ -14,13 +15,18 @@ import { ConfigService } from '@nestjs/config';
 import {
   ApiBearerAuth,
   ApiOperation,
+  ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
+import { Public } from '../../../common/decorators/public.decorator';
 import { PaginateHelper } from '../../../common/helper/paginate.helper';
+import { InvoiceService } from './invoice.service';
 import { InitiateSubscriptionPaymentDto } from './dto/initiate-subscription-payment.dto';
+import { PublicCheckoutDto } from './dto/public-checkout.dto';
 import { QuerySubscriptionPaymentsDto } from './dto/query-subscription-payments.dto';
 import { SubscriptionPaymentsService } from './subscription-payments.service';
 
@@ -31,11 +37,23 @@ export class SubscriptionPaymentsController {
 
   constructor(
     private readonly subscriptionPaymentsService: SubscriptionPaymentsService,
+    private readonly invoiceService: InvoiceService,
     private readonly configService: ConfigService,
   ) {
     this.frontendUrl =
       this.configService.get<string>('APP_FRONTEND_URL') ||
       'http://localhost:3000';
+  }
+
+  @Post('public-checkout')
+  @Public()
+  @ApiOperation({
+    summary: 'Public self-service tenant registration and checkout (no auth required)',
+    description: 'Creates new Organization + Org Admin account and generates SSLCommerz checkout session or trial activation.',
+  })
+  @ApiResponse({ status: 201, description: 'Organization and checkout session created successfully' })
+  async publicCheckout(@Body() dto: PublicCheckoutDto) {
+    return this.subscriptionPaymentsService.publicCheckout(dto);
   }
 
   @Post('initiate')
@@ -117,5 +135,57 @@ export class SubscriptionPaymentsController {
     const expiredCount =
       await this.subscriptionPaymentsService.expireStalePendingPayments();
     return { success: true, expiredCount };
+  }
+
+  @Get(':tranId/invoice')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiParam({ name: 'tranId', description: 'Transaction ID (e.g. RB_1234567890_ABCDE)' })
+  @ApiQuery({ name: 'format', required: false, enum: ['html', 'pdf'], description: 'Response format. html (default) returns printable page; pdf returns binary PDF.' })
+  @ApiOperation({ summary: 'Download subscription invoice as HTML or PDF' })
+  @ApiResponse({ status: 200, description: 'Invoice HTML or PDF returned' })
+  async getInvoice(
+    @Param('tranId') tranId: string,
+    @Query('format') format: string,
+    @Res() res: Response,
+  ) {
+    const payment = await this.invoiceService.getPaymentForInvoice(tranId);
+    const html = this.invoiceService.generateInvoiceHtml(payment);
+
+    if (format === 'pdf') {
+      // Lazy-load puppeteer to avoid startup cost
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const puppeteer = await import('puppeteer');
+      const browser = await puppeteer.default.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      });
+      try {
+        const page = await browser.newPage();
+        await page.setContent(html, { waitUntil: 'domcontentloaded' });
+        const pdfBuffer = await page.pdf({
+          format: 'A4',
+          printBackground: true,
+          margin: { top: '0', right: '0', bottom: '0', left: '0' },
+        });
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader(
+          'Content-Disposition',
+          `attachment; filename="invoice-${tranId}.pdf"`,
+        );
+        res.send(Buffer.from(pdfBuffer));
+      } finally {
+        await browser.close();
+      }
+      return;
+    }
+
+    // Default: serve the printable HTML page
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader(
+      'Content-Disposition',
+      `inline; filename="invoice-${tranId}.html"`,
+    );
+    res.send(html);
   }
 }
