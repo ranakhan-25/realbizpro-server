@@ -22,9 +22,11 @@ import {
 } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
+import { Public } from '../../../common/decorators/public.decorator';
 import { PaginateHelper } from '../../../common/helper/paginate.helper';
 import { InvoiceService } from './invoice.service';
 import { InitiateSubscriptionPaymentDto } from './dto/initiate-subscription-payment.dto';
+import { PublicCheckoutDto } from './dto/public-checkout.dto';
 import { QuerySubscriptionPaymentsDto } from './dto/query-subscription-payments.dto';
 import { SubscriptionPaymentsService } from './subscription-payments.service';
 
@@ -41,6 +43,17 @@ export class SubscriptionPaymentsController {
     this.frontendUrl =
       this.configService.get<string>('APP_FRONTEND_URL') ||
       'http://localhost:3000';
+  }
+
+  @Post('public-checkout')
+  @Public()
+  @ApiOperation({
+    summary: 'Public self-service tenant registration and checkout (no auth required)',
+    description: 'Creates new Organization + Org Admin account and generates SSLCommerz checkout session or trial activation.',
+  })
+  @ApiResponse({ status: 201, description: 'Organization and checkout session created successfully' })
+  async publicCheckout(@Body() dto: PublicCheckoutDto) {
+    return this.subscriptionPaymentsService.publicCheckout(dto);
   }
 
   @Post('initiate')

@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   Logger,
   NotFoundException,
@@ -7,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/sequelize';
+import * as argon2 from 'argon2';
 import { Op } from 'sequelize';
 import { Sequelize } from 'sequelize-typescript';
 import {
@@ -14,15 +16,18 @@ import {
   SysOrganization,
 } from '../../../database/models/system/sys_organization.model';
 import { SysPlan } from '../../../database/models/system/sys_plan.model';
+import { SysRole } from '../../../database/models/system/sys_role.model';
 import {
   SubscriptionPaymentStatus,
   SysSubscriptionPayment,
 } from '../../../database/models/system/sys_subscription_payment.model';
 import { SysUser } from '../../../database/models/system/sys_user.model';
+import { SysUserRole } from '../../../database/models/system/sys_user_role.model';
 import {
   InitiateSubscriptionPaymentDto,
   PaymentBillingCycle,
 } from './dto/initiate-subscription-payment.dto';
+import { PublicCheckoutDto } from './dto/public-checkout.dto';
 import { QuerySubscriptionPaymentsDto } from './dto/query-subscription-payments.dto';
 import { SslcommerzService } from './sslcommerz.service';
 
@@ -39,6 +44,10 @@ export class SubscriptionPaymentsService implements OnModuleInit {
     private planModel: typeof SysPlan,
     @InjectModel(SysUser)
     private userModel: typeof SysUser,
+    @InjectModel(SysRole)
+    private roleModel: typeof SysRole,
+    @InjectModel(SysUserRole)
+    private userRoleModel: typeof SysUserRole,
     private readonly sslcommerzService: SslcommerzService,
     private readonly configService: ConfigService,
     private readonly sequelize: Sequelize,
@@ -299,6 +308,17 @@ export class SubscriptionPaymentsService implements OnModuleInit {
         await org.save({ transaction: dbTransaction });
       }
 
+      // Activate tenant admin user if pending
+      if (payment.userId) {
+        const user = await this.userModel.findByPk(payment.userId, {
+          transaction: dbTransaction,
+        });
+        if (user && !user.isActive) {
+          user.isActive = true;
+          await user.save({ transaction: dbTransaction });
+        }
+      }
+
       await dbTransaction.commit();
       this.logger.log(
         `Successfully activated subscription for Org ${payment.organizationId} on TXN ${tranId}`,
@@ -408,4 +428,268 @@ export class SubscriptionPaymentsService implements OnModuleInit {
     }
     return updatedCount;
   }
+
+  /**
+   * Public Self-Service Checkout: Creates Org + Org Admin + Subscription Payment
+   * Supports Free Trial (instant activation) or Paid Gateway (SSLCommerz checkout session)
+   */
+  async publicCheckout(dto: PublicCheckoutDto) {
+    const email = dto.adminEmail.trim().toLowerCase();
+    const username = (
+      dto.adminUsername?.trim().toLowerCase() ||
+      email.split('@')[0].replace(/[^a-z0-9_]/g, '_')
+    );
+
+    // 1. Check duplicate user email or username
+    const existingUser = await this.userModel.findOne({
+      where: {
+        [Op.or]: [
+          { email: { [Op.iLike]: email } },
+          { username: { [Op.iLike]: username } },
+        ],
+      },
+    });
+
+    if (existingUser) {
+      if (existingUser.email?.toLowerCase() === email) {
+        throw new ConflictException(
+          `The email "${email}" is already registered. Please log in or use a different email.`,
+        );
+      }
+      throw new ConflictException(
+        `The username "${username}" is already taken. Please choose a different username.`,
+      );
+    }
+
+    // 2. Resolve Plan
+    const isPlanNumeric = !isNaN(Number(dto.planId));
+    const plan = await this.planModel.findOne({
+      where: isPlanNumeric
+        ? { id: Number(dto.planId) }
+        : { uuid: String(dto.planId) },
+    });
+
+    if (!plan) {
+      throw new NotFoundException(`Subscription plan "${dto.planId}" not found`);
+    }
+
+    // 3. Resolve Organization Code
+    let orgCode = dto.organizationCode?.trim().toUpperCase();
+    if (!orgCode) {
+      const sanitizedName = dto.organizationName
+        .trim()
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, '_')
+        .slice(0, 8);
+      const randomCode = Math.random().toString(36).substring(2, 6).toUpperCase();
+      orgCode = `ORG_${sanitizedName}_${randomCode}`;
+    }
+
+    const existingOrg = await this.orgModel.findOne({
+      where: { code: { [Op.iLike]: orgCode } },
+    });
+    if (existingOrg) {
+      orgCode = `${orgCode}_${Math.random().toString(36).substring(2, 5).toUpperCase()}`;
+    }
+
+    // 4. Calculate Price & Duration
+    const billingCycle = dto.billingCycle || PaymentBillingCycle.MONTHLY;
+    let amount = 0;
+    let durationDays = 30;
+
+    switch (billingCycle) {
+      case PaymentBillingCycle.YEARLY:
+        amount = Number(plan.yearlyPrice || plan.monthlyPrice * 12 * 0.8);
+        durationDays = 365;
+        break;
+      case PaymentBillingCycle.HALF_YEARLY:
+        amount = Number(plan.monthlyPrice * 6 * 0.9);
+        durationDays = 180;
+        break;
+      case PaymentBillingCycle.QUARTERLY:
+        amount = Number(plan.monthlyPrice * 3 * 0.95);
+        durationDays = 90;
+        break;
+      case PaymentBillingCycle.MONTHLY:
+      default:
+        amount = Number(plan.monthlyPrice);
+        durationDays = Number(plan.durationDays || 30);
+        break;
+    }
+
+    const isFree =
+      (isNaN(amount) || amount <= 0) &&
+      (Number(plan.monthlyPrice) === 0 || plan.code?.toLowerCase().includes('trial'));
+
+    const now = new Date();
+    const trialDays = plan.trialDays || 14;
+    const initialStatus = isFree ? OrgSubscriptionStatus.TRIAL : OrgSubscriptionStatus.TRIAL;
+    const initialEndDate = new Date(now.getTime() + (isFree ? trialDays : durationDays) * 24 * 60 * 60 * 1000);
+    const trialEndsAt = isFree ? initialEndDate : null;
+
+    const passwordHash = await argon2.hash(dto.adminPassword);
+
+    // 5. Execute Atomic Creation Transaction
+    const { org, adminUser } = await this.sequelize.transaction(async (tx) => {
+      const createdOrg = await this.orgModel.create(
+        {
+          name: dto.organizationName.trim(),
+          code: orgCode,
+          email,
+          phone: dto.adminPhone,
+          address: dto.organizationAddress,
+          planId: plan.id,
+          planUuid: plan.uuid,
+          subscriptionStatus: initialStatus,
+          subscriptionStartDate: now,
+          subscriptionEndDate: initialEndDate,
+          trialEndsAt,
+          maxUsers: plan.maxUsers || 5,
+          maxProjects: plan.maxProjects || 5,
+          maxStorageMb: plan.maxStorageMb || 10240,
+          isLocked: false,
+        } as any,
+        { transaction: tx },
+      );
+
+      const createdUser = await this.userModel.create(
+        {
+          name: dto.adminName.trim(),
+          username,
+          email,
+          password: passwordHash,
+          passwordHash,
+          mobile: dto.adminPhone,
+          designationName: 'Organization Administrator',
+          orgId: createdOrg.id,
+          orgUuid: createdOrg.uuid,
+          isOrgAdmin: true,
+          isActive: isFree ? true : false,
+          isSuperUser: false,
+        } as any,
+        { transaction: tx },
+      );
+
+      // Ensure org-admin role
+      let adminRole = await this.roleModel.findOne({
+        where: { slug: 'org-admin' },
+        transaction: tx,
+      });
+      if (!adminRole) {
+        adminRole = await this.roleModel.create(
+          {
+            name: 'Organization Admin',
+            slug: 'org-admin',
+            description: 'Tenant Administrator',
+            isSystemRole: true,
+          } as any,
+          { transaction: tx },
+        );
+      }
+
+      await this.userRoleModel.create(
+        {
+          userId: createdUser.id,
+          roleId: adminRole.id,
+        } as any,
+        { transaction: tx },
+      );
+
+      if (isFree) {
+        await plan.increment('subscribersCount', { by: 1, transaction: tx });
+      }
+
+      return { org: createdOrg, adminUser: createdUser };
+    });
+
+    // 6. Handle Free Plan / Instant Trial
+    if (isFree) {
+      return {
+        success: true,
+        isFree: true,
+        message: 'Free trial organization successfully created! You can now log in.',
+        organization: {
+          id: org.id,
+          name: org.name,
+          code: org.code,
+        },
+        user: {
+          id: adminUser.id,
+          username: adminUser.username,
+          email: adminUser.email,
+        },
+        loginUrl: '/portal',
+      };
+    }
+
+    // 7. Handle Paid Plan: Create Transaction & SSLCommerz Session
+    if (isNaN(amount) || amount <= 0) {
+      amount = 100.0;
+    }
+
+    const randomSuffix = Math.random().toString(36).substring(2, 7).toUpperCase();
+    const tranId = `RB_${Date.now()}_${randomSuffix}`;
+
+    const paymentRecord = await this.paymentModel.create({
+      organizationId: Number(org.id),
+      planId: Number(plan.id),
+      userId: Number(adminUser.id),
+      tranId,
+      amount,
+      currency: 'BDT',
+      billingCycle,
+      durationDays,
+      status: SubscriptionPaymentStatus.PENDING,
+      paymentInitiatedAt: new Date(),
+    });
+
+    const backendDomain =
+      this.configService.get<string>('BACKEND_DOMAIN') || 'http://localhost';
+    const port = this.configService.get<number>('PORT') || 5002;
+    const apiPrefix = 'realbizpro/api/v1';
+    const callbackBase = `${backendDomain}:${port}/${apiPrefix}/subscription-payments`;
+
+    const sessionRes = await this.sslcommerzService.initiatePaymentSession({
+      totalAmount: amount,
+      currency: 'BDT',
+      tranId,
+      successUrl: `${callbackBase}/success`,
+      failUrl: `${callbackBase}/fail`,
+      cancelUrl: `${callbackBase}/cancel`,
+      ipnUrl: `${callbackBase}/ipn`,
+      customerName: dto.adminName,
+      customerEmail: email,
+      customerPhone: dto.adminPhone || '01700000000',
+      customerAddress: dto.organizationAddress || 'Dhaka, Bangladesh',
+      customerCity: 'Dhaka',
+      productName: `${plan.name} (${billingCycle})`,
+      productCategory: 'Subscription',
+    });
+
+    if (sessionRes.status !== 'SUCCESS' || !sessionRes.gatewayUrl) {
+      paymentRecord.status = SubscriptionPaymentStatus.FAILED;
+      paymentRecord.gatewayResponse = sessionRes;
+      await paymentRecord.save();
+      throw new BadRequestException(
+        sessionRes.failedreason || 'Failed to initiate gateway payment session',
+      );
+    }
+
+    return {
+      success: true,
+      isFree: false,
+      gatewayUrl: sessionRes.gatewayUrl,
+      tranId,
+      amount,
+      currency: 'BDT',
+      planName: plan.name,
+      billingCycle,
+      organization: {
+        id: org.id,
+        name: org.name,
+        code: org.code,
+      },
+    };
+  }
 }
+

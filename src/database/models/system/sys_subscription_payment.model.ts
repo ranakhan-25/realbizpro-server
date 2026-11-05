@@ -10,6 +10,8 @@ import { SysOrganization } from './sys_organization.model';
 import { SysPlan } from './sys_plan.model';
 import { SysUser } from './sys_user.model';
 
+import type { SysSubscriptionPaymentAttributes, SysSubscriptionPaymentCreationAttributes } from '../../types/syssubscriptionpayment.types';
+
 export enum SubscriptionPaymentStatus {
   PENDING = 'PENDING',
   VALID = 'VALID',
@@ -31,7 +33,7 @@ export enum SubscriptionPaymentStatus {
     { fields: ['status'] },
   ],
 })
-export class SysSubscriptionPayment extends BaseModel {
+export class SysSubscriptionPayment extends BaseModel<SysSubscriptionPaymentAttributes, SysSubscriptionPaymentCreationAttributes> {
   @ForeignKey(() => SysOrganization)
   @Column({
     type: DataType.BIGINT,
