@@ -38,6 +38,10 @@ export class EmailService {
     emailOptions: EmailOptions,
   ): Promise<boolean> {
     try {
+      this.logger.log(
+        `[EmailService] Sending email to: ${Array.isArray(emailOptions.to) ? emailOptions.to.join(', ') : emailOptions.to} | Subject: "${emailOptions.subject}"`,
+      );
+
       const mailOptions: ISendMailOptions = {
         to: emailOptions.to,
         subject: emailOptions.subject,
@@ -52,13 +56,13 @@ export class EmailService {
         mailOptions,
       );
       this.logger.log(
-        `Email sent successfully to: ${emailOptions.to}`,
+        `[EmailService] Email delivered successfully to: ${emailOptions.to}`,
       );
       return true;
     } catch (error) {
       this.logger.error(
-        `Failed to send email to ${emailOptions.to}:`,
-        error,
+        `[EmailService] Failed to send email to ${emailOptions.to}: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
       );
       return false;
     }
