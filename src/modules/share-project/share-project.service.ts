@@ -20,6 +20,7 @@ import {
   PublicCreateShareProjectDto,
   PublicInvestmentRequestDto,
 } from './dto/share-project.dto';
+import { BANGLADESH_DIVISIONS, ALL_BANGLADESH_DISTRICTS } from '../locations/locations.data';
 import { EmailService } from '../email/email.service';
 import * as argon2 from 'argon2';
 
@@ -254,13 +255,17 @@ export class ShareProjectService {
     return { investments: rows, shares: rows, payments: [], profits: [], reports: [] };
   }
 
-  async adminInvestments(page = 1, limit = 10, projectUuid?: string) {
+  async adminInvestments(page = 1, limit = 10, projectUuid?: string, trash = false) {
     const where: any = {};
     if (projectUuid) {
       where.projectId = projectUuid;
     }
+    if (trash) {
+      where.deletedAt = { [Op.ne]: null };
+    }
     const { rows, count } = await this.investmentModel.findAndCountAll({
       where,
+      paranoid: !trash,
       limit,
       offset: (page - 1) * limit,
       order: [['createdAt', 'DESC']],
@@ -270,10 +275,12 @@ export class ShareProjectService {
     const projects = projectUuids.length ? await this.projectModel.findAll({
       where: { uuid: { [Op.in]: projectUuids } },
       attributes: ['uuid', 'name', 'location', 'status', 'thumbnailUrl'],
+      paranoid: false,
     }) : [];
     const investors = investorIds.length ? await this.shareUserModel.findAll({
       where: { id: { [Op.in]: investorIds } },
       attributes: ['id', 'uuid', 'name', 'email', 'phone'],
+      paranoid: false,
     }) : [];
     const projectByUuid = new Map(projects.map((project) => [project.uuid, project]));
     const investorById = new Map(investors.map((investor) => [investor.id, investor]));
@@ -294,6 +301,7 @@ export class ShareProjectService {
       totalAmount: row.totalAmount,
       status: row.status,
       createdAt: row.createdAt,
+      deletedAt: row.deletedAt,
     }));
     return { data, meta: { total: count, page, limit, totalPages: Math.ceil(count / limit) } };
   }
@@ -387,13 +395,49 @@ export class ShareProjectService {
       await this.historyModel.create({ projectId: uuid, fromStatus, toStatus: nextStatus, changedBy: reviewerId, note: reason || undefined }, { transaction });
       return project.reload({ transaction });
     });
-    if (project.creatorEmail) {
-      const statusLabel = nextStatus === ShareProjectStatus.PUBLISHED ? 'published' : nextStatus === ShareProjectStatus.APPROVED ? 'approved' : nextStatus === ShareProjectStatus.REJECTED ? 'rejected' : nextStatus;
-      await this.emailService.sendMail({
-        to: project.creatorEmail,
-        subject: `Project ${statusLabel} - ${project.name}`,
-        html: `<p>Your project <strong>${project.name}</strong> (${project.code || updated.uuid}) has been <strong>${statusLabel}</strong>.</p>${reason ? `<p>Reason: ${reason}</p>` : ''}`,
-      } as any);
+
+    // Notify Project Creator / Owner via Email
+    let recipientEmail = project.creatorEmail;
+    let recipientName = project.creatorName;
+    if (!recipientEmail && project.ownerId) {
+      const owner = await this.shareUserModel.findByPk(project.ownerId);
+      if (owner) {
+        recipientEmail = owner.email;
+        recipientName = recipientName || owner.name;
+      }
+    }
+
+    if (recipientEmail) {
+      try {
+        const statusLabel = nextStatus === ShareProjectStatus.PUBLISHED ? 'Published' : nextStatus === ShareProjectStatus.APPROVED ? 'Approved' : nextStatus === ShareProjectStatus.REJECTED ? 'Rejected' : nextStatus;
+        const statusColor = nextStatus === ShareProjectStatus.APPROVED || nextStatus === ShareProjectStatus.PUBLISHED ? '#059669' : nextStatus === ShareProjectStatus.REJECTED ? '#e11d48' : '#475569';
+
+        await this.emailService.sendMail({
+          to: recipientEmail,
+          subject: `[RealBiz Pro] Project ${statusLabel}: ${project.name}`,
+          html: `
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
+              <div style="border-bottom: 2px solid #10b981; padding-bottom: 16px; margin-bottom: 20px;">
+                <h2 style="color: #0f172a; margin: 0; font-size: 20px;">RealBiz Pro - Project Status Update</h2>
+              </div>
+              <p style="color: #334155; font-size: 15px;">Hello <strong>${recipientName || 'Project Creator'}</strong>,</p>
+              <p style="color: #334155; font-size: 14px; line-height: 1.6;">
+                Your project <strong>${project.name}</strong> has been updated to:
+              </p>
+              <div style="background: #f8fafc; border-left: 4px solid ${statusColor}; padding: 16px; border-radius: 6px; margin: 20px 0;">
+                <p style="margin: 0 0 8px 0; font-size: 14px; color: #64748b;">Status: <strong style="color: ${statusColor}; font-size: 16px; text-transform: uppercase;">${statusLabel}</strong></p>
+                <p style="margin: 0 0 8px 0; font-size: 14px; color: #64748b;">Project Code: <strong style="color: #0f172a;">${project.code || updated.uuid}</strong></p>
+                ${reason ? `<p style="margin: 8px 0 0 0; font-size: 14px; color: #e11d48;"><strong>Decision Note / Reason:</strong> ${reason}</p>` : ''}
+              </div>
+              <p style="color: #64748b; font-size: 13px; margin-top: 24px; border-top: 1px solid #e2e8f0; padding-top: 16px;">
+                Thank you for choosing RealBiz Pro. If you have any questions, please contact our support team.
+              </p>
+            </div>
+          `,
+        });
+      } catch (mailError) {
+        console.error('Failed to send project status email:', mailError);
+      }
     }
     return updated;
   }
@@ -474,11 +518,33 @@ export class ShareProjectService {
       await transaction.rollback();
       throw error;
     }
-    await this.emailService.sendMail({
-      to: dto.creatorEmail,
-      subject: `Project submitted - ${project.name} (${(project as any).code})`,
-      html: `<p>Your project <strong>${project.name}</strong> has been submitted and is pending Super Admin review.</p><p>Project code: <strong>${(project as any).code}</strong></p>`,
-    } as any);
+    try {
+      await this.emailService.sendMail({
+        to: dto.creatorEmail,
+        subject: `[RealBiz Pro] Project Submitted: ${project.name} (${(project as any).code})`,
+        html: `
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
+            <div style="border-bottom: 2px solid #10b981; padding-bottom: 16px; margin-bottom: 20px;">
+              <h2 style="color: #0f172a; margin: 0; font-size: 20px;">Project Submission Received</h2>
+            </div>
+            <p style="color: #334155; font-size: 15px;">Hello <strong>${dto.creatorName}</strong>,</p>
+            <p style="color: #334155; font-size: 14px; line-height: 1.6;">
+              Your project <strong>${project.name}</strong> has been successfully submitted and is currently pending review by Super Admin.
+            </p>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 8px; margin: 20px 0;">
+              <p style="margin: 0 0 6px 0; font-size: 14px; color: #64748b;">Project Code: <strong style="color: #0f172a;">${(project as any).code}</strong></p>
+              <p style="margin: 0 0 6px 0; font-size: 14px; color: #64748b;">Total Investment Target: <strong style="color: #059669;">৳${Number(dto.totalInvestmentAmount).toLocaleString()}</strong></p>
+              <p style="margin: 0; font-size: 14px; color: #64748b;">Total Shares: <strong style="color: #0f172a;">${dto.totalShares}</strong></p>
+            </div>
+            <p style="color: #64748b; font-size: 13px; margin-top: 24px; border-top: 1px solid #e2e8f0; padding-top: 16px;">
+              You will receive an email notification as soon as your project is reviewed and approved.
+            </p>
+          </div>
+        `,
+      });
+    } catch (createMailErr) {
+      console.error('Failed to send project submission email:', createMailErr);
+    }
     return project;
   }
 
@@ -511,11 +577,89 @@ export class ShareProjectService {
       totalAmount: (shareValue + serviceFee).toFixed(2),
       status: ShareProjectInvestmentStatus.PREPARED,
     } as any);
-    await this.emailService.sendMail({
-      to: dto.email,
-      subject: `Investment request pending - ${project.name} (${(investment as any).code})`,
-      html: `<p>Your investment request for <strong>${project.name}</strong> is pending Super Admin approval.</p><p>Investment code: <strong>${(investment as any).code}</strong></p><p>Quantity: ${dto.quantity}<br>Total: ${(investment as any).totalAmount}</p>`,
-    } as any);
+
+    // 1. Send confirmation email to investor
+    try {
+      const sharePriceNum = Number(sharePrice);
+      const totalAmountNum = shareValue + serviceFee;
+
+      await this.emailService.sendMail({
+        to: dto.email,
+        subject: `[RealBiz Pro] Investment Request Received - ${project.name} (${(investment as any).code})`,
+        html: `
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
+            <div style="border-bottom: 2px solid #10b981; padding-bottom: 16px; margin-bottom: 20px;">
+              <h2 style="color: #0f172a; margin: 0; font-size: 20px;">Investment Request Confirmation</h2>
+            </div>
+            <p style="color: #334155; font-size: 15px;">Dear <strong>${dto.name}</strong>,</p>
+            <p style="color: #334155; font-size: 14px; line-height: 1.6;">
+              Thank you for submitting your investment request for <strong>${project.name}</strong>. Your request has been received and is currently pending review by Super Admin.
+            </p>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 18px; border-radius: 8px; margin: 20px 0;">
+              <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                <tr>
+                  <td style="padding: 6px 0; color: #64748b;">Investment Tracking Code:</td>
+                  <td style="padding: 6px 0; font-weight: bold; color: #0f172a; text-align: right;">${(investment as any).code}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #64748b;">Project:</td>
+                  <td style="padding: 6px 0; font-weight: bold; color: #0f172a; text-align: right;">${project.name}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #64748b;">Quantity (Shares):</td>
+                  <td style="padding: 6px 0; font-weight: bold; color: #0f172a; text-align: right;">${dto.quantity}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #64748b;">Price Per Share:</td>
+                  <td style="padding: 6px 0; font-weight: bold; color: #0f172a; text-align: right;">৳${sharePriceNum.toLocaleString()}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #64748b;">Total Amount:</td>
+                  <td style="padding: 6px 0; font-weight: bold; color: #059669; text-align: right; font-size: 16px;">৳${totalAmountNum.toLocaleString()}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #64748b;">Status:</td>
+                  <td style="padding: 6px 0; font-weight: bold; color: #d97706; text-align: right;">Pending Admin Approval</td>
+                </tr>
+              </table>
+            </div>
+            <p style="color: #334155; font-size: 14px; line-height: 1.6;">
+              You can track your investments anytime without login using your email (<strong>${dto.email}</strong>) or tracking code on our portal.
+            </p>
+            <p style="color: #64748b; font-size: 13px; margin-top: 24px; border-top: 1px solid #e2e8f0; padding-top: 16px;">
+              Regards,<br><strong>RealBiz Pro Investment Portal</strong>
+            </p>
+          </div>
+        `,
+      });
+    } catch (mailError) {
+      console.error('Failed to send investment request confirmation email to investor:', mailError);
+    }
+
+    // 2. Also notify project creator of new investment request
+    try {
+      let creatorEmail = project.creatorEmail;
+      if (!creatorEmail && project.ownerId) {
+        const owner = await this.shareUserModel.findByPk(project.ownerId);
+        creatorEmail = owner?.email;
+      }
+      if (creatorEmail) {
+        await this.emailService.sendMail({
+          to: creatorEmail,
+          subject: `[RealBiz Pro] New Investment Request for ${project.name}`,
+          html: `
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
+              <h3 style="color: #0f172a; margin-top: 0;">New Investment Received</h3>
+              <p style="color: #334155; font-size: 14px;">An investor (<strong>${dto.name}</strong>, ${dto.email}) has requested <strong>${dto.quantity} shares</strong> (Total: ৳${(shareValue + serviceFee).toLocaleString()}) for your project <strong>${project.name}</strong>.</p>
+              <p style="color: #64748b; font-size: 13px;">Investment Code: <strong>${(investment as any).code}</strong></p>
+            </div>
+          `,
+        });
+      }
+    } catch (creatorMailErr) {
+      console.error('Failed to notify project creator of investment:', creatorMailErr);
+    }
+
     return investment;
   }
 
@@ -542,15 +686,87 @@ export class ShareProjectService {
       recipientEmail = investor?.email;
     }
 
+    // Send review email to investor
     if (recipientEmail) {
       try {
+        const statusTitle = approved ? 'Investment Approved & Confirmed' : 'Investment Request Rejected';
+        const statusColor = approved ? '#059669' : '#e11d48';
+
         await this.emailService.sendMail({
           to: recipientEmail,
-          subject: `Investment ${approved ? 'approved' : 'rejected'} - ${projectName}`,
-          html: `<p>Your investment request <strong>${investment.code || ''}</strong> for <strong>${projectName}</strong> has been ${approved ? 'approved' : 'rejected'}.</p>${!approved && reason ? `<p>Reason: ${reason}</p>` : ''}`,
-        } as any);
+          subject: `[RealBiz Pro] ${statusTitle} - ${projectName} (${investment.code || ''})`,
+          html: `
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
+              <div style="border-bottom: 2px solid ${statusColor}; padding-bottom: 16px; margin-bottom: 20px;">
+                <h2 style="color: #0f172a; margin: 0; font-size: 20px;">${statusTitle}</h2>
+              </div>
+              <p style="color: #334155; font-size: 15px;">Dear <strong>${investment.investorName || 'Investor'}</strong>,</p>
+              <p style="color: #334155; font-size: 14px; line-height: 1.6;">
+                Your investment request for <strong>${projectName}</strong> has been officially <strong>${approved ? 'APPROVED & CONFIRMED' : 'REJECTED'}</strong> by Super Admin.
+              </p>
+              <div style="background: #f8fafc; border-left: 4px solid ${statusColor}; padding: 18px; border-radius: 8px; margin: 20px 0;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                  <tr>
+                    <td style="padding: 6px 0; color: #64748b;">Investment Code:</td>
+                    <td style="padding: 6px 0; font-weight: bold; color: #0f172a; text-align: right;">${investment.code || ''}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px 0; color: #64748b;">Project:</td>
+                    <td style="padding: 6px 0; font-weight: bold; color: #0f172a; text-align: right;">${projectName}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px 0; color: #64748b;">Shares Quantity:</td>
+                    <td style="padding: 6px 0; font-weight: bold; color: #0f172a; text-align: right;">${investment.quantity}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px 0; color: #64748b;">Total Amount:</td>
+                    <td style="padding: 6px 0; font-weight: bold; color: #059669; text-align: right; font-size: 16px;">৳${Number(investment.totalAmount).toLocaleString()}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px 0; color: #64748b;">Status:</td>
+                    <td style="padding: 6px 0; font-weight: bold; color: ${statusColor}; text-align: right; text-transform: uppercase;">${approved ? 'Confirmed' : 'Cancelled'}</td>
+                  </tr>
+                  ${!approved && reason ? `
+                  <tr>
+                    <td style="padding: 8px 0 0 0; color: #e11d48;" colspan="2"><strong>Decision Note / Reason:</strong> ${reason}</td>
+                  </tr>
+                  ` : ''}
+                </table>
+              </div>
+              <p style="color: #64748b; font-size: 13px; margin-top: 24px; border-top: 1px solid #e2e8f0; padding-top: 16px;">
+                Thank you for investing with RealBiz Pro. You can view your portfolio anytime on our portal.
+              </p>
+            </div>
+          `,
+        });
       } catch (mailError) {
-        console.error('Failed to send investment review email:', mailError);
+        console.error('Failed to send investment review email to investor:', mailError);
+      }
+    }
+
+    // Also notify project creator when investment is approved
+    if (approved && project) {
+      try {
+        let creatorEmail = project.creatorEmail;
+        if (!creatorEmail && project.ownerId) {
+          const owner = await this.shareUserModel.findByPk(project.ownerId);
+          creatorEmail = owner?.email;
+        }
+        if (creatorEmail) {
+          await this.emailService.sendMail({
+            to: creatorEmail,
+            subject: `[RealBiz Pro] Investment Confirmed for ${projectName}`,
+            html: `
+              <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
+                <h3 style="color: #059669; margin-top: 0;">Investment Confirmed!</h3>
+                <p style="color: #334155; font-size: 14px;">An investment of <strong>${investment.quantity} shares</strong> (Total: ৳${Number(investment.totalAmount).toLocaleString()}) for your project <strong>${projectName}</strong> has been approved by Super Admin.</p>
+                <p style="color: #64748b; font-size: 13px;">Investment Code: <strong>${investment.code || ''}</strong></p>
+              </div>
+            `,
+          });
+        }
+      } catch (creatorMailErr) {
+        console.error('Failed to notify project creator of approved investment:', creatorMailErr);
       }
     }
 
@@ -579,6 +795,76 @@ export class ShareProjectService {
     return item;
   }
 
+  async publicPortfolio(query?: { email?: string; phone?: string; code?: string }) {
+    const where: any = {};
+    const orConditions: any[] = [];
+    const searchVal = (query?.email || query?.phone || query?.code || '').trim();
+
+    if (searchVal) {
+      orConditions.push({ code: searchVal });
+      orConditions.push({ investorEmail: searchVal });
+      orConditions.push({ investorPhone: searchVal });
+
+      const matchedUsers = await this.shareUserModel.findAll({
+        where: {
+          [Op.or]: [
+            { email: searchVal },
+            { phone: searchVal },
+          ],
+        },
+        attributes: ['id'],
+      });
+      if (matchedUsers.length > 0) {
+        orConditions.push({ investorId: { [Op.in]: matchedUsers.map((u) => u.id) } });
+      }
+    }
+
+    if (orConditions.length > 0) {
+      where[Op.or] = orConditions;
+    }
+
+    const investments = await this.investmentModel.findAll({
+      where,
+      limit: 100,
+      order: [['createdAt', 'DESC']],
+    });
+
+    const projectUuids = [...new Set(investments.map((row) => row.projectId))];
+    const projects = projectUuids.length ? await this.projectModel.findAll({
+      where: { uuid: { [Op.in]: projectUuids } },
+      attributes: ['uuid', 'name', 'location', 'status', 'thumbnailUrl', 'pricePerShare'],
+    }) : [];
+    const projectByUuid = new Map(projects.map((project) => [project.uuid, project]));
+
+    const rows = investments.map((row) => {
+      const project = projectByUuid.get(row.projectId);
+      return {
+        uuid: row.uuid,
+        code: row.code,
+        projectUuid: row.projectId,
+        projectName: project?.name || '',
+        location: project?.location || '',
+        thumbnailUrl: project?.thumbnailUrl || '',
+        investorName: row.investorName || '',
+        quantity: row.quantity,
+        sharePrice: row.sharePrice,
+        shareValue: row.shareValue,
+        serviceFee: row.serviceFee,
+        totalAmount: row.totalAmount,
+        status: row.status,
+        createdAt: row.createdAt,
+      };
+    });
+
+    return {
+      investments: rows,
+      shares: rows.filter((r) => r.status === ShareProjectInvestmentStatus.CONFIRMED || r.status === ShareProjectInvestmentStatus.PREPARED),
+      payments: [],
+      profits: [],
+      reports: [],
+    };
+  }
+
   async categoryList(activeOnly = false) {
     const where: any = activeOnly ? { isActive: true } : {};
     return this.categoryModel.findAll({ where, order: [['name', 'ASC']] });
@@ -595,5 +881,43 @@ export class ShareProjectService {
     if (!category) throw new NotFoundException('Share Project category not found');
     await category.destroy();
     return { message: 'Category deleted successfully' };
+  }
+
+  async softDeleteInvestment(uuid: string) {
+    const investment = await this.investmentModel.findOne({ where: { uuid } });
+    if (!investment) throw new NotFoundException('Investment not found');
+    await investment.destroy();
+    return { message: 'Investment soft-deleted successfully' };
+  }
+
+  async restoreInvestment(uuid: string) {
+    const investment = await this.investmentModel.findOne({ where: { uuid }, paranoid: false });
+    if (!investment) throw new NotFoundException('Investment not found');
+    await investment.restore();
+    return { message: 'Investment restored successfully' };
+  }
+
+  publicLocations(search?: string) {
+    if (!search?.trim()) {
+      return {
+        totalDivisions: BANGLADESH_DIVISIONS.length,
+        totalDistricts: ALL_BANGLADESH_DISTRICTS.length,
+        divisions: BANGLADESH_DIVISIONS,
+        districts: ALL_BANGLADESH_DISTRICTS,
+      };
+    }
+    const term = search.trim().toLowerCase();
+    const filteredDistricts = ALL_BANGLADESH_DISTRICTS.filter(
+      (d) =>
+        d.name.toLowerCase().includes(term) ||
+        d.bnName.toLowerCase().includes(term) ||
+        d.divisionName.toLowerCase().includes(term),
+    );
+    return {
+      totalDivisions: BANGLADESH_DIVISIONS.length,
+      totalDistricts: filteredDistricts.length,
+      divisions: BANGLADESH_DIVISIONS,
+      districts: filteredDistricts,
+    };
   }
 }
