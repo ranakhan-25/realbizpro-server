@@ -8,6 +8,7 @@ import { SysUser } from '../../../database/models/system/sys_user.model';
 import { SslcommerzService } from './sslcommerz.service';
 import { SubscriptionPaymentsController } from './subscription-payments.controller';
 import { SubscriptionPaymentsService } from './subscription-payments.service';
+import { InvoiceService } from './invoice.service';
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { SubscriptionPaymentsService } from './subscription-payments.service';
     ]),
   ],
   controllers: [SubscriptionPaymentsController],
-  providers: [SubscriptionPaymentsService, SslcommerzService],
-  exports: [SubscriptionPaymentsService, SslcommerzService],
+  providers: [SubscriptionPaymentsService, SslcommerzService, InvoiceService],
+  exports: [SubscriptionPaymentsService, SslcommerzService, InvoiceService],
 })
 export class SubscriptionPaymentsModule {}
