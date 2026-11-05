@@ -135,6 +135,50 @@ export function convertAdminMenuToMenuNode(
   };
 }
 
+export function structureDelimitedMenuNodes(nodes: MenuNode[]): MenuNode[] {
+  const result: MenuNode[] = [];
+  const parentMap = new Map<string, MenuNode>();
+
+  for (const node of nodes) {
+    if (node.children && node.children.length > 0) {
+      result.push({
+        ...node,
+        children: structureDelimitedMenuNodes(node.children),
+      });
+      continue;
+    }
+
+    if (node.label.includes('|') || node.label.includes('>') || node.label.includes('::')) {
+      const parts = node.label.split(/\s*\|\s*|\s*>\s*|\s*::\s*/).filter(Boolean);
+      if (parts.length > 1) {
+        const parentTitle = parts[0];
+        const childTitle = parts.slice(1).join(' - ');
+        let parentNode = parentMap.get(parentTitle);
+        if (!parentNode) {
+          const parentSlug = slugify(parentTitle) || 'group';
+          parentNode = {
+            label: parentTitle,
+            slug: parentSlug,
+            path: parentSlug,
+            children: [],
+          };
+          parentMap.set(parentTitle, parentNode);
+          result.push(parentNode);
+        }
+        parentNode.children!.push({
+          ...node,
+          label: childTitle,
+        });
+        continue;
+      }
+    }
+
+    result.push(node);
+  }
+
+  return result;
+}
+
 export function pruneMenuTree(nodes: MenuNode[], allowedRoutes: string[]): MenuNode[] {
   if (!allowedRoutes || allowedRoutes.includes('*')) return nodes;
   const allowedSet = new Set(allowedRoutes.map((r) => r.toLowerCase().replace(/^\/+|\/+$/g, '')));
@@ -339,6 +383,7 @@ export class UserAccessService {
         let tree = adminMenus.map((item) =>
           convertAdminMenuToMenuNode(item, moduleKey),
         );
+        tree = structureDelimitedMenuNodes(tree);
         if (!allowedRoutes.includes('*')) {
           tree = pruneMenuTree(tree, allowedRoutes);
         }

@@ -49,6 +49,7 @@ import { JobLogModule } from './modules/system/job-log/job-log.module';
 import { CompanyModule } from './modules/system/sys-company/sys-company.module';
 import { PlansModule } from './modules/system/plans/plans.module';
 import { OrganizationsModule } from './modules/system/organizations/organizations.module';
+import { SubscriptionPaymentsModule } from './modules/system/subscription-payments/subscription-payments.module';
 import { TenantCmsModule } from './modules/system/cms/tenant-cms.module';
 import { UserAccessModule } from './modules/system/access/user-access.module';
 import { AdminDashboardModule } from './modules/system/dashboard/admin-dashboard.module';
@@ -60,6 +61,7 @@ import { HrmMobileAuthFaceModule } from './modules/user-management/hrm-mobile-au
 import { FeaturesModule } from './modules/user-management/features/feature.module';
 import { RolesModule } from './modules/user-management/roles/roles.module';
 import { PermissionsModule } from './modules/user-management/permissions/permissions.module';
+import { CustomPermissionsModule } from './modules/user-management/custom-permissions/custom-permissions.module';
 import { EmailModule } from './modules/email/email.module';
 import { ModulesModule } from './modules/modules/modules.module';
 import { MenuModule } from './modules/menu/menu.module';
@@ -294,6 +296,7 @@ import { ListOfChequeModule } from './modules/accounts/bank-reconciliation/list_
     ModulesModule,
     FeaturesModule,
     PermissionsModule,
+    CustomPermissionsModule,
     RolesModule,
     UsersModule,
     MenuModule,
@@ -332,6 +335,7 @@ import { ListOfChequeModule } from './modules/accounts/bank-reconciliation/list_
     CompanyModule,
     PlansModule,
     OrganizationsModule,
+    SubscriptionPaymentsModule,
     TenantCmsModule,
     UserAccessModule,
     AdminDashboardModule,
