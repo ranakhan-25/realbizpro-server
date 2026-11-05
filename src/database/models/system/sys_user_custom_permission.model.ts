@@ -9,6 +9,8 @@ import { BaseModel } from '../../base.model';
 import { SysUser } from './sys_user.model';
 import { SysCustomPermission } from './sys_custom_permission.model';
 
+import type { SysUserCustomPermissionAttributes, SysUserCustomPermissionCreationAttributes } from '../../types/sysusercustompermission.types';
+
 @Table({
   tableName: 'sys_user_custom_permissions',
   timestamps: true,
@@ -20,7 +22,7 @@ import { SysCustomPermission } from './sys_custom_permission.model';
     { fields: ['custom_permission_id'] },
   ],
 })
-export class SysUserCustomPermission extends BaseModel {
+export class SysUserCustomPermission extends BaseModel<SysUserCustomPermissionAttributes, SysUserCustomPermissionCreationAttributes> {
   @ForeignKey(() => SysUser)
   @Column({
     type: DataType.BIGINT,
