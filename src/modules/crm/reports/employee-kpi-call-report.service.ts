@@ -40,7 +40,11 @@ export class EmployeeKpiCallReportService {
     if (periodFrom || periodTo) activityWhere.activityDate = { ...(periodFrom ? { [Op.gte]: periodFrom } : {}), ...(periodTo ? { [Op.lte]: periodTo } : {}) };
     const activities = await this.activities.findAll({ where: activityWhere, attributes: ['id', 'activityType', 'activityDate', 'conductedBy', 'createdBy'] });
     const userKeys = [...new Set(activities.flatMap(item => [item.conductedBy, item.createdBy]).filter(Boolean))] as string[];
-    const matchedUsers = userKeys.length ? await this.users.findAll({ where: { [Op.or]: [{ uuid: { [Op.in]: userKeys } }, { userCode: { [Op.in]: userKeys } }, { name: { [Op.in]: userKeys } }] }, attributes: ['uuid', 'userCode', 'name'] }) : [];
+    const isUuid = (val: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
+    const uuidKeys = userKeys.filter(isUuid);
+    const userOrCond: any[] = [{ userCode: { [Op.in]: userKeys } }, { name: { [Op.in]: userKeys } }];
+    if (uuidKeys.length) userOrCond.unshift({ uuid: { [Op.in]: uuidKeys } });
+    const matchedUsers = userKeys.length ? await this.users.findAll({ where: { [Op.or]: userOrCond }, attributes: ['uuid', 'userCode', 'name'] }) : [];
     const allUsers = [...matchedUsers, ...kpis.map(kpi => kpi.user).filter((value): value is SysUser => !!value)];
     const keyMap = new Map<string, string>();
     for (const user of allUsers) { keyMap.set(user.uuid, user.uuid); if (user.userCode) keyMap.set(user.userCode, user.uuid); keyMap.set(user.name, user.uuid); }

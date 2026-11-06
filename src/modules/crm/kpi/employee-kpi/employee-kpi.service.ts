@@ -137,6 +137,19 @@ export class EmployeeKpiService {
     const data = kpi.toJSON() as any;
     const toDate = new Date(`${data.toDate}T23:59:59`);
     const leftDays = Math.max(0, Math.ceil((toDate.getTime() - Date.now()) / 86400000));
+    data.created_at = data.created_at ?? data.createdAt;
+    data.updated_at = data.updated_at ?? data.updatedAt;
+    data.deleted_at = data.deleted_at ?? data.deletedAt ?? null;
+    delete data.createdAt;
+    delete data.updatedAt;
+    delete data.deletedAt;
+    data.created_by = data.createdBy ?? data.created_by ?? null;
+    data.updated_by = data.updatedBy ?? data.updated_by ?? null;
+    data.deleted_by = data.deletedBy ?? data.deleted_by ?? null;
+    delete data.addedBy;
+    delete data.createdBy;
+    delete data.updatedBy;
+    delete data.deletedBy;
     return {
       ...data,
       target1: Number(data.target1), target2: Number(data.target2), target3: Number(data.target3),

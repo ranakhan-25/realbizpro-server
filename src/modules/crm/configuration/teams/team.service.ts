@@ -118,7 +118,19 @@ export class TeamService {
         : null;
       data.leader = users.get(data.leaderUuid) ?? null;
       delete data.leaderId;
-      data.addedBy = users.get(data.createdBy ?? '') ?? (data.createdBy ? { uuid: null, name: data.createdBy } : null);
+      data.created_at = data.created_at ?? data.createdAt;
+      data.updated_at = data.updated_at ?? data.updatedAt;
+      data.deleted_at = data.deleted_at ?? data.deletedAt ?? null;
+      delete data.createdAt;
+      delete data.updatedAt;
+      delete data.deletedAt;
+      data.created_by = data.createdBy ?? data.created_by ?? null;
+      data.updated_by = data.updatedBy ?? data.updated_by ?? null;
+      data.deleted_by = data.deletedBy ?? data.deleted_by ?? null;
+      delete data.addedBy;
+      delete data.createdBy;
+      delete data.updatedBy;
+      delete data.deletedBy;
       if (Array.isArray(data.members)) {
         data.members = data.members.map((member: Record<string, any>) => {
           delete member.id;

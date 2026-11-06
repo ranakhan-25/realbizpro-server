@@ -82,11 +82,26 @@ export class LeadService {
     const { rows, count } = await this.leads.findAndCountAll({ where, include, limit, offset: (page - 1) * limit, order: [['createdAt', 'DESC']], distinct: true, paranoid: !query.withDeleted });
     const users = await this.userMap(rows.flatMap(row => [row.assignedTo, row.creditOfficerId]));
     return {
-      data: rows.map(row => ({
-        ...row.toJSON(),
-        assignedUser: users.get(row.assignedTo ?? '') ?? null,
-        creditOfficer: users.get(row.creditOfficerId ?? '') ?? null,
-      })),
+      data: rows.map(row => {
+        const item = row.toJSON() as any;
+        item.created_at = item.created_at ?? item.createdAt;
+        item.updated_at = item.updated_at ?? item.updatedAt;
+        item.deleted_at = item.deleted_at ?? item.deletedAt ?? null;
+        delete item.createdAt;
+        delete item.updatedAt;
+        delete item.deletedAt;
+        item.created_by = item.createdBy ?? item.created_by ?? null;
+        item.updated_by = item.updatedBy ?? item.updated_by ?? null;
+        item.deleted_by = item.deletedBy ?? item.deleted_by ?? null;
+        delete item.createdBy;
+        delete item.updatedBy;
+        delete item.deletedBy;
+        return {
+          ...item,
+          assignedUser: users.get(row.assignedTo ?? '') ?? null,
+          creditOfficer: users.get(row.creditOfficerId ?? '') ?? null,
+        };
+      }),
       meta: { page, limit, total: count, totalPages: Math.ceil(count / limit) || 1 },
     };
   }
@@ -95,8 +110,21 @@ export class LeadService {
     const row = await this.leads.findOne({ where: { uuid }, include: ['category', 'stage', 'source', 'campaign', 'profession', 'offer', 'area', 'priceRange', 'activities', 'attachments', 'callAssignments', 'propertyInterests', 'requirements', 'transferLogs'] });
     if (!row) throw new NotFoundException(`Lead ${uuid} not found`);
     const users = await this.userMap([row.assignedTo, row.creditOfficerId]);
+    const item = row.toJSON() as any;
+    item.created_at = item.created_at ?? item.createdAt;
+    item.updated_at = item.updated_at ?? item.updatedAt;
+    item.deleted_at = item.deleted_at ?? item.deletedAt ?? null;
+    delete item.createdAt;
+    delete item.updatedAt;
+    delete item.deletedAt;
+    item.created_by = item.createdBy ?? item.created_by ?? null;
+    item.updated_by = item.updatedBy ?? item.updated_by ?? null;
+    item.deleted_by = item.deletedBy ?? item.deleted_by ?? null;
+    delete item.createdBy;
+    delete item.updatedBy;
+    delete item.deletedBy;
     return {
-      ...row.toJSON(),
+      ...item,
       assignedUser: users.get(row.assignedTo ?? '') ?? null,
       creditOfficer: users.get(row.creditOfficerId ?? '') ?? null,
     };

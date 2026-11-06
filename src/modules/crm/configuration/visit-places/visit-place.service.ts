@@ -111,10 +111,12 @@ export class VisitPlaceService {
       ...(data.address !== undefined ? { address: data.address } : {}),
       ...(data.contactPerson !== undefined ? { contactPerson: data.contactPerson } : {}),
       ...(data.contactNumber !== undefined ? { contactNumber: data.contactNumber } : {}),
-      createdBy: data.createdBy ?? null,
-      ...(data.createdAt !== undefined ? { createdAt: data.createdAt } : {}),
-      ...(data.updatedAt !== undefined ? { updatedAt: data.updatedAt } : {}),
-      ...(data.deletedAt !== undefined ? { deletedAt: data.deletedAt } : {}),
+      created_by: data.created_by ?? data.createdBy ?? null,
+      updated_by: data.updated_by ?? data.updatedBy ?? null,
+      deleted_by: data.deleted_by ?? data.deletedBy ?? null,
+      created_at: data.created_at ?? data.createdAt,
+      updated_at: data.updated_at ?? data.updatedAt,
+      ...(data.deleted_at || data.deletedAt ? { deleted_at: data.deleted_at ?? data.deletedAt } : {}),
     };
   }
 }

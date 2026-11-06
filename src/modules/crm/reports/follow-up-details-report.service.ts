@@ -69,7 +69,7 @@ export class FollowUpDetailsReportService {
         attributes: ['id', 'uuid', 'leadCode', 'clientName', 'phone', 'assignedTo', 'projectId', 'leadStageId'],
         include: [
           { association: 'stage', required: false, attributes: ['id', 'uuid', 'name'] },
-          { association: 'propertyInterests', required: false, separate: true, include: [{ association: 'project', required: false, attributes: ['uuid', 'code', 'name'] }] },
+          { association: 'propertyInterests', required: false, separate: true, attributes: ['id', 'uuid', 'leadId', 'projectId', 'projectName', 'plotFlatNo'] },
         ],
       }],
       limit, offset: (page - 1) * limit,
@@ -92,7 +92,7 @@ export class FollowUpDetailsReportService {
           stage: lead?.stage?.name ?? null,
           name: lead?.clientName ?? null,
           leadId: lead?.uuid ?? null,
-          project: interest?.project?.name ?? interest?.project?.code ?? interest?.projectName ?? null,
+          project: interest?.projectName ?? interest?.projectId ?? lead?.projectId ?? null,
           projectId: interest?.projectId ?? lead?.projectId ?? null,
           flatLand: interest?.plotFlatNo ?? null,
           phone: lead?.phone ?? null,

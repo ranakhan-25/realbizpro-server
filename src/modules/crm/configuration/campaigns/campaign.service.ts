@@ -117,7 +117,16 @@ export class CampaignService {
       }));
     }
     delete result.leadSourceId;
-    result.addedBy = result.createdBy ?? null;
+    result.created_at = result.created_at ?? result.createdAt;
+    result.updated_at = result.updated_at ?? result.updatedAt;
+    result.deleted_at = result.deleted_at ?? result.deletedAt ?? null;
+    delete result.createdAt;
+    delete result.updatedAt;
+    delete result.deletedAt;
+    result.created_by = result.createdBy ?? result.created_by ?? null;
+    result.updated_by = result.updatedBy ?? result.updated_by ?? null;
+    result.deleted_by = result.deletedBy ?? result.deleted_by ?? null;
+    delete result.addedBy;
     delete result.createdBy;
     delete result.updatedBy;
     delete result.deletedBy;
