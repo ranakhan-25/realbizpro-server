@@ -49,7 +49,7 @@ export class PublicCreateShareProjectDto {
   @ApiProperty() @IsString() @IsNotEmpty() creatorName: string;
   @ApiProperty() @IsString() @IsNotEmpty() creatorEmail: string;
   @ApiProperty() @IsString() @IsNotEmpty() creatorPhone: string;
-  @ApiProperty() @IsString() @IsNotEmpty() creatorPassword: string;
+  @ApiProperty({ required: false }) @IsOptional() @IsString() creatorPassword?: string;
   @ApiProperty({ required: false }) @IsOptional() @IsString() companyName?: string;
 }
 
@@ -57,9 +57,17 @@ export class PublicInvestmentRequestDto {
   @ApiProperty() @IsString() @IsNotEmpty() projectUuid: string;
   @ApiProperty() @IsString() @IsNotEmpty() name: string;
   @ApiProperty() @IsString() @IsNotEmpty() email: string;
-  @ApiProperty() @IsString() @IsNotEmpty() password: string;
+  @ApiProperty({ required: false }) @IsOptional() @IsString() password?: string;
   @ApiProperty() @IsString() @IsNotEmpty() phone: string;
   @ApiProperty() @Type(() => Number) @IsInt() @Min(1) quantity: number;
+  @ApiProperty({ required: false }) @IsOptional() @IsString() investorType?: string;
+  @ApiProperty({ required: false }) @IsOptional() @IsString() organizationName?: string;
+  @ApiProperty({ required: false }) @IsOptional() @IsString() organizationLocation?: string;
+  @ApiProperty({ required: false }) @IsOptional() @IsString() organizationPhone?: string;
+  @ApiProperty({ required: false }) @IsOptional() @IsString() representativePhone?: string;
+  @ApiProperty({ required: false }) @IsOptional() @IsString() tradeLicenseNumber?: string;
+  @ApiProperty({ required: false }) @IsOptional() @IsString() organizationRepresentativeName?: string;
+  @ApiProperty({ required: false }) @IsOptional() @IsString() organizationDesignation?: string;
 }
 
 export class UpdateShareProjectDto extends CreateShareProjectDto {}

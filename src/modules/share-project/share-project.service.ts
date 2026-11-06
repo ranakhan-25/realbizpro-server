@@ -48,6 +48,21 @@ export class ShareProjectService {
     return `${prefix}-${letters}-${date}-${random}`;
   }
 
+  private generateInvestmentCode(investorName: string, investorPhone: string) {
+    const cleanName = (investorName || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+    const namePrefix = (cleanName.slice(0, 2) || 'IN').padEnd(2, 'X');
+    const cleanPhone = (investorPhone || '').replace(/[^0-9]/g, '');
+    const phoneSuffix = cleanPhone.length >= 2 ? cleanPhone.slice(-2) : (cleanPhone || '00').padStart(2, '0');
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const mins = String(now.getMinutes()).padStart(2, '0');
+    const secs = String(now.getSeconds()).padStart(2, '0');
+    return `${namePrefix}@${phoneSuffix}-${year}${month}${day}${hours}${mins}${secs}`;
+  }
+
   private async ensureCategory(categoryId: number) {
     const category = await this.categoryModel.findByPk(categoryId);
     if (!category) throw new BadRequestException('Project category does not exist');
@@ -284,25 +299,39 @@ export class ShareProjectService {
     }) : [];
     const projectByUuid = new Map(projects.map((project) => [project.uuid, project]));
     const investorById = new Map(investors.map((investor) => [investor.id, investor]));
-    const data = rows.map((row) => ({
-      id: row.id,
-      uuid: row.uuid,
-      code: row.code,
-      projectUuid: row.projectId,
-      project: projectByUuid.get(row.projectId) || null,
-      investor: investorById.get(row.investorId) || null,
-      investorName: row.investorName || investorById.get(row.investorId)?.name || null,
-      investorEmail: row.investorEmail || investorById.get(row.investorId)?.email || null,
-      investorPhone: row.investorPhone || investorById.get(row.investorId)?.phone || null,
-      quantity: row.quantity,
-      sharePrice: row.sharePrice,
-      shareValue: row.shareValue,
-      serviceFee: row.serviceFee,
-      totalAmount: row.totalAmount,
-      status: row.status,
-      createdAt: row.createdAt,
-      deletedAt: row.deletedAt,
-    }));
+    const data = rows.map((row) => {
+      const user = investorById.get(row.investorId);
+      const displayName = row.investorName || user?.name || null;
+      const displayEmail = row.investorEmail || user?.email || null;
+      const displayPhone = row.investorPhone || user?.phone || null;
+      return {
+        id: row.id,
+        uuid: row.uuid,
+        code: row.code,
+        projectUuid: row.projectId,
+        project: projectByUuid.get(row.projectId) || null,
+        investor: user
+          ? {
+              id: user.id,
+              uuid: user.uuid,
+              name: displayName,
+              email: displayEmail,
+              phone: displayPhone,
+            }
+          : null,
+        investorName: displayName,
+        investorEmail: displayEmail,
+        investorPhone: displayPhone,
+        quantity: row.quantity,
+        sharePrice: row.sharePrice,
+        shareValue: row.shareValue,
+        serviceFee: row.serviceFee,
+        totalAmount: row.totalAmount,
+        status: row.status,
+        createdAt: row.createdAt,
+        deletedAt: row.deletedAt,
+      };
+    });
     return { data, meta: { total: count, page, limit, totalPages: Math.ceil(count / limit) } };
   }
 
@@ -344,8 +373,12 @@ export class ShareProjectService {
   async adminDetails(uuid: string) {
     const project = await this.projectModel.findOne({ where: { uuid }, paranoid: false });
     if (!project) throw new NotFoundException('Share Project not found');
-    const owner = project.ownerId ? await this.shareUserModel.findByPk(project.ownerId) : null;
-    const category = project.categoryId ? await this.categoryModel.findByPk(project.categoryId) : null;
+    const [owner, category, documents, images] = await Promise.all([
+      project.ownerId ? this.shareUserModel.findByPk(project.ownerId) : Promise.resolve(null),
+      project.categoryId ? this.categoryModel.findByPk(project.categoryId) : Promise.resolve(null),
+      this.documentModel.findAll({ where: { projectId: project.uuid }, order: [['createdAt', 'ASC']] }),
+      this.imageModel.findAll({ where: { projectId: project.uuid }, order: [['sortOrder', 'ASC']] }),
+    ]);
     const item = project.toJSON() as any;
     item.owner = owner
       ? {
@@ -369,6 +402,8 @@ export class ShareProjectService {
       };
     }
     item.category = category ? { id: category.id, uuid: category.uuid, name: category.name, code: category.code } : null;
+    item.documents = documents.map((doc) => doc.toJSON());
+    item.images = images.map((img) => img.toJSON());
     return item;
   }
 
@@ -477,11 +512,12 @@ export class ShareProjectService {
     await this.ensureCategory(dto.categoryId);
     let owner = await this.shareUserModel.findOne({ where: { email: dto.creatorEmail } });
     if (!owner) {
+      const password = dto.creatorPassword || (Math.random().toString(36).slice(-8) + 'Ab1!');
       owner = await this.shareUserModel.create({
         name: dto.creatorName,
         email: dto.creatorEmail,
         phone: dto.creatorPhone,
-        passwordHash: await argon2.hash(dto.creatorPassword),
+        passwordHash: await argon2.hash(password),
         role: ShareUserRole.OWNER,
         status: ShareUserStatus.PENDING,
         emailVerified: false,
@@ -555,19 +591,28 @@ export class ShareProjectService {
     if (dto.quantity > project.totalShares) throw new BadRequestException('Requested quantity exceeds available project shares');
     let investor = await this.shareUserModel.findOne({ where: { [Op.or]: [{ email: dto.email }, ...(dto.phone ? [{ phone: dto.phone }] : [])] } });
     if (!investor) {
+      const password = dto.password || (Math.random().toString(36).slice(-8) + 'Xy9#');
       investor = await this.shareUserModel.create({
-        name: dto.name, email: dto.email, phone: dto.phone, passwordHash: await argon2.hash(dto.password),
+        name: dto.name, email: dto.email, phone: dto.phone, passwordHash: await argon2.hash(password),
         role: ShareUserRole.OWNER, status: ShareUserStatus.PENDING, emailVerified: false,
       } as any);
     }
     const sharePrice = Number(project.pricePerShare);
     const shareValue = sharePrice * dto.quantity;
     const serviceFee = Math.round(shareValue * 0.01 * 100) / 100;
+    const isOrg = dto.investorType === 'ORGANIZATION';
+    const investorDisplayName = isOrg && dto.organizationName
+      ? `${dto.organizationName} (${dto.organizationRepresentativeName || dto.name || 'Representative'}${dto.organizationDesignation ? `, ${dto.organizationDesignation}` : ''})`
+      : dto.name;
+    const investmentCode = this.generateInvestmentCode(
+      isOrg ? (dto.organizationName || dto.name || 'OR') : (dto.name || 'IN'),
+      dto.phone || dto.organizationPhone || '',
+    );
     const investment = await this.investmentModel.create({
       projectId: project.uuid,
       investorId: investor.id,
-      code: this.generateCode('IN', project.name),
-      investorName: dto.name,
+      code: investmentCode,
+      investorName: investorDisplayName,
       investorEmail: dto.email,
       investorPhone: dto.phone,
       quantity: dto.quantity,
@@ -789,9 +834,15 @@ export class ShareProjectService {
   async publicOne(uuid: string) {
     const project = await this.projectModel.findOne({ where: { uuid, status: ShareProjectStatus.PUBLISHED }, include: this.projectIncludes() });
     if (!project) throw new NotFoundException('Published Share Project not found');
-    const category = await this.categoryModel.findByPk(project.categoryId);
+    const [category, documents, images] = await Promise.all([
+      this.categoryModel.findByPk(project.categoryId),
+      this.documentModel.findAll({ where: { projectId: project.uuid }, order: [['createdAt', 'ASC']] }),
+      this.imageModel.findAll({ where: { projectId: project.uuid }, order: [['sortOrder', 'ASC']] }),
+    ]);
     const item = project.toJSON() as any;
     item.category = category ? { id: category.id, uuid: category.uuid, name: category.name, code: category.code } : null;
+    item.documents = documents.map((doc) => doc.toJSON());
+    item.images = images.map((img) => img.toJSON());
     return item;
   }
 
