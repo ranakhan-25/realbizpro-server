@@ -99,7 +99,16 @@ export class LeadSourceService {
     const data = row.toJSON() as Record<string, any>;
     delete data.id;
     data.status = data.isActive === false ? LeadSourceStatus.INACTIVE : LeadSourceStatus.ACTIVE;
-    data.addedBy = data.createdBy ?? null;
+    data.created_at = data.created_at ?? data.createdAt;
+    data.updated_at = data.updated_at ?? data.updatedAt;
+    data.deleted_at = data.deleted_at ?? data.deletedAt ?? null;
+    delete data.createdAt;
+    delete data.updatedAt;
+    delete data.deletedAt;
+    data.created_by = data.createdBy ?? data.created_by ?? null;
+    data.updated_by = data.updatedBy ?? data.updated_by ?? null;
+    data.deleted_by = data.deletedBy ?? data.deleted_by ?? null;
+    delete data.addedBy;
     delete data.isActive;
     delete data.createdBy;
     delete data.updatedBy;

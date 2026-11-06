@@ -37,8 +37,22 @@ export class CommunicationStatusService {
     });
     const totalPages = Math.ceil(count / limit) || 1;
     const currentPage = skip !== undefined ? Math.floor(offset / limit) + 1 : page;
+    const mappedRows = rows.map(r => {
+      const item = r.toJSON() as any;
+      item.created_at = item.created_at ?? item.createdAt;
+      item.updated_at = item.updated_at ?? item.updatedAt;
+      item.deleted_at = item.deleted_at ?? item.deletedAt ?? null;
+      delete item.createdAt;
+      delete item.updatedAt;
+      delete item.deletedAt;
+      item.created_by = item.addedById ?? item.created_by ?? null;
+      item.updated_by = item.updated_by ?? null;
+      item.deleted_by = item.deleted_by ?? null;
+      delete item.addedById;
+      return item;
+    });
     return {
-      data: rows,
+      data: mappedRows,
       meta: {
         page: currentPage, pageNo: currentPage,
         nextPage: currentPage < totalPages ? currentPage + 1 : null,
@@ -48,13 +62,24 @@ export class CommunicationStatusService {
     };
   }
 
-  async findOne(uuid: string): Promise<CommunicationStatus> {
+  async findOne(uuid: string): Promise<any> {
     const row = await this.statusModel.findOne({
       where: { uuid } as any,
       include: [{ association: 'leadStage', required: false, paranoid: false }],
     });
     if (!row) throw new NotFoundException(`Communication status #${uuid} not found`);
-    return row;
+    const item = row.toJSON() as any;
+    item.created_at = item.created_at ?? item.createdAt;
+    item.updated_at = item.updated_at ?? item.updatedAt;
+    item.deleted_at = item.deleted_at ?? item.deletedAt ?? null;
+    delete item.createdAt;
+    delete item.updatedAt;
+    delete item.deletedAt;
+    item.created_by = item.addedById ?? item.created_by ?? null;
+    item.updated_by = item.updated_by ?? null;
+    item.deleted_by = item.deleted_by ?? null;
+    delete item.addedById;
+    return item;
   }
 
   async update(uuid: string, dto: UpdateCommunicationStatusDto): Promise<CommunicationStatus> {
