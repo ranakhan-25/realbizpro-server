@@ -17,7 +17,7 @@ export interface InvBrandAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id?: string | null;
 
   // Relations
   items: InvItem[];
@@ -32,7 +32,7 @@ export interface InvBrandCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id?: string | null;
 }
 
 export type InvBrandUpdateAttributes = Partial<InvBrandCreationAttributes>;

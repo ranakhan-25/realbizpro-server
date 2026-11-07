@@ -20,7 +20,7 @@ export enum DepartmentStatus {
 }
 
 @Table({
-  tableName: 'department',
+  tableName: 'hrm_department',
   timestamps: true,
   paranoid: true,
   underscored: false,
@@ -31,7 +31,7 @@ export enum DepartmentStatus {
     },
     {
       name: 'Department_departmentHeadId_idx',
-      fields: ['departmentHeadId'],
+      fields: ['department_head_id'],
     },
     {
       name: 'Department_deletedAt_idx',
@@ -50,36 +50,42 @@ export class Department
     type: DataType.STRING,
     allowNull: false,
     unique: true,
+    field: 'name',
   })
   declare name: string;
 
   @Column({
     type: DataType.STRING,
     allowNull: true,
+    field: 'department_head_id',
   })
   declare departmentHeadId?: string;
 
   @Column({
     type: DataType.STRING,
     allowNull: true,
+    field: 'added_by_id',
   })
   declare addedById?: string;
 
   @Column({
     type: DataType.STRING,
     allowNull: true,
+    field: 'created_by',
   })
   declare createdBy?: string;
 
   @Column({
     type: DataType.STRING,
     allowNull: true,
+    field: 'updated_by',
   })
   declare updatedBy?: string;
 
   @Column({
     type: DataType.STRING,
     allowNull: true,
+    field: 'deleted_by',
   })
   declare deletedBy?: string;
 

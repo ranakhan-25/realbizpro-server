@@ -20,7 +20,7 @@ export interface AcquisitionLeadAttributes {
   created_by?: number | null;
   added_by?: number | null;
   deleted_by?: number | null;
-  projectId?: string | null;
+  org_id?: string | null;
 
   // Relations
   land_owners?: LandOwner[];
@@ -38,7 +38,7 @@ export interface AcquisitionLeadCreationAttributes {
   created_by?: number | null;
   added_by?: number | null;
   deleted_by?: number | null;
-  projectId?: string | null;
+  org_id?: string | null;
 }
 
 export type AcquisitionLeadUpdateAttributes = Partial<AcquisitionLeadCreationAttributes>;

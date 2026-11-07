@@ -86,6 +86,6 @@ export class InvItem extends BaseModel<InvItemAttributes, InvItemCreationAttribu
     type: DataType.STRING,
     allowNull: true,
   })
-  declare projectId?: string;
+  declare org_id?: string;
 }
 
