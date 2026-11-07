@@ -10,6 +10,7 @@ import { SysRolePermission } from '../../../database/models/system/sys_role_perm
 import { SysPermission } from '../../../database/models/system/sys_permission.model';
 import { SysUser } from '../../../database/models/system/sys_user.model';
 import { SysOrganization } from '../../../database/models/system/sys_organization.model';
+import { AdminMenuModule } from '../admin-menu/admin-menu.module';
 import { UserAccessService } from './user-access.service';
 import { UserAccessController } from './user-access.controller';
 
@@ -27,6 +28,7 @@ import { UserAccessController } from './user-access.controller';
       SysUser,
       SysOrganization,
     ]),
+    AdminMenuModule,
   ],
   controllers: [UserAccessController],
   providers: [UserAccessService],

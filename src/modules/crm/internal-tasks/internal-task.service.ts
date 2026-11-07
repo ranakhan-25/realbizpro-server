@@ -135,8 +135,12 @@ export class InternalTaskService {
     const projects = projectCodes.length
       ? await this.projects.findAll({ where: { code: { [Op.in]: projectCodes } } as any, attributes: ['uuid', 'name', 'code'], transaction })
       : [];
+    const isUuid = (val: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
+    const validUuids = userIds.filter(isUuid);
+    const userConditions: any[] = [{ userCode: { [Op.in]: userIds } }];
+    if (validUuids.length) userConditions.push({ uuid: { [Op.in]: validUuids } });
     const users = userIds.length
-      ? await this.users.findAll({ where: { [Op.or]: [{ userCode: { [Op.in]: userIds } }, { uuid: { [Op.in]: userIds } }] } as any, attributes: ['uuid', 'userCode', 'name'], transaction })
+      ? await this.users.findAll({ where: { [Op.or]: userConditions } as any, attributes: ['uuid', 'userCode', 'name'], transaction })
       : [];
     return {
       projects: new Map(projects.map(project => [project.code, { uuid: project.uuid, name: project.name, code: project.code }])),
@@ -158,7 +162,11 @@ export class InternalTaskService {
 
   private async syncAssignees(task: CrmInternalTask, userUuids: string[], actor: string | undefined, transaction: Transaction, projectUuid?: string | null) {
     const distinctIds = [...new Set(userUuids)];
-    const users = distinctIds.length ? await this.users.findAll({ where: { [Op.or]: [{ userCode: { [Op.in]: distinctIds } }, { uuid: { [Op.in]: distinctIds } }] } as any, attributes: ['uuid', 'userCode'], transaction }) : [];
+    const isUuid = (val: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
+    const validUuids = distinctIds.filter(isUuid);
+    const userConditions: any[] = [{ userCode: { [Op.in]: distinctIds } }];
+    if (validUuids.length) userConditions.push({ uuid: { [Op.in]: validUuids } });
+    const users = distinctIds.length ? await this.users.findAll({ where: { [Op.or]: userConditions } as any, attributes: ['uuid', 'userCode'], transaction }) : [];
     if (users.length !== distinctIds.length) throw new BadRequestException('One or more assigned users were not found');
     const userIdByInput = new Map(users.flatMap(user => [[user.uuid, user.userCode ?? user.uuid], ...(user.userCode ? [[user.userCode, user.userCode]] : [])] as [string, string][]));
     await this.assignees.destroy({ where: { taskId: task.id }, transaction });
@@ -193,11 +201,13 @@ export class InternalTaskService {
       priority: this.displayStatus(data.priority),
       status: this.displayStatus(data.status),
       progress: progressByStatus[this.displayStatus(data.status)] ?? 0,
-      startDate: data.createdAt ?? null,
+      startDate: data.created_at ?? data.createdAt ?? null,
       dueDate: data.dueDate ?? null,
-      createdBy: data.createdBy ?? null,
-      createdAt: data.createdAt,
-      updatedAt: data.updatedAt,
+      created_by: data.created_by ?? data.createdBy ?? null,
+      updated_by: data.updated_by ?? data.updatedBy ?? null,
+      deleted_by: data.deleted_by ?? data.deletedBy ?? null,
+      created_at: data.created_at ?? data.createdAt,
+      updated_at: data.updated_at ?? data.updatedAt,
     };
   }
 

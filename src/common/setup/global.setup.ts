@@ -88,40 +88,52 @@ export function setupGlobalConfig(
           );
         };
 
-        // Create user-friendly message
+        // Create comprehensive, user-friendly validation error message
+        const extractAllConstraintMessages = (
+          validationErrors: ValidationError[],
+          prefix = '',
+        ): string[] => {
+          const list: string[] = [];
+          for (const err of validationErrors) {
+            const field = prefix
+              ? `${prefix}.${err.property}`
+              : err.property;
+
+            if (err.constraints) {
+              const constraintValues = Object.values(err.constraints);
+              for (const c of constraintValues) {
+                // Ensure field name is clearly stated for end-user visibility
+                if (c.toLowerCase().includes(err.property.toLowerCase())) {
+                  list.push(c);
+                } else {
+                  list.push(`${field}: ${c}`);
+                }
+              }
+            }
+
+            if (err.children && err.children.length > 0) {
+              list.push(
+                ...extractAllConstraintMessages(err.children, field),
+              );
+            }
+          }
+          return list;
+        };
+
         const createMessage = (
           validationErrors: ValidationError[],
         ): string => {
-          return validationErrors
-            .map((error) => {
-              const constraints = Object.values(
-                error.constraints || {},
-              );
-              const constraintMessage =
-                constraints.join(', ');
-              const childrenMessage =
-                (error.children || []).length > 0
-                  ? createMessage(error.children || [])
-                  : '';
-
-              return [
-                constraintMessage,
-                childrenMessage
-                  ? `${error.property}: ${childrenMessage}`
-                  : '',
-              ]
-                .filter(Boolean)
-                .join('; ');
-            })
-            .filter(Boolean)
-            .join('; ');
+          const msgs = extractAllConstraintMessages(validationErrors);
+          if (msgs.length > 0) {
+            return msgs.join('; ');
+          }
+          return 'Validation failed: Please ensure all required fields are correctly formatted.';
         };
 
         const detailedErrors =
           formatErrors(errors);
         const message =
-          createMessage(errors) ||
-          'Validation failed';
+          createMessage(errors);
 
         return new BadRequestException({
           message,

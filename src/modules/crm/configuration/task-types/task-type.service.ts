@@ -98,9 +98,12 @@ export class TaskTypeService {
     const data = row.toJSON() as Record<string, any>;
     return {
       uuid: data.uuid, name: data.name, code: data.code ?? null,
-      status: data.deletedAt ? 'Inactive' : 'Active', createdBy: data.createdBy ?? null,
-      createdAt: data.createdAt, updatedAt: data.updatedAt,
-      ...(data.deletedAt ? { deletedAt: data.deletedAt } : {}),
+      status: data.deletedAt || data.deleted_at ? 'Inactive' : 'Active',
+      created_by: data.created_by ?? data.createdBy ?? null,
+      updated_by: data.updated_by ?? data.updatedBy ?? null,
+      deleted_by: data.deleted_by ?? data.deletedBy ?? null,
+      created_at: data.created_at ?? data.createdAt, updated_at: data.updated_at ?? data.updatedAt,
+      ...(data.deleted_at || data.deletedAt ? { deleted_at: data.deleted_at ?? data.deletedAt } : {}),
     };
   }
 }

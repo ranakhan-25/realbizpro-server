@@ -75,6 +75,15 @@ export class SysPlan extends BaseModel<SysPlanAttributes, SysPlanCreationAttribu
   declare yearlyPrice: number;
 
   @Column({
+    type: DataType.STRING(10),
+    allowNull: false,
+    defaultValue: '$',
+    field: 'currency',
+    comment: 'Currency symbol or ISO code, e.g. $, ৳, €, USD, BDT',
+  })
+  declare currency: string;
+
+  @Column({
     type: DataType.ENUM(...Object.values(PlanBillingCycle)),
     allowNull: false,
     defaultValue: PlanBillingCycle.MONTHLY,

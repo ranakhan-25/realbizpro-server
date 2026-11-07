@@ -51,6 +51,11 @@ export class FeatureNodeDto {
   @IsOptional()
   actionType?: string;
 
+  @ApiPropertyOptional({ example: ['read', 'write'], description: 'Feature actions array' })
+  @IsArray()
+  @IsOptional()
+  actions?: string[];
+
   @ApiPropertyOptional({ example: 'Permission to add new prospective client leads' })
   @IsString()
   @IsOptional()

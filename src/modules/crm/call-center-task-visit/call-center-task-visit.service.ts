@@ -99,8 +99,8 @@ export class CallCenterTaskVisitService {
           action: { activityUuid: activity.uuid, leadUuid: lead?.uuid ?? null, canViewLead: !!lead?.uuid },
           lead: lead ? { uuid: lead.uuid, leadCode: lead.leadCode, name: lead.clientName, phone: lead.phone } : null,
           feedback: activity.feedback ?? null,
-          createdAt: activity.createdAt,
-          updatedAt: activity.updatedAt,
+          created_at: activity.createdAt,
+          updated_at: activity.updatedAt,
         };
       }),
       meta: { page, limit, total: count, totalPages: Math.ceil(count / limit) },

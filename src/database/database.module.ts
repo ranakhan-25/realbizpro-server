@@ -30,6 +30,9 @@ import { SysOrganization } from './models/system/sys_organization.model';
 import { SysOrgEntitlement } from './models/system/sys_org_entitlement.model';
 import { SysRoleFeature } from './models/system/sys_role_feature.model';
 import { SysUserFeatureOverride } from './models/system/sys_user_feature_override.model';
+import { SysCustomPermission } from './models/system/sys_custom_permission.model';
+import { SysUserCustomPermission } from './models/system/sys_user_custom_permission.model';
+import { SysSubscriptionPayment } from './models/system/sys_subscription_payment.model';
 import {
   SysTenantSite,
   SysTenantMenu,
@@ -97,6 +100,9 @@ import { ShareProjectStatusHistory } from './models/share-project/share-project-
       SysOrgEntitlement,
       SysRoleFeature,
       SysUserFeatureOverride,
+      SysCustomPermission,
+      SysUserCustomPermission,
+      SysSubscriptionPayment,
       SysTenantSite,
       SysTenantMenu,
       SysTenantMenuItem,

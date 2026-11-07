@@ -11,6 +11,8 @@ import {
   RejectShareProjectDto,
   UpdateShareProjectCategoryDto,
   UpdateShareProjectDto,
+  PublicCreateShareProjectDto,
+  PublicInvestmentRequestDto,
 } from './dto/share-project.dto';
 import { ShareProjectService } from './share-project.service';
 
@@ -70,8 +72,13 @@ export class ShareProjectController {
   }
   @ApiBearerAuth() @UseGuards(ShareUserAuthGuard, ShareUserRoleGuard) @ShareUserRoles(ShareUserRole.SUPER_ADMIN)
   @Get('admin/investments')
-  adminInvestments(@Query('page') page = 1, @Query('limit') limit = 10) {
-    return this.service.adminInvestments(Number(page), Number(limit));
+  adminInvestments(
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+    @Query('projectUuid') projectUuid?: string,
+    @Query('trash') trash?: string,
+  ) {
+    return this.service.adminInvestments(Number(page), Number(limit), projectUuid, trash === 'true');
   }
 
   @ApiBearerAuth() @UseGuards(ShareUserAuthGuard, ShareUserRoleGuard) @ShareUserRoles(ShareUserRole.SUPER_ADMIN)
@@ -119,4 +126,34 @@ export class ShareProjectController {
   @Public() @Get('public/projects') publicProjects(@Query('page') page = 1, @Query('limit') limit = 10) { return this.service.publicList(Number(page), Number(limit)); }
   @Public() @Get('public/projects/:uuid') publicProject(@Param('uuid', ParseUUIDPipe) uuid: string) { return this.service.publicOne(uuid); }
   @Public() @Get('public/categories') publicCategories() { return this.service.categoryList(true); }
+  @Public() @Get('public/locations') publicLocations(@Query('search') search?: string) { return this.service.publicLocations(search); }
+  @Public() @Get('public/portfolio') publicPortfolio(
+    @Query('email') email?: string,
+    @Query('phone') phone?: string,
+    @Query('code') code?: string,
+  ) {
+    return this.service.publicPortfolio({ email, phone, code });
+  }
+  @Public() @Post('public/projects')
+  publicCreateProject(@Body() dto: PublicCreateShareProjectDto) { return this.service.publicCreateProject(dto); }
+  @Public() @Post('public/investments/request')
+  publicInvestmentRequest(@Body() dto: PublicInvestmentRequestDto) { return this.service.publicInvestmentRequest(dto); }
+  @ApiBearerAuth() @UseGuards(ShareUserAuthGuard, ShareUserRoleGuard) @ShareUserRoles(ShareUserRole.SUPER_ADMIN)
+  @Post('admin/investments/:uuid/approve')
+  approveInvestment(@Req() req: any, @Param('uuid', ParseUUIDPipe) uuid: string) { return this.service.reviewInvestment(uuid, req.user.id, true); }
+  @ApiBearerAuth() @UseGuards(ShareUserAuthGuard, ShareUserRoleGuard) @ShareUserRoles(ShareUserRole.SUPER_ADMIN)
+  @Post('admin/investments/:uuid/reject')
+  rejectInvestment(@Req() req: any, @Param('uuid', ParseUUIDPipe) uuid: string, @Body() dto: RejectShareProjectDto) { return this.service.reviewInvestment(uuid, req.user.id, false, dto.reason); }
+
+  @ApiBearerAuth() @UseGuards(ShareUserAuthGuard, ShareUserRoleGuard) @ShareUserRoles(ShareUserRole.SUPER_ADMIN)
+  @Delete('admin/investments/:uuid')
+  softDeleteInvestment(@Param('uuid', ParseUUIDPipe) uuid: string) {
+    return this.service.softDeleteInvestment(uuid);
+  }
+
+  @ApiBearerAuth() @UseGuards(ShareUserAuthGuard, ShareUserRoleGuard) @ShareUserRoles(ShareUserRole.SUPER_ADMIN)
+  @Patch('admin/investments/:uuid/restore')
+  restoreInvestment(@Param('uuid', ParseUUIDPipe) uuid: string) {
+    return this.service.restoreInvestment(uuid);
+  }
 }

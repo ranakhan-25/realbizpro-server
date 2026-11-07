@@ -24,6 +24,7 @@ import { CreatePlanDto } from './dto/create-plan.dto';
 import { UpdatePlanDto } from './dto/update-plan.dto';
 import { PlanResponseDto } from './dto/plan-response.dto';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { Public } from '@/common/decorators/public.decorator';
 
 @ApiTags('System | Subscription Plans')
 @Controller('system/plans')
@@ -32,6 +33,7 @@ import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 export class PlansController {
   constructor(private readonly plansService: PlansService) {}
 
+  @Public()
   @Get()
   @ApiOperation({
     summary: 'List all subscription plans',
@@ -51,6 +53,7 @@ export class PlansController {
     return this.plansService.findAll({ status, search });
   }
 
+  @Public()
   @Get(':id')
   @ApiOperation({
     summary: 'Get single subscription plan by ID or UUID',

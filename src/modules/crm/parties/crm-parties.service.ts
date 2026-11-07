@@ -55,11 +55,25 @@ export class CrmPartiesService {
       offset: (page - 1) * limit,
       distinct: true,
     });
-    return { data: rows, meta: { page, limit, total: count, totalPages: Math.ceil(count / limit) || 1 } };
+    const mappedRows = rows.map(r => {
+      const item = r.toJSON() as any;
+      item.created_at = item.created_at ?? item.createdAt;
+      item.updated_at = item.updated_at ?? item.updatedAt;
+      item.deleted_at = item.deleted_at ?? item.deletedAt ?? null;
+      delete item.createdAt;
+      delete item.updatedAt;
+      delete item.deletedAt;
+      item.created_by = item.createdByUuid ?? null;
+      item.updated_by = item.updatedByUuid ?? null;
+      item.deleted_by = item.deletedByUuid ?? null;
+      return item;
+    });
+    return { data: mappedRows, meta: { page, limit, total: count, totalPages: Math.ceil(count / limit) || 1 } };
   }
 
   async create(dto: CreateCrmPartyDto, actorUuid?: string) {
-    return this.parties.create({ ...dto, status: dto.status ?? CrmPartyStatus.ACTIVE, createdByUuid: actorUuid } as any);
+    const party = await this.parties.create({ ...dto, status: dto.status ?? CrmPartyStatus.ACTIVE, createdByUuid: actorUuid } as any);
+    return this.findOne(party.uuid);
   }
 
   async findOne(uuid: string) {
@@ -73,7 +87,17 @@ export class CrmPartiesService {
       order: [[{ model: CrmPartyAssignment, as: 'assignments' }, 'createdAt', 'DESC'], [{ model: CrmPartyCommunication, as: 'communications' }, 'occurredAt', 'DESC']],
     });
     if (!party) throw new NotFoundException(`CRM party ${uuid} not found`);
-    return party;
+    const item = party.toJSON() as any;
+    item.created_at = item.created_at ?? item.createdAt;
+    item.updated_at = item.updated_at ?? item.updatedAt;
+    item.deleted_at = item.deleted_at ?? item.deletedAt ?? null;
+    delete item.createdAt;
+    delete item.updatedAt;
+    delete item.deletedAt;
+    item.created_by = item.createdByUuid ?? null;
+    item.updated_by = item.updatedByUuid ?? null;
+    item.deleted_by = item.deletedByUuid ?? null;
+    return item;
   }
 
   async update(uuid: string, dto: UpdateCrmPartyDto, actorUuid?: string) {

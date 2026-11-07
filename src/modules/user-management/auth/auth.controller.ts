@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {
   Body,
   Controller,
@@ -228,11 +229,12 @@ export class AuthController {
     );
   }
 
-  @UseGuards(JwtAuthGuard)
+  // ✅ FIXED: Login chara password change korar jonno
+  @Public()
   @Patch('change-password')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
-    summary: 'Change user password',
+    summary: 'Change user password (without login)',
   })
   @ApiResponse({
     status: 204,
@@ -243,13 +245,9 @@ export class AuthController {
     description: 'Current password is incorrect',
   })
   async changePassword(
-    @Req() req: AuthenticatedRequest,
     @Body() changePasswordDto: ChangePasswordDto,
   ): Promise<void> {
-    return this.authService.changePassword(
-      req.user.id,
-      changePasswordDto,
-    );
+    return this.authService.changePassword(changePasswordDto);
   }
 
   @Get('permitted-menus')
@@ -287,7 +285,8 @@ export class AuthController {
     @Query('moduleId') moduleId?: string,
     @Query('location')
     location?:
-      SysMenuLocation | SysMenuLocation[],
+      | SysMenuLocation
+      | SysMenuLocation[],
   ): Promise<ModuleWithMenuTreeResponseDto[]> {
     const moduleIdNumber = moduleId
       ? +moduleId

@@ -27,7 +27,7 @@ export enum SysMenuLocation {
 @Table({
   tableName: 'sys_menus',
   timestamps: true,
-  paranoid: true,
+  paranoid: false,
   underscored: true,
 })
 export class SysMenu extends BaseModel<

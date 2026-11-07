@@ -30,6 +30,9 @@ interface JwtPayload {
 export class JwtStrategy extends PassportStrategy(
   Strategy,
 ) {
+  // In-memory token validation cache to eliminate repeated remote WAN queries across bursts (TTL: 30s)
+  private readonly sessionCache = new Map<string, { user: JwtAuthUser; expiresAt: number }>();
+
   constructor(
     configService: ConfigService<AllConfigType>,
     private readonly usersService: UsersService,
@@ -55,6 +58,15 @@ export class JwtStrategy extends PassportStrategy(
   async validate(
     payload: JwtPayload,
   ): Promise<JwtAuthUser> {
+    const cacheKey = `${payload.sub}:${payload.jti || payload.iat || ''}`;
+    const cached = this.sessionCache.get(cacheKey);
+    if (cached) {
+      if (Date.now() < cached.expiresAt) {
+        return cached.user;
+      }
+      this.sessionCache.delete(cacheKey);
+    }
+
     // 1. Check if token is blacklisted in cache
     if (
       payload.jti &&
@@ -62,6 +74,7 @@ export class JwtStrategy extends PassportStrategy(
         payload.jti,
       ))
     ) {
+      this.sessionCache.delete(cacheKey);
       throw new UnauthorizedException(
         'Token has been revoked',
       );
@@ -74,6 +87,7 @@ export class JwtStrategy extends PassportStrategy(
           payload.jti,
         );
       if (!isTokenValid) {
+        this.sessionCache.delete(cacheKey);
         throw new UnauthorizedException(
           'Token is invalid or expired',
         );
@@ -87,16 +101,25 @@ export class JwtStrategy extends PassportStrategy(
       );
 
     if (!user || !user.isActive) {
+      this.sessionCache.delete(cacheKey);
       throw new UnauthorizedException(
         'User is inactive or not found',
       );
     }
 
-    return {
+    const authUser: JwtAuthUser = {
       ...user,
       authType: payload.authType,
       iat: payload.iat,
       exp: payload.exp,
     };
+
+    // Cache verified session for 30 seconds
+    this.sessionCache.set(cacheKey, {
+      user: authUser,
+      expiresAt: Date.now() + 30000,
+    });
+
+    return authUser;
   }
 }

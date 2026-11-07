@@ -46,6 +46,8 @@ export interface DashboardStatsResponse {
 
 @Injectable()
 export class AdminDashboardService {
+  private readonly statsCache = new Map<string, { data: DashboardStatsResponse; expiresAt: number }>();
+
   constructor(
     @InjectModel(SysOrganization)
     private readonly orgModel: typeof SysOrganization,
@@ -71,40 +73,46 @@ export class AdminDashboardService {
     const isSuperUser = Boolean(currentUser.isSuperUser);
     const isOrgAdmin = Boolean(currentUser.isOrgAdmin);
 
+    const cacheKey = isSuperUser ? 'super-admin' : `org-admin:${currentUser.orgId || 'default'}`;
+    const cached = this.statsCache.get(cacheKey);
+    if (cached) {
+      if (Date.now() < cached.expiresAt) {
+        return cached.data;
+      }
+      this.statsCache.delete(cacheKey);
+    }
+
+    let stats: DashboardStatsResponse;
     if (isSuperUser) {
-      return this.getSuperAdminStats();
+      stats = await this.getSuperAdminStats();
+    } else if (isOrgAdmin && currentUser.orgId) {
+      stats = await this.getOrgAdminStats(Number(currentUser.orgId));
+    } else if (currentUser.orgId) {
+      stats = await this.getOrgAdminStats(Number(currentUser.orgId));
+    } else {
+      stats = await this.getSuperAdminStats();
     }
 
-    if (isOrgAdmin && currentUser.orgId) {
-      return this.getOrgAdminStats(Number(currentUser.orgId));
-    }
+    this.statsCache.set(cacheKey, {
+      data: stats,
+      expiresAt: Date.now() + 30000,
+    });
 
-    // Default fallback to org admin view if user has orgId
-    if (currentUser.orgId) {
-      return this.getOrgAdminStats(Number(currentUser.orgId));
-    }
-
-    return this.getSuperAdminStats();
+    return stats;
   }
 
   private async getSuperAdminStats(): Promise<DashboardStatsResponse> {
-    const [
-      totalOrgs,
-      activeOrgs,
-      totalUsers,
-      activeUsers,
-      totalPlans,
-      totalModules,
-      recentOrgs,
-      recentUsers,
-      roles,
-    ] = await Promise.all([
-      this.orgModel.count(),
-      this.orgModel.count({ where: { isLocked: false } }),
-      this.userModel.count(),
-      this.userModel.count({ where: { isActive: true } }),
-      this.planModel.count(),
-      this.moduleModel.count(),
+    const [countsResult, recentOrgs, recentUsers, roles] = await Promise.all([
+      this.orgModel.sequelize!.query<any>(
+        `SELECT
+          (SELECT COUNT(*) FROM sys_organizations) AS "totalOrgs",
+          (SELECT COUNT(*) FROM sys_organizations WHERE is_locked = false) AS "activeOrgs",
+          (SELECT COUNT(*) FROM sys_users) AS "totalUsers",
+          (SELECT COUNT(*) FROM sys_users WHERE is_active = true) AS "activeUsers",
+          (SELECT COUNT(*) FROM sys_plans) AS "totalPlans",
+          (SELECT COUNT(*) FROM sys_modules) AS "totalModules"`,
+        { type: 'SELECT' as any },
+      ),
       this.orgModel.findAll({
         limit: 5,
         order: [['createdAt', 'DESC']],
@@ -120,6 +128,14 @@ export class AdminDashboardService {
         order: [['id', 'ASC']],
       }),
     ]);
+
+    const counts = (countsResult && countsResult[0]) || {};
+    const totalOrgs = Number(counts.totalOrgs) || 0;
+    const activeOrgs = Number(counts.activeOrgs) || 0;
+    const totalUsers = Number(counts.totalUsers) || 0;
+    const activeUsers = Number(counts.activeUsers) || 0;
+    const totalPlans = Number(counts.totalPlans) || 0;
+    const totalModules = Number(counts.totalModules) || 0;
 
     const roleColors = ['#0000F2', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444'];
     const roleDistribution = roles.slice(0, 5).map((r, i) => ({
