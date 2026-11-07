@@ -30,5 +30,5 @@ export class CreateAcquisitionLeadDto {
   @ApiPropertyOptional({ description: 'Optional project identifier', example: 'PRJ-1001' })
   @IsString()
   @IsOptional()
-  projectId?: string;
+  org_id?: string;
 }

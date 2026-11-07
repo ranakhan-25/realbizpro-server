@@ -17,7 +17,7 @@ export interface InvUnitAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id?: string | null;
 
   // Relations
   items: InvItem[];
@@ -32,7 +32,7 @@ export interface InvUnitCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id?: string | null;
 }
 
 export type InvUnitUpdateAttributes = Partial<InvUnitCreationAttributes>;

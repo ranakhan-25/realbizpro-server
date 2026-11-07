@@ -64,6 +64,6 @@ export class InvCategory extends BaseModel<InvCategoryAttributes, InvCategoryCre
     type: DataType.STRING,
     allowNull: true,
   })
-  declare projectId?: string;
+  declare org_id?: string;
 }
 

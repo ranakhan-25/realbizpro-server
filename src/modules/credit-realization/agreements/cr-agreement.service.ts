@@ -59,7 +59,7 @@ export class CrAgreementService {
           penalty_amount: 0,
           penalty_waived: 0,
           status: 'unpaid',
-          projectId: agreement.projectId,
+          org_id: agreement.org_id,
         } as any);
       }
     }
@@ -111,7 +111,7 @@ export class CrAgreementService {
     return await this.plotModel.create({
       ...dto,
       sale_agreement_id: agreement.id,
-      projectId: agreement.projectId,
+      org_id: agreement.org_id,
     } as any);
   }
 }

@@ -19,7 +19,7 @@ export interface LegalDocumentAttributes {
   created_by?: number | null;
   added_by?: number | null;
   deleted_by?: number | null;
-  projectId?: string | null;
+  org_id?: string | null;
 
   // Relations
   acquisition_lead?: AcquisitionLead;
@@ -36,7 +36,7 @@ export interface LegalDocumentCreationAttributes {
   created_by?: number | null;
   added_by?: number | null;
   deleted_by?: number | null;
-  projectId?: string | null;
+  org_id?: string | null;
 }
 
 export type LegalDocumentUpdateAttributes = Partial<LegalDocumentCreationAttributes>;

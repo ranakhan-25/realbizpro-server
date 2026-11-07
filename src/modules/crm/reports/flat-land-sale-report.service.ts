@@ -50,7 +50,7 @@ export class FlatLandSaleReportService {
       this.flatLands.findAll({ attributes: ['uuid', 'projectId', 'flatLandNo', 'size'] }),
       this.teamMembers.findAll({ attributes: ['uuid', 'projectId', 'name', 'email'] }),
       this.users.findAll({ attributes: ['uuid', 'userCode', 'name'] }),
-      this.agreements.findAll({ attributes: ['projectId', 'unit_identifier', 'customer_name', 'agreement_date', 'handover_date', 'total_price'] }),
+      this.agreements.findAll({ attributes: ['org_id', 'unit_identifier', 'customer_name', 'agreement_date', 'handover_date', 'total_price'] }),
     ]);
     const projectMap = new Map(projects.map(row => [row.uuid, row]));
     const propertyMap = new Map(flatLands.map(row => [row.uuid, row]));
@@ -58,7 +58,7 @@ export class FlatLandSaleReportService {
     const userMap = new Map<string, SysUser>();
     for (const user of users) { userMap.set(user.uuid, user); if (user.userCode) userMap.set(user.userCode, user); }
     const agreementMap = new Map<string, AgreementRow>();
-    for (const agreement of agreements) agreementMap.set(`${agreement.projectId ?? ''}:${agreement.unit_identifier ?? ''}`, agreement as AgreementRow);
+    for (const agreement of agreements) agreementMap.set(`${agreement.org_id ?? ''}:${agreement.unit_identifier ?? ''}`, agreement as AgreementRow);
     const selectedTeam = query.teamId ? teamMap.get(query.teamId) ?? teams.find(team => [team.name, team.email, team.uuid].some(value => value?.toLowerCase() === query.teamId?.toLowerCase())) : undefined;
     const term = query.search?.trim().toLowerCase();
     const filtered = bookings.filter(booking => {
