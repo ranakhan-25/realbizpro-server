@@ -21,10 +21,13 @@ export class DealNegotiationActivityService {
     @InjectModel(LeadCallAssignment) private readonly assignments: typeof LeadCallAssignment,
   ) {}
 
-  async list(query: QueryDealNegotiationActivityDto) {
+  async list(query: QueryDealNegotiationActivityDto, currentUser?: any) {
     const page = query.page ?? 1;
     const limit = Math.min(query.limit ?? 10, 100);
     const where: any = {};
+    if (currentUser?.orgId) {
+      where.orgId = currentUser.orgId;
+    }
     if (query.status) where.status = query.status;
     const term = query.search?.trim();
     if (term) {
@@ -50,28 +53,31 @@ export class DealNegotiationActivityService {
     };
   }
 
-  async details(uuid: string) {
-    const row = await this.find(uuid);
+  async details(uuid: string, currentUser?: any) {
+    const row = await this.find(uuid, currentUser);
     return this.toPublic(row);
   }
 
-  async setDecision(uuid: string, status: 'approved' | 'rejected', note?: string) {
-    const row = await this.find(uuid);
+  async setDecision(uuid: string, status: 'approved' | 'rejected', note?: string, userId?: number, currentUser?: any) {
+    const row = await this.find(uuid, currentUser);
     if (row.status !== CrmNegotiationStatus.PENDING) throw new BadRequestException('Only pending negotiation activities can be approved or rejected');
     const decisionStatus = status === 'approved' ? CrmNegotiationStatus.APPROVED : CrmNegotiationStatus.REJECTED;
     await row.update({
       status: decisionStatus,
       ...(note !== undefined ? { rejectionReason: note } : {}),
       ...(decisionStatus === CrmNegotiationStatus.APPROVED ? { approvalDate: new Date() } : {}),
-    });
-    return this.details(uuid);
+      ...(userId ? { updatedBy: String(userId) } : {}),
+    } as any);
+    return this.details(uuid, currentUser);
   }
 
-  async reassign(uuid: string, dto: ReassignDealNegotiationDto) {
-    const row = await this.find(uuid);
+  async reassign(uuid: string, dto: ReassignDealNegotiationDto, userId?: number, currentUser?: any) {
+    const row = await this.find(uuid, currentUser);
     if (!row.lead) throw new NotFoundException('Related lead not found');
     const assignee = await this.users.findOne({ where: { uuid: dto.userId, isActive: true }, attributes: ['uuid'] });
     if (!assignee) throw new NotFoundException(`Active user ${dto.userId} not found`);
+    const orgId = row.orgId ?? currentUser?.orgId ?? null;
+    const actorId = userId ? String(userId) : null;
     await this.negotiations.sequelize!.transaction(async transaction => {
       await this.assignments.create({
         leadId: row.lead!.id,
@@ -82,14 +88,21 @@ export class DealNegotiationActivityService {
         assignedUserType: 'Officer/SR',
         status: 'pending',
         projectId: row.lead!.projectId,
-      }, { transaction });
-      await row.lead!.update({ assignedTo: assignee.uuid }, { transaction });
+        orgId,
+        createdBy: actorId,
+      } as any, { transaction });
+      await row.lead!.update({ assignedTo: assignee.uuid, updatedBy: actorId }, { transaction });
+      await row.update({ updatedBy: actorId } as any, { transaction });
     });
-    return { negotiation: await this.details(uuid), assignedTo: { uuid: assignee.uuid }, note: dto.note ?? null };
+    return { negotiation: await this.details(uuid, currentUser), assignedTo: { uuid: assignee.uuid }, note: dto.note ?? null };
   }
 
-  private async find(uuid: string) {
-    const row = await this.negotiations.findOne({ where: { uuid }, include: this.relations() });
+  private async find(uuid: string, currentUser?: any) {
+    const where: any = { uuid };
+    if (currentUser?.orgId) {
+      where.orgId = currentUser.orgId;
+    }
+    const row = await this.negotiations.findOne({ where, include: this.relations() });
     if (!row) throw new NotFoundException(`Negotiation activity ${uuid} not found`);
     return row;
   }
@@ -112,6 +125,11 @@ export class DealNegotiationActivityService {
     return {
       ...(sl !== undefined ? { sl } : {}),
       ...data,
+      orgId: data.org_id ?? data.orgId ?? null,
+      org_id: data.org_id ?? data.orgId ?? null,
+      created_by: data.created_by ?? data.createdBy ?? null,
+      updated_by: data.updated_by ?? data.updatedBy ?? null,
+      deleted_by: data.deleted_by ?? data.deletedBy ?? null,
       leadName: data.lead?.clientName ?? null,
       projectName: data.project?.name ?? null,
       flatLandName: data.flatLand?.flatLandNo ?? null,

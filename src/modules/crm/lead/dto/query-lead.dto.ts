@@ -19,6 +19,7 @@ export class QueryLeadDto {
   @ApiPropertyOptional() @IsOptional() @IsString() declare projectName?: string;
   @ApiPropertyOptional() @IsOptional() @Type(() => Number) declare teamId?: number;
   @ApiPropertyOptional() @IsOptional() @IsString() declare createdBy?: string;
+  @ApiPropertyOptional({ description: 'Filter by organization ID' }) @IsOptional() @Type(() => Number) @IsInt() declare orgId?: number;
   @ApiPropertyOptional() @IsOptional() @IsString() declare occasion?: 'birthDate' | 'anniversaryDate';
   @ApiPropertyOptional() @IsOptional() @IsString() declare dateFrom?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() declare dateTo?: string;

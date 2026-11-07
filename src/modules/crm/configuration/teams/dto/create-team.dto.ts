@@ -23,4 +23,8 @@ export class CreateTeamDto {
   @IsOptional()
   @IsString()
   createdBy?: string;
+
+  @ApiPropertyOptional({ type: Number, description: 'Organization ID' })
+  @IsOptional()
+  orgId?: number;
 }

@@ -20,4 +20,10 @@ export class QueryUserWiseReportDto {
 
   @ApiPropertyOptional({ description: 'Team database ID' })
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) declare teamId?: number;
+
+  @ApiPropertyOptional({ description: 'Filter by organization ID' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  declare orgId?: number;
 }

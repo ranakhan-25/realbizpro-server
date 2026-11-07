@@ -22,4 +22,8 @@ export class QueryTaskTypeDto {
   @ApiPropertyOptional({ type: Boolean, default: false, description: 'Include inactive task types' })
   @IsOptional() @Transform(({ value }) => value === true || value === 'true') @IsBoolean()
   declare withInactive?: boolean;
+
+  @ApiPropertyOptional({ type: Number, description: 'Organization ID' })
+  @IsOptional() @Type(() => Number) @IsInt()
+  declare orgId?: number;
 }

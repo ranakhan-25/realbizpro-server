@@ -1,5 +1,6 @@
+import { Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsOptional, IsString } from 'class-validator';
+import { IsDateString, IsOptional, IsString, IsInt } from 'class-validator';
 
 export class QuerySalesPipelineFunnelReportDto {
   @ApiPropertyOptional({ description: 'Lead date lower bound (YYYY-MM-DD)', example: '2026-10-01' })
@@ -16,4 +17,10 @@ export class QuerySalesPipelineFunnelReportDto {
 
   @ApiPropertyOptional({ description: 'Project UUID, project code or project name' })
   @IsOptional() @IsString() declare projectId?: string;
+
+  @ApiPropertyOptional({ description: 'Filter by organization ID' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  declare orgId?: number;
 }

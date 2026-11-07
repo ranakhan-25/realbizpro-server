@@ -35,4 +35,8 @@ export class CreateCommunicationStatusDto {
   @IsOptional()
   @IsString()
   addedById?: string;
+
+  @ApiPropertyOptional({ type: Number, description: 'Organization ID' })
+  @IsOptional()
+  orgId?: number;
 }

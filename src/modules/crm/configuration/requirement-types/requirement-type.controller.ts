@@ -1,45 +1,90 @@
-import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import type { Request } from 'express';
 import { CreateRequirementTypeDto } from './dto/create-requirement-type.dto';
 import { QueryRequirementTypeDto } from './dto/query-requirement-type.dto';
 import { UpdateRequirementTypeDto } from './dto/update-requirement-type.dto';
 import { RequirementTypeService } from './requirement-type.service';
-
-type AuthenticatedRequest = Request & { user?: { id?: number; username?: string; firstName?: string | null; lastName?: string | null } };
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { CurrentUser, CurrentUserId } from 'src/common/decorators/auth.decorators';
 
 @ApiTags('CRM | Configuration | Requirement Type')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('crm/configuration/requirement-types')
 export class RequirementTypeController {
   constructor(private readonly service: RequirementTypeService) {}
 
-  @Post() @ApiOperation({ summary: 'Create a CRM requirement type' })
-  create(@Body() dto: CreateRequirementTypeDto, @Req() req: AuthenticatedRequest) {
-    const user = req.user;
-    const createdBy = user?.username || [user?.firstName, user?.lastName].filter(Boolean).join(' ') || (user?.id != null ? String(user.id) : undefined);
-    return this.service.create(dto, createdBy);
+  @Post()
+  @Permissions('create_crm_requirement_type')
+  @ApiOperation({ summary: 'Create a CRM requirement type' })
+  create(
+    @Body() dto: CreateRequirementTypeDto,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.service.create(dto, userId, currentUser);
   }
 
-  @Get() @ApiOperation({ summary: 'List requirement types with search and pagination' })
-  findAll(@Query() query: QueryRequirementTypeDto) { return this.service.findAll(query); }
-
-  @Get('dropdown') @ApiOperation({ summary: 'Get requirement types for CRM form dropdowns' })
-  dropdown() { return this.service.dropdown(); }
-
-  @Get(':uuid') @ApiOperation({ summary: 'Get requirement type by UUID, including related lead requirements' })
-  findOne(@Param('uuid', ParseUUIDPipe) uuid: string) { return this.service.findOne(uuid); }
-
-  @Patch(':uuid') @ApiOperation({ summary: 'Update a requirement type by UUID' })
-  update(@Param('uuid', ParseUUIDPipe) uuid: string, @Body() dto: UpdateRequirementTypeDto, @Req() req: AuthenticatedRequest) {
-    return this.service.update(uuid, dto, req.user?.username ?? (req.user?.id != null ? String(req.user.id) : undefined));
+  @Get()
+  @Permissions('list_crm_requirement_type')
+  @ApiOperation({ summary: 'List requirement types with search and pagination' })
+  findAll(
+    @Query() query: QueryRequirementTypeDto,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.service.findAll(query, currentUser);
   }
 
-  @Delete(':uuid') @ApiOperation({ summary: 'Soft-delete a requirement type by UUID' })
-  remove(@Param('uuid', ParseUUIDPipe) uuid: string, @Req() req: AuthenticatedRequest) {
-    return this.service.remove(uuid, req.user?.username ?? (req.user?.id != null ? String(req.user.id) : undefined));
+  @Get('dropdown')
+  @Permissions('read_crm_requirement_type')
+  @ApiOperation({ summary: 'Get requirement types for CRM form dropdowns' })
+  dropdown(@CurrentUser() currentUser: any) {
+    return this.service.dropdown(currentUser);
   }
 
-  @Patch(':uuid/restore') @ApiOperation({ summary: 'Restore a soft-deleted requirement type by UUID' })
-  restore(@Param('uuid', ParseUUIDPipe) uuid: string) { return this.service.restore(uuid); }
+  @Get(':uuid')
+  @Permissions('read_crm_requirement_type')
+  @ApiOperation({ summary: 'Get requirement type by UUID, including related lead requirements' })
+  findOne(
+    @Param('uuid', ParseUUIDPipe) uuid: string,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.service.findOne(uuid, currentUser);
+  }
+
+  @Patch(':uuid')
+  @Permissions('update_crm_requirement_type')
+  @ApiOperation({ summary: 'Update a requirement type by UUID' })
+  update(
+    @Param('uuid', ParseUUIDPipe) uuid: string,
+    @Body() dto: UpdateRequirementTypeDto,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.service.update(uuid, dto, userId, currentUser);
+  }
+
+  @Delete(':uuid')
+  @Permissions('delete_crm_requirement_type')
+  @ApiOperation({ summary: 'Soft-delete a requirement type by UUID' })
+  remove(
+    @Param('uuid', ParseUUIDPipe) uuid: string,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.service.remove(uuid, userId, currentUser);
+  }
+
+  @Patch(':uuid/restore')
+  @Permissions('update_crm_requirement_type')
+  @ApiOperation({ summary: 'Restore a soft-deleted requirement type by UUID' })
+  restore(
+    @Param('uuid', ParseUUIDPipe) uuid: string,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.service.restore(uuid, userId, currentUser);
+  }
 }

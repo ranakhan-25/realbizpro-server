@@ -8,6 +8,7 @@ import {
 } from 'sequelize-typescript';
 import { BaseModel } from 'src/database/base.model';
 import { SysUser } from 'src/database/models/system/sys_user.model';
+import { SysOrganization } from 'src/database/models/system/sys_organization.model';
 import { LeadStage } from 'src/database/models/crm/configuration/crm-lead-stage.model';
 import { Project } from 'src/database/models/projects/project/pr_project.model';
 import { CrmOffer } from 'src/database/models/crm/configuration/crm-offer.model';
@@ -126,14 +127,30 @@ export class Lead extends BaseModel<LeadAttributes, LeadCreationAttributes> {
   @Column({ type: DataType.TEXT, allowNull: true })
   declare query?: string;
 
-  @Column({ type: DataType.STRING, allowNull: true, field: 'created_by' })
-  declare createdBy?: string;
+  @ForeignKey(() => SysOrganization)
+  @Column({
+    type: DataType.BIGINT,
+    allowNull: true,
+    field: 'org_id',
+    defaultValue: null,
+  })
+  declare orgId?: number | null;
 
-  @Column({ type: DataType.STRING, allowNull: true, field: 'updated_by' })
-  declare updatedBy?: string;
+  @BelongsTo(() => SysOrganization, {
+    foreignKey: 'orgId',
+    targetKey: 'id',
+    as: 'tenantOrganization',
+  })
+  declare tenantOrganization?: SysOrganization;
 
-  @Column({ type: DataType.STRING, allowNull: true, field: 'deleted_by' })
-  declare deletedBy?: string;
+  @Column({ type: DataType.STRING, allowNull: true, field: 'created_by', defaultValue: null })
+  declare createdBy?: string | null;
+
+  @Column({ type: DataType.STRING, allowNull: true, field: 'updated_by', defaultValue: null })
+  declare updatedBy?: string | null;
+
+  @Column({ type: DataType.STRING, allowNull: true, field: 'deleted_by', defaultValue: null })
+  declare deletedBy?: string | null;
 
   @ForeignKey(() => Project)
   @Column({ type: DataType.STRING, allowNull: true, field: 'project_id' })

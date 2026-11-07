@@ -17,9 +17,9 @@ export class CrmProjectService {
     @InjectModel(Project) private readonly projectModel: typeof Project,
   ) {}
 
-  async dropdown() {
+  async dropdown(currentUser?: any) {
     const [projectTypes, areas, users, storeys] = await Promise.all([
-      this.projectTypeDropdown(), this.areaDropdown(), this.userDropdown(), this.storeyDropdown(),
+      this.projectTypeDropdown(), this.areaDropdown(currentUser), this.userDropdown(), this.storeyDropdown(),
     ]);
     return {
       projectTypes,
@@ -37,8 +37,12 @@ export class CrmProjectService {
     return rows.map(row => { const item = row.toJSON() as unknown as Record<string, unknown>; delete item.id; return item; });
   }
 
-  async areaDropdown() {
-    const rows = await this.areas.findAll({ attributes: ['uuid', 'name'], order: [['name', 'ASC']] });
+  async areaDropdown(currentUser?: any) {
+    const where: any = {};
+    if (currentUser?.orgId) {
+      where.orgId = currentUser.orgId;
+    }
+    const rows = await this.areas.findAll({ where, attributes: ['uuid', 'name'], order: [['name', 'ASC']] });
     return rows.map(row => { const item = row.toJSON() as unknown as Record<string, unknown>; delete item.id; return item; });
   }
 
@@ -52,21 +56,34 @@ export class CrmProjectService {
     return rows.map(row => row.numberOfStoreys);
   }
 
-  async create(dto: any, userId?: number) {
+  async create(dto: any, userId?: number, currentUser?: any) {
     await this.validateRelations(dto);
-    return this.toPublicProject(await this.projects.create(dto, userId));
+    const createData = { ...dto, ...(currentUser?.orgId && !dto.orgId ? { orgId: currentUser.orgId } : {}) };
+    return this.toPublicProject(await this.projects.create(createData, userId));
   }
-  async findAll(query: any) {
-    const result = await this.projects.findAll(query);
+
+  async findAll(query: any, currentUser?: any) {
+    const queryData = { ...query, ...(currentUser?.orgId && !query.orgId ? { orgId: currentUser.orgId } : {}) };
+    const result = await this.projects.findAll(queryData);
     return { ...result, data: result.data.map(project => this.toPublicProject(project)) };
   }
-  async findOne(uuid: string) { return this.toPublicProject(await this.projects.findOne(uuid)); }
-  async update(uuid: string, dto: any, userId?: number) {
+
+  async findOne(uuid: string, currentUser?: any) {
+    return this.toPublicProject(await this.projects.findOne(uuid));
+  }
+
+  async update(uuid: string, dto: any, userId?: number, currentUser?: any) {
     await this.validateRelations(dto);
     return this.toPublicProject(await this.projects.update(uuid, dto, userId));
   }
-  remove(uuid: string, userId?: number) { return this.projects.remove(uuid, userId); }
-  async restore(uuid: string) { return this.toPublicProject(await this.projects.restore(uuid)); }
+
+  remove(uuid: string, userId?: number, currentUser?: any) {
+    return this.projects.remove(uuid, userId);
+  }
+
+  async restore(uuid: string, userId?: number, currentUser?: any) {
+    return this.toPublicProject(await this.projects.restore(uuid));
+  }
 
   private toPublicProject(project: Project) {
     const data = project.toJSON() as unknown as Record<string, unknown>;

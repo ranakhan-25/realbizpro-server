@@ -20,7 +20,7 @@ export class InterestedFlatLandReportService {
     @InjectModel(SysUser) private readonly users: typeof SysUser,
   ) {}
 
-  async dropdowns() {
+  async dropdowns(currentUser?: any) {
     const [projects, flatLands] = await Promise.all([
       this.projects.findAll({ attributes: ['uuid', 'code', 'name'], order: [['name', 'ASC']] }),
       this.flatLands.findAll({ attributes: ['uuid', 'projectId', 'projectName', 'flatLandNo', 'propertyType'], order: [['projectName', 'ASC'], ['flatLandNo', 'ASC']] }),
@@ -28,10 +28,11 @@ export class InterestedFlatLandReportService {
     return { projects, flatLands };
   }
 
-  async report(query: QueryInterestedFlatLandReportDto) {
+  async report(query: QueryInterestedFlatLandReportDto, currentUser?: any) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const where: any = {};
+    if (currentUser?.orgId) { where.orgId = currentUser.orgId; }
     if (query.projectId) where.projectId = query.projectId;
     if (query.flatLandId) {
       const property = await this.flatLands.findOne({ where: { uuid: query.flatLandId } as any, attributes: ['uuid', 'projectId', 'flatLandNo'] });

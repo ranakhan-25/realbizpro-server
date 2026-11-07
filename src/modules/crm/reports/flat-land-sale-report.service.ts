@@ -22,7 +22,7 @@ export class FlatLandSaleReportService {
     @InjectModel(CrSaleAgreement) private readonly agreements: typeof CrSaleAgreement,
   ) {}
 
-  async dropdowns() {
+  async dropdowns(currentUser?: any) {
     const [bookings, projects, teams, users] = await Promise.all([
       this.bookings.findAll({ attributes: ['salesBy'], where: { salesBy: { [Op.ne]: null } }, order: [['salesBy', 'ASC']] }),
       this.projects.findAll({ attributes: ['uuid', 'code', 'name'], order: [['name', 'ASC']] }),
@@ -33,7 +33,7 @@ export class FlatLandSaleReportService {
     return { salesBy, teams, projects, users };
   }
 
-  async report(query: QueryFlatLandSaleReportDto) {
+  async report(query: QueryFlatLandSaleReportDto, currentUser?: any) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const dateWhere: any = {};
@@ -50,7 +50,7 @@ export class FlatLandSaleReportService {
       this.flatLands.findAll({ attributes: ['uuid', 'projectId', 'flatLandNo', 'size'] }),
       this.teamMembers.findAll({ attributes: ['uuid', 'projectId', 'name', 'email'] }),
       this.users.findAll({ attributes: ['uuid', 'userCode', 'name'] }),
-      this.agreements.findAll({ attributes: ['projectId', 'unit_identifier', 'customer_name', 'agreement_date', 'handover_date', 'total_price'] }),
+      this.agreements.findAll({ attributes: ['projectId', 'unit_identifier', 'customer_name', 'agreement_date', 'handover_date', 'total_price'] }).catch(() => [] as CrSaleAgreement[]),
     ]);
     const projectMap = new Map(projects.map(row => [row.uuid, row]));
     const propertyMap = new Map(flatLands.map(row => [row.uuid, row]));

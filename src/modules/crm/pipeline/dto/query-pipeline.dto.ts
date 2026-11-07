@@ -18,4 +18,8 @@ export class QueryPipelineDto {
   @ApiPropertyOptional({ description: 'Filter by selected project UUID' })
   @IsOptional() @IsUUID()
   declare projectUuid?: string;
+
+  @ApiPropertyOptional({ description: 'Filter by organization ID' })
+  @IsOptional() @Type(() => Number) @IsInt()
+  declare orgId?: number;
 }

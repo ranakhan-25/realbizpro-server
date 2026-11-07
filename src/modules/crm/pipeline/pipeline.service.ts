@@ -22,15 +22,17 @@ export class PipelineService {
     @InjectModel(CrmLeadPipeline) private readonly pipelineRecords: typeof CrmLeadPipeline,
   ) {}
 
-  async projectDropdown() {
+  async projectDropdown(currentUser?: any) {
+    const where: any = {};
     const projects = await this.projects.findAll({
+      where,
       attributes: ['uuid', 'code', 'name', 'status'],
       order: [['name', 'ASC']],
     });
     return projects.map(project => ({ uuid: project.uuid, code: project.code, name: project.name, status: project.status }));
   }
 
-  async findAll(query: QueryPipelineDto) {
+  async findAll(query: QueryPipelineDto, currentUser?: any) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const where: any = {};
@@ -49,7 +51,11 @@ export class PipelineService {
       offset: (page - 1) * limit,
     });
     const metrics = await this.getMetrics(rows);
-    const pipelineRows = await this.pipelineRecords.findAll({ where: { projectId: { [Op.in]: rows.map(project => project.uuid) } } as any });
+    const pipelineWhere: any = { projectId: { [Op.in]: rows.map(project => project.uuid) } };
+    if (currentUser?.orgId) {
+      pipelineWhere.orgId = currentUser.orgId;
+    }
+    const pipelineRows = await this.pipelineRecords.findAll({ where: pipelineWhere });
     const byProject = new Map(pipelineRows.map(row => [row.projectId, row]));
     const data = rows.map(project => this.toPublic(project, metrics.get(project.uuid), byProject.get(project.uuid)));
     return {
@@ -58,61 +64,89 @@ export class PipelineService {
     };
   }
 
-  async findOne(projectUuid: string) {
-    const project = await this.projects.findOne({ where: { uuid: projectUuid } as any, attributes: ['uuid', 'code', 'name', 'status'] });
+  async findOne(projectUuid: string, currentUser?: any) {
+    const where: any = { uuid: projectUuid };
+    const project = await this.projects.findOne({ where, attributes: ['uuid', 'code', 'name', 'status'] });
     if (!project) throw new NotFoundException(`Project ${projectUuid} not found`);
     const metrics = await this.getMetrics([project]);
-    const pipelineRecord = await this.pipelineRecords.findOne({ where: { projectId: project.uuid } as any });
+    const pipelineWhere: any = { projectId: project.uuid };
+    if (currentUser?.orgId) {
+      pipelineWhere.orgId = currentUser.orgId;
+    }
+    const pipelineRecord = await this.pipelineRecords.findOne({ where: pipelineWhere });
     return this.toPublic(project, metrics.get(project.uuid), pipelineRecord ?? undefined);
   }
 
-  async create(dto: CreatePipelineDto, actorUuid?: string) {
-    const project = await this.projects.findOne({ where: { uuid: dto.projectUuid } as any });
+  async create(dto: CreatePipelineDto, userId?: number, currentUser?: any) {
+    const projectWhere: any = { uuid: dto.projectUuid };
+    const project = await this.projects.findOne({ where: projectWhere });
     if (!project) throw new NotFoundException(`Project ${dto.projectUuid} not found`);
-    const existing = await this.pipelineRecords.findOne({ where: { projectId: project.uuid } as any });
+    const orgId = dto.orgId ?? currentUser?.orgId ?? null;
+    const existingWhere: any = { projectId: project.uuid };
+    if (orgId) {
+      existingWhere.orgId = orgId;
+    }
+    const existing = await this.pipelineRecords.findOne({ where: existingWhere });
     if (existing) throw new BadRequestException(`A pipeline record already exists for project ${project.uuid}`);
+    const actor = userId ? String(userId) : null;
     return this.pipelineRecords.create({
       projectId: project.uuid,
       initialLeadsCount: dto.initialLeadsCount ?? 0,
       estimatedPipelineValue: dto.estimatedPipelineValue ?? 0,
-      createdBy: actorUuid,
+      orgId,
+      createdBy: actor,
     } as any, { include: [{ association: 'project' }] });
   }
 
-  async update(uuid: string, dto: UpdatePipelineDto, actorUuid?: string) {
-    const record = await this.getRecord(uuid);
+  async update(uuid: string, dto: UpdatePipelineDto, userId?: number, currentUser?: any) {
+    const record = await this.getRecord(uuid, currentUser);
+    const orgId = dto.orgId ?? record.orgId ?? currentUser?.orgId ?? null;
     if (dto.projectUuid) {
-      const project = await this.projects.findOne({ where: { uuid: dto.projectUuid } as any });
+      const projectWhere: any = { uuid: dto.projectUuid };
+      const project = await this.projects.findOne({ where: projectWhere });
       if (!project) throw new NotFoundException(`Project ${dto.projectUuid} not found`);
-      const duplicate = await this.pipelineRecords.findOne({ where: { projectId: project.uuid, uuid: { [Op.ne]: uuid } } as any });
+      const dupWhere: any = { projectId: project.uuid, uuid: { [Op.ne]: uuid } };
+      if (orgId) {
+        dupWhere.orgId = orgId;
+      }
+      const duplicate = await this.pipelineRecords.findOne({ where: dupWhere });
       if (duplicate) throw new BadRequestException(`A pipeline record already exists for project ${project.uuid}`);
       record.projectId = project.uuid;
     }
     if (dto.initialLeadsCount !== undefined) record.initialLeadsCount = dto.initialLeadsCount;
     if (dto.estimatedPipelineValue !== undefined) record.estimatedPipelineValue = dto.estimatedPipelineValue;
-    record.updatedBy = actorUuid;
+    if (dto.orgId !== undefined) record.orgId = dto.orgId;
+    if (userId) record.updatedBy = String(userId);
     await record.save();
     return this.pipelineRecords.findOne({ where: { uuid } as any, include: [{ association: 'project' }] });
   }
 
-  async remove(uuid: string, actorUuid?: string) {
-    const record = await this.getRecord(uuid);
-    await record.update({ deletedBy: actorUuid });
+  async remove(uuid: string, userId?: number, currentUser?: any) {
+    const record = await this.getRecord(uuid, currentUser);
+    if (userId) await record.update({ deletedBy: String(userId) });
     await record.destroy();
     return { message: `Pipeline record ${uuid} soft-deleted successfully` };
   }
 
-  async restore(uuid: string) {
-    const record = await this.pipelineRecords.findOne({ where: { uuid } as any, paranoid: false });
+  async restore(uuid: string, userId?: number, currentUser?: any) {
+    const where: any = { uuid };
+    if (currentUser?.orgId) {
+      where.orgId = currentUser.orgId;
+    }
+    const record = await this.pipelineRecords.findOne({ where, paranoid: false });
     if (!record) throw new NotFoundException(`Pipeline record ${uuid} not found`);
     if (!record.deletedAt) throw new BadRequestException(`Pipeline record ${uuid} is not deleted`);
     await record.restore();
-    await record.update({ deletedBy: null });
+    await record.update({ deletedBy: null, ...(userId ? { updatedBy: String(userId) } : {}) });
     return this.pipelineRecords.findOne({ where: { uuid } as any, include: [{ association: 'project' }] });
   }
 
-  private async getRecord(uuid: string) {
-    const record = await this.pipelineRecords.findOne({ where: { uuid } as any, include: [{ association: 'project' }] });
+  private async getRecord(uuid: string, currentUser?: any) {
+    const where: any = { uuid };
+    if (currentUser?.orgId) {
+      where.orgId = currentUser.orgId;
+    }
+    const record = await this.pipelineRecords.findOne({ where, include: [{ association: 'project' }] });
     if (!record) throw new NotFoundException(`Pipeline record ${uuid} not found`);
     return record;
   }
@@ -170,6 +204,11 @@ export class PipelineService {
       estimatedPipelineValue,
       pipelineValueBdt: estimatedPipelineValue,
       pipelineValueLakhs: estimatedPipelineValue / 100000,
+      orgId: pipelineRecord?.orgId ?? null,
+      org_id: pipelineRecord?.orgId ?? null,
+      created_by: pipelineRecord?.createdBy ?? null,
+      updated_by: pipelineRecord?.updatedBy ?? null,
+      deleted_by: pipelineRecord?.deletedBy ?? null,
     };
   }
 }

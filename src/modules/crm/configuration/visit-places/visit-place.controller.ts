@@ -1,48 +1,90 @@
-import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import type { Request } from 'express';
 import { CreateVisitPlaceDto } from './dto/create-visit-place.dto';
 import { QueryVisitPlaceDto } from './dto/query-visit-place.dto';
 import { UpdateVisitPlaceDto } from './dto/update-visit-place.dto';
 import { VisitPlaceService } from './visit-place.service';
-
-type AuthenticatedRequest = Request & { user?: { id?: number; username?: string; firstName?: string | null; lastName?: string | null } };
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { CurrentUser, CurrentUserId } from 'src/common/decorators/auth.decorators';
 
 @ApiTags('CRM | Configuration | Visit Places')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('crm/configuration/visit-places')
 export class VisitPlaceController {
   constructor(private readonly service: VisitPlaceService) {}
 
-  @Post() @ApiOperation({ summary: 'Create a CRM visit place' })
-  create(@Body() dto: CreateVisitPlaceDto, @Req() req: AuthenticatedRequest) {
-    return this.service.create(dto, this.actor(req));
+  @Post()
+  @Permissions('create_crm_visit_place')
+  @ApiOperation({ summary: 'Create a CRM visit place' })
+  create(
+    @Body() dto: CreateVisitPlaceDto,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.service.create(dto, userId, currentUser);
   }
 
-  @Get() @ApiOperation({ summary: 'List visit places with search and pagination' })
-  findAll(@Query() query: QueryVisitPlaceDto) { return this.service.findAll(query); }
-
-  @Get('dropdown') @ApiOperation({ summary: 'Get visit places for CRM activity dropdowns' })
-  dropdown() { return this.service.dropdown(); }
-
-  @Get(':uuid') @ApiOperation({ summary: 'Get a visit place by UUID with related activities' })
-  findOne(@Param('uuid', ParseUUIDPipe) uuid: string) { return this.service.findOne(uuid); }
-
-  @Patch(':uuid') @ApiOperation({ summary: 'Update a visit place by UUID' })
-  update(@Param('uuid', ParseUUIDPipe) uuid: string, @Body() dto: UpdateVisitPlaceDto, @Req() req: AuthenticatedRequest) {
-    return this.service.update(uuid, dto, this.actor(req));
+  @Get()
+  @Permissions('list_crm_visit_place')
+  @ApiOperation({ summary: 'List visit places with search and pagination' })
+  findAll(
+    @Query() query: QueryVisitPlaceDto,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.service.findAll(query, currentUser);
   }
 
-  @Delete(':uuid') @ApiOperation({ summary: 'Soft-delete a visit place by UUID' })
-  remove(@Param('uuid', ParseUUIDPipe) uuid: string, @Req() req: AuthenticatedRequest) {
-    return this.service.remove(uuid, this.actor(req));
+  @Get('dropdown')
+  @Permissions('read_crm_visit_place')
+  @ApiOperation({ summary: 'Get visit places for CRM activity dropdowns' })
+  dropdown(@CurrentUser() currentUser: any) {
+    return this.service.dropdown(currentUser);
   }
 
-  @Patch(':uuid/restore') @ApiOperation({ summary: 'Restore a soft-deleted visit place by UUID' })
-  restore(@Param('uuid', ParseUUIDPipe) uuid: string) { return this.service.restore(uuid); }
+  @Get(':uuid')
+  @Permissions('read_crm_visit_place')
+  @ApiOperation({ summary: 'Get a visit place by UUID with related activities' })
+  findOne(
+    @Param('uuid', ParseUUIDPipe) uuid: string,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.service.findOne(uuid, currentUser);
+  }
 
-  private actor(req: AuthenticatedRequest) {
-    const user = req.user;
-    return user?.username || [user?.firstName, user?.lastName].filter(Boolean).join(' ') || (user?.id != null ? String(user.id) : undefined);
+  @Patch(':uuid')
+  @Permissions('update_crm_visit_place')
+  @ApiOperation({ summary: 'Update a visit place by UUID' })
+  update(
+    @Param('uuid', ParseUUIDPipe) uuid: string,
+    @Body() dto: UpdateVisitPlaceDto,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.service.update(uuid, dto, userId, currentUser);
+  }
+
+  @Delete(':uuid')
+  @Permissions('delete_crm_visit_place')
+  @ApiOperation({ summary: 'Soft-delete a visit place by UUID' })
+  remove(
+    @Param('uuid', ParseUUIDPipe) uuid: string,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.service.remove(uuid, userId, currentUser);
+  }
+
+  @Patch(':uuid/restore')
+  @Permissions('update_crm_visit_place')
+  @ApiOperation({ summary: 'Restore a soft-deleted visit place by UUID' })
+  restore(
+    @Param('uuid', ParseUUIDPipe) uuid: string,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.service.restore(uuid, userId, currentUser);
   }
 }

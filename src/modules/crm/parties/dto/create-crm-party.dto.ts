@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsEnum, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import { IsEmail, IsEnum, IsInt, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 import { CrmPartyStatus, CrmPartyType } from 'src/database/models/crm/lead/crm-party.model';
 
 export class CreateCrmPartyDto {
@@ -11,4 +11,5 @@ export class CreateCrmPartyDto {
   @ApiPropertyOptional({ example: 'House 10, Road 5, Dhaka' }) @IsOptional() @IsString() declare address?: string;
   @ApiPropertyOptional({ example: 'VIP Client, Commercial', description: 'Comma-separated tags' }) @IsOptional() @IsString() declare tags?: string;
   @ApiPropertyOptional({ enum: CrmPartyStatus, default: CrmPartyStatus.ACTIVE }) @IsOptional() @IsEnum(CrmPartyStatus) declare status?: CrmPartyStatus;
+  @ApiPropertyOptional({ example: 1 }) @IsOptional() @IsInt() declare orgId?: number;
 }

@@ -1,6 +1,7 @@
 import { BelongsTo, Column, DataType, ForeignKey, HasMany, Table } from 'sequelize-typescript';
 import { BaseModel } from 'src/database/base.model';
 import { SysUser } from 'src/database/models/system/sys_user.model';
+import { SysOrganization } from 'src/database/models/system/sys_organization.model';
 import { CrmPartyAssignment } from './crm-party-assignment.model';
 import { CrmPartyCommunication } from './crm-party-communication.model';
 
@@ -19,6 +20,26 @@ export class CrmParty extends BaseModel<CrmPartyAttributes, CrmPartyCreationAttr
   @Column({ type: DataType.TEXT, allowNull: true }) declare address?: string;
   @Column({ type: DataType.TEXT, allowNull: true, comment: 'Comma-separated tags from the CRM party form' }) declare tags?: string;
   @Column({ type: DataType.ENUM(...Object.values(CrmPartyStatus)), allowNull: false, defaultValue: CrmPartyStatus.ACTIVE }) declare status: CrmPartyStatus;
+
+  @ForeignKey(() => SysOrganization)
+  @Column({
+    type: DataType.BIGINT,
+    allowNull: true,
+    field: 'org_id',
+    defaultValue: null,
+  })
+  declare orgId?: number | null;
+
+  @BelongsTo(() => SysOrganization, {
+    foreignKey: 'orgId',
+    targetKey: 'id',
+    as: 'organization',
+  })
+  declare organization?: SysOrganization;
+
+  @Column({ type: DataType.STRING, allowNull: true, field: 'created_by', defaultValue: null }) declare createdBy?: string | null;
+  @Column({ type: DataType.STRING, allowNull: true, field: 'updated_by', defaultValue: null }) declare updatedBy?: string | null;
+  @Column({ type: DataType.STRING, allowNull: true, field: 'deleted_by', defaultValue: null }) declare deletedBy?: string | null;
 
   @ForeignKey(() => SysUser)
   @Column({ type: DataType.UUID, allowNull: true, field: 'assigned_to_uuid' }) declare assignedToUuid?: string;
