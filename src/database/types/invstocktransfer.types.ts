@@ -21,7 +21,7 @@ export interface InvStockTransferAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id?: string | null;
 
   // Relations
   item: InvItem;
@@ -40,7 +40,7 @@ export interface InvStockTransferCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id?: string | null;
 }
 
 export type InvStockTransferUpdateAttributes = Partial<InvStockTransferCreationAttributes>;

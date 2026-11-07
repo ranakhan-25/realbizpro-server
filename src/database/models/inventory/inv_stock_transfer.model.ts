@@ -59,5 +59,5 @@ export class InvStockTransfer extends BaseModel<InvStockTransferAttributes, InvS
     type: DataType.STRING,
     allowNull: true,
   })
-  declare projectId?: string;
+  declare org_id?: string;
 }

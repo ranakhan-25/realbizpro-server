@@ -63,5 +63,5 @@ export class InvSupplier extends BaseModel<InvSupplierAttributes, InvSupplierCre
     type: DataType.STRING,
     allowNull: true,
   })
-  declare projectId?: string;
+  declare org_id?: string;
 }

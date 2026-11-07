@@ -48,6 +48,6 @@ export class InvBrand extends BaseModel<InvBrandAttributes, InvBrandCreationAttr
     type: DataType.STRING,
     allowNull: true,
   })
-  declare projectId?: string;
+  declare org_id?: string;
 }
 
