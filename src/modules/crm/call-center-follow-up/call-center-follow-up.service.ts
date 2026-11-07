@@ -34,10 +34,13 @@ export class CallCenterFollowUpService {
     @InjectModel(LeadVisitStatus) private readonly visitStatuses: typeof LeadVisitStatus,
   ) {}
 
-  async list(query: QueryCallCenterFollowUpDto) {
+  async list(query: QueryCallCenterFollowUpDto, currentUser?: any) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const where: any = {};
+    if (currentUser?.orgId) {
+      where.orgId = currentUser.orgId;
+    }
     if (query.dateFrom || query.dateTo) where.activityDate = {
       ...(query.dateFrom ? { [Op.gte]: new Date(`${query.dateFrom}T00:00:00`) } : {}),
       ...(query.dateTo ? { [Op.lte]: new Date(`${query.dateTo}T23:59:59.999`) } : {}),
@@ -46,6 +49,9 @@ export class CallCenterFollowUpService {
     if (query.communicationStatus) where.discussionPoints = query.communicationStatus;
     if (query.leadStatus) where['$lead.status$'] = query.leadStatus;
     const leadWhere: any = {};
+    if (currentUser?.orgId) {
+      leadWhere.orgId = currentUser.orgId;
+    }
     if (query.userId) {
       const selectedUser = await this.users.findOne({ where: { uuid: query.userId } as any, attributes: ['uuid', 'userCode'] });
       leadWhere.assignedTo = { [Op.in]: selectedUser ? [selectedUser.uuid, selectedUser.userCode].filter(Boolean) : [query.userId] };
@@ -93,20 +99,24 @@ export class CallCenterFollowUpService {
     };
   }
 
-  async dropdowns() {
+  async dropdowns(currentUser?: any) {
+    const whereActive: any = { isActive: true };
+    if (currentUser?.orgId) {
+      whereActive.orgId = currentUser.orgId;
+    }
     const [projects, users, stages, communicationStatuses, requirementTypes, visitPlaces, visitStatuses] = await Promise.all([
       this.projects.findAll({ where: { status: 'ACTIVE' }, attributes: ['uuid', 'code', 'name'], order: [['name', 'ASC']] }),
       this.users.findAll({ where: { isActive: true }, attributes: ['uuid', 'name'], order: [['name', 'ASC']] }),
       this.stages.findAll({ where: { isActive: true }, attributes: ['id', 'uuid', 'name', 'sortOrder'], order: [['sortOrder', 'ASC']] }),
       this.communicationStatuses.findAll({ where: { status: CommunicationStatusState.ACTIVE }, attributes: ['uuid', 'name'], order: [['name', 'ASC']] }),
-      this.requirementTypes.findAll({ attributes: ['id', 'name'], order: [['name', 'ASC']] }),
-      this.visitPlaces.findAll({ attributes: ['id', 'name', 'address'], order: [['name', 'ASC']] }),
+      this.requirementTypes.findAll({ where: whereActive, attributes: ['id', 'name'], order: [['name', 'ASC']] }),
+      this.visitPlaces.findAll({ where: whereActive, attributes: ['id', 'name', 'address'], order: [['name', 'ASC']] }),
       this.visitStatuses.findAll({ attributes: ['id', 'name'], order: [['name', 'ASC']] }),
     ]);
     return { projects, users, stages, communicationStatuses, requirementTypes, visitPlaces, visitStatuses, leadStatuses: ['active', 'junk', 'converted'] };
   }
 
-  async propertyDropdown(projectUuid: string) {
+  async propertyDropdown(projectUuid: string, currentUser?: any) {
     const project = await this.projects.findOne({ where: { uuid: projectUuid } as any, attributes: ['uuid'] });
     if (!project) throw new NotFoundException(`Project ${projectUuid} not found`);
     return this.flatLand.findAll({
@@ -116,9 +126,13 @@ export class CallCenterFollowUpService {
     });
   }
 
-  async details(uuid: string) {
+  async details(uuid: string, currentUser?: any) {
+    const leadWhere: any = { uuid };
+    if (currentUser?.orgId) {
+      leadWhere.orgId = currentUser.orgId;
+    }
     const lead = await this.leads.findOne({
-      where: { uuid },
+      where: leadWhere,
       attributes: ['id', 'uuid', 'leadCode', 'clientName', 'phone', 'alternatePhone', 'email', 'designation', 'organization', 'presentAddress', 'permanentAddress', 'assignedTo', 'priority', 'leadScore', 'status', 'notes', 'leadDate', 'creditOfficerId', 'birthDate', 'anniversaryDate', 'areaId', 'priceRangeId', 'leadType', 'initialRemark', 'query', 'createdBy', 'projectId', 'createdAt', 'updatedAt'],
       include: [
         'category', 'stage', 'source', 'campaign', 'profession', 'area', 'priceRange',
@@ -129,7 +143,7 @@ export class CallCenterFollowUpService {
     });
     if (!lead) throw new NotFoundException(`Lead ${uuid} not found`);
     const activities = lead.activities ?? [];
-    const negotiations = await this.listNegotiations(uuid);
+    const negotiations = await this.listNegotiations(uuid, currentUser);
     const leadJson = lead.toJSON() as any;
     const interestProjects = await this.projectMap((lead.propertyInterests ?? []).map(item => item.projectId));
     const leadProjects = await this.projectMap([lead.projectId]);
@@ -152,8 +166,10 @@ export class CallCenterFollowUpService {
     };
   }
 
-  async createActivity(uuid: string, dto: CreateFollowUpActivityDto) {
-    const lead = await this.getLead(uuid);
+  async createActivity(uuid: string, dto: CreateFollowUpActivityDto, userId?: number, currentUser?: any) {
+    const lead = await this.getLead(uuid, currentUser);
+    const orgId = lead.orgId ?? currentUser?.orgId ?? null;
+    const actor = userId ? String(userId) : null;
     const created = await this.activities.sequelize!.transaction(async transaction => {
       const activity = await this.activities.create({
         leadId: lead.id,
@@ -167,107 +183,158 @@ export class CallCenterFollowUpService {
         visitStatusId: dto.visitStatusId,
         conductedBy: dto.conductedBy,
         projectId: lead.projectId,
+        orgId,
+        createdBy: actor,
       } as any, { transaction });
       const leadChanges: any = {};
       if (dto.leadStageId !== undefined) leadChanges.leadStageId = dto.leadStageId;
       if (dto.leadStatus) leadChanges.status = dto.leadStatus;
       if (dto.junkNote) leadChanges.notes = dto.junkNote;
+      if (actor) leadChanges.updatedBy = actor;
       if (Object.keys(leadChanges).length) await lead.update(leadChanges, { transaction });
       return activity;
     });
     return created;
   }
 
-  async addNote(uuid: string, note: string) {
+  async addNote(uuid: string, note: string, userId?: number, currentUser?: any) {
     if (!note?.trim()) throw new BadRequestException('note is required');
-    return this.createActivity(uuid, { activityType: 'note', comment: note } as CreateFollowUpActivityDto);
+    return this.createActivity(uuid, { activityType: 'note', comment: note } as CreateFollowUpActivityDto, userId, currentUser);
   }
 
-  async listRequirements(uuid: string) {
-    const lead = await this.getLead(uuid);
+  async listRequirements(uuid: string, currentUser?: any) {
+    const lead = await this.getLead(uuid, currentUser);
     return this.requirements.findAll({ where: { leadId: lead.id }, include: ['requirementType'], order: [['createdAt', 'DESC']] });
   }
-  async createRequirement(uuid: string, dto: UpsertLeadRequirementDto) {
-    const lead = await this.getLead(uuid);
-    return this.requirements.create({ ...dto, leadId: lead.id, projectId: lead.projectId } as any);
+
+  async createRequirement(uuid: string, dto: UpsertLeadRequirementDto, userId?: number, currentUser?: any) {
+    const lead = await this.getLead(uuid, currentUser);
+    const orgId = lead.orgId ?? currentUser?.orgId ?? null;
+    const actor = userId ? String(userId) : null;
+    return this.requirements.create({
+      ...dto,
+      leadId: lead.id,
+      projectId: lead.projectId,
+      orgId,
+      createdBy: actor,
+    } as any);
   }
-  async updateRequirement(uuid: string, requirementUuid: string, dto: UpsertLeadRequirementDto) {
-    const row = await this.requirements.findOne({ where: { uuid: requirementUuid, leadId: (await this.getLead(uuid)).id } });
+
+  async updateRequirement(uuid: string, requirementUuid: string, dto: UpsertLeadRequirementDto, userId?: number, currentUser?: any) {
+    const lead = await this.getLead(uuid, currentUser);
+    const row = await this.requirements.findOne({ where: { uuid: requirementUuid, leadId: lead.id } });
     if (!row) throw new NotFoundException(`Requirement ${requirementUuid} not found`);
-    await row.update(dto as any);
+    const changes: any = { ...dto };
+    if (userId) changes.updatedBy = String(userId);
+    await row.update(changes);
     return row;
   }
-  async deleteRequirement(uuid: string, requirementUuid: string) {
-    const row = await this.requirements.findOne({ where: { uuid: requirementUuid, leadId: (await this.getLead(uuid)).id } });
+
+  async deleteRequirement(uuid: string, requirementUuid: string, userId?: number, currentUser?: any) {
+    const lead = await this.getLead(uuid, currentUser);
+    const row = await this.requirements.findOne({ where: { uuid: requirementUuid, leadId: lead.id } });
     if (!row) throw new NotFoundException(`Requirement ${requirementUuid} not found`);
+    if (userId) await row.update({ deletedBy: String(userId) });
     await row.destroy();
     return { deleted: true };
   }
 
-  async listInterests(uuid: string) {
-    const lead = await this.getLead(uuid);
+  async listInterests(uuid: string, currentUser?: any) {
+    const lead = await this.getLead(uuid, currentUser);
     const rows = await this.interests.findAll({ where: { leadId: lead.id }, order: [['createdAt', 'DESC']] });
     const projects = await this.projectMap(rows.map(item => item.projectId));
     return rows.map(item => ({ ...item.toJSON(), project: projects.get(item.projectId ?? '') ?? null }));
   }
-  async listNegotiations(uuid: string) {
-    const lead = await this.getLead(uuid);
-    // `roundNo` is a virtual compatibility field, not a database column.
+
+  async listNegotiations(uuid: string, currentUser?: any) {
+    const lead = await this.getLead(uuid, currentUser);
     return this.negotiations.findAll({ where: { leadId: lead.id }, include: ['project', 'flatLand', 'creator'], order: [['createdAt', 'DESC']] });
   }
-  async createNegotiation(uuid: string, dto: CreateNegotiationDto) {
-    const lead = await this.getLead(uuid);
+
+  async createNegotiation(uuid: string, dto: CreateNegotiationDto, userId?: number, currentUser?: any) {
+    const lead = await this.getLead(uuid, currentUser);
     const project = await this.projects.findOne({ where: { uuid: dto.projectId } as any });
     if (!project) throw new BadRequestException(`Project ${dto.projectId} not found`);
     if (dto.flatLandId) {
       const property = await this.flatLand.findOne({ where: { uuid: dto.flatLandId } as any });
       if (!property || property.projectId !== dto.projectId) throw new BadRequestException('Flat/land must belong to the selected project');
     }
-    return this.negotiations.create({ ...dto, leadId: lead.id, projectId: dto.projectId, roundNo: dto.roundNo ?? 1, status: dto.status ?? CrmNegotiationStatus.PENDING } as any);
+    const orgId = lead.orgId ?? currentUser?.orgId ?? null;
+    const actor = userId ? String(userId) : null;
+    return this.negotiations.create({
+      ...dto,
+      leadId: lead.id,
+      projectId: dto.projectId,
+      roundNo: dto.roundNo ?? 1,
+      status: dto.status ?? CrmNegotiationStatus.PENDING,
+      orgId,
+      createdBy: actor,
+    } as any);
   }
-  async updateNegotiation(uuid: string, negotiationUuid: string, dto: UpdateNegotiationDto) {
-    const row = await this.getNegotiation(uuid, negotiationUuid);
+
+  async updateNegotiation(uuid: string, negotiationUuid: string, dto: UpdateNegotiationDto, userId?: number, currentUser?: any) {
+    const row = await this.getNegotiation(uuid, negotiationUuid, currentUser);
     if (dto.projectId) {
       const project = await this.projects.findOne({ where: { uuid: dto.projectId } as any });
       if (!project) throw new BadRequestException(`Project ${dto.projectId} not found`);
     }
+    const actor = userId ? String(userId) : null;
     await row.update({
       ...dto,
       ...(dto.status !== undefined ? { status: dto.status as CrmNegotiationStatus } : {}),
+      ...(actor ? { updatedBy: actor } : {}),
     } as any);
     return row;
   }
-  async deleteNegotiation(uuid: string, negotiationUuid: string) {
-    const row = await this.getNegotiation(uuid, negotiationUuid);
-    await row.destroy();
-    return { deleted: true };
-  }
-  async setNegotiationStatus(uuid: string, negotiationUuid: string, status: CrmNegotiationStatus) {
-    const row = await this.getNegotiation(uuid, negotiationUuid);
-    await row.update({ status });
-    return row;
-  }
-  async createInterest(uuid: string, dto: UpsertPropertyInterestDto) {
-    const lead = await this.getLead(uuid);
-    return this.interests.create({ ...dto, leadId: lead.id, projectId: dto.projectId ?? lead.projectId, status: dto.status ?? 'interested' } as any);
-  }
-  async updateInterest(uuid: string, interestUuid: string, dto: UpsertPropertyInterestDto) {
-    const lead = await this.getLead(uuid);
-    const row = await this.interests.findOne({ where: { uuid: interestUuid, leadId: lead.id } });
-    if (!row) throw new NotFoundException(`Property interest ${interestUuid} not found`);
-    await row.update(dto);
-    return row;
-  }
-  async deleteInterest(uuid: string, interestUuid: string) {
-    const lead = await this.getLead(uuid);
-    const row = await this.interests.findOne({ where: { uuid: interestUuid, leadId: lead.id } });
-    if (!row) throw new NotFoundException(`Property interest ${interestUuid} not found`);
+
+  async deleteNegotiation(uuid: string, negotiationUuid: string, userId?: number, currentUser?: any) {
+    const row = await this.getNegotiation(uuid, negotiationUuid, currentUser);
+    if (userId) await row.update({ deletedBy: String(userId) } as any);
     await row.destroy();
     return { deleted: true };
   }
 
-  async listActivities(uuid: string, type: string) {
-    const lead = await this.getLead(uuid);
+  async setNegotiationStatus(uuid: string, negotiationUuid: string, status: CrmNegotiationStatus, userId?: number, currentUser?: any) {
+    const row = await this.getNegotiation(uuid, negotiationUuid, currentUser);
+    const actor = userId ? String(userId) : null;
+    await row.update({ status, ...(actor ? { updatedBy: actor } : {}) } as any);
+    return row;
+  }
+
+  async createInterest(uuid: string, dto: UpsertPropertyInterestDto, userId?: number, currentUser?: any) {
+    const lead = await this.getLead(uuid, currentUser);
+    const orgId = lead.orgId ?? currentUser?.orgId ?? null;
+    const actor = userId ? String(userId) : null;
+    return this.interests.create({
+      ...dto,
+      leadId: lead.id,
+      projectId: dto.projectId ?? lead.projectId,
+      status: dto.status ?? 'interested',
+      orgId,
+      createdBy: actor,
+    } as any);
+  }
+
+  async updateInterest(uuid: string, interestUuid: string, dto: UpsertPropertyInterestDto, userId?: number, currentUser?: any) {
+    const lead = await this.getLead(uuid, currentUser);
+    const row = await this.interests.findOne({ where: { uuid: interestUuid, leadId: lead.id } });
+    if (!row) throw new NotFoundException(`Property interest ${interestUuid} not found`);
+    const actor = userId ? String(userId) : null;
+    await row.update({ ...dto, ...(actor ? { updatedBy: actor } : {}) });
+    return row;
+  }
+
+  async deleteInterest(uuid: string, interestUuid: string, userId?: number, currentUser?: any) {
+    const lead = await this.getLead(uuid, currentUser);
+    const row = await this.interests.findOne({ where: { uuid: interestUuid, leadId: lead.id } });
+    if (!row) throw new NotFoundException(`Property interest ${interestUuid} not found`);
+    if (userId) await row.update({ deletedBy: String(userId) });
+    await row.destroy();
+    return { deleted: true };
+  }
+
+  async listActivities(uuid: string, type: string, currentUser?: any) {
+    const lead = await this.getLead(uuid, currentUser);
     const where: any = { leadId: lead.id };
     if (type === 'upcoming') where.nextFollowupDate = { [Op.not]: null };
     else if (type === 'visits') where.activityType = { [Op.in]: ['visit', 'task_visit'] };
@@ -278,17 +345,23 @@ export class CallCenterFollowUpService {
     return rows.map(row => ({ ...row.toJSON(), communicationStatus: row.discussionPoints ?? null, conductedByUser: users.get(row.conductedBy ?? '') ?? null }));
   }
 
-  private async getLead(uuid: string) {
-    const lead = await this.leads.findOne({ where: { uuid } });
+  private async getLead(uuid: string, currentUser?: any) {
+    const where: any = { uuid };
+    if (currentUser?.orgId) {
+      where.orgId = currentUser.orgId;
+    }
+    const lead = await this.leads.findOne({ where });
     if (!lead) throw new NotFoundException(`Lead ${uuid} not found`);
     return lead;
   }
-  private async getNegotiation(leadUuid: string, negotiationUuid: string) {
-    const lead = await this.getLead(leadUuid);
+
+  private async getNegotiation(leadUuid: string, negotiationUuid: string, currentUser?: any) {
+    const lead = await this.getLead(leadUuid, currentUser);
     const row = await this.negotiations.findOne({ where: { uuid: negotiationUuid, leadId: lead.id } as any, include: ['project', 'flatLand', 'creator'] });
     if (!row) throw new NotFoundException(`Negotiation ${negotiationUuid} not found`);
     return row;
   }
+
   private async projectMap(ids: Array<string | null | undefined>) {
     const values = [...new Set(ids.filter((id): id is string => !!id))];
     if (!values.length) return new Map<string, Project>();
@@ -300,6 +373,7 @@ export class CallCenterFollowUpService {
     });
     return new Map(projects.flatMap(project => [[project.uuid, project], [project.code, project]]));
   }
+
   private async userMap(ids: Array<string | null | undefined>) {
     const values = [...new Set(ids.filter((id): id is string => typeof id === 'string' && !!id))];
     if (!values.length) return new Map<string, { uuid: string; name: string }>();

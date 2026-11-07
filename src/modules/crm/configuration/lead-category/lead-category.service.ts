@@ -14,13 +14,22 @@ export class LeadCategoryService {
     @InjectModel(Lead) private readonly leads: typeof Lead,
   ) {}
 
-  async create(dto: CreateLeadCategoryDto) {
+  async create(dto: CreateLeadCategoryDto, userId?: number, currentUser?: any) {
     const code = dto.code?.trim() || await this.generateCode();
-    const row = await this.categories.create({ ...dto, code, name: dto.name.trim(), isActive: dto.isActive ?? true } as any);
+    const row = await this.categories.create({
+      ...dto,
+      code,
+      name: dto.name.trim(),
+      isActive: dto.isActive ?? true,
+      createdBy: userId ? String(userId) : dto.createdBy ?? null,
+      updatedBy: null,
+      deletedBy: null,
+      orgId: dto.orgId ?? currentUser?.orgId ?? null,
+    } as any);
     return this.findOne(row.uuid);
   }
 
-  async findAll(query: QueryLeadCategoryDto) {
+  async findAll(query: QueryLeadCategoryDto, currentUser?: any) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const where: any = {};
@@ -31,6 +40,8 @@ export class LeadCategoryService {
       { description: { [Op.iLike]: `%${search}%` } },
     ];
     if (query.isActive !== undefined) where.isActive = query.isActive;
+    const effectiveOrgId = query.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) where.orgId = effectiveOrgId;
     const { rows, count } = await this.categories.findAndCountAll({
       where, limit, offset: (page - 1) * limit, order: [['createdAt', 'DESC']],
       paranoid: !query.withDeleted,
@@ -41,9 +52,11 @@ export class LeadCategoryService {
     };
   }
 
-  async findOne(uuid: string) {
+  async findOne(uuid: string, currentUser?: any) {
+    const where: any = { uuid };
+    if (currentUser?.orgId) where.orgId = currentUser.orgId;
     const row = await this.categories.findOne({
-      where: { uuid },
+      where,
       include: [{ association: 'leads', attributes: ['uuid', 'leadCode', 'clientName'], required: false }],
     });
     if (!row) throw new NotFoundException(`Lead category ${uuid} not found`);
@@ -54,25 +67,33 @@ export class LeadCategoryService {
     return { ...result, leads: relatedLeads };
   }
 
-  async update(uuid: string, dto: UpdateLeadCategoryDto) {
+  async update(uuid: string, dto: UpdateLeadCategoryDto, userId?: number, currentUser?: any) {
     const row = await this.categories.findOne({ where: { uuid } });
     if (!row) throw new NotFoundException(`Lead category ${uuid} not found`);
-    await row.update({ ...dto, ...(dto.name ? { name: dto.name.trim() } : {}), ...(dto.code ? { code: dto.code.trim() } : {}) } as any);
+    await row.update({
+      ...dto,
+      ...(dto.name ? { name: dto.name.trim() } : {}),
+      ...(dto.code ? { code: dto.code.trim() } : {}),
+      updatedBy: userId ? String(userId) : row.updatedBy ?? null,
+      ...(dto.orgId !== undefined ? { orgId: dto.orgId } : {}),
+    } as any);
     return this.findOne(uuid);
   }
 
-  async remove(uuid: string) {
+  async remove(uuid: string, userId?: number, currentUser?: any) {
     const row = await this.categories.findOne({ where: { uuid } });
     if (!row) throw new NotFoundException(`Lead category ${uuid} not found`);
+    await row.update({ deletedBy: userId ? String(userId) : null } as any);
     await row.destroy({ force: false });
     return { message: `Lead category ${uuid} deleted successfully` };
   }
 
-  async restore(uuid: string) {
+  async restore(uuid: string, userId?: number, currentUser?: any) {
     const row = await this.categories.findOne({ where: { uuid }, paranoid: false });
     if (!row) throw new NotFoundException(`Lead category ${uuid} not found`);
     if (!row.deletedAt) throw new BadRequestException(`Lead category ${uuid} is not deleted`);
     await row.restore();
+    await row.update({ deletedBy: null, updatedBy: userId ? String(userId) : row.updatedBy ?? null } as any);
     return this.findOne(uuid);
   }
 

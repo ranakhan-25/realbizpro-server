@@ -10,6 +10,7 @@ export class QueryCallCenterFollowUpDto {
   @ApiPropertyOptional({ description: 'Filters the activity type/status column' }) @IsOptional() @IsString() declare activityType?: string;
   @ApiPropertyOptional({ description: 'Communication outcome, persisted in the existing activity discussion_points field' }) @IsOptional() @IsString() declare communicationStatus?: string;
   @ApiPropertyOptional({ description: 'Filters the lead status column' }) @IsOptional() @IsString() declare leadStatus?: string;
+  @ApiPropertyOptional({ description: 'Filter by organization ID' }) @IsOptional() @Type(() => Number) @IsInt() declare orgId?: number;
   @ApiPropertyOptional() @IsOptional() @IsString() declare search?: string;
   @ApiPropertyOptional({ default: 1 }) @IsOptional() @Type(() => Number) @IsInt() @Min(1) declare page?: number;
   @ApiPropertyOptional({ default: 10, maximum: 100 }) @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(100) declare limit?: number;

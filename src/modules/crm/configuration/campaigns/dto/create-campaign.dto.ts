@@ -51,4 +51,8 @@ export class CreateCampaignDto {
   @ApiPropertyOptional({ description: 'UUID or display name of the user adding this campaign' })
   @IsOptional() @IsString()
   declare createdBy?: string;
+
+  @ApiPropertyOptional({ type: Number, description: 'Organization ID' })
+  @IsOptional() @Type(() => Number)
+  declare orgId?: number;
 }

@@ -14,13 +14,19 @@ export class CommunicationStatusService {
     @InjectModel(LeadStage) private readonly leadStageModel: typeof LeadStage,
   ) {}
 
-  async create(dto: CreateCommunicationStatusDto): Promise<CommunicationStatus> {
+  async create(dto: CreateCommunicationStatusDto, userId?: number, currentUser?: any): Promise<CommunicationStatus> {
     if (dto.leadStageId) await this.ensureActiveLeadStage(dto.leadStageId);
-    const row = await this.statusModel.create(dto as any);
+    const row = await this.statusModel.create({
+      ...dto,
+      createdBy: userId ? String(userId) : dto.addedById ?? null,
+      updatedBy: null,
+      deletedBy: null,
+      orgId: dto.orgId ?? currentUser?.orgId ?? null,
+    } as any);
     return this.findOne(row.uuid);
   }
 
-  async findAll(query: QueryCommunicationStatusDto) {
+  async findAll(query: QueryCommunicationStatusDto, currentUser?: any) {
     const { page = 1, limit = 10, skip, search, status, leadStageId, isDefault, sortBy = 'createdAt', sortOrder = 'DESC', withDeleted = false } = query;
     const offset = skip ?? (page - 1) * limit;
     const where: any = {};
@@ -31,6 +37,8 @@ export class CommunicationStatusService {
     if (status) where.status = status;
     if (leadStageId) where.leadStageId = leadStageId;
     if (isDefault !== undefined) where.isDefault = isDefault;
+    const effectiveOrgId = query.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) where.orgId = effectiveOrgId;
     const { rows, count } = await this.statusModel.findAndCountAll({
       where, limit, offset, order: [[sortBy, sortOrder]], paranoid: !withDeleted,
       include: [{ association: 'leadStage', required: false }],
@@ -45,9 +53,9 @@ export class CommunicationStatusService {
       delete item.createdAt;
       delete item.updatedAt;
       delete item.deletedAt;
-      item.created_by = item.addedById ?? item.created_by ?? null;
-      item.updated_by = item.updated_by ?? null;
-      item.deleted_by = item.deleted_by ?? null;
+      item.created_by = item.createdBy ?? item.addedById ?? item.created_by ?? null;
+      item.updated_by = item.updatedBy ?? item.updated_by ?? null;
+      item.deleted_by = item.deletedBy ?? item.deleted_by ?? null;
       delete item.addedById;
       return item;
     });
@@ -62,9 +70,11 @@ export class CommunicationStatusService {
     };
   }
 
-  async findOne(uuid: string): Promise<any> {
+  async findOne(uuid: string, currentUser?: any): Promise<any> {
+    const where: any = { uuid };
+    if (currentUser?.orgId) where.orgId = currentUser.orgId;
     const row = await this.statusModel.findOne({
-      where: { uuid } as any,
+      where,
       include: [{ association: 'leadStage', required: false, paranoid: false }],
     });
     if (!row) throw new NotFoundException(`Communication status #${uuid} not found`);
@@ -75,47 +85,57 @@ export class CommunicationStatusService {
     delete item.createdAt;
     delete item.updatedAt;
     delete item.deletedAt;
-    item.created_by = item.addedById ?? item.created_by ?? null;
-    item.updated_by = item.updated_by ?? null;
-    item.deleted_by = item.deleted_by ?? null;
+    item.created_by = item.createdBy ?? item.addedById ?? item.created_by ?? null;
+    item.updated_by = item.updatedBy ?? item.updated_by ?? null;
+    item.deleted_by = item.deletedBy ?? item.deleted_by ?? null;
     delete item.addedById;
     return item;
   }
 
-  async update(uuid: string, dto: UpdateCommunicationStatusDto): Promise<CommunicationStatus> {
+  async update(uuid: string, dto: UpdateCommunicationStatusDto, userId?: number, currentUser?: any): Promise<CommunicationStatus> {
     const row = await this.statusModel.findOne({ where: { uuid } as any });
     if (!row) throw new NotFoundException(`Communication status #${uuid} not found`);
     if (dto.leadStageId) await this.ensureActiveLeadStage(dto.leadStageId);
-    await row.update(dto as any);
+    await row.update({
+      ...dto,
+      updatedBy: userId ? String(userId) : (row as any).updatedBy ?? null,
+      ...(dto.orgId !== undefined ? { orgId: dto.orgId } : {}),
+    } as any);
     return this.findOne(uuid);
   }
 
-  async remove(uuid: string): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const row = await this.statusModel.findOne({ where: { uuid } as any });
     if (!row) throw new NotFoundException(`Communication status #${uuid} not found`);
+    await row.update({ deletedBy: userId ? String(userId) : null } as any);
     await row.destroy({ force: false });
     return { message: `Communication status #${uuid} deleted successfully` };
   }
 
-  async restore(uuid: string): Promise<CommunicationStatus> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<CommunicationStatus> {
     const row = await this.statusModel.findOne({ where: { uuid } as any, paranoid: false });
     if (!row) throw new NotFoundException(`Communication status #${uuid} not found`);
     if (!row.deletedAt) throw new BadRequestException(`Communication status #${uuid} is not deleted`);
     await row.restore();
+    await row.update({ deletedBy: null, updatedBy: userId ? String(userId) : (row as any).updatedBy ?? null } as any);
     return this.findOne(uuid);
   }
 
-  async dropdown() {
+  async dropdown(currentUser?: any) {
+    const where: any = { status: CommunicationStatusState.ACTIVE };
+    if (currentUser?.orgId) where.orgId = currentUser.orgId;
     return this.statusModel.findAll({
-      where: { status: CommunicationStatusState.ACTIVE },
+      where,
       attributes: ['uuid', 'name', 'isDefault', 'leadStageId'],
       order: [['name', 'ASC']],
     });
   }
 
-  async leadStageDropdown() {
+  async leadStageDropdown(currentUser?: any) {
+    const where: any = { isActive: true };
+    if (currentUser?.orgId) where.orgId = currentUser.orgId;
     return this.leadStageModel.findAll({
-      where: { isActive: true }, attributes: ['uuid', 'name'], order: [['name', 'ASC']],
+      where, attributes: ['uuid', 'name'], order: [['name', 'ASC']],
     });
   }
 

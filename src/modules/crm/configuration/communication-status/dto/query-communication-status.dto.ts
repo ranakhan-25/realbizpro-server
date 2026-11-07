@@ -43,4 +43,8 @@ export class QueryCommunicationStatusDto {
   @ApiPropertyOptional({ default: false })
   @IsOptional() @Transform(({ value }) => value === true || value === 'true') @IsBoolean()
   withDeleted?: boolean = false;
+
+  @ApiPropertyOptional({ type: Number, description: 'Organization ID' })
+  @IsOptional() @Type(() => Number) @IsInt()
+  orgId?: number;
 }

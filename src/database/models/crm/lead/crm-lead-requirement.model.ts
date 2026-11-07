@@ -1,5 +1,6 @@
 import { BelongsTo, Column, DataType, ForeignKey, Table } from 'sequelize-typescript';
 import { BaseModel } from 'src/database/base.model';
+import { SysOrganization } from 'src/database/models/system/sys_organization.model';
 import { LeadRequirementType } from './crm-lead-master-data.model';
 import { Lead } from './crm-lead.model';
 
@@ -18,9 +19,25 @@ export class LeadRequirement extends BaseModel<LeadRequirementAttributes, LeadRe
   @Column({ type: DataType.DECIMAL(15, 2), allowNull: true, field: 'budget_max' }) declare budgetMax?: number;
   @Column({ type: DataType.JSON, allowNull: true, field: 'features_required' }) declare featuresRequired?: unknown;
   @Column({ type: DataType.TEXT, allowNull: true }) declare remarks?: string;
-  @Column({ type: DataType.STRING, allowNull: true, field: 'created_by' }) declare createdBy?: string;
-  @Column({ type: DataType.STRING, allowNull: true, field: 'updated_by' }) declare updatedBy?: string;
-  @Column({ type: DataType.STRING, allowNull: true, field: 'deleted_by' }) declare deletedBy?: string;
+  @ForeignKey(() => SysOrganization)
+  @Column({
+    type: DataType.BIGINT,
+    allowNull: true,
+    field: 'org_id',
+    defaultValue: null,
+  })
+  declare orgId?: number | null;
+
+  @BelongsTo(() => SysOrganization, {
+    foreignKey: 'orgId',
+    targetKey: 'id',
+    as: 'organization',
+  })
+  declare organization?: SysOrganization;
+
+  @Column({ type: DataType.STRING, allowNull: true, field: 'created_by', defaultValue: null }) declare createdBy?: string | null;
+  @Column({ type: DataType.STRING, allowNull: true, field: 'updated_by', defaultValue: null }) declare updatedBy?: string | null;
+  @Column({ type: DataType.STRING, allowNull: true, field: 'deleted_by', defaultValue: null }) declare deletedBy?: string | null;
   @Column({ type: DataType.STRING, allowNull: true, field: 'project_id' }) declare projectId?: string;
   @BelongsTo(() => Lead, { foreignKey: 'leadId', targetKey: 'id', as: 'lead' }) declare lead?: Lead;
   @BelongsTo(() => LeadRequirementType, { foreignKey: 'requirementTypeId', targetKey: 'id', as: 'requirementType' }) declare requirementType?: LeadRequirementType;

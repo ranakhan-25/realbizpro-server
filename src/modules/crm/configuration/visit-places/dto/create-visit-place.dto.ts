@@ -17,4 +17,8 @@ export class CreateVisitPlaceDto {
   @ApiPropertyOptional({ maxLength: 50 })
   @IsOptional() @IsString() @MaxLength(50)
   declare contactNumber?: string;
+
+  @ApiPropertyOptional({ type: Number, description: 'Organization ID' })
+  @IsOptional()
+  declare orgId?: number;
 }

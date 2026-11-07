@@ -11,4 +11,10 @@ export class QueryTeamSummaryReportDto {
 
   @ApiPropertyOptional({ description: 'Team database ID from the dropdown API' })
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) declare teamId?: number;
+
+  @ApiPropertyOptional({ description: 'Filter by organization ID' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  declare orgId?: number;
 }

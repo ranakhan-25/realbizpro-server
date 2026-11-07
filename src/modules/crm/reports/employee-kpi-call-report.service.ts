@@ -21,12 +21,12 @@ export class EmployeeKpiCallReportService {
     @InjectModel(SysUser) private readonly users: typeof SysUser,
   ) {}
 
-  async dropdowns() {
+  async dropdowns(currentUser?: any) {
     const users = await this.users.findAll({ where: { isActive: true }, attributes: ['uuid', 'userCode', 'name'], order: [['name', 'ASC']] });
     return { users };
   }
 
-  async report(query: QueryEmployeeKpiCallReportDto) {
+  async report(query: QueryEmployeeKpiCallReportDto, currentUser?: any) {
     const periodFrom = query.dateFrom ? new Date(`${query.dateFrom}T00:00:00.000Z`) : undefined;
     const periodTo = query.dateTo ? new Date(`${query.dateTo}T23:59:59.999Z`) : undefined;
     const kpis = await this.kpis.findAll({

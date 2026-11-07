@@ -18,7 +18,7 @@ export class CallAssignHistoryService {
     @InjectModel(CommunicationStatus) private readonly communicationStatuses: typeof CommunicationStatus,
   ) {}
 
-  async dropdowns() {
+  async dropdowns(currentUser?: any) {
     const [users, communicationStatuses] = await Promise.all([
       this.users.findAll({ where: { isActive: true }, attributes: ['uuid', 'userCode', 'name'], order: [['name', 'ASC']] }),
       this.communicationStatuses.findAll({ where: { status: CommunicationStatusState.ACTIVE }, attributes: ['uuid', 'name'], order: [['name', 'ASC']] }),
@@ -27,10 +27,13 @@ export class CallAssignHistoryService {
     return { from: options, to: options, communicationStatuses };
   }
 
-  async list(query: QueryCallAssignHistoryDto) {
+  async list(query: QueryCallAssignHistoryDto, currentUser?: any) {
     const page = query.page ?? 1;
     const limit = Math.min(query.limit ?? 10, 100);
     const where: any = {};
+    if (currentUser?.orgId) {
+      where.orgId = currentUser.orgId;
+    }
     if (query.dateFrom || query.dateTo) {
       where.assignmentDate = {};
       if (query.dateFrom) where.assignmentDate[Op.gte] = new Date(`${query.dateFrom}T00:00:00.000`);
@@ -63,6 +66,9 @@ export class CallAssignHistoryService {
     });
     const leadIds = [...new Set(rows.map(row => row.leadId))];
     const activityWhere: any = { leadId: { [Op.in]: leadIds }, activityType: 'followup' };
+    if (currentUser?.orgId) {
+      activityWhere.orgId = currentUser.orgId;
+    }
     if (selectedStatus) activityWhere.discussionPoints = { [Op.in]: [selectedStatus.uuid, selectedStatus.name] };
     const activityRows = leadIds.length ? await this.activities.findAll({ where: activityWhere, attributes: ['leadId', 'activityDate', 'summary', 'discussionPoints'], order: [['activityDate', 'DESC']] }) : [];
     const latestActivityByLead = new Map<number, LeadActivity>();
@@ -107,6 +113,11 @@ export class CallAssignHistoryService {
         from: userById.get(row.assignedFrom) ?? { uuid: row.assignedFrom, name: row.assignedFrom },
         to: userById.get(row.assignedTo) ?? { uuid: row.assignedTo, name: row.assignedTo },
         lead: lead ? { uuid: lead.uuid, leadCode: lead.leadCode, name: lead.clientName, phone: lead.phone } : null,
+        orgId: row.orgId ?? null,
+        org_id: row.orgId ?? null,
+        created_by: row.createdBy ?? null,
+        updated_by: row.updatedBy ?? null,
+        deleted_by: row.deletedBy ?? null,
       };
     });
     return { data, meta: { total: searched.length, page, limit, totalPages: Math.ceil(searched.length / limit) } };

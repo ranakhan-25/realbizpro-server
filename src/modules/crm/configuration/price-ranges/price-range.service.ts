@@ -10,18 +10,22 @@ import { UpdatePriceRangeDto } from './dto/update-price-range.dto';
 export class PriceRangeService {
   constructor(@InjectModel(LeadPriceRange) private readonly ranges: typeof LeadPriceRange) {}
 
-  async create(dto: CreatePriceRangeDto) {
+  async create(dto: CreatePriceRangeDto, userId?: number, currentUser?: any) {
     this.assertValidRange(dto.fromPrice, dto.toPrice);
     await this.assertUniqueRange(dto.fromPrice, dto.toPrice);
     const row = await this.ranges.create({
       name: this.makeName(dto.fromPrice, dto.toPrice),
       minPrice: dto.fromPrice,
       maxPrice: dto.toPrice,
-    });
+      createdBy: userId ? String(userId) : null,
+      updatedBy: null,
+      deletedBy: null,
+      orgId: dto.orgId ?? currentUser?.orgId ?? null,
+    } as any);
     return this.findOne(row.uuid);
   }
 
-  async findAll(query: QueryPriceRangeDto) {
+  async findAll(query: QueryPriceRangeDto, currentUser?: any) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const where: any = {};
@@ -33,6 +37,8 @@ export class PriceRangeService {
         { name: { [Op.iLike]: `%${term}%` } },
       ];
     }
+    const effectiveOrgId = query.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) where.orgId = effectiveOrgId;
     const { rows, count } = await this.ranges.findAndCountAll({
       where,
       limit,
@@ -46,9 +52,11 @@ export class PriceRangeService {
     };
   }
 
-  async findOne(uuid: string) {
+  async findOne(uuid: string, currentUser?: any) {
+    const where: any = { uuid };
+    if (currentUser?.orgId) where.orgId = currentUser.orgId;
     const row = await this.ranges.findOne({
-      where: { uuid },
+      where,
       include: [{ association: 'leads', attributes: ['uuid', 'leadCode', 'clientName'], required: false }],
     });
     if (!row) throw new NotFoundException(`Price range ${uuid} not found`);
@@ -57,7 +65,7 @@ export class PriceRangeService {
     return data;
   }
 
-  async update(uuid: string, dto: UpdatePriceRangeDto) {
+  async update(uuid: string, dto: UpdatePriceRangeDto, userId?: number, currentUser?: any) {
     const row = await this.ranges.findOne({ where: { uuid } });
     if (!row) throw new NotFoundException(`Price range ${uuid} not found`);
     const fromPrice = dto.fromPrice ?? (row.minPrice === null ? undefined : Number(row.minPrice));
@@ -67,27 +75,37 @@ export class PriceRangeService {
     }
     this.assertValidRange(fromPrice, toPrice);
     await this.assertUniqueRange(fromPrice, toPrice, uuid);
-    await row.update({ minPrice: fromPrice, maxPrice: toPrice, name: this.makeName(fromPrice, toPrice) });
+    await row.update({
+      minPrice: fromPrice,
+      maxPrice: toPrice,
+      name: this.makeName(fromPrice, toPrice),
+      updatedBy: userId ? String(userId) : row.updatedBy ?? null,
+      ...(dto.orgId !== undefined ? { orgId: dto.orgId } : {}),
+    } as any);
     return this.findOne(uuid);
   }
 
-  async remove(uuid: string) {
+  async remove(uuid: string, userId?: number, currentUser?: any) {
     const row = await this.ranges.findOne({ where: { uuid } });
     if (!row) throw new NotFoundException(`Price range ${uuid} not found`);
+    await row.update({ deletedBy: userId ? String(userId) : null } as any);
     await row.destroy({ force: false });
     return { message: `Price range ${uuid} deleted successfully` };
   }
 
-  async restore(uuid: string) {
+  async restore(uuid: string, userId?: number, currentUser?: any) {
     const row = await this.ranges.findOne({ where: { uuid }, paranoid: false });
     if (!row) throw new NotFoundException(`Price range ${uuid} not found`);
     if (!row.deletedAt) throw new BadRequestException(`Price range ${uuid} is not deleted`);
     await row.restore();
+    await row.update({ deletedBy: null, updatedBy: userId ? String(userId) : row.updatedBy ?? null } as any);
     return this.findOne(uuid);
   }
 
-  async dropdown() {
-    const rows = await this.ranges.findAll({ attributes: ['uuid', 'minPrice', 'maxPrice'], order: [['minPrice', 'ASC']] });
+  async dropdown(currentUser?: any) {
+    const where: any = {};
+    if (currentUser?.orgId) where.orgId = currentUser.orgId;
+    const rows = await this.ranges.findAll({ where, attributes: ['uuid', 'minPrice', 'maxPrice'], order: [['minPrice', 'ASC']] });
     return rows.map(row => this.toPublicRange(row));
   }
 

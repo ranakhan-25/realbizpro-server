@@ -34,4 +34,6 @@ export class CreateEmployeeKpiDto {
   @IsOptional() @IsEnum(EmployeeKpiStatus) declare status?: EmployeeKpiStatus;
   @ApiPropertyOptional({ description: 'UUID/code of the user creating the record' })
   @IsOptional() @IsString() declare createdBy?: string;
+  @ApiPropertyOptional({ example: 1 })
+  @IsOptional() @IsInt() declare orgId?: number;
 }

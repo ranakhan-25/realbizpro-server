@@ -9,6 +9,7 @@ import { BaseModel } from 'src/database/base.model';
 import { Project } from 'src/database/models/projects/project/pr_project.model';
 import { FlatLand } from 'src/database/models/projects/flatland/pr_flatland.model';
 import { SysUser } from 'src/database/models/system/sys_user.model';
+import { SysOrganization } from 'src/database/models/system/sys_organization.model';
 import { Lead } from '../lead/crm-lead.model';
 
 import type { CrmLeadNegotiationAttributes, CrmLeadNegotiationCreationAttributes } from '../../../types/crmleadnegotiation.types';
@@ -79,13 +80,54 @@ export class CrmLeadNegotiation extends BaseModel<CrmLeadNegotiationAttributes, 
     field: 'approval_status',
   })
   declare status: CrmNegotiationStatus;
+  @ForeignKey(() => SysOrganization)
+  @Column({
+    type: DataType.BIGINT,
+    allowNull: true,
+    field: 'org_id',
+    defaultValue: null,
+  })
+  declare orgId?: number | null;
+
+  @BelongsTo(() => SysOrganization, {
+    foreignKey: 'orgId',
+    targetKey: 'id',
+    as: 'organization',
+  })
+  declare organization?: SysOrganization;
+
   @ForeignKey(() => SysUser)
   @Column({
     type: DataType.STRING,
     allowNull: true,
     field: 'created_by',
+    defaultValue: null,
   })
-  declare createdById?: string;
+  declare createdById?: string | null;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+    field: 'created_by',
+    defaultValue: null,
+  })
+  declare createdBy?: string | null;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+    field: 'updated_by',
+    defaultValue: null,
+  })
+  declare updatedBy?: string | null;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+    field: 'deleted_by',
+    defaultValue: null,
+  })
+  declare deletedBy?: string | null;
   @Column({
     type: DataType.TEXT,
     allowNull: true,
