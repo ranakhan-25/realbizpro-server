@@ -22,7 +22,7 @@ export interface CrRecoveryLogAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id?: string | null;
 
   // Relations
   sale_agreement: CrSaleAgreement;
@@ -42,7 +42,7 @@ export interface CrRecoveryLogCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id?: string | null;
 }
 
 export type CrRecoveryLogUpdateAttributes = Partial<CrRecoveryLogCreationAttributes>;

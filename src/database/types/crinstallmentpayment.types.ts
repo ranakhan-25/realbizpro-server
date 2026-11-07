@@ -25,7 +25,7 @@ export interface CrInstallmentPaymentAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id?: string | null;
 
   // Relations
   installment_plan: CrInstallmentPlan;
@@ -48,7 +48,7 @@ export interface CrInstallmentPaymentCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id?: string | null;
 }
 
 export type CrInstallmentPaymentUpdateAttributes = Partial<CrInstallmentPaymentCreationAttributes>;

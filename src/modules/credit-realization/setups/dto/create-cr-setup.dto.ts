@@ -51,7 +51,7 @@ export class CreateCrInstallmentSetupDto {
   @ApiPropertyOptional({ example: 'PRJ-101' })
   @IsString()
   @IsOptional()
-  projectId?: string;
+  org_id?: string;
 
   @ApiPropertyOptional()
   @IsString()
