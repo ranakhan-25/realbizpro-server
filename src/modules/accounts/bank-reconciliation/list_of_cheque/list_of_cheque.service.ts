@@ -98,17 +98,19 @@ export class ChequeService {
   }
 
   async update(uuid: string, dto: UpdateListOfChequeDto): Promise<Cheque> {
-    const cheque = await this.findOne(uuid);
+    const cheque = await this.chequeModel.findOne({ where: { uuid } });
+    if (!cheque) throw new NotFoundException(`Cheque ${uuid} not found`);
     const { instrumentDate, ...updates } = dto;
     await cheque.update({
       ...updates,
       ...(instrumentDate ? { instrumentDate: new Date(instrumentDate) } : {}),
     });
-    return cheque;
+    return this.findOne(uuid);
   }
 
   async remove(uuid: string): Promise<{ message: string }> {
-    const cheque = await this.findOne(uuid);
+    const cheque = await this.chequeModel.findOne({ where: { uuid } });
+    if (!cheque) throw new NotFoundException(`Cheque ${uuid} not found`);
     await cheque.destroy();
     return { message: 'Cheque deleted successfully.' };
   }

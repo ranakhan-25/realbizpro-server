@@ -36,4 +36,13 @@ export class CreateProcurementMaterialRequisitionDto {
   @ApiPropertyOptional({ enum: ProcurementMaterialRequisitionApprovalLayer }) @IsOptional() @IsEnum(ProcurementMaterialRequisitionApprovalLayer) approval_layer?: ProcurementMaterialRequisitionApprovalLayer;
   @ApiPropertyOptional({ enum: ProcurementMaterialRequisitionStatus }) @IsOptional() @IsEnum(ProcurementMaterialRequisitionStatus) status?: ProcurementMaterialRequisitionStatus;
   @ApiProperty({ type: [CreateProcurementMaterialRequisitionItemDto] }) @IsArray() @ArrayMinSize(1) @ValidateNested({ each: true }) @Type(() => CreateProcurementMaterialRequisitionItemDto) items: CreateProcurementMaterialRequisitionItemDto[];
+
+  @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+  @IsOptional()
+  orgId?: number;
+
+  @ApiPropertyOptional({ description: 'Project UUID or ID' })
+  @IsOptional()
+  projectId?: string;
+
 }

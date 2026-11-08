@@ -169,7 +169,8 @@ export class ContraVoucherService {
   }
 
   async remove(uuid: string): Promise<{ message: string }> {
-    const voucher = await this.findOne(uuid);
+    const voucher = await this.voucherModel.findOne({ where: { uuid } });
+    if (!voucher) throw new NotFoundException(`Contra Voucher ${uuid} not found`);
     await voucher.destroy();
     return { message: 'Contra Voucher deleted successfully' };
   }

@@ -1,3 +1,4 @@
+import { SysOrganization } from 'src/database/models/system/sys_organization.model';
 import { BelongsTo, Column, DataType, ForeignKey, HasMany, Table } from 'sequelize-typescript';
 import { BaseModel } from 'src/database/base.model';
 import { Project } from '../../projects/project/pr_project.model';
@@ -40,4 +41,22 @@ export class ProcurementWorkOrder extends BaseModel<ProcurementWorkOrderAttribut
   @HasMany(() => ProcurementWorkOrderItem, { foreignKey: 'work_order_id', sourceKey: 'uuid', as: 'items', onDelete: 'CASCADE' }) declare items?: ProcurementWorkOrderItem[];
   @HasMany(() => ProcurementWorkOrderMeasurement, { foreignKey: 'work_order_id', sourceKey: 'uuid', as: 'measurements', onDelete: 'RESTRICT' }) declare measurements?: ProcurementWorkOrderMeasurement[];
   @HasMany(() => ProcurementWorkBill, { foreignKey: 'work_order_id', sourceKey: 'uuid', as: 'workBills', onDelete: 'RESTRICT' }) declare workBills?: ProcurementWorkBill[];
+
+
+  @ForeignKey(() => SysOrganization)
+  @Column({
+    type: DataType.BIGINT,
+    allowNull: true,
+    field: 'org_id',
+    defaultValue: null,
+  })
+  declare orgId?: number | null;
+
+  @BelongsTo(() => SysOrganization, {
+    foreignKey: 'orgId',
+    targetKey: 'id',
+    as: 'organization',
+  })
+  declare organization?: SysOrganization;
+
 }

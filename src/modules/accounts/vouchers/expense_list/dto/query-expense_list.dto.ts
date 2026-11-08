@@ -1,11 +1,7 @@
+import { ApiPropertyOptional } from '@nestjs/swagger';
 /* eslint-disable prettier/prettier */
 
-import { 
-  IsString, 
-  IsEnum, 
-  IsOptional, 
-  IsNumberString 
-} from 'class-validator';
+import { IsString, IsEnum, IsOptional, IsNumberString } from 'class-validator';
 import { ApprovalLayerStatus } from 'src/database/models/projects/material-requisition/pr_material_requisition.model';
 
 
@@ -46,4 +42,13 @@ export class QueryExpenseDto {
   @IsNumberString()
   @IsOptional()
   limit?: string;
+  @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+  @IsOptional()
+  orgId?: number;
+
+  @ApiPropertyOptional({ description: 'Project UUID or ID' })
+  @IsOptional()
+  @IsString()
+  projectId?: string;
+
 }

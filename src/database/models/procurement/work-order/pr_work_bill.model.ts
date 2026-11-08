@@ -1,3 +1,4 @@
+import { SysOrganization } from 'src/database/models/system/sys_organization.model';
 import { BelongsTo, Column, DataType, ForeignKey, Table } from 'sequelize-typescript';
 import { BaseModel } from 'src/database/base.model';
 import { Project } from '../../projects/project/pr_project.model';
@@ -25,4 +26,22 @@ export class ProcurementWorkBill extends BaseModel<ProcurementWorkBillAttributes
   @Column({ type: DataType.STRING, allowNull: true }) declare created_by?: string;
   @Column({ type: DataType.STRING, allowNull: true }) declare updated_by?: string;
   @Column({ type: DataType.STRING, allowNull: true }) declare deleted_by?: string;
+
+
+  @ForeignKey(() => SysOrganization)
+  @Column({
+    type: DataType.BIGINT,
+    allowNull: true,
+    field: 'org_id',
+    defaultValue: null,
+  })
+  declare orgId?: number | null;
+
+  @BelongsTo(() => SysOrganization, {
+    foreignKey: 'orgId',
+    targetKey: 'id',
+    as: 'organization',
+  })
+  declare organization?: SysOrganization;
+
 }

@@ -12,4 +12,13 @@ export class QueryProcurementItemEntryDto {
   @ApiPropertyOptional({ enum: ['createdAt', 'updatedAt', 'item_code', 'name', 'purchase_price', 'sale_price'] }) @IsOptional() @IsIn(['createdAt', 'updatedAt', 'item_code', 'name', 'purchase_price', 'sale_price']) sortBy = 'createdAt';
   @ApiPropertyOptional({ enum: ['ASC', 'DESC'], default: 'DESC' }) @IsOptional() @IsIn(['ASC', 'DESC']) sortOrder: 'ASC' | 'DESC' = 'DESC';
   @ApiPropertyOptional({ default: false }) @IsOptional() @Transform(({ value }) => value === 'true' || value === true) @IsBoolean() withDeleted = false;
+
+  @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+  @IsOptional()
+  orgId?: number;
+
+  @ApiPropertyOptional({ description: 'Project UUID or ID' })
+  @IsOptional()
+  projectId?: string;
+
 }

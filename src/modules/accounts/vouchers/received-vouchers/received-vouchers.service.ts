@@ -65,8 +65,9 @@ export class VouchersService {
       whereCondition.voucherNo = { [Op.iLike]: `%${search}%` }; // iLike = Case insensitive (Postgres)
     }
 
-    // 2. Filter by Project / Work
+    // 2. Filter by Project / Work / Org
     if (projectId) whereCondition.projectId = projectId;
+    if ((query as any)?.orgId) whereCondition.orgId = (query as any).orgId;
     if (workId) whereCondition.workId = workId;
     if (status) whereCondition.status = status;
 

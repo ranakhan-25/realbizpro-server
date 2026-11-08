@@ -1,11 +1,7 @@
+import { ApiPropertyOptional } from '@nestjs/swagger';
 /* eslint-disable prettier/prettier */
 
-import { 
-  IsString, 
-  IsOptional, 
-  IsNumberString,
-  IsISO8601 
-} from 'class-validator';
+import { IsString, IsOptional, IsNumberString, IsISO8601 } from 'class-validator';
 
 export class QueryContraVoucherDto {
   @IsString() @IsOptional() search?: string;
@@ -20,4 +16,13 @@ export class QueryContraVoucherDto {
 
   @IsNumberString() @IsOptional() page?: string;
   @IsNumberString() @IsOptional() limit?: string;
+  @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+  @IsOptional()
+  orgId?: number;
+
+  @ApiPropertyOptional({ description: 'Project UUID or ID' })
+  @IsOptional()
+  @IsString()
+  projectId?: string;
+
 }

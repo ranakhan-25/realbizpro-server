@@ -26,4 +26,13 @@ export class CreateProcurementAssetItemEntryDto {
 
   @ApiPropertyOptional({ example: 'user-uuid' })
   @IsOptional() @IsString() createdBy?: string;
+
+  @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+  @IsOptional()
+  orgId?: number;
+
+  @ApiPropertyOptional({ description: 'Project UUID or ID' })
+  @IsOptional()
+  projectId?: string;
+
 }

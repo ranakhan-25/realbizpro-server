@@ -1,15 +1,8 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  ParseUUIDPipe,
-  Patch,
-  Post,
-  Query,
-  Req,
-} from '@nestjs/common';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { CurrentUser, CurrentUserId } from 'src/common/decorators/auth.decorators';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -25,6 +18,7 @@ import {
 
 @ApiTags('Procurement | Hire Orders')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('procurement/hire-orders')
 export class HireOrderController {
   constructor(
@@ -40,7 +34,8 @@ export class HireOrderController {
   ) {
     return this.service.dropdowns(projectId);
   }
-  @Get('trash') trash(@Query() query: QueryHireOrderDto) { return this.service.listDeletedOrders(query); }
+  @Get('trash') @Permissions('view_procurement_equipment_hire')
+  trash(@Query() query: QueryHireOrderDto) { return this.service.listDeletedOrders(query); }
   @Get()
   @ApiOperation({
     summary: 'List/filter hire orders',
@@ -62,12 +57,14 @@ export class HireOrderController {
       req.user?.id,
     );
   }
-  @Get(':uuid') view(
+  @Get(':uuid') @Permissions('view_procurement_equipment_hire')
+  view(
     @Param('uuid', ParseUUIDPipe) uuid: string,
   ) {
     return this.service.viewOrder(uuid);
   }
-  @Patch(':uuid') update(
+  @Patch(':uuid') @Permissions('update_procurement_equipment_hire')
+  update(
     @Param('uuid', ParseUUIDPipe) uuid: string,
     @Body() dto: CreateHireOrderDto,
     @Req() req: any,
@@ -78,7 +75,8 @@ export class HireOrderController {
       req.user?.id,
     );
   }
-  @Delete(':uuid') remove(
+  @Delete(':uuid') @Permissions('delete_procurement_equipment_hire')
+  remove(
     @Param('uuid', ParseUUIDPipe) uuid: string,
     @Req() req: any,
   ) {
@@ -87,7 +85,8 @@ export class HireOrderController {
       req.user?.id,
     );
   }
-  @Patch(':uuid/restore') restore(
+  @Patch(':uuid/restore') @Permissions('update_procurement_equipment_hire')
+  restore(
     @Param('uuid', ParseUUIDPipe) uuid: string,
   ) {
     return this.service.restoreOrder(uuid);
@@ -101,18 +100,22 @@ export class HireInController {
   constructor(
     private readonly service: EquipmentHireService,
   ) {}
-  @Get('trash') trash(@Query() query: QueryHireMovementDto) { return this.service.listDeletedHireIns(query); }
-  @Get() list(
+  @Get('trash') @Permissions('view_procurement_equipment_hire')
+  trash(@Query() query: QueryHireMovementDto) { return this.service.listDeletedHireIns(query); }
+  @Get() @Permissions('view_procurement_equipment_hire')
+  list(
     @Query() query: QueryHireMovementDto,
   ) {
     return this.service.listHireIns(query);
   }
-  @Get(':uuid') view(
+  @Get(':uuid') @Permissions('view_procurement_equipment_hire')
+  view(
     @Param('uuid', ParseUUIDPipe) uuid: string,
   ) {
     return this.service.viewHireIn(uuid);
   }
-  @Delete(':uuid') remove(
+  @Delete(':uuid') @Permissions('delete_procurement_equipment_hire')
+  remove(
     @Param('uuid', ParseUUIDPipe) uuid: string,
     @Req() req: any,
   ) {
@@ -122,7 +125,8 @@ export class HireInController {
       req.user?.id,
     );
   }
-  @Patch(':uuid/restore') restore(
+  @Patch(':uuid/restore') @Permissions('update_procurement_equipment_hire')
+  restore(
     @Param('uuid', ParseUUIDPipe) uuid: string,
   ) {
     return this.service.restoreEntity(
@@ -139,18 +143,22 @@ export class HireOutController {
   constructor(
     private readonly service: EquipmentHireService,
   ) {}
-  @Get('trash') trash(@Query() query: QueryHireMovementDto) { return this.service.listDeletedHireOuts(query); }
-  @Get() list(
+  @Get('trash') @Permissions('view_procurement_equipment_hire')
+  trash(@Query() query: QueryHireMovementDto) { return this.service.listDeletedHireOuts(query); }
+  @Get() @Permissions('view_procurement_equipment_hire')
+  list(
     @Query() query: QueryHireMovementDto,
   ) {
     return this.service.listHireOuts(query);
   }
-  @Get(':uuid') view(
+  @Get(':uuid') @Permissions('view_procurement_equipment_hire')
+  view(
     @Param('uuid', ParseUUIDPipe) uuid: string,
   ) {
     return this.service.viewHireOut(uuid);
   }
-  @Delete(':uuid') remove(
+  @Delete(':uuid') @Permissions('delete_procurement_equipment_hire')
+  remove(
     @Param('uuid', ParseUUIDPipe) uuid: string,
     @Req() req: any,
   ) {
@@ -160,7 +168,8 @@ export class HireOutController {
       req.user?.id,
     );
   }
-  @Patch(':uuid/restore') restore(
+  @Patch(':uuid/restore') @Permissions('update_procurement_equipment_hire')
+  restore(
     @Param('uuid', ParseUUIDPipe) uuid: string,
   ) {
     return this.service.restoreEntity(
@@ -177,21 +186,26 @@ export class HireBillController {
   constructor(
     private readonly service: EquipmentHireService,
   ) {}
-  @Get('trash') trash(@Query() query: QueryHireMovementDto) { return this.service.listDeletedBills(query); }
-  @Get('dropdowns') dropdowns() {
+  @Get('trash') @Permissions('view_procurement_equipment_hire')
+  trash(@Query() query: QueryHireMovementDto) { return this.service.listDeletedBills(query); }
+  @Get('dropdowns') @Permissions('view_procurement_equipment_hire')
+  dropdowns() {
     return this.service.dropdowns();
   }
-  @Get() list(
+  @Get() @Permissions('view_procurement_equipment_hire')
+  list(
     @Query() query: QueryHireMovementDto,
   ) {
     return this.service.listBills(query);
   }
-  @Get(':uuid') view(
+  @Get(':uuid') @Permissions('view_procurement_equipment_hire')
+  view(
     @Param('uuid', ParseUUIDPipe) uuid: string,
   ) {
     return this.service.viewBill(uuid);
   }
-  @Delete(':uuid') remove(
+  @Delete(':uuid') @Permissions('delete_procurement_equipment_hire')
+  remove(
     @Param('uuid', ParseUUIDPipe) uuid: string,
     @Req() req: any,
   ) {
@@ -201,7 +215,8 @@ export class HireBillController {
       req.user?.id,
     );
   }
-  @Patch(':uuid/restore') restore(
+  @Patch(':uuid/restore') @Permissions('update_procurement_equipment_hire')
+  restore(
     @Param('uuid', ParseUUIDPipe) uuid: string,
   ) {
     return this.service.restoreEntity(
@@ -218,7 +233,8 @@ export class EquipmentOnSiteController {
   constructor(
     private readonly service: EquipmentHireService,
   ) {}
-  @Get('dropdowns') dropdowns() {
+  @Get('dropdowns') @Permissions('view_procurement_equipment_hire')
+  dropdowns() {
     return this.service.onSiteDropdowns();
   }
   @Get()

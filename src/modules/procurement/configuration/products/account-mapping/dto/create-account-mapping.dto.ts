@@ -81,4 +81,13 @@ export class CreateAccountMappingDto {
   @IsOptional()
   @IsString()
   addedById?: string;
+
+  @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+  @IsOptional()
+  orgId?: number;
+
+  @ApiPropertyOptional({ description: 'Project UUID or ID' })
+  @IsOptional()
+  projectId?: string;
+
 }
