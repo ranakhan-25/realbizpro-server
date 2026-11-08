@@ -18,12 +18,12 @@ export class CallLogReportService {
     @InjectModel(SysUser) private readonly users: typeof SysUser,
   ) {}
 
-  async dropdowns() {
+  async dropdowns(currentUser?: any) {
     const users = await this.users.findAll({ where: { isActive: true }, attributes: ['uuid', 'userCode', 'name'], order: [['name', 'ASC']] });
     return { users };
   }
 
-  async report(query: QueryCallLogReportDto) {
+  async report(query: QueryCallLogReportDto, currentUser?: any) {
     const where: any = { activityType: { [Op.in]: CALL_TYPES } };
     if (query.dateFrom || query.dateTo) {
       where.activityDate = {
@@ -36,7 +36,13 @@ export class CallLogReportService {
       this.users.findAll({ where: { isActive: true }, attributes: ['uuid', 'userCode', 'name'], order: [['name', 'ASC']] }),
     ]);
     const actorIds = [...new Set(activities.flatMap(item => [item.conductedBy, item.createdBy]).filter(Boolean))] as string[];
-    const activityUsers = actorIds.length ? await this.users.findAll({ where: { [Op.or]: [{ uuid: { [Op.in]: actorIds } }, { userCode: { [Op.in]: actorIds } }, { name: { [Op.in]: actorIds } }] }, attributes: ['uuid', 'userCode', 'name'] }) : [];
+    const isUuid = (val: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
+    const actorUuids = actorIds.filter(isUuid);
+    const actorNumericIds = actorIds.filter(id => !isUuid(id) && /^\d+$/.test(id)).map(id => Number(id));
+    const orConditions: any[] = [{ userCode: { [Op.in]: actorIds } }, { name: { [Op.in]: actorIds } }];
+    if (actorUuids.length) orConditions.push({ uuid: { [Op.in]: actorUuids } });
+    if (actorNumericIds.length) orConditions.push({ id: { [Op.in]: actorNumericIds } });
+    const activityUsers = actorIds.length ? await this.users.findAll({ where: { [Op.or]: orConditions }, attributes: ['id', 'uuid', 'userCode', 'name'] }) : [];
     const allUsers = [...activeUsers, ...activityUsers].filter((user, index, list) => list.findIndex(item => item.uuid === user.uuid) === index);
     const userByKey = new Map<string, SysUser>();
     for (const user of allUsers) { userByKey.set(user.uuid, user); if (user.userCode) userByKey.set(user.userCode, user); userByKey.set(user.name, user); }

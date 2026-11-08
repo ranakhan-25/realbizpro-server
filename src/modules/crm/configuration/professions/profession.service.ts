@@ -10,14 +10,20 @@ import { UpdateProfessionDto } from './dto/update-profession.dto';
 export class ProfessionService {
   constructor(@InjectModel(LeadProfession) private readonly professions: typeof LeadProfession) {}
 
-  async create(dto: CreateProfessionDto) {
+  async create(dto: CreateProfessionDto, userId?: number, currentUser?: any) {
     const row = await this.professions.create({
-      ...dto, name: dto.name.trim(), status: dto.status ?? 'active',
+      ...dto,
+      name: dto.name.trim(),
+      status: dto.status ?? 'active',
+      createdBy: userId ? String(userId) : dto.createdBy ?? null,
+      updatedBy: null,
+      deletedBy: null,
+      orgId: dto.orgId ?? currentUser?.orgId ?? null,
     } as any);
     return this.findOne(row.uuid);
   }
 
-  async findAll(query: QueryProfessionDto) {
+  async findAll(query: QueryProfessionDto, currentUser?: any) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const where: any = {};
@@ -27,6 +33,8 @@ export class ProfessionService {
       { name: { [Op.iLike]: `%${search}%` } },
       { description: { [Op.iLike]: `%${search}%` } },
     ];
+    const effectiveOrgId = query.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) where.orgId = effectiveOrgId;
     const { rows, count } = await this.professions.findAndCountAll({
       where, limit, offset: (page - 1) * limit, order: [['createdAt', 'DESC']],
       paranoid: !query.withDeleted,
@@ -37,34 +45,43 @@ export class ProfessionService {
     };
   }
 
-  async findOne(uuid: string) {
+  async findOne(uuid: string, currentUser?: any) {
+    const where: any = { uuid };
+    if (currentUser?.orgId) where.orgId = currentUser.orgId;
     const row = await this.professions.findOne({
-      where: { uuid },
+      where,
       include: [{ association: 'leads', attributes: ['uuid', 'leadCode', 'clientName'], required: false }],
     });
     if (!row) throw new NotFoundException(`Profession ${uuid} not found`);
     return this.toPublicProfession(row);
   }
 
-  async update(uuid: string, dto: UpdateProfessionDto) {
+  async update(uuid: string, dto: UpdateProfessionDto, userId?: number, currentUser?: any) {
     const row = await this.professions.findOne({ where: { uuid } });
     if (!row) throw new NotFoundException(`Profession ${uuid} not found`);
-    await row.update({ ...dto, ...(dto.name ? { name: dto.name.trim() } : {}) } as any);
+    await row.update({
+      ...dto,
+      ...(dto.name ? { name: dto.name.trim() } : {}),
+      updatedBy: userId ? String(userId) : row.updatedBy ?? null,
+      ...(dto.orgId !== undefined ? { orgId: dto.orgId } : {}),
+    } as any);
     return this.findOne(uuid);
   }
 
-  async remove(uuid: string) {
+  async remove(uuid: string, userId?: number, currentUser?: any) {
     const row = await this.professions.findOne({ where: { uuid } });
     if (!row) throw new NotFoundException(`Profession ${uuid} not found`);
+    await row.update({ deletedBy: userId ? String(userId) : null } as any);
     await row.destroy({ force: false });
     return { message: `Profession ${uuid} deleted successfully` };
   }
 
-  async restore(uuid: string) {
+  async restore(uuid: string, userId?: number, currentUser?: any) {
     const row = await this.professions.findOne({ where: { uuid }, paranoid: false });
     if (!row) throw new NotFoundException(`Profession ${uuid} not found`);
     if (!row.deletedAt) throw new BadRequestException(`Profession ${uuid} is not deleted`);
     await row.restore();
+    await row.update({ deletedBy: null, updatedBy: userId ? String(userId) : row.updatedBy ?? null } as any);
     return this.findOne(uuid);
   }
 

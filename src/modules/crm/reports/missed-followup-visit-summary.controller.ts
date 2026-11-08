@@ -1,19 +1,33 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { QueryMissedFollowupVisitSummaryDto } from './dto/query-missed-followup-visit-summary.dto';
 import { MissedFollowupVisitSummaryService } from './missed-followup-visit-summary.service';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { CurrentUser } from 'src/common/decorators/auth.decorators';
 
-@ApiTags('CRM | Reports | Missed FollowUp/Visit Summary')
+@ApiTags('CRM | Reports | Missed Follow-up & Visit Summary')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('crm/reports/missed-followup-visit-summary')
 export class MissedFollowupVisitSummaryController {
   constructor(private readonly service: MissedFollowupVisitSummaryService) {}
 
   @Get('dropdowns')
-  @ApiOperation({ summary: 'Get active teams and users for the missed follow-up/visit summary' })
-  dropdowns() { return this.service.dropdowns(); }
+  @Permissions('list_crm_missed_followup_visit_summary')
+  @ApiOperation({ summary: 'Get dropdown options for report filters' })
+  dropdowns(@CurrentUser() currentUser: any) {
+    return this.service.dropdowns(currentUser);
+  }
 
   @Get()
-  @ApiOperation({ summary: 'Get missed follow-ups, missed visits and new leads grouped by team employee' })
-  report(@Query() query: QueryMissedFollowupVisitSummaryDto) { return this.service.report(query); }
+  @Permissions('list_crm_missed_followup_visit_summary')
+  @ApiOperation({ summary: 'Generate report data' })
+  report(
+    @Query() query: QueryMissedFollowupVisitSummaryDto,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.service.report(query, currentUser);
+  }
 }

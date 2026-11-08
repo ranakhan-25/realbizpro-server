@@ -26,7 +26,7 @@ export class CallReportsService {
     @InjectModel(SysUser) private readonly users: typeof SysUser,
   ) {}
 
-  async getReport(query: QueryCallReportsDto) {
+  async getReport(query: QueryCallReportsDto, currentUser?: any) {
     const where: any = {
       activityType: { [Op.in]: CALL_ACTIVITY_TYPES },
     };

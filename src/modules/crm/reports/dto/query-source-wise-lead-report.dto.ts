@@ -1,5 +1,6 @@
+import { Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsOptional, IsString } from 'class-validator';
+import { IsDateString, IsOptional, IsString, IsInt } from 'class-validator';
 
 export class QuerySourceWiseLeadReportDto {
   @ApiPropertyOptional({ example: '2026-09-28', description: 'Report start date' })
@@ -13,4 +14,10 @@ export class QuerySourceWiseLeadReportDto {
 
   @ApiPropertyOptional({ description: 'Lead source database ID' })
   @IsOptional() @IsString() declare leadSourceId?: string;
+
+  @ApiPropertyOptional({ description: 'Filter by organization ID' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  declare orgId?: number;
 }

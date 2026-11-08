@@ -20,7 +20,7 @@ export class FollowUpDetailsReportService {
     @InjectModel(SysUser) private readonly users: typeof SysUser,
   ) {}
 
-  async dropdowns() {
+  async dropdowns(currentUser?: any) {
     const [users, leads, leadStages, communicationStatuses] = await Promise.all([
       this.users.findAll({ where: { isActive: true }, attributes: ['uuid', 'name', 'userCode'], order: [['name', 'ASC']] }),
       this.leads.findAll({ where: { status: { [Op.ne]: 'deleted' } }, attributes: ['uuid', 'leadCode', 'clientName', 'phone'], order: [['clientName', 'ASC']] }),
@@ -30,7 +30,7 @@ export class FollowUpDetailsReportService {
     return { users, leads, leadStages, communicationStatuses };
   }
 
-  async list(query: QueryFollowUpDetailsReportDto) {
+  async list(query: QueryFollowUpDetailsReportDto, currentUser?: any) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const where: any = { activityType: { [Op.in]: ['followup', 'follow_up', 'follow-up', 'call'] } };

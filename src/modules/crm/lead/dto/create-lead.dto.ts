@@ -32,4 +32,5 @@ export class CreateLeadDto {
   @ApiPropertyOptional() @IsOptional() @IsString() declare query?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() declare projectId?: string;
   @ApiPropertyOptional({ description: 'Interested project display name/UUID; saved in the related property interest record' }) @IsOptional() @IsString() declare projectName?: string;
+  @ApiPropertyOptional({ example: 1 }) @IsOptional() @Type(() => Number) @IsInt() declare orgId?: number;
 }

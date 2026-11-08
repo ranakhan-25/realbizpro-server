@@ -1,6 +1,7 @@
 import { BelongsTo, Column, DataType, ForeignKey, Table } from 'sequelize-typescript';
 import { BaseModel } from 'src/database/base.model';
 import { SysUser } from 'src/database/models/system/sys_user.model';
+import { SysOrganization } from 'src/database/models/system/sys_organization.model';
 import { LeadVisitPlace, LeadVisitStatus } from './crm-lead-master-data.model';
 import { Lead } from './crm-lead.model';
 
@@ -21,9 +22,25 @@ export class LeadActivity extends BaseModel<LeadActivityAttributes, LeadActivity
   @Column({ type: DataType.BIGINT, allowNull: true, field: 'visit_status_id' }) declare visitStatusId?: number;
   @Column({ type: DataType.TEXT, allowNull: true }) declare feedback?: string;
   @Column({ type: DataType.STRING, allowNull: true, field: 'conducted_by' }) declare conductedBy?: string;
-  @Column({ type: DataType.STRING, allowNull: true, field: 'created_by' }) declare createdBy?: string;
-  @Column({ type: DataType.STRING, allowNull: true, field: 'updated_by' }) declare updatedBy?: string;
-  @Column({ type: DataType.STRING, allowNull: true, field: 'deleted_by' }) declare deletedBy?: string;
+  @ForeignKey(() => SysOrganization)
+  @Column({
+    type: DataType.BIGINT,
+    allowNull: true,
+    field: 'org_id',
+    defaultValue: null,
+  })
+  declare orgId?: number | null;
+
+  @BelongsTo(() => SysOrganization, {
+    foreignKey: 'orgId',
+    targetKey: 'id',
+    as: 'organization',
+  })
+  declare organization?: SysOrganization;
+
+  @Column({ type: DataType.STRING, allowNull: true, field: 'created_by', defaultValue: null }) declare createdBy?: string | null;
+  @Column({ type: DataType.STRING, allowNull: true, field: 'updated_by', defaultValue: null }) declare updatedBy?: string | null;
+  @Column({ type: DataType.STRING, allowNull: true, field: 'deleted_by', defaultValue: null }) declare deletedBy?: string | null;
   @Column({ type: DataType.STRING, allowNull: true, field: 'project_id' }) declare projectId?: string;
 
   @BelongsTo(() => Lead, { foreignKey: 'leadId', targetKey: 'id', as: 'lead' }) declare lead?: Lead;

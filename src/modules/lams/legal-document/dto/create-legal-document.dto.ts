@@ -40,5 +40,5 @@ export class CreateLegalDocumentDto {
   @ApiPropertyOptional({ description: 'Optional project identifier', example: 'PRJ-1001' })
   @IsString()
   @IsOptional()
-  projectId?: string;
+  org_id?: string;
 }

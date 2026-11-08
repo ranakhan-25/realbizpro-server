@@ -26,7 +26,7 @@ export class UserWiseReportService {
     @InjectModel(SysUser) private readonly users: typeof SysUser,
   ) {}
 
-  async dropdowns() {
+  async dropdowns(currentUser?: any) {
     const [users, leadSources, campaigns, teams] = await Promise.all([
       this.users.findAll({ where: { isActive: true }, attributes: ['uuid', 'name', 'userCode'], order: [['name', 'ASC']] }),
       this.sources.findAll({ where: { isActive: true }, attributes: ['id', 'uuid', 'name', 'code'], order: [['name', 'ASC']] }),
@@ -36,7 +36,7 @@ export class UserWiseReportService {
     return { users, leadSources, campaigns, teams };
   }
 
-  async report(query: QueryUserWiseReportDto) {
+  async report(query: QueryUserWiseReportDto, currentUser?: any) {
     const leadWhere: any = {};
     if (query.dateFrom || query.dateTo) {
       leadWhere.leadDate = {

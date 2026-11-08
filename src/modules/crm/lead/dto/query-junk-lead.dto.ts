@@ -15,6 +15,9 @@ export class QueryJunkLeadDto {
   @ApiPropertyOptional({ description: 'Filter by assigned user UUID' })
   @IsOptional() @IsString() declare userId?: string;
 
+  @ApiPropertyOptional({ description: 'Filter by organization ID' })
+  @IsOptional() @Type(() => Number) @IsInt() declare orgId?: number;
+
   @ApiPropertyOptional({ description: 'Search lead name, phone, code, organization, address, or note' })
   @IsOptional() @IsString() declare search?: string;
 

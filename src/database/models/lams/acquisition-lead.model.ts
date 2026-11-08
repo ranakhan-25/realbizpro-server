@@ -84,7 +84,7 @@ export class AcquisitionLead extends BaseModel<
     type: DataType.STRING,
     allowNull: true,
   })
-  declare projectId?: string;
+  declare org_id?: string;
 
   @HasMany(() => LandOwner, { foreignKey: 'lead_id', as: 'land_owners' })
   declare land_owners?: LandOwner[];

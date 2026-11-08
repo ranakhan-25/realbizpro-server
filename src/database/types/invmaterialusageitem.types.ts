@@ -16,7 +16,7 @@ export interface InvMaterialUsageItemAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id?: string | null;
 
   // Relations
   usage: InvMaterialUsage;
@@ -30,7 +30,7 @@ export interface InvMaterialUsageItemCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id?: string | null;
 }
 
 export type InvMaterialUsageItemUpdateAttributes = Partial<InvMaterialUsageItemCreationAttributes>;

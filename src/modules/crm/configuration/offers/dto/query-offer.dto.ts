@@ -23,4 +23,8 @@ export class QueryOfferDto {
   @ApiPropertyOptional({ type: Boolean, default: false, description: 'Include soft-deleted offers' })
   @IsOptional() @Transform(({ value }) => value === true || value === 'true') @IsBoolean()
   declare withDeleted?: boolean;
+
+  @ApiPropertyOptional({ type: Number, description: 'Organization ID' })
+  @IsOptional() @Type(() => Number) @IsInt()
+  declare orgId?: number;
 }

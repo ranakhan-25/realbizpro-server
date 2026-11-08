@@ -15,17 +15,21 @@ export class LeadSourceService {
     @InjectModel(LeadCampaign) private readonly campaigns: typeof LeadCampaign,
   ) {}
 
-  async create(dto: CreateLeadSourceDto) {
+  async create(dto: CreateLeadSourceDto, userId?: number, currentUser?: any) {
     const row = await this.sources.create({
       ...dto,
       name: dto.name.trim(),
       ...(dto.code !== undefined ? { code: dto.code.trim() || null } : {}),
       isActive: dto.status ? dto.status === LeadSourceStatus.ACTIVE : true,
+      createdBy: userId ? String(userId) : dto.createdBy ?? null,
+      updatedBy: null,
+      deletedBy: null,
+      orgId: dto.orgId ?? currentUser?.orgId ?? null,
     } as any);
     return this.findOne(row.uuid);
   }
 
-  async findAll(query: QueryLeadSourceDto) {
+  async findAll(query: QueryLeadSourceDto, currentUser?: any) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const where: any = {};
@@ -35,6 +39,8 @@ export class LeadSourceService {
       { code: { [Op.iLike]: `%${search}%` } },
     ];
     if (query.status) where.isActive = query.status === LeadSourceStatus.ACTIVE;
+    const effectiveOrgId = query.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) where.orgId = effectiveOrgId;
     const { rows, count } = await this.sources.findAndCountAll({
       where, limit, offset: (page - 1) * limit, order: [['createdAt', 'DESC']],
       paranoid: !query.withDeleted,
@@ -45,9 +51,11 @@ export class LeadSourceService {
     };
   }
 
-  async findOne(uuid: string) {
+  async findOne(uuid: string, currentUser?: any) {
+    const where: any = { uuid };
+    if (currentUser?.orgId) where.orgId = currentUser.orgId;
     const row = await this.sources.findOne({
-      where: { uuid },
+      where,
       include: [
         { association: 'leads', attributes: ['uuid', 'leadCode', 'clientName'], required: false },
         { association: 'campaigns', attributes: ['uuid', 'name', 'status'], required: false },
@@ -57,11 +65,15 @@ export class LeadSourceService {
     return this.toPublicLeadSource(row);
   }
 
-  async update(uuid: string, dto: UpdateLeadSourceDto) {
+  async update(uuid: string, dto: UpdateLeadSourceDto, userId?: number, currentUser?: any) {
     const row = await this.sources.findOne({ where: { uuid } });
     if (!row) throw new NotFoundException(`Lead source ${uuid} not found`);
     const { status, ...fields } = dto;
-    const changes: Record<string, any> = { ...fields };
+    const changes: Record<string, any> = {
+      ...fields,
+      updatedBy: userId ? String(userId) : row.updatedBy ?? null,
+      ...(dto.orgId !== undefined ? { orgId: dto.orgId } : {}),
+    };
     if (dto.name !== undefined) changes.name = dto.name.trim();
     if (dto.code !== undefined) changes.code = dto.code.trim() || null;
     if (status !== undefined) changes.isActive = status === LeadSourceStatus.ACTIVE;
@@ -69,24 +81,28 @@ export class LeadSourceService {
     return this.findOne(uuid);
   }
 
-  async remove(uuid: string) {
+  async remove(uuid: string, userId?: number, currentUser?: any) {
     const row = await this.sources.findOne({ where: { uuid } });
     if (!row) throw new NotFoundException(`Lead source ${uuid} not found`);
+    await row.update({ deletedBy: userId ? String(userId) : null } as any);
     await row.destroy({ force: false });
     return { message: `Lead source ${uuid} deleted successfully` };
   }
 
-  async restore(uuid: string) {
+  async restore(uuid: string, userId?: number, currentUser?: any) {
     const row = await this.sources.findOne({ where: { uuid }, paranoid: false });
     if (!row) throw new NotFoundException(`Lead source ${uuid} not found`);
     if (!row.deletedAt) throw new BadRequestException(`Lead source ${uuid} is not deleted`);
     await row.restore();
+    await row.update({ deletedBy: null, updatedBy: userId ? String(userId) : row.updatedBy ?? null } as any);
     return this.findOne(uuid);
   }
 
-  async dropdown() {
+  async dropdown(currentUser?: any) {
+    const where: any = { isActive: true };
+    if (currentUser?.orgId) where.orgId = currentUser.orgId;
     const rows = await this.sources.findAll({
-      where: { isActive: true }, attributes: ['uuid', 'code', 'name'], order: [['name', 'ASC']],
+      where, attributes: ['uuid', 'code', 'name'], order: [['name', 'ASC']],
     });
     return rows.map(row => {
       const result = row.toJSON() as Record<string, any>;

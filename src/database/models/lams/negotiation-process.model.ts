@@ -52,7 +52,7 @@ export class NegotiationProcess extends BaseModel<NegotiationProcessAttributes, 
     type: DataType.STRING,
     allowNull: true,
   })
-  declare projectId?: string;
+  declare org_id?: string;
 
   @BelongsTo(() => AcquisitionLead, { foreignKey: 'lead_id', as: 'acquisition_lead' })
   declare acquisition_lead?: AcquisitionLead;

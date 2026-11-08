@@ -52,5 +52,5 @@ export class InvPurchaseItem extends BaseModel<InvPurchaseItemAttributes, InvPur
     type: DataType.STRING,
     allowNull: true,
   })
-  declare projectId?: string;
+  declare org_id?: string;
 }

@@ -46,5 +46,5 @@ export class InvMaterialUsageItem extends BaseModel<InvMaterialUsageItemAttribut
     type: DataType.STRING,
     allowNull: true,
   })
-  declare projectId?: string;
+  declare org_id?: string;
 }

@@ -16,12 +16,12 @@ export class CallLogDetailsReportService {
     @InjectModel(SysUser) private readonly users: typeof SysUser,
   ) {}
 
-  async dropdowns() {
+  async dropdowns(currentUser?: any) {
     const users = await this.users.findAll({ where: { isActive: true }, attributes: ['uuid', 'userCode', 'name'], order: [['name', 'ASC']] });
     return { users };
   }
 
-  async report(query: QueryCallLogDetailsReportDto) {
+  async report(query: QueryCallLogDetailsReportDto, currentUser?: any) {
     const page = query.page ?? 1;
     const limit = Math.min(query.limit ?? 10, 100);
     const where: any = { activityType: { [Op.in]: CALL_TYPES } };

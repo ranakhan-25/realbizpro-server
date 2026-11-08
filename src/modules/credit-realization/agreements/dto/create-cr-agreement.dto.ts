@@ -75,7 +75,7 @@ export class CreateCrSaleAgreementDto {
   @ApiPropertyOptional({ example: 'PRJ-101' })
   @IsString()
   @IsOptional()
-  projectId?: string;
+  org_id?: string;
 
   @ApiPropertyOptional()
   @IsString()
@@ -129,7 +129,7 @@ export class CreateCrPlotDistributionDto {
   @ApiPropertyOptional({ example: 'PRJ-101' })
   @IsString()
   @IsOptional()
-  projectId?: string;
+  org_id?: string;
 
   @ApiPropertyOptional()
   @IsString()

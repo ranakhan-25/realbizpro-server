@@ -27,7 +27,7 @@ export interface CrSaleAgreementAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id?: string | null;
 
   // Relations
   installment_plans: CrInstallmentPlan[];
@@ -52,7 +52,7 @@ export interface CrSaleAgreementCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id?: string | null;
 }
 
 export type CrSaleAgreementUpdateAttributes = Partial<CrSaleAgreementCreationAttributes>;

@@ -21,12 +21,12 @@ export class TeamKpiReportService {
     @InjectModel(SysUser) private readonly users: typeof SysUser,
   ) {}
 
-  async dropdowns() {
+  async dropdowns(currentUser?: any) {
     const teams = await this.teams.findAll({ where: { isActive: true }, attributes: ['id', 'uuid', 'name'], order: [['name', 'ASC']] });
     return { teams };
   }
 
-  async report(query: QueryTeamKpiReportDto) {
+  async report(query: QueryTeamKpiReportDto, currentUser?: any) {
     const fromDate = query.dateFrom ? new Date(`${query.dateFrom}T00:00:00.000Z`) : undefined;
     const toDate = query.dateTo ? new Date(`${query.dateTo}T23:59:59.999Z`) : undefined;
     const kpis = await this.kpis.findAll({

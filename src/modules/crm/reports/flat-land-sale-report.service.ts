@@ -22,7 +22,7 @@ export class FlatLandSaleReportService {
     @InjectModel(CrSaleAgreement) private readonly agreements: typeof CrSaleAgreement,
   ) {}
 
-  async dropdowns() {
+  async dropdowns(currentUser?: any) {
     const [bookings, projects, teams, users] = await Promise.all([
       this.bookings.findAll({ attributes: ['salesBy'], where: { salesBy: { [Op.ne]: null } }, order: [['salesBy', 'ASC']] }),
       this.projects.findAll({ attributes: ['uuid', 'code', 'name'], order: [['name', 'ASC']] }),
@@ -33,7 +33,7 @@ export class FlatLandSaleReportService {
     return { salesBy, teams, projects, users };
   }
 
-  async report(query: QueryFlatLandSaleReportDto) {
+  async report(query: QueryFlatLandSaleReportDto, currentUser?: any) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const dateWhere: any = {};
@@ -50,7 +50,7 @@ export class FlatLandSaleReportService {
       this.flatLands.findAll({ attributes: ['uuid', 'projectId', 'flatLandNo', 'size'] }),
       this.teamMembers.findAll({ attributes: ['uuid', 'projectId', 'name', 'email'] }),
       this.users.findAll({ attributes: ['uuid', 'userCode', 'name'] }),
-      this.agreements.findAll({ attributes: ['projectId', 'unit_identifier', 'customer_name', 'agreement_date', 'handover_date', 'total_price'] }),
+      this.agreements.findAll({ attributes: ['projectId', 'unit_identifier', 'customer_name', 'agreement_date', 'handover_date', 'total_price'] }).catch(() => [] as CrSaleAgreement[]),
     ]);
     const projectMap = new Map(projects.map(row => [row.uuid, row]));
     const propertyMap = new Map(flatLands.map(row => [row.uuid, row]));
@@ -58,7 +58,7 @@ export class FlatLandSaleReportService {
     const userMap = new Map<string, SysUser>();
     for (const user of users) { userMap.set(user.uuid, user); if (user.userCode) userMap.set(user.userCode, user); }
     const agreementMap = new Map<string, AgreementRow>();
-    for (const agreement of agreements) agreementMap.set(`${agreement.projectId ?? ''}:${agreement.unit_identifier ?? ''}`, agreement as AgreementRow);
+    for (const agreement of agreements) agreementMap.set(`${agreement.org_id ?? ''}:${agreement.unit_identifier ?? ''}`, agreement as AgreementRow);
     const selectedTeam = query.teamId ? teamMap.get(query.teamId) ?? teams.find(team => [team.name, team.email, team.uuid].some(value => value?.toLowerCase() === query.teamId?.toLowerCase())) : undefined;
     const term = query.search?.trim().toLowerCase();
     const filtered = bookings.filter(booking => {

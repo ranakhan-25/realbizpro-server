@@ -16,7 +16,7 @@ export class SalesProbabilityReportService {
     @InjectModel(SysUser) private readonly users: typeof SysUser,
   ) {}
 
-  async dropdowns() {
+  async dropdowns(currentUser?: any) {
     const [users, leadStages] = await Promise.all([
       this.users.findAll({ where: { isActive: true }, attributes: ['uuid', 'userCode', 'name'], order: [['name', 'ASC']] }),
       this.stages.findAll({ where: { isActive: true }, attributes: ['id', 'uuid', 'name', 'sortOrder'], order: [['sortOrder', 'ASC'], ['name', 'ASC']] }),
@@ -24,7 +24,7 @@ export class SalesProbabilityReportService {
     return { users, leadStages };
   }
 
-  async report(query: QuerySalesProbabilityReportDto) {
+  async report(query: QuerySalesProbabilityReportDto, currentUser?: any) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const [leads, users, stages] = await Promise.all([

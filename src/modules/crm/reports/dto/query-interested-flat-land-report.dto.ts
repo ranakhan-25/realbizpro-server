@@ -17,4 +17,10 @@ export class QueryInterestedFlatLandReportDto {
 
   @ApiPropertyOptional({ example: 10, default: 10, maximum: 100 })
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(100) declare limit?: number;
+
+  @ApiPropertyOptional({ description: 'Filter by organization ID' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  declare orgId?: number;
 }

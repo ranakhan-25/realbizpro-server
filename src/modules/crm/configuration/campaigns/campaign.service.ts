@@ -13,7 +13,7 @@ export class CampaignService {
     @InjectModel(LeadSource) private readonly leadSources: typeof LeadSource,
   ) {}
 
-  async create(dto: CreateCampaignDto) {
+  async create(dto: CreateCampaignDto, userId?: number, currentUser?: any) {
     const source = await this.getActiveLeadSource(dto.leadSourceUuid);
     const { leadSourceUuid, ...fields } = dto;
     const campaign = await this.campaigns.create({
@@ -21,11 +21,15 @@ export class CampaignService {
       name: dto.name.trim(),
       leadSourceId: source.id,
       status: dto.status ?? 'active',
+      createdBy: userId ? String(userId) : dto.createdBy ?? null,
+      updatedBy: null,
+      deletedBy: null,
+      orgId: dto.orgId ?? currentUser?.orgId ?? null,
     } as any);
     return this.findOne(campaign.uuid);
   }
 
-  async findAll(query: QueryCampaignDto) {
+  async findAll(query: QueryCampaignDto, currentUser?: any) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const where: any = {};
@@ -36,6 +40,8 @@ export class CampaignService {
       { description: { [Op.iLike]: `%${search}%` } },
       { formId: { [Op.iLike]: `%${search}%` } },
     ];
+    const effectiveOrgId = query.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) where.orgId = effectiveOrgId;
     const include: any[] = [{
       association: 'leadSource', attributes: ['uuid', 'code', 'name'], required: !!query.leadSourceUuid,
       ...(query.leadSourceUuid ? { where: { uuid: query.leadSourceUuid } } : {}),
@@ -50,9 +56,11 @@ export class CampaignService {
     };
   }
 
-  async findOne(uuid: string) {
+  async findOne(uuid: string, currentUser?: any) {
+    const where: any = { uuid };
+    if (currentUser?.orgId) where.orgId = currentUser.orgId;
     const campaign = await this.campaigns.findOne({
-      where: { uuid },
+      where,
       include: [
         { association: 'leadSource', attributes: ['uuid', 'code', 'name'], required: false, paranoid: false },
         { association: 'leads', attributes: ['uuid', 'leadCode', 'clientName'], required: false },
@@ -62,35 +70,43 @@ export class CampaignService {
     return this.toPublicCampaign(campaign);
   }
 
-  async update(uuid: string, dto: UpdateCampaignDto) {
+  async update(uuid: string, dto: UpdateCampaignDto, userId?: number, currentUser?: any) {
     const campaign = await this.campaigns.findOne({ where: { uuid } });
     if (!campaign) throw new NotFoundException(`Campaign ${uuid} not found`);
     const { leadSourceUuid, ...fields } = dto;
-    const changes: Record<string, any> = { ...fields };
+    const changes: Record<string, any> = {
+      ...fields,
+      updatedBy: userId ? String(userId) : campaign.updatedBy ?? null,
+      ...(dto.orgId !== undefined ? { orgId: dto.orgId } : {}),
+    };
     if (leadSourceUuid) changes.leadSourceId = (await this.getActiveLeadSource(leadSourceUuid)).id;
     if (dto.name) changes.name = dto.name.trim();
     await campaign.update(changes);
     return this.findOne(uuid);
   }
 
-  async remove(uuid: string) {
+  async remove(uuid: string, userId?: number, currentUser?: any) {
     const campaign = await this.campaigns.findOne({ where: { uuid } });
     if (!campaign) throw new NotFoundException(`Campaign ${uuid} not found`);
+    await campaign.update({ deletedBy: userId ? String(userId) : null } as any);
     await campaign.destroy({ force: false });
     return { message: `Campaign ${uuid} deleted successfully` };
   }
 
-  async restore(uuid: string) {
+  async restore(uuid: string, userId?: number, currentUser?: any) {
     const campaign = await this.campaigns.findOne({ where: { uuid }, paranoid: false });
     if (!campaign) throw new NotFoundException(`Campaign ${uuid} not found`);
     if (!campaign.deletedAt) throw new BadRequestException(`Campaign ${uuid} is not deleted`);
     await campaign.restore();
+    await campaign.update({ deletedBy: null, updatedBy: userId ? String(userId) : campaign.updatedBy ?? null } as any);
     return this.findOne(uuid);
   }
 
-  async leadSourceDropdown() {
+  async leadSourceDropdown(currentUser?: any) {
+    const where: any = { isActive: true };
+    if (currentUser?.orgId) where.orgId = currentUser.orgId;
     return this.leadSources.findAll({
-      where: { isActive: true }, attributes: ['uuid', 'code', 'name'], order: [['name', 'ASC']],
+      where, attributes: ['uuid', 'code', 'name'], order: [['name', 'ASC']],
     });
   }
 

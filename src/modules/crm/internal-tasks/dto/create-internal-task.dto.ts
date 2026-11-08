@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ArrayNotEmpty, ArrayUnique, IsArray, IsDateString, IsIn, IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import { ArrayNotEmpty, ArrayUnique, IsArray, IsDateString, IsIn, IsInt, IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
 
 export const INTERNAL_TASK_PRIORITIES = ['Low', 'Medium', 'High', 'Critical', 'Urgent'] as const;
 export const INTERNAL_TASK_STATUSES = ['Todo', 'In Progress', 'Review', 'Testing', 'Completed', 'Cancelled', 'Pending', 'Delayed'] as const;
@@ -40,4 +40,8 @@ export class CreateInternalTaskDto {
   @ApiPropertyOptional({ description: 'Related CRM Lead UUID' })
   @IsOptional() @IsUUID()
   declare relatedLeadUuid?: string;
+
+  @ApiPropertyOptional({ example: 1 })
+  @IsOptional() @IsInt()
+  declare orgId?: number;
 }

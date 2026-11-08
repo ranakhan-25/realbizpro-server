@@ -21,4 +21,8 @@ export class CreateLeadCategoryDto {
   @ApiPropertyOptional({ default: true })
   @IsOptional() @IsBoolean()
   declare isActive?: boolean;
+
+  @ApiPropertyOptional({ type: Number, description: 'Organization ID' })
+  @IsOptional()
+  declare orgId?: number;
 }

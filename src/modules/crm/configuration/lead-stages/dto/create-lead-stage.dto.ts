@@ -26,4 +26,8 @@ export class CreateLeadStageDto {
   @ApiPropertyOptional({ example: '#6C63FF', pattern: '^#([0-9A-Fa-f]{6})$' })
   @IsOptional() @IsString() @Matches(/^#([0-9A-Fa-f]{6})$/)
   declare color?: string;
+
+  @ApiPropertyOptional({ type: Number, description: 'Organization ID' })
+  @IsOptional() @Type(() => Number) @IsInt()
+  declare orgId?: number;
 }
