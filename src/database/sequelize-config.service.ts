@@ -41,14 +41,7 @@ export class SequelizeConfigService implements SequelizeOptionsFactory {
       autoLoadModels:
         databaseConfig.autoLoadModels,
       repositoryMode: true,
-      models: [
-        Expense,
-        ExpenseItem,
-        Voucher,
-        VoucherEntry,
-        PaymentVoucher,
-        PaymentVoucherEntry,
-      ],
+      models: [],
       logging: databaseConfig.logging
         ? this.getLoggingFunction()
         : false,

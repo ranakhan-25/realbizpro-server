@@ -1,13 +1,8 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Query,
-} from '@nestjs/common';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { CurrentUser, CurrentUserId } from 'src/common/decorators/auth.decorators';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -22,6 +17,7 @@ import { ProcurementItemEntryService } from './item-entry.service';
   'Procurement | Configuration | Item Entry',
 )
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('procurement/item-entry')
 export class ProcurementItemEntryController {
   constructor(
@@ -60,23 +56,27 @@ export class ProcurementItemEntryController {
     return this.service.findAll(query);
   }
 
-  @Get(':uuid') findOne(
+  @Get(':uuid') @Permissions('view_procurement_item_entry')
+  findOne(
     @Param('uuid') uuid: string,
   ) {
     return this.service.findOne(uuid);
   }
-  @Patch(':uuid') update(
+  @Patch(':uuid') @Permissions('update_procurement_item_entry')
+  update(
     @Param('uuid') uuid: string,
     @Body() dto: UpdateProcurementItemEntryDto,
   ) {
     return this.service.update(uuid, dto);
   }
-  @Delete(':uuid') remove(
+  @Delete(':uuid') @Permissions('delete_procurement_item_entry')
+  remove(
     @Param('uuid') uuid: string,
   ) {
     return this.service.remove(uuid);
   }
-  @Patch(':uuid/restore') restore(
+  @Patch(':uuid/restore') @Permissions('update_procurement_item_entry')
+  restore(
     @Param('uuid') uuid: string,
   ) {
     return this.service.restore(uuid);

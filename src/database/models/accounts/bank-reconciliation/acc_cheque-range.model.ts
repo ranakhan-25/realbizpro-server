@@ -1,3 +1,5 @@
+import { SysOrganization } from 'src/database/models/system/sys_organization.model';
+import { Project } from 'src/database/models/projects/project/pr_project.model';
 /* eslint-disable prettier/prettier */
 
 import {
@@ -5,6 +7,8 @@ import {
   DataType,
   Table,
   HasMany,
+  ForeignKey,
+  BelongsTo
 } from 'sequelize-typescript';
 import { BaseModel } from '../../../base.model';
 import { Cheque } from './acc_cheque.model';
@@ -77,4 +81,37 @@ export class ChequeRange
   // ✅ HasMany রিলেশন: একটি চেক রেঞ্জের অধীনে একাধিক চেক
   @HasMany(() => Cheque)
   declare cheques: Cheque[];
+
+  @ForeignKey(() => SysOrganization)
+  @Column({
+    type: DataType.BIGINT,
+    allowNull: true,
+    field: 'org_id',
+    defaultValue: null,
+  })
+  declare orgId?: number | null;
+
+  @BelongsTo(() => SysOrganization, {
+    foreignKey: 'orgId',
+    targetKey: 'id',
+    as: 'organization',
+  })
+  declare organization?: SysOrganization;
+
+  @ForeignKey(() => Project)
+  @Column({
+    type: DataType.UUID,
+    allowNull: true,
+    field: 'project_id',
+    defaultValue: null,
+  })
+  declare projectId?: string | null;
+
+  @BelongsTo(() => Project, {
+    foreignKey: 'projectId',
+    targetKey: 'uuid',
+    as: 'project',
+  })
+  declare project?: Project;
+
 }

@@ -35,6 +35,14 @@ export class CreatePartyDto {
   @ApiPropertyOptional() @IsOptional() @IsString() notes?: string;
   @ApiPropertyOptional({ enum: PartyStatus }) @IsOptional() @IsEnum(PartyStatus) status?: PartyStatus;
   @ApiPropertyOptional({ type: [PartyDocumentDto] }) @IsOptional() @IsArray() @ValidateNested({ each: true }) @Type(() => PartyDocumentDto) documents?: PartyDocumentDto[];
+  @ApiPropertyOptional({ example: 1, description: 'Organization ID' })
+  @IsOptional()
+  orgId?: number;
+
+  @ApiPropertyOptional({ example: '550e8400-e29b-41d4-a716-446655440000', description: 'Project ID' })
+  @IsOptional()
+  @IsString()
+  projectId?: string;
 }
 
 export class UpdatePartyDto extends PartialType(CreatePartyDto) {}

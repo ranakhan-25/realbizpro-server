@@ -1,10 +1,7 @@
 // src/vouchers/dto/create-voucher.dto.ts
 import { Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsString, IsNotEmpty, IsOptional, IsDateString,
-  IsArray, ValidateNested, IsNumber, ArrayMinSize
-} from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsDateString, IsArray, ValidateNested, IsNumber, ArrayMinSize } from 'class-validator';
 
 // ==========================================
 // DETAILS (Nicher table er ek row)
@@ -107,4 +104,13 @@ export class CreateVoucherDto {
   @ValidateNested({ each: true })
   @Type(() => CreateVoucherEntryDto)
   entries: CreateVoucherEntryDto[];
+  @ApiPropertyOptional({ example: 'user-uuid' })
+  @IsOptional()
+  @IsString()
+  createdBy?: string;
+
+  @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+  @IsOptional()
+  orgId?: number;
+
 }

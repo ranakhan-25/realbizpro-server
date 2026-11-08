@@ -93,7 +93,7 @@ export class ExpenseService {
         { project: { [Op.iLike]: `%${query.search}%` } },
       ];
     }
-    ['project', 'site', 'task'].forEach((field) => {
+    ['project', 'site', 'task', 'orgId', 'projectId'].forEach((field) => {
       if (query[field]) where[field] = query[field];
     });
 

@@ -52,16 +52,16 @@ export class GrnVsInvoiceService {
         ...(query.search ? { [Op.or]: [{ item_name: { [Op.iLike]: `%${query.search}%` } }, { item_code: { [Op.iLike]: `%${query.search}%` } }] } : {}),
       },
       include: [
-        { model: ProcurementGrn, as: 'grn', where: grnWhere, required: true, include: [
-          { model: ProcurementPurchaseOrder, as: 'purchaseOrder', attributes: ['uuid', 'code'], required: false },
-          { model: SupplierAccounts, as: 'supplier', attributes: ['uuid', 'supplierCode', 'supplierName'], required: false },
-          { model: Project, as: 'project', attributes: ['uuid', 'code', 'name'], required: false },
-          { model: ProjectType, as: 'projectType', attributes: ['uuid', 'code', 'name'], required: false },
-          { model: ProcurementPurchaseBill, as: 'purchaseBills', through: { attributes: [] }, attributes: ['uuid', 'code', 'date', 'grand_total'], required: false },
+        { association: 'grn', where: grnWhere, required: true, include: [
+          { association: 'purchaseOrder', attributes: ['uuid', 'code'], required: false },
+          { association: 'supplier', attributes: ['uuid', 'supplierCode', 'supplierName'], required: false },
+          { association: 'project', attributes: ['uuid', 'code', 'name'], required: false },
+          { association: 'projectType', attributes: ['uuid', 'code', 'name'], required: false },
+          { association: 'purchaseBills', through: { attributes: [] }, attributes: ['uuid', 'code', 'date', 'grand_total'], required: false },
         ] },
-        { model: ProcurementItemEntry, as: 'item', attributes: ['uuid', 'item_code', 'name', 'category_id'], where: Object.keys(itemWhere).length ? itemWhere : undefined, required: Object.keys(itemWhere).length > 0 },
+        { association: 'item', attributes: ['uuid', 'item_code', 'name', 'category_id'], where: Object.keys(itemWhere).length ? itemWhere : undefined, required: Object.keys(itemWhere).length > 0 },
       ],
-      order: [[{ model: ProcurementGrn, as: 'grn' }, 'date', 'DESC'], ['id', 'ASC']],
+      order: [['id', 'ASC']],
     });
     const all = rows.flatMap((line: any) => {
       const grn = line.grn; const bills: any[] = grn?.purchaseBills ?? [];

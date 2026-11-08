@@ -125,7 +125,8 @@ export class JournalVoucherService {
   async update(uuid: string, dto: UpdateJournalVoucherDto): Promise<JournalVoucher> {
     const transaction = await this.sequelize.transaction();
     try {
-      const voucher = await this.findOne(uuid);
+      const voucher = await this.voucherModel.findOne({ where: { uuid }, transaction });
+      if (!voucher) throw new NotFoundException(`Journal Voucher ${uuid} not found`);
       const { items, bank_name: _bankName, ...voucherData } = dto as any;
       const updateData: any = { ...voucherData };
       if (dto.date) updateData.date = new Date(dto.date);
@@ -156,7 +157,8 @@ export class JournalVoucherService {
   }
 
   async remove(uuid: string): Promise<{ message: string }> {
-    const voucher = await this.findOne(uuid);
+    const voucher = await this.voucherModel.findOne({ where: { uuid } });
+    if (!voucher) throw new NotFoundException(`Journal Voucher ${uuid} not found`);
     await voucher.destroy();
     return { message: 'Journal Voucher deleted successfully' };
   }

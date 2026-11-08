@@ -21,21 +21,21 @@ import { QueryGrnDto } from './dto/query-grn.dto';
 import { UpdateGrnDto, UpdateGrnItemDto } from './dto/update-grn.dto';
 
 const includes = [
-  { model: SysCompany, as: 'company', attributes: ['uuid', 'name'], required: false },
-  { model: SupplierAccounts, as: 'supplier', attributes: ['uuid', 'supplierCode', 'supplierName'] },
-  { model: ProjectType, as: 'projectType', attributes: ['uuid', 'code', 'name'], required: false },
-  { model: Project, as: 'project', attributes: ['uuid', 'code', 'name'], required: false },
-  { model: BillingCategory, as: 'titleOfWork', attributes: ['uuid', 'code', 'name'], required: false },
-  { model: Task, as: 'task', attributes: ['uuid', 'taskName'], required: false },
-  { model: Site, as: 'site', attributes: ['uuid', 'code', 'name'], required: false },
-  { model: Category, as: 'category', attributes: ['uuid', 'code', 'name'], required: false },
-  { model: ProcurementPurchaseOrder, as: 'purchaseOrder', attributes: ['uuid', 'code', 'reference'], required: false },
-  { model: ProcurementMaterialRequisition, as: 'requisition', attributes: ['uuid', 'code'], required: false },
-  { model: SysUser, as: 'addedBy', attributes: ['id', 'name'], required: false },
-  { model: ProcurementGrnItem, as: 'items', include: [
-    { model: ProcurementItemEntry, as: 'item', attributes: ['uuid', 'item_code', 'name'], required: false },
-    { model: ProcurementUnit, as: 'unitRelation', attributes: ['uuid', 'code', 'name'], required: false },
-    { model: ProcurementPurchaseOrderItem, as: 'purchaseOrderItem', attributes: ['uuid', 'item_code', 'quantity', 'rate'], required: false },
+  { association: 'company', attributes: ['uuid', 'name'], required: false },
+  { association: 'supplier', attributes: ['uuid', 'supplierCode', 'supplierName'] },
+  { association: 'projectType', attributes: ['uuid', 'code', 'name'], required: false },
+  { association: 'project', attributes: ['uuid', 'code', 'name'], required: false },
+  { association: 'titleOfWork', attributes: ['uuid', 'code', 'name'], required: false },
+  { association: 'task', attributes: ['uuid', 'taskName'], required: false },
+  { association: 'site', attributes: ['uuid', 'code', 'name'], required: false },
+  { association: 'category', attributes: ['uuid', 'code', 'name'], required: false },
+  { association: 'purchaseOrder', attributes: ['uuid', 'code', 'reference'], required: false },
+  { association: 'requisition', attributes: ['uuid', 'code'], required: false },
+  { association: 'addedBy', attributes: ['id', 'name'], required: false },
+  { association: 'items', include: [
+    { association: 'item', attributes: ['uuid', 'item_code', 'name'], required: false },
+    { association: 'unitRelation', attributes: ['uuid', 'code', 'name'], required: false },
+    { association: 'purchaseOrderItem', attributes: ['uuid', 'item_code', 'quantity', 'rate'], required: false },
   ] },
 ];
 
@@ -79,12 +79,12 @@ export class GrnService {
     const result: any[] = [];
     for (const input of inputs) {
       const poLine = input.purchase_order_item_id
-        ? await this.purchaseOrderItemModel.findOne({ where: { uuid: input.purchase_order_item_id } as any, include: [{ model: ProcurementPurchaseOrder, as: 'purchaseOrder' }], transaction })
+        ? await this.purchaseOrderItemModel.findOne({ where: { uuid: input.purchase_order_item_id } as any, include: [{ association: 'purchaseOrder' }], transaction })
         : null;
       if (input.purchase_order_item_id && !poLine) throw new BadRequestException('Selected purchase-order item does not exist');
       if (poLine && purchaseOrderId && poLine.purchase_order_id !== purchaseOrderId) throw new BadRequestException('Purchase-order item does not belong to selected purchase order');
       const itemId = input.item_id ?? poLine?.item_id;
-      const item = itemId ? await this.itemModel.findOne({ where: { uuid: itemId } as any, include: [{ model: ProcurementUnit, as: 'unit' }], transaction }) : null;
+      const item = itemId ? await this.itemModel.findOne({ where: { uuid: itemId } as any, include: [{ association: 'unit' }], transaction }) : null;
       if (itemId && !item) throw new BadRequestException(`Selected item ${itemId} does not exist`);
       if (!item && !input.item_code) throw new BadRequestException('Each GRN line must reference an item or provide an item code');
       if (categoryId && item && item.category_id !== categoryId) throw new BadRequestException(`Item ${item.item_code} does not belong to selected category`);
@@ -108,6 +108,8 @@ export class GrnService {
   async findAll(query: QueryGrnDto) {
     const { page = 1, limit = 10, search, date_from, date_to, already_billed, ...filters } = query;
     const where: any = {};
+    if ((query as any)?.orgId) where.orgId = (query as any).orgId;
+    if ((query as any)?.projectId) where.projectId = (query as any).projectId;
     for (const key of ['company_id', 'supplier_id', 'project_type_id', 'project_id', 'title_of_work_id', 'task_id', 'added_by_id', 'approval_layer', 'status']) if ((filters as any)[key] !== undefined) where[key] = (filters as any)[key];
     if (date_from && date_to) where.date = { [Op.between]: [date_from, date_to] };
     else if (date_from) where.date = { [Op.gte]: date_from };
@@ -180,7 +182,7 @@ export class GrnService {
       this.taskModel.findAll({ attributes: ['uuid', 'uid', 'taskName'], order: [['taskName', 'ASC']] }),
       this.siteModel.findAll({ where: projectId ? { projectId } as any : {}, attributes: ['uuid', 'projectId', 'code', 'name'], order: [['name', 'ASC']] }),
       this.categoryModel.findAll({ attributes: ['uuid', 'code', 'name'], order: [['name', 'ASC']] }),
-      this.itemModel.findAll({ where: categoryId ? { category_id: categoryId } as any : {}, attributes: ['uuid', 'category_id', 'unit_id', 'item_code', 'name', 'purchase_price'], include: [{ model: ProcurementUnit, as: 'unit', attributes: ['uuid', 'code', 'name'] }], order: [['name', 'ASC']] }),
+      this.itemModel.findAll({ where: categoryId ? { category_id: categoryId } as any : {}, attributes: ['uuid', 'category_id', 'unit_id', 'item_code', 'name', 'purchase_price'], include: [{ association: 'unit', attributes: ['uuid', 'code', 'name'] }], order: [['name', 'ASC']] }),
       this.unitModel.findAll({ attributes: ['uuid', 'code', 'name'], order: [['name', 'ASC']] }),
       this.purchaseOrderModel.findAll({ attributes: ['uuid', 'code', 'reference', 'supplier_id', 'project_id'], order: [['createdAt', 'DESC']] }),
       this.requisitionModel.findAll({ attributes: ['uuid', 'code', 'project_id', 'date'], order: [['createdAt', 'DESC']] }),

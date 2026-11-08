@@ -28,4 +28,13 @@ export class CreateAssetPurchaseOrderDto {
   @ApiPropertyOptional({ enum: ProcurementAssetPurchaseOrderApprovalLayer }) @IsOptional() @IsEnum(ProcurementAssetPurchaseOrderApprovalLayer) approval_layer?: ProcurementAssetPurchaseOrderApprovalLayer;
   @ApiPropertyOptional({ enum: ProcurementAssetPurchaseOrderStatus }) @IsOptional() @IsEnum(ProcurementAssetPurchaseOrderStatus) status?: ProcurementAssetPurchaseOrderStatus;
   @ApiProperty({ type: [CreateAssetPurchaseOrderItemDto] }) @IsArray() @ArrayMinSize(1) @ValidateNested({ each: true }) @Type(() => CreateAssetPurchaseOrderItemDto) items: CreateAssetPurchaseOrderItemDto[];
+
+  @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+  @IsOptional()
+  orgId?: number;
+
+  @ApiPropertyOptional({ description: 'Project UUID or ID' })
+  @IsOptional()
+  projectId?: string;
+
 }

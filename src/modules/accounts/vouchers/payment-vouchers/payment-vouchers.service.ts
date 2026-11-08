@@ -81,6 +81,7 @@ export class PaymentVouchersService {
       whereCondition.voucherNo = { [Op.iLike]: `%${search}%` };
     }
     if (projectId) whereCondition.projectId = projectId;
+    if ((query as any)?.orgId) whereCondition.orgId = (query as any).orgId;
     if (workId) whereCondition.workId = workId;
     if (siteId) whereCondition.siteId = siteId;
     if (taskId) whereCondition.taskId = taskId;

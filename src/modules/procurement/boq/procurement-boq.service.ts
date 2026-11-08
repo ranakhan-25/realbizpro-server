@@ -14,16 +14,16 @@ import { ProcurementUnit } from 'src/database/models/procurement/configuration/p
 import { CreateProcurementBoqDto, ImportProcurementBoqDto, ProcurementBoqItemDto, QueryProcurementBoqDto } from './dto/procurement-boq.dto';
 
 const include: any[] = [
-  { model: Project, as: 'project', attributes: ['uuid', 'code', 'name'] },
-  { model: SysCompany, as: 'company', attributes: ['uuid', 'name'], required: false },
-  { model: SysUser, as: 'responsibleUser', attributes: ['id', 'name'], required: false },
-  { model: SysUser, as: 'addedBy', attributes: ['id', 'name'], required: false },
-  { model: ProcurementBoqItem, as: 'items', include: [
-    { model: ProcurementItemEntry, as: 'item', attributes: ['uuid', 'item_code', 'name'], required: false },
-    { model: Category, as: 'category', attributes: ['uuid', 'code', 'name'], required: false },
-    { model: ProcurementUnit, as: 'unitRelation', attributes: ['uuid', 'code', 'name'], required: false },
+  { association: 'project', attributes: ['uuid', 'code', 'name'] },
+  { association: 'company', attributes: ['uuid', 'name'], required: false },
+  { association: 'responsibleUser', attributes: ['id', 'name'], required: false },
+  { association: 'addedBy', attributes: ['id', 'name'], required: false },
+  { association: 'items', include: [
+    { association: 'item', attributes: ['uuid', 'item_code', 'name'], required: false },
+    { association: 'category', attributes: ['uuid', 'code', 'name'], required: false },
+    { association: 'unitRelation', attributes: ['uuid', 'code', 'name'], required: false },
   ] },
-  { model: ProcurementBoqNote, as: 'importantNotes' },
+  { association: 'importantNotes' },
 ];
 const costTypes = Object.values(ProcurementBoqCostType);
 
@@ -45,6 +45,8 @@ export class ProcurementBoqService {
   async list(query: QueryProcurementBoqDto) {
     const page = Math.max(1, Number(query.page) || 1); const limit = Math.min(100, Math.max(1, Number(query.limit) || 10));
     const where: any = {};
+    if ((query as any)?.orgId) where.orgId = (query as any).orgId;
+    if ((query as any)?.projectId) where.projectId = (query as any).projectId;
     if (query.project_id) where.project_id = query.project_id;
     if (query.company_id) where.company_id = query.company_id;
     if (query.status) where.status = query.status;
@@ -60,7 +62,7 @@ export class ProcurementBoqService {
       this.company.findAll({ attributes: ['uuid', 'name'], order: [['name', 'ASC']] }),
       this.user.findAll({ attributes: ['id', 'name'], order: [['name', 'ASC']] }),
       this.category.findAll({ attributes: ['uuid', 'code', 'name'], order: [['name', 'ASC']] }),
-      this.item.findAll({ attributes: ['uuid', 'item_code', 'name', 'category_id', 'unit_id'], include: [{ model: ProcurementUnit, as: 'unit', attributes: ['uuid', 'code', 'name'], required: false }], order: [['name', 'ASC']] }),
+      this.item.findAll({ attributes: ['uuid', 'item_code', 'name', 'category_id', 'unit_id'], include: [{ association: 'unit', attributes: ['uuid', 'code', 'name'], required: false }], order: [['name', 'ASC']] }),
       this.unit.findAll({ attributes: ['uuid', 'code', 'name'], order: [['name', 'ASC']] }),
     ]);
     return { projects, companies, responsibleUsers: users, categories, items, units, boqTypes: ['standard', 'material', 'labour', 'equipment', 'subcontract'], costTypes, statuses: Object.values(ProcurementBoqStatus) };
@@ -81,7 +83,7 @@ export class ProcurementBoqService {
   private async prepareItems(inputs: ProcurementBoqItemDto[], transaction: Transaction) {
     const lines: any[] = [];
     for (const [index, input] of inputs.entries()) {
-      const product = input.item_id ? await this.item.findOne({ where: { uuid: input.item_id } as any, include: [{ model: ProcurementUnit, as: 'unit' }], transaction }) : null;
+      const product = input.item_id ? await this.item.findOne({ where: { uuid: input.item_id } as any, include: [{ association: 'unit' }], transaction }) : null;
       if (input.item_id && !product) throw new BadRequestException(`Selected item ${input.item_id} does not exist`);
       const categoryId = input.category_id ?? product?.category_id;
       if (input.category_id && !(await this.category.findOne({ where: { uuid: input.category_id } as any, transaction }))) throw new BadRequestException('Selected category does not exist');

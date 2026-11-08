@@ -48,6 +48,8 @@ export class PurchaseBillService {
   async list(q: QueryPurchaseBillDto) {
     const page = Math.max(1, Number(q.page) || 1); const limit = Math.min(100, Math.max(1, Number(q.limit) || 10));
     const where: any = {};
+    if ((q as any)?.orgId) where.orgId = (q as any).orgId;
+    if ((q as any)?.projectId) where.projectId = (q as any).projectId;
     if (q.project_id) where.project_id = q.project_id;
     if (q.supplier_id) where.supplier_id = q.supplier_id;
     if (q.search) where[Op.or] = [{ code: { [Op.iLike]: `%${q.search}%` } }, { note: { [Op.iLike]: `%${q.search}%` } }];

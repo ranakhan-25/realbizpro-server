@@ -28,4 +28,13 @@ export class CreateAssetRequisitionDto {
   @ApiPropertyOptional({ enum: ProcurementAssetRequisitionApprovalLayer }) @IsOptional() @IsEnum(ProcurementAssetRequisitionApprovalLayer) approval_layer?: ProcurementAssetRequisitionApprovalLayer;
   @ApiPropertyOptional({ enum: ProcurementAssetRequisitionStatus }) @IsOptional() @IsEnum(ProcurementAssetRequisitionStatus) status?: ProcurementAssetRequisitionStatus;
   @ApiProperty({ type: [CreateAssetRequisitionItemDto] }) @IsArray() @ArrayMinSize(1) @ValidateNested({ each: true }) @Type(() => CreateAssetRequisitionItemDto) items: CreateAssetRequisitionItemDto[];
+
+  @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+  @IsOptional()
+  orgId?: number;
+
+  @ApiPropertyOptional({ description: 'Project UUID or ID' })
+  @IsOptional()
+  projectId?: string;
+
 }

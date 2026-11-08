@@ -1,3 +1,4 @@
+import { SysOrganization } from 'src/database/models/system/sys_organization.model';
 import {
   BelongsTo,
   Column,
@@ -206,4 +207,22 @@ export class ProcurementHireOrder extends BaseModel<ProcurementHireOrderAttribut
     allowNull: true,
   })
   declare deletedBy?: string;
+
+
+  @ForeignKey(() => SysOrganization)
+  @Column({
+    type: DataType.BIGINT,
+    allowNull: true,
+    field: 'org_id',
+    defaultValue: null,
+  })
+  declare orgId?: number | null;
+
+  @BelongsTo(() => SysOrganization, {
+    foreignKey: 'orgId',
+    targetKey: 'id',
+    as: 'organization',
+  })
+  declare organization?: SysOrganization;
+
 }

@@ -1,16 +1,7 @@
+import { ApiPropertyOptional } from '@nestjs/swagger';
 /* eslint-disable prettier/prettier */
 
-import { 
-  IsString, 
-  IsOptional, 
-  IsNumber,
-  IsISO8601,
-  IsArray,
-  ValidateNested,
-  Min,
-  IsEnum,
-  ValidateIf,
-} from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsISO8601, IsArray, ValidateNested, Min, IsEnum, ValidateIf } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 import { EntryType } from 'src/database/models/accounts/vouchers/acc_journal-voucher-item.model';
 
@@ -133,4 +124,18 @@ export class CreateContraVoucherDto {
   @ValidateNested({ each: true })
   @Type(() => CreateContraVoucherItemDto)
   items: CreateContraVoucherItemDto[];
+  @ApiPropertyOptional({ example: 'user-uuid' })
+  @IsOptional()
+  @IsString()
+  createdBy?: string;
+
+  @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+  @IsOptional()
+  orgId?: number;
+
+  @ApiPropertyOptional({ description: 'Project UUID or ID' })
+  @IsOptional()
+  @IsString()
+  projectId?: string;
+
 }

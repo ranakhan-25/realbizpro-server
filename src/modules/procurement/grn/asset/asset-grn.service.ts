@@ -104,6 +104,8 @@ export class AssetGrnService {
   async findAll(query: QueryAssetGrnDto) {
     const { page = 1, limit = 10, search, date_from, date_to, ...filters } = query;
     const where: any = {};
+    if ((query as any)?.orgId) where.orgId = (query as any).orgId;
+    if ((query as any)?.projectId) where.projectId = (query as any).projectId;
     for (const key of ['supplier_id', 'project_type_id', 'project_id', 'title_of_work_id', 'task_id', 'site_id', 'category_id', 'ledger_id', 'added_by_id', 'approval_layer', 'status']) {
       if ((filters as any)[key] !== undefined) where[key] = (filters as any)[key];
     }

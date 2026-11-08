@@ -1,3 +1,4 @@
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsDateString, IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
 export class QueryGrnVsInvoiceDto {
@@ -11,4 +12,13 @@ export class QueryGrnVsInvoiceDto {
   @IsOptional() @Type(() => Number) @IsNumber() page?: number;
   @IsOptional() @Type(() => Number) @IsNumber() limit?: number;
   @IsOptional() @IsString() search?: string;
+
+  @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+  @IsOptional()
+  orgId?: number;
+
+  @ApiPropertyOptional({ description: 'Project UUID or ID' })
+  @IsOptional()
+  projectId?: string;
+
 }

@@ -32,6 +32,8 @@ export class WorkOrderMeasurementService {
     const page = query.page ?? 1;
     const limit = Math.min(query.limit ?? 10, 100);
     const where: any = {};
+    if ((query as any)?.orgId) where.orgId = (query as any).orgId;
+    if ((query as any)?.projectId) where.projectId = (query as any).projectId;
     if (query.measurement_no) where.measurement_no = { [Op.iLike]: `%${query.measurement_no}%` };
     if (query.work_order_id) where.work_order_id = query.work_order_id;
     if (query.project_id) where.project_id = query.project_id;

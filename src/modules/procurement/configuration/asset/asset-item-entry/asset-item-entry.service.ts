@@ -53,6 +53,8 @@ export class ProcurementAssetItemEntryService {
     const { page = 1, limit = 10, skip, search, category_id, brand_id, sortBy = 'createdAt', sortOrder = 'DESC', withDeleted = false } = query;
     const offset = skip ?? (page - 1) * limit;
     const where: any = {};
+    if ((query as any)?.orgId) where.orgId = (query as any).orgId;
+    if ((query as any)?.projectId) where.projectId = (query as any).projectId;
     if (category_id) where.category_id = category_id;
     if (brand_id) where.brand_id = brand_id;
     if (search) where[Op.or] = [

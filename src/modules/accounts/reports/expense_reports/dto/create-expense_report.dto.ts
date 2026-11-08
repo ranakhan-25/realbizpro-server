@@ -1,12 +1,7 @@
+import { ApiPropertyOptional } from '@nestjs/swagger';
 /* eslint-disable prettier/prettier */
 
-import { 
-  IsString, 
-  IsOptional, 
-  IsNumber,
-  IsISO8601,
-  Min
-} from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsISO8601, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateExpenseReportDto {
@@ -51,4 +46,18 @@ export class CreateExpenseReportDto {
   @IsString()
   @IsOptional()
   addedById?: string;
+  @ApiPropertyOptional({ example: 'user-uuid' })
+  @IsOptional()
+  @IsString()
+  createdBy?: string;
+
+  @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+  @IsOptional()
+  orgId?: number;
+
+  @ApiPropertyOptional({ description: 'Project UUID or ID' })
+  @IsOptional()
+  @IsString()
+  projectId?: string;
+
 }

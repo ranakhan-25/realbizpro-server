@@ -1,4 +1,6 @@
-import { Column, DataType, HasMany, Table } from 'sequelize-typescript';
+import { SysOrganization } from 'src/database/models/system/sys_organization.model';
+import { Project } from 'src/database/models/projects/project/pr_project.model';
+import { Column, DataType, HasMany, Table, ForeignKey, BelongsTo } from 'sequelize-typescript';
 import { BaseModel } from 'src/database/base.model';
 import { PartyDocument } from './party-document.model';
 
@@ -37,4 +39,62 @@ export class Party extends BaseModel<PartyAttributes, PartyCreationAttributes> {
   @Column({ type: DataType.TEXT, allowNull: true }) declare notes?: string;
   @Column({ type: DataType.ENUM(...Object.values(PartyStatus)), allowNull: false, defaultValue: PartyStatus.ACTIVE }) declare status: PartyStatus;
   @HasMany(() => PartyDocument, { foreignKey: 'partyId', sourceKey: 'uuid', as: 'documents', onDelete: 'CASCADE' }) declare documents?: PartyDocument[];
+
+
+  @ForeignKey(() => SysOrganization)
+  @Column({
+    type: DataType.BIGINT,
+    allowNull: true,
+    field: 'org_id',
+    defaultValue: null,
+  })
+  declare orgId?: number | null;
+
+  @BelongsTo(() => SysOrganization, {
+    foreignKey: 'orgId',
+    targetKey: 'id',
+    as: 'organization',
+  })
+  declare organization?: SysOrganization;
+
+  @ForeignKey(() => Project)
+  @Column({
+    type: DataType.UUID,
+    allowNull: true,
+    field: 'project_id',
+    defaultValue: null,
+  })
+  declare projectId?: string | null;
+
+  @BelongsTo(() => Project, {
+    foreignKey: 'projectId',
+    targetKey: 'uuid',
+    as: 'project',
+  })
+  declare project?: Project;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+    field: 'created_by',
+    defaultValue: null,
+  })
+  declare createdBy?: string | null;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+    field: 'updated_by',
+    defaultValue: null,
+  })
+  declare updatedBy?: string | null;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+    field: 'deleted_by',
+    defaultValue: null,
+  })
+  declare deletedBy?: string | null;
+
 }

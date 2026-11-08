@@ -1,4 +1,8 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { CurrentUser, CurrentUserId } from 'src/common/decorators/auth.decorators';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateRfqDto } from './dto/create-rfq.dto';
 import { QueryRfqDto } from './dto/query-rfq.dto';
@@ -7,14 +11,19 @@ import { RfqService } from './rfq.service';
 
 @ApiTags('Procurement | Request for Quotation (RFQ)')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('procurement/rfq')
 export class RfqController {
   constructor(private readonly service: RfqService) {}
   @Post() @ApiOperation({ summary: 'Create RFQ with related item lines' }) create(@Body() dto: CreateRfqDto) { return this.service.create(dto); }
   @Get('dropdowns') @ApiOperation({ summary: 'Get all RFQ form dropdown data' }) dropdowns(@Query('project_id') projectId?: string, @Query('category_id') categoryId?: string) { return this.service.dropdowns(projectId, categoryId); }
   @Get() @ApiOperation({ summary: 'List and filter RFQs' }) findAll(@Query() query: QueryRfqDto) { return this.service.findAll(query); }
-  @Get(':uuid') findOne(@Param('uuid') uuid: string) { return this.service.findOne(uuid); }
-  @Patch(':uuid') update(@Param('uuid') uuid: string, @Body() dto: UpdateRfqDto) { return this.service.update(uuid, dto); }
-  @Delete(':uuid') remove(@Param('uuid') uuid: string) { return this.service.remove(uuid); }
-  @Patch(':uuid/restore') restore(@Param('uuid') uuid: string) { return this.service.restore(uuid); }
+  @Get(':uuid') @Permissions('view_procurement_rfq')
+  findOne(@Param('uuid') uuid: string) { return this.service.findOne(uuid); }
+  @Patch(':uuid') @Permissions('update_procurement_rfq')
+  update(@Param('uuid') uuid: string, @Body() dto: UpdateRfqDto) { return this.service.update(uuid, dto); }
+  @Delete(':uuid') @Permissions('delete_procurement_rfq')
+  remove(@Param('uuid') uuid: string) { return this.service.remove(uuid); }
+  @Patch(':uuid/restore') @Permissions('update_procurement_rfq')
+  restore(@Param('uuid') uuid: string) { return this.service.restore(uuid); }
 }

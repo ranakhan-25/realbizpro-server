@@ -110,4 +110,13 @@ export class CreateCategoryDto {
   @ValidateNested()
   @Type(() => CreateCategoryAccountMappingDto)
   accountMapping?: CreateCategoryAccountMappingDto;
+
+  @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+  @IsOptional()
+  orgId?: number;
+
+  @ApiPropertyOptional({ description: 'Project UUID or ID' })
+  @IsOptional()
+  projectId?: string;
+
 }
