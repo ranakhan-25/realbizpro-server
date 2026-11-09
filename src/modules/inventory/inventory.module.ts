@@ -9,6 +9,9 @@ import { PurchaseModule } from './purchase/purchase.module';
 import { MaterialUsageModule } from './material-usage/material-usage.module';
 import { StockTransferModule } from './stock-transfer/stock-transfer.module';
 import { ReportsModule } from './reports/reports.module';
+import { WarehouseModule } from './warehouse/warehouse.module';
+import { StockCountModule } from './stock-count/stock-count.module';
+import { StockIssueModule } from './stock-issue/stock-issue.module';
 
 @Module({
   imports: [
@@ -22,6 +25,9 @@ import { ReportsModule } from './reports/reports.module';
     MaterialUsageModule,
     StockTransferModule,
     ReportsModule,
+    WarehouseModule,
+    StockCountModule,
+    StockIssueModule,
   ],
 })
 export class InventoryModule {}
