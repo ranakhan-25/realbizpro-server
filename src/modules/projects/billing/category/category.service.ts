@@ -23,7 +23,11 @@ export class CategoryService {
   ) {}
 
   // CREATE
-  async create(dto: CreateCategoryDto) {
+  async create(
+    dto: CreateCategoryDto,
+    userId?: number,
+    currentUser?: any,
+  ) {
     const existingCategory =
       await this.categoryModel.findOne({
         where: {
@@ -38,20 +42,23 @@ export class CategoryService {
     }
 
     const category =
-      await this.categoryModel.create({
+      await this.categoryModel.create(({
         type: dto.type,
         code: dto.code,
         name: dto.name,
         description: dto.description,
         createdBy: dto.createdBy,
         updatedBy: dto.updatedBy,
-      });
+      }) as any);
 
     return category;
   }
 
   // GET ALL
-  async findAll(query: QueryCategoryDto) {
+  async findAll(
+    query: QueryCategoryDto,
+    currentUser?: any,
+  ) {
     const page = Number(query.page) || 1;
     const limit = Number(query.limit) || 10;
 
@@ -61,6 +68,14 @@ export class CategoryService {
         : (page - 1) * limit;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
     if ((query as any)?.orgId) {
       where.orgId = (query as any).orgId;
     }
@@ -119,7 +134,7 @@ export class CategoryService {
   }
 
   // GET ONE
-  async findOne(uuid: string) {
+  async findOne(uuid: string, currentUser?: any) {
     const category =
       await this.categoryModel.findOne({
         where: {
@@ -140,6 +155,8 @@ export class CategoryService {
   async update(
     uuid: string,
     dto: UpdateCategoryDto,
+    userId?: number,
+    currentUser?: any,
   ) {
     const category =
       await this.categoryModel.findOne({
@@ -172,15 +189,15 @@ export class CategoryService {
       }
     }
 
-    await category.update({
+    await category.update(({
       ...dto,
-    });
+    }) as any);
 
     return category;
   }
 
   // DELETE
-  async remove(uuid: string) {
+  async remove(uuid: string, userId?: number, currentUser?: any) {
     const category =
       await this.categoryModel.findOne({
         where: {
@@ -200,7 +217,7 @@ export class CategoryService {
   }
 
   // RESTORE
-  async restore(uuid: string) {
+  async restore(uuid: string, userId?: number, currentUser?: any) {
     const category =
       await this.categoryModel.findOne({
         where: {

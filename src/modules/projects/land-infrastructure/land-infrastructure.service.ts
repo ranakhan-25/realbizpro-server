@@ -25,7 +25,7 @@ export class LandInfrastructureService {
     private readonly sequelize: Sequelize,
   ) {}
 
-  async create(dto: CreateLandInfrastructureDto, userId?: number) {
+  async create(dto: CreateLandInfrastructureDto, userId?: number, currentUser?: any) {
     const uuid = await this.sequelize.transaction(async (transaction) => {
       const project = await this.projectModel.findOne({
         where: { uuid: dto.projectId } as WhereOptions<Project>,
@@ -49,6 +49,7 @@ export class LandInfrastructureService {
   async findAll(
     query: QueryLandInfrastructureDto,
     kind?: LandInfrastructureKind,
+    currentUser?: any,
   ) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
@@ -78,7 +79,7 @@ export class LandInfrastructureService {
     };
   }
 
-  async findOne(uuid: string) {
+  async findOne(uuid: string, currentUser?: any) {
     const item = await this.infrastructureModel.findOne({
       where: { uuid } as WhereOptions<LandInfrastructure>,
       include: [{ model: this.projectModel, as: 'project', attributes: ['uuid', 'code', 'name'], include: [{ association: 'sites', attributes: ['uuid', 'code', 'name'], required: false }] }],
@@ -89,7 +90,7 @@ export class LandInfrastructureService {
     return item;
   }
 
-  async findOneByKind(uuid: string, kind: LandInfrastructureKind) {
+  async findOneByKind(uuid: string, kind: LandInfrastructureKind, currentUser?: any) {
     const item = await this.infrastructureModel.findOne({
       where: { uuid, kind } as WhereOptions<LandInfrastructure>,
       include: [{ model: this.projectModel, as: 'project', attributes: ['uuid', 'code', 'name'], include: [{ association: 'sites', attributes: ['uuid', 'code', 'name'], required: false }] }],
@@ -109,12 +110,7 @@ export class LandInfrastructureService {
     return { projects, sites, [kind === LandInfrastructureKind.ROAD ? 'roads' : 'blocks']: rows };
   }
 
-  async update(
-    uuid: string,
-    dto: UpdateLandInfrastructureDto,
-    userId?: number,
-    kind?: LandInfrastructureKind,
-  ) {
+  async update(uuid: string, dto: UpdateLandInfrastructureDto, kind?: LandInfrastructureKind, userId?: number, currentUser?: any) {
     await this.sequelize.transaction(async (transaction) => {
       const item = await this.infrastructureModel.findOne({
         where: { uuid, ...(kind ? { kind } : {}) } as WhereOptions<LandInfrastructure>,
@@ -144,7 +140,7 @@ export class LandInfrastructureService {
     return kind ? this.findOneByKind(uuid, kind) : this.findOne(uuid);
   }
 
-  async remove(uuid: string, kind?: LandInfrastructureKind) {
+  async remove(uuid: string, kind?: LandInfrastructureKind, userId?: number, currentUser?: any) {
     const item = await this.infrastructureModel.findOne({
       where: { uuid, ...(kind ? { kind } : {}) } as WhereOptions<LandInfrastructure>,
     });
@@ -155,7 +151,7 @@ export class LandInfrastructureService {
     return { message: `Land infrastructure "${uuid}" deleted successfully` };
   }
 
-  async restore(uuid: string, kind?: LandInfrastructureKind) {
+  async restore(uuid: string, kind?: LandInfrastructureKind, userId?: number, currentUser?: any) {
     const item = await this.infrastructureModel.findOne({ where: { uuid, ...(kind ? { kind } : {}) } as WhereOptions<LandInfrastructure>, paranoid: false });
     if (!item) throw new NotFoundException(`Land infrastructure "${uuid}" not found`);
     if (!item.deletedAt) throw new BadRequestException(`Land infrastructure "${uuid}" is not deleted`);

@@ -24,6 +24,8 @@ export class SalaryGradeService {
 
   async create(
     dto: CreateSalaryGradeDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<SalaryGrade> {
     // name column unique, tai soft-deleted gulo-o check kori
     const existing =
@@ -43,15 +45,17 @@ export class SalaryGradeService {
     const record =
       await this.salaryGradeModel.create({
         ...dto,
-        createdBy: dto.createdBy ?? dto.addedById,
+        createdBy: userId ? String(userId) : (dto as any).createdBy ?? (dto as any).addedById ?? null,
+        orgId: (dto as any).orgId ?? currentUser?.orgId ?? null,
+        projectId: (dto as any).projectId ?? currentUser?.projectId ?? null,
         status:
           dto.status ?? SalaryGradeStatus.ACTIVE,
-      });
+      } as any);
 
     return this.findOne(record.uuid);
   }
 
-  async findAll(query: QuerySalaryGradeDto) {
+  async findAll(query: QuerySalaryGradeDto, currentUser?: any) {
     const {
       page = 1,
       limit = 10,
@@ -69,11 +73,13 @@ export class SalaryGradeService {
         : (page - 1) * limit;
 
     const where: any = {};
-    if (query.orgId) {
-      where.orgId = query.orgId;
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
     }
-    if ((query as any).projectId) {
-      where.projectId = (query as any).projectId;
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
     }
 
     if (search) {
@@ -125,9 +131,7 @@ export class SalaryGradeService {
     };
   }
 
-  async findOne(
-    uuid: string,
-  ): Promise<SalaryGrade> {
+  async findOne(uuid: string, currentUser?: any): Promise<SalaryGrade> {
     const record =
       await this.salaryGradeModel.findOne({
         where: { uuid } as any,
@@ -142,10 +146,7 @@ export class SalaryGradeService {
     return record;
   }
 
-  async update(
-    uuid: string,
-    dto: UpdateSalaryGradeDto,
-  ): Promise<SalaryGrade> {
+  async update(uuid: string, dto: UpdateSalaryGradeDto, userId?: number, currentUser?: any): Promise<SalaryGrade> {
     const record =
       await this.salaryGradeModel.findOne({
         where: { uuid } as any,
@@ -180,14 +181,12 @@ export class SalaryGradeService {
       ...dto,
       updatedBy:
         dto.addedById ?? record.updatedBy,
-    });
+    } as any);
 
     return this.findOne(uuid);
   }
 
-  async remove(
-    uuid: string,
-  ): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const record =
       await this.salaryGradeModel.findOne({
         where: { uuid } as any,
@@ -202,7 +201,8 @@ export class SalaryGradeService {
     // status → inactive + soft delete
     await record.update({
       status: SalaryGradeStatus.INACTIVE,
-    });
+      deletedBy: userId ? String(userId) : null,
+    } as any);
 
     await record.destroy();
 
@@ -211,9 +211,7 @@ export class SalaryGradeService {
     };
   }
 
-  async restore(
-    uuid: string,
-  ): Promise<SalaryGrade> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<SalaryGrade> {
     const record =
       await this.salaryGradeModel.findOne({
         where: { uuid } as any,
@@ -236,7 +234,9 @@ export class SalaryGradeService {
     await record.restore();
     await record.update({
       status: SalaryGradeStatus.ACTIVE,
-    });
+      deletedBy: null,
+      updatedBy: userId ? String(userId) : null,
+    } as any);
 
     return this.findOne(uuid);
   }

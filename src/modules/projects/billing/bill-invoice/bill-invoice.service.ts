@@ -33,7 +33,11 @@ export class BillInvoiceService {
     private readonly projectTypeModel: typeof ProjectType,
   ) {}
 
-  async create(dto: CreateBillInvoiceDto) {
+  async create(
+    dto: CreateBillInvoiceDto,
+    userId?: number,
+    currentUser?: any,
+  ) {
     // 1. Verify relations
     if (dto.customerId) {
       const customer =
@@ -84,7 +88,10 @@ export class BillInvoiceService {
     return this.findOne(invoice.uuid);
   }
 
-  async findAll(query: QueryBillInvoiceDto) {
+  async findAll(
+    query: QueryBillInvoiceDto,
+    currentUser?: any,
+  ) {
     const page = Number(query.page) || 1;
     const limit = Number(query.limit) || 10;
     const skip =
@@ -93,6 +100,14 @@ export class BillInvoiceService {
         : (page - 1) * limit;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
     if ((query as any)?.orgId) {
       where.orgId = (query as any).orgId;
     }
@@ -153,7 +168,7 @@ export class BillInvoiceService {
     };
   }
 
-  async findOne(uuid: string) {
+  async findOne(uuid: string, currentUser?: any) {
     const invoice =
       await this.invoiceModel.findOne({
         where: { uuid },
@@ -171,6 +186,8 @@ export class BillInvoiceService {
   async update(
     uuid: string,
     dto: UpdateBillInvoiceDto,
+    userId?: number,
+    currentUser?: any,
   ) {
     const invoice = await this.invoiceModel.findOne({
       where: { uuid },
@@ -201,7 +218,7 @@ export class BillInvoiceService {
     return this.findOne(uuid);
   }
 
-  async remove(uuid: string) {
+  async remove(uuid: string, userId?: number, currentUser?: any) {
     const invoice = await this.invoiceModel.findOne({
       where: { uuid },
     });
@@ -215,7 +232,7 @@ export class BillInvoiceService {
     };
   }
 
-  async restore(uuid: string) {
+  async restore(uuid: string, userId?: number, currentUser?: any) {
     const invoice =
       await this.invoiceModel.findOne({
         where: { uuid },

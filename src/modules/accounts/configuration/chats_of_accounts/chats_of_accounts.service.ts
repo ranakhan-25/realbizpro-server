@@ -23,7 +23,7 @@ export class ChartOfAccountService {
     private readonly groupModel: typeof ChartOfGroup,
   ) {}
 
-  async create(dto: CreateChartOfAccountDto): Promise<ChartOfAccount> {
+  async create(dto: CreateChartOfAccountDto, userId?: number, currentUser?: any): Promise<ChartOfAccount> {
     try {
       // ✅ শুধুমাত্র তখনই গ্রুপ চেক করুন যখন chartOfGroupUuid পাঠানো হয়েছে
       if (dto.chartOfGroupUuid && dto.chartOfGroupUuid.trim() !== '') {
@@ -44,7 +44,12 @@ export class ChartOfAccountService {
         delete payload.chartOfGroupUuid;
       }
 
-      return await this.accountModel.create(payload as any);
+      return await this.accountModel.create({
+        ...payload,
+        createdBy: userId ? String(userId) : (dto as any).createdBy ?? null,
+        orgId: (dto as any).orgId ?? currentUser?.orgId ?? null,
+        projectId: (dto as any).projectId ?? currentUser?.projectId ?? null,
+      } as any);
     } catch (error) {
       console.error('ChartOfAccount Create Error:', error);
 
@@ -64,13 +69,17 @@ export class ChartOfAccountService {
     }
   }
 
-  async findAll(query: QueryChartOfAccountDto) {
+  async findAll(query: QueryChartOfAccountDto, currentUser?: any) {
     const { page = '1', limit = '20', search, ...filters } = query;
     const pageNum = parseInt(page, 10);
     const limitNum = parseInt(limit, 10);
     const offset = (pageNum - 1) * limitNum;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) where.orgId = effectiveOrgId;
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) where.projectId = effectiveProjectId;
     Object.keys(filters).forEach((key) => {
       if (
         filters[key] !== undefined &&
@@ -106,7 +115,7 @@ export class ChartOfAccountService {
     };
   }
 
-  async findOne(uuid: string): Promise<ChartOfAccount> {
+  async findOne(uuid: string, currentUser?: any): Promise<ChartOfAccount> {
     const account = await this.accountModel.findOne({
       where: { uuid },
     });
@@ -121,6 +130,8 @@ export class ChartOfAccountService {
   async update(
     uuid: string,
     dto: UpdateChartOfAccountDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<ChartOfAccount> {
     const account = await this.findOne(uuid);
 
@@ -140,12 +151,18 @@ export class ChartOfAccountService {
       delete updateData.chartOfGroupUuid;
     }
 
-    return account.update(updateData);
+    return account.update({
+      ...updateData,
+      updatedBy: userId ? String(userId) : account.updatedBy ?? null,
+      ...((dto as any).orgId !== undefined ? { orgId: (dto as any).orgId } : {}),
+      ...((dto as any).projectId !== undefined ? { projectId: (dto as any).projectId } : {}),
+    });
   }
 
-  async remove(uuid: string): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const account = await this.findOne(uuid);
 
+    await account.update({ deletedBy: userId ? String(userId) : null } as any);
     await account.destroy();
 
     return {
@@ -153,7 +170,7 @@ export class ChartOfAccountService {
     };
   }
 
-  async restore(uuid: string): Promise<ChartOfAccount> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<ChartOfAccount> {
     const account = await this.accountModel.findOne({
       where: { uuid },
       paranoid: false,
@@ -168,6 +185,7 @@ export class ChartOfAccountService {
     }
 
     await account.restore();
+    await account.update({ deletedBy: null, updatedBy: userId ? String(userId) : null } as any);
 
     return this.findOne(uuid);
   }

@@ -20,15 +20,25 @@ export class DetailsService {
     private readonly detailsModel: typeof Details,
   ) {}
 
-  async create(dto: CreateDetailsDto): Promise<Details> {
+  async create(
+    dto: CreateDetailsDto,
+    userId?: number,
+    currentUser?: any,
+  ): Promise<Details> {
     const details = await this.detailsModel.create({
-      ...dto,
+        createdBy: userId ? String(userId) : null,
+        orgId: currentUser?.orgId ?? null,
+        projectId: currentUser?.projectId ?? null,
+        ...dto,
     } as any);
 
     return this.findOne(details.uuid);
   }
 
-  async findAll(query: QueryDetailsDto) {
+  async findAll(
+    query: QueryDetailsDto,
+    currentUser?: any,
+  ) {
     const {
       page = 1,
       limit = 10,
@@ -43,6 +53,14 @@ export class DetailsService {
       skip !== undefined && skip !== null ? skip : (page - 1) * limit;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
     if ((query as any)?.orgId) {
       where.orgId = (query as any).orgId;
     }
@@ -108,7 +126,7 @@ export class DetailsService {
     };
   }
 
-  async findOne(uuid: string): Promise<Details> {
+  async findOne(uuid: string, currentUser?: any): Promise<Details> {
     const details = await this.detailsModel.findOne({
       where: { uuid } as any,
     });
@@ -120,7 +138,12 @@ export class DetailsService {
     return details;
   }
 
-  async update(uuid: string, dto: UpdateDetailsDto): Promise<Details> {
+  async update(
+    uuid: string,
+    dto: UpdateDetailsDto,
+    userId?: number,
+    currentUser?: any,
+  ): Promise<Details> {
     const details = await this.detailsModel.findOne({
       where: { uuid } as any,
     });
@@ -134,7 +157,7 @@ export class DetailsService {
     return this.findOne(uuid);
   }
 
-  async remove(uuid: string): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const details = await this.detailsModel.findOne({
       where: { uuid } as any,
     });
@@ -150,7 +173,7 @@ export class DetailsService {
     };
   }
 
-  async restore(uuid: string): Promise<Details> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<Details> {
     const details = await this.detailsModel.findOne({
       where: { uuid } as any,
       paranoid: false,

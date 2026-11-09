@@ -1,4 +1,4 @@
-﻿/* eslint-disable prettier/prettier */
+/* eslint-disable prettier/prettier */
 import {
   ConflictException,
   Injectable,
@@ -53,6 +53,7 @@ export class ProjectService {
   async create(
     dto: CreateProjectDto,
     userId?: number,
+    currentUser?: any,
   ): Promise<Project> {
     const existing =
       await this.projectModel.findOne({
@@ -96,7 +97,10 @@ export class ProjectService {
     return this.findOne(project.uuid);
   }
 
-  async findAll(query: QueryProjectDto) {
+  async findAll(
+    query: QueryProjectDto,
+    currentUser?: any,
+  ) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const search = query.search?.trim();
@@ -182,7 +186,7 @@ export class ProjectService {
     };
   }
 
-  async findReport(report: 'projects' | 'sites') {
+  async findReport(report: 'projects' | 'sites', currentUser?: any) {
     if (report === 'sites') {
       const rows = await this.siteModel.findAll({
         include: [
@@ -203,7 +207,7 @@ export class ProjectService {
     return { data: rows };
   }
 
-  async findProjectIncomeReport() {
+  async findProjectIncomeReport(currentUser?: any) {
     const [projects, bookings, assignments] =
       await Promise.all([
         this.projectModel.findAll({
@@ -254,7 +258,7 @@ export class ProjectService {
     };
   }
 
-  async findSiteIncomeReport() {
+  async findSiteIncomeReport(currentUser?: any) {
     const [sites, bookings, assignments] =
       await Promise.all([
         this.siteModel.findAll({
@@ -329,7 +333,7 @@ export class ProjectService {
     };
   }
 
-  async findMembers(projectUuid: string) {
+  async findMembers(projectUuid: string, currentUser?: any) {
     await this.findOne(projectUuid);
     const where = {
       projectId: projectUuid,
@@ -347,11 +351,7 @@ export class ProjectService {
     };
   }
 
-  async createMember(
-    projectUuid: string,
-    dto: CreateProjectTeamMemberDto,
-    userId?: number,
-  ) {
+  async createMember(projectUuid: string, dto: CreateProjectTeamMemberDto, userId?: number, currentUser?: any) {
     const memberUuid =
       await this.sequelize.transaction(
         async (transaction) => {
@@ -400,12 +400,7 @@ export class ProjectService {
     );
   }
 
-  async updateMember(
-    projectUuid: string,
-    memberUuid: string,
-    dto: UpdateProjectTeamMemberDto,
-    userId?: number,
-  ) {
+  async updateMember(projectUuid: string, memberUuid: string, dto: UpdateProjectTeamMemberDto, userId?: number, currentUser?: any) {
     await this.sequelize.transaction(
       async (transaction) => {
         const member = await this.getMember(
@@ -509,7 +504,7 @@ export class ProjectService {
     return member;
   }
 
-  async findOne(uuid: string): Promise<Project> {
+  async findOne(uuid: string, currentUser?: any): Promise<Project> {
     const project =
       await this.projectModel.findOne({
         where: { uuid } as WhereOptions<Project>,
@@ -526,6 +521,7 @@ export class ProjectService {
     uuid: string,
     dto: UpdateProjectDto,
     userId?: number,
+    currentUser?: any,
   ): Promise<Project> {
     await this.sequelize.transaction(
       async (transaction) => {
@@ -596,21 +592,22 @@ export class ProjectService {
   async remove(
     uuid: string,
     userId?: number,
+    currentUser?: any,
   ): Promise<{ message: string }> {
     const project = await this.findOne(uuid);
-    await project.update({
+    await project.update(({
       deletedBy:
         userId === undefined
           ? undefined
           : String(userId),
-    });
+    }) as any);
     await project.destroy();
     return {
       message: `Project "${uuid}" deleted successfully`,
     };
   }
 
-  async restore(uuid: string): Promise<Project> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<Project> {
     const project =
       await this.projectModel.findOne({
         where: { uuid } as WhereOptions<Project>,

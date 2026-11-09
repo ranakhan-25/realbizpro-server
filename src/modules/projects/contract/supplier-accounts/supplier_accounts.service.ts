@@ -25,6 +25,8 @@ export class SupplierAccountsService {
 
   async create(
     dto: CreateSupplierAccountDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<SupplierAccounts> {
     const existing =
       await this.supplierAccountsModel.findOne({
@@ -42,7 +44,10 @@ export class SupplierAccountsService {
     const { dueDate, ...supplierData } = dto;
 
     const supplierAccount =
-      await this.supplierAccountsModel.create({
+      await this.supplierAccountsModel.create(({
+        createdBy: userId ? String(userId) : null,
+        orgId: currentUser?.orgId ?? null,
+        projectId: currentUser?.projectId ?? null,
         ...supplierData,
         status:
           dto.status ??
@@ -50,12 +55,15 @@ export class SupplierAccountsService {
         ...(dueDate
           ? { dueDate: new Date(dueDate) }
           : {}),
-      });
+      }) as any);
 
     return this.findOne(supplierAccount.uuid);
   }
 
-  async findAll(query: QuerySupplierAccountDto) {
+  async findAll(
+    query: QuerySupplierAccountDto,
+    currentUser?: any,
+  ) {
     const {
       page = 1,
       limit = 10,
@@ -74,6 +82,14 @@ export class SupplierAccountsService {
         : (page - 1) * limit;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
     if ((query as any)?.orgId) {
       where.orgId = (query as any).orgId;
     }
@@ -168,6 +184,7 @@ export class SupplierAccountsService {
 
   async findOne(
     uuid: string,
+    currentUser?: any,
   ): Promise<SupplierAccounts> {
     const supplierAccount =
       await this.supplierAccountsModel.findOne({
@@ -186,6 +203,8 @@ export class SupplierAccountsService {
   async update(
     uuid: string,
     dto: UpdateSupplierAccountDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<SupplierAccounts> {
     const supplierAccount =
       await this.supplierAccountsModel.findOne({
@@ -219,19 +238,17 @@ export class SupplierAccountsService {
 
     const { dueDate, ...supplierData } = dto;
 
-    await supplierAccount.update({
+    await supplierAccount.update(({
       ...supplierData,
       ...(dueDate
         ? { dueDate: new Date(dueDate) }
         : {}),
-    });
+    }) as any);
 
     return this.findOne(uuid);
   }
 
-  async remove(
-    uuid: string,
-  ): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const supplierAccount =
       await this.supplierAccountsModel.findOne({
         where: { uuid } as any,
@@ -244,9 +261,9 @@ export class SupplierAccountsService {
     }
 
     // status → inactive + soft delete
-    await supplierAccount.update({
+    await supplierAccount.update(({
       status: SupplierAccountsStatus.INACTIVE,
-    });
+    }) as any);
 
     await supplierAccount.destroy();
 
@@ -255,9 +272,7 @@ export class SupplierAccountsService {
     };
   }
 
-  async restore(
-    uuid: string,
-  ): Promise<SupplierAccounts> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<SupplierAccounts> {
     const supplierAccount =
       await this.supplierAccountsModel.findOne({
         where: { uuid } as any,
@@ -278,9 +293,9 @@ export class SupplierAccountsService {
 
     // status → active + restore
     await supplierAccount.restore();
-    await supplierAccount.update({
+    await supplierAccount.update(({
       status: SupplierAccountsStatus.ACTIVE,
-    });
+    }) as any);
 
     return this.findOne(uuid);
   }

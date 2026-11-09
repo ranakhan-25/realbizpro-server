@@ -19,6 +19,8 @@ export class AllowanceDeductionSetupService {
 
   async create(
     dto: CreateAllowanceDeductionSetupDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<AllowanceDeductionSetup> {
     const { addedById, ...data } = dto;
 
@@ -35,6 +37,7 @@ export class AllowanceDeductionSetupService {
 
   async findAll(
     query: QueryAllowanceDeductionSetupDto,
+    currentUser?: any,
   ) {
     const {
       page = 1,
@@ -54,11 +57,13 @@ export class AllowanceDeductionSetupService {
         : (page - 1) * limit;
 
     const where: any = {};
-    if (query.orgId) {
-      where.orgId = query.orgId;
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
     }
-    if ((query as any).projectId) {
-      where.projectId = (query as any).projectId;
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
     }
 
     if (type) {
@@ -114,9 +119,7 @@ export class AllowanceDeductionSetupService {
     };
   }
 
-  async findOne(
-    uuid: string,
-  ): Promise<AllowanceDeductionSetup> {
+  async findOne(uuid: string, currentUser?: any): Promise<AllowanceDeductionSetup> {
     const record =
       await this.allowanceDeductionSetupModel.findOne(
         {
@@ -133,10 +136,7 @@ export class AllowanceDeductionSetupService {
     return record;
   }
 
-  async update(
-    uuid: string,
-    dto: UpdateAllowanceDeductionSetupDto,
-  ): Promise<AllowanceDeductionSetup> {
+  async update(uuid: string, dto: UpdateAllowanceDeductionSetupDto, userId?: number, currentUser?: any): Promise<AllowanceDeductionSetup> {
     const record =
       await this.allowanceDeductionSetupModel.findOne(
         {
@@ -154,14 +154,12 @@ export class AllowanceDeductionSetupService {
     await record.update({
       ...updateData,
       updatedBy: addedById ?? record.updatedBy,
-    });
+    } as any);
 
     return this.findOne(uuid);
   }
 
-  async remove(
-    uuid: string,
-  ): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const record =
       await this.allowanceDeductionSetupModel.findOne(
         {
@@ -175,15 +173,14 @@ export class AllowanceDeductionSetupService {
       );
     }
 
+    await record.update({ deletedBy: userId ? String(userId) : null } as any);
     await record.destroy();
     return {
       message: `AllowanceDeductionSetup #${uuid} deleted successfully`,
     };
   }
 
-  async restore(
-    uuid: string,
-  ): Promise<AllowanceDeductionSetup> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<AllowanceDeductionSetup> {
     const record =
       await this.allowanceDeductionSetupModel.findOne(
         {
@@ -205,6 +202,7 @@ export class AllowanceDeductionSetupService {
     }
 
     await record.restore();
+    await record.update({ deletedBy: null, updatedBy: userId ? String(userId) : null } as any);
     return this.findOne(uuid);
   }
 }

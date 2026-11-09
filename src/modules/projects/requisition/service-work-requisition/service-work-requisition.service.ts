@@ -65,7 +65,11 @@ export class ServiceWorkRequisitionService {
   // CREATE
   // =========================
 
-  async create(dto: CreateServiceWorkRequisitionDto) {
+  async create(
+    dto: CreateServiceWorkRequisitionDto,
+    userId?: number,
+    currentUser?: any,
+  ) {
     const uuid = await this.sequelize.transaction(async (transaction) => {
       const { items, ...requisitionData } = dto as any;
 
@@ -110,7 +114,10 @@ export class ServiceWorkRequisitionService {
   // FIND ALL
   // =========================
 
-  async findAll(query: QueryServiceWorkRequisitionDto) {
+  async findAll(
+    query: QueryServiceWorkRequisitionDto,
+    currentUser?: any,
+  ) {
     const {
       page = 1,
       limit = 10,
@@ -198,7 +205,7 @@ export class ServiceWorkRequisitionService {
   // FIND ONE
   // =========================
 
-  async findOne(uuid: string) {
+  async findOne(uuid: string, currentUser?: any) {
     const requisition = await this.serviceWorkRequisitionModel.findOne({
       where: { uuid } as WhereOptions<ServiceWorkRequisitionAttributes>,
       include: INCLUDE_RELATIONS(
@@ -224,7 +231,12 @@ export class ServiceWorkRequisitionService {
   // UPDATE
   // =========================
 
-  async update(uuid: string, dto: UpdateServiceWorkRequisitionDto) {
+  async update(
+    uuid: string,
+    dto: UpdateServiceWorkRequisitionDto,
+    userId?: number,
+    currentUser?: any,
+  ) {
     await this.sequelize.transaction(async (transaction) => {
       const requisition = await this.serviceWorkRequisitionModel.findOne({
         where: { uuid } as WhereOptions<ServiceWorkRequisitionAttributes>,
@@ -291,7 +303,7 @@ export class ServiceWorkRequisitionService {
   // DELETE
   // =========================
 
-  async remove(uuid: string) {
+  async remove(uuid: string, userId?: number, currentUser?: any) {
     const requisition = await this.serviceWorkRequisitionModel.findOne({
       where: { uuid } as WhereOptions<ServiceWorkRequisitionAttributes>,
     });
@@ -311,7 +323,7 @@ export class ServiceWorkRequisitionService {
   // RESTORE
   // =========================
 
-  async restore(uuid: string) {
+  async restore(uuid: string, userId?: number, currentUser?: any) {
     const requisition = await this.serviceWorkRequisitionModel.findOne({
       where: { uuid } as WhereOptions<ServiceWorkRequisitionAttributes>,
       paranoid: false,

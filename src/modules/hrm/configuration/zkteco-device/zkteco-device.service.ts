@@ -52,6 +52,8 @@ export class ZkTecoDeviceService {
 
   async create(
     dto: CreateZkTecoDeviceDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<ZkTecoDevice> {
     const connection = this.resolveConnection(
       dto.type,
@@ -63,7 +65,9 @@ export class ZkTecoDeviceService {
       await this.zkTecoDeviceModel.create({
         ...dto,
         ...connection,
-        createdBy: dto.createdBy ?? dto.addedById,
+        createdBy: userId ? String(userId) : (dto as any).createdBy ?? (dto as any).addedById ?? null,
+        orgId: (dto as any).orgId ?? currentUser?.orgId ?? null,
+        projectId: (dto as any).projectId ?? currentUser?.projectId ?? null,
         status:
           dto.status ?? ZkTecoDeviceStatus.ACTIVE,
       } as any);
@@ -71,7 +75,7 @@ export class ZkTecoDeviceService {
     return this.findOne(record.uuid);
   }
 
-  async findAll(query: QueryZkTecoDeviceDto) {
+  async findAll(query: QueryZkTecoDeviceDto, currentUser?: any) {
     const {
       page = 1,
       limit = 10,
@@ -90,11 +94,13 @@ export class ZkTecoDeviceService {
         : (page - 1) * limit;
 
     const where: any = {};
-    if (query.orgId) {
-      where.orgId = query.orgId;
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
     }
-    if ((query as any).projectId) {
-      where.projectId = (query as any).projectId;
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
     }
 
     if (search) {
@@ -154,13 +160,11 @@ export class ZkTecoDeviceService {
     };
   }
 
-  async findOne(
-    uuid: string,
-  ): Promise<ZkTecoDevice> {
+  async findOne(uuid: string, currentUser?: any): Promise<ZkTecoDevice> {
     const record =
       await this.zkTecoDeviceModel.findOne({
         where: { uuid } as any,
-      });
+      } as any);
 
     if (!record) {
       throw new NotFoundException(
@@ -171,10 +175,7 @@ export class ZkTecoDeviceService {
     return record;
   }
 
-  async update(
-    uuid: string,
-    dto: UpdateZkTecoDeviceDto,
-  ): Promise<ZkTecoDevice> {
+  async update(uuid: string, dto: UpdateZkTecoDeviceDto, userId?: number, currentUser?: any): Promise<ZkTecoDevice> {
     const record =
       await this.zkTecoDeviceModel.findOne({
         where: { uuid } as any,
@@ -205,9 +206,7 @@ export class ZkTecoDeviceService {
     return this.findOne(uuid);
   }
 
-  async remove(
-    uuid: string,
-  ): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const record =
       await this.zkTecoDeviceModel.findOne({
         where: { uuid } as any,
@@ -222,7 +221,8 @@ export class ZkTecoDeviceService {
     // status → inactive + soft delete
     await record.update({
       status: ZkTecoDeviceStatus.INACTIVE,
-    });
+      deletedBy: userId ? String(userId) : null,
+    } as any);
 
     await record.destroy();
 
@@ -231,9 +231,7 @@ export class ZkTecoDeviceService {
     };
   }
 
-  async restore(
-    uuid: string,
-  ): Promise<ZkTecoDevice> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<ZkTecoDevice> {
     const record =
       await this.zkTecoDeviceModel.findOne({
         where: { uuid } as any,
@@ -256,7 +254,9 @@ export class ZkTecoDeviceService {
     await record.restore();
     await record.update({
       status: ZkTecoDeviceStatus.ACTIVE,
-    });
+      deletedBy: null,
+      updatedBy: userId ? String(userId) : null,
+    } as any);
 
     return this.findOne(uuid);
   }

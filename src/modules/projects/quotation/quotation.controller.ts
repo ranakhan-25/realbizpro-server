@@ -1,16 +1,9 @@
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { CurrentUser, CurrentUserId } from 'src/common/decorators/auth.decorators';
 /* eslint-disable prettier/prettier */
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  ParseUUIDPipe,
-  Query,
-  Req,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { QuotationService } from './quotation.service';
@@ -24,60 +17,67 @@ type AuthenticatedRequest = Request & {
 
 @ApiTags('Project | Quotations')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('quotation')
 export class QuotationController {
   constructor(private readonly quotationService: QuotationService) {}
 
   @Post()
+  @Permissions('create_projects_quotation')
   create(
     @Body() createQuotationDto: CreateQuotationDto,
-    @Req() request: AuthenticatedRequest,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
   ) {
-    const userId = request.user?.id;
-    return this.quotationService.create(
-      createQuotationDto,
-      userId === undefined ? undefined : String(userId),
-    );
+    return this.quotationService.create(createQuotationDto, userId, currentUser);
   }
 
   @Get()
-  findAll(@Query() query: QueryQuotationDto) {
-    return this.quotationService.findAll(query);
+  @Permissions('list_projects_quotation')
+  findAll(
+    @Query() query: QueryQuotationDto,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.quotationService.findAll(query, currentUser);
   }
 
   @Get(':uuid')
-  findOne(@Param('uuid', ParseUUIDPipe) uuid: string) {
-    return this.quotationService.findOne(uuid);
+  @Permissions('read_projects_quotation')
+  findOne(
+    @Param('uuid', ParseUUIDPipe) uuid: string,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.quotationService.findOne(uuid, currentUser);
   }
 
   @Patch(':uuid')
+  @Permissions('update_projects_quotation')
   update(
     @Param('uuid', ParseUUIDPipe) uuid: string,
     @Body() updateQuotationDto: UpdateQuotationDto,
-    @Req() request: AuthenticatedRequest,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
   ) {
-    const userId = request.user?.id;
-    return this.quotationService.update(
-      uuid,
-      updateQuotationDto,
-      userId === undefined ? undefined : String(userId),
-    );
+    return this.quotationService.update(uuid, updateQuotationDto, userId, currentUser);
   }
 
   @Delete(':uuid')
+  @Permissions('delete_projects_quotation')
   remove(
     @Param('uuid', ParseUUIDPipe) uuid: string,
-    @Req() request: AuthenticatedRequest,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
   ) {
-    const userId = request.user?.id;
-    return this.quotationService.remove(
-      uuid,
-      userId === undefined ? undefined : String(userId),
-    );
+    return this.quotationService.remove(uuid, userId, currentUser);
   }
 
   @Patch(':uuid/restore')
-  restore(@Param('uuid', ParseUUIDPipe) uuid: string) {
-    return this.quotationService.restore(uuid);
+  @Permissions('update_projects_quotation')
+  restore(
+    @Param('uuid', ParseUUIDPipe) uuid: string,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.quotationService.restore(uuid, userId, currentUser);
   }
 }

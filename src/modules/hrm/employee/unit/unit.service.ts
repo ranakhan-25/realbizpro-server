@@ -26,6 +26,8 @@ export class UnitService {
 
   async create(
     dto: CreateUnitDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<Unit> {
     // name column unique, tai soft-deleted gulo-o check kori
     const existing = await this.unitModel.findOne(
@@ -45,14 +47,16 @@ export class UnitService {
 
     const unit = await this.unitModel.create({
       ...dto,
-      createdBy: dto.createdBy ?? dto.addedById,
+      createdBy: userId ? String(userId) : (dto as any).createdBy ?? (dto as any).addedById ?? null,
+        orgId: (dto as any).orgId ?? currentUser?.orgId ?? null,
+        projectId: (dto as any).projectId ?? currentUser?.projectId ?? null,
       status: dto.status ?? UnitStatus.ACTIVE,
     } as any);
 
     return this.findOne(unit.uuid);
   }
 
-  async findAll(query: QueryUnitDto) {
+  async findAll(query: QueryUnitDto, currentUser?: any) {
     const {
       page = 1,
       limit = 10,
@@ -70,11 +74,13 @@ export class UnitService {
         : (page - 1) * limit;
 
     const where: any = {};
-    if (query.orgId) {
-      where.orgId = query.orgId;
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
     }
-    if ((query as any).projectId) {
-      where.projectId = (query as any).projectId;
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
     }
 
     if (search) {
@@ -92,7 +98,7 @@ export class UnitService {
         offset,
         order: [[sortBy, sortOrder]],
         paranoid: !withDeleted,
-      });
+      } as any);
 
     const totalPages =
       Math.ceil(count / limit) || 1;
@@ -124,7 +130,7 @@ export class UnitService {
     };
   }
 
-  async findOne(uuid: string): Promise<Unit> {
+  async findOne(uuid: string, currentUser?: any): Promise<Unit> {
     const unit = await this.unitModel.findOne({
       where: { uuid } as any,
     });
@@ -138,10 +144,7 @@ export class UnitService {
     return unit;
   }
 
-  async update(
-    uuid: string,
-    dto: UpdateUnitDto,
-  ): Promise<Unit> {
+  async update(uuid: string, dto: UpdateUnitDto, userId?: number, currentUser?: any): Promise<Unit> {
     const unit = await this.unitModel.findOne({
       where: { uuid } as any,
     });
@@ -180,9 +183,7 @@ export class UnitService {
     return this.findOne(uuid);
   }
 
-  async remove(
-    uuid: string,
-  ): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const unit = await this.unitModel.findOne({
       where: { uuid } as any,
     });
@@ -196,6 +197,7 @@ export class UnitService {
     // status → inactive + soft delete
     await unit.update({
       status: UnitStatus.INACTIVE,
+      deletedBy: userId ? String(userId) : null,
     } as any);
 
     await unit.destroy();
@@ -205,7 +207,7 @@ export class UnitService {
     };
   }
 
-  async restore(uuid: string): Promise<Unit> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<Unit> {
     const unit = await this.unitModel.findOne({
       where: { uuid } as any,
       paranoid: false,
@@ -227,6 +229,8 @@ export class UnitService {
     await unit.restore();
     await unit.update({
       status: UnitStatus.ACTIVE,
+      deletedBy: null,
+      updatedBy: userId ? String(userId) : null,
     } as any);
 
     return this.findOne(uuid);

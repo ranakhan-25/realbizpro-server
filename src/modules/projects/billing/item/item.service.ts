@@ -30,7 +30,11 @@ export class ItemService {
   ) {}
 
   // Create Item
-  async create(dto: CreateItemDto) {
+  async create(
+    dto: CreateItemDto,
+    userId?: number,
+    currentUser?: any,
+  ) {
     // Validate category UUID
     if (dto.categoryId) {
       const category =
@@ -73,13 +77,19 @@ export class ItemService {
       }
     }
 
-    return this.itemModel.create({
-      ...dto,
-    });
+    return this.itemModel.create(({
+        createdBy: userId ? String(userId) : null,
+        orgId: currentUser?.orgId ?? null,
+        projectId: currentUser?.projectId ?? null,
+        ...dto,
+    }) as any);
   }
 
   // Get All Items with Pagination, Filtering and Search
-  async findAll(query: QueryItemDto) {
+  async findAll(
+    query: QueryItemDto,
+    currentUser?: any,
+  ) {
     const page = Math.max(
       1,
       Number(query.page) || 1,
@@ -95,6 +105,14 @@ export class ItemService {
         : (page - 1) * limit;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
     if ((query as any)?.orgId) {
       where.orgId = (query as any).orgId;
     }
@@ -155,7 +173,7 @@ export class ItemService {
   }
 
   // Get Single Item by UUID
-  async findOne(uuid: string) {
+  async findOne(uuid: string, currentUser?: any) {
     const item = await this.itemModel.findOne({
       where: {
         uuid,
@@ -182,7 +200,12 @@ export class ItemService {
   }
 
   // Update Item by UUID
-  async update(uuid: string, dto: UpdateItemDto) {
+  async update(
+    uuid: string,
+    dto: UpdateItemDto,
+    userId?: number,
+    currentUser?: any,
+  ) {
     const item = await this.findOne(uuid);
 
     // Validate category UUID if supplied
@@ -230,15 +253,15 @@ export class ItemService {
       }
     }
 
-    await item.update({
+    await item.update(({
       ...dto,
-    });
+    }) as any);
 
     return item;
   }
 
   // Soft Delete Item by UUID
-  async remove(uuid: string) {
+  async remove(uuid: string, userId?: number, currentUser?: any) {
     const item = await this.findOne(uuid);
 
     await item.destroy();
@@ -249,7 +272,7 @@ export class ItemService {
   }
 
   // Restore Soft-Deleted Item by UUID
-  async restore(uuid: string) {
+  async restore(uuid: string, userId?: number, currentUser?: any) {
     const item = await this.itemModel.findOne({
       where: {
         uuid,

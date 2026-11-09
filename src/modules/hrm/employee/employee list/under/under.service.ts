@@ -24,6 +24,8 @@ export class UnderService {
 
   async create(
     dto: CreateUnderDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<Under> {
     // name column unique, tai soft-deleted gulo-o check kori
     const existing =
@@ -42,14 +44,16 @@ export class UnderService {
 
     const record = await this.underModel.create({
       ...dto,
-      createdBy: dto.createdBy ?? dto.addedById,
+      createdBy: userId ? String(userId) : (dto as any).createdBy ?? (dto as any).addedById ?? null,
+        orgId: (dto as any).orgId ?? currentUser?.orgId ?? null,
+        projectId: (dto as any).projectId ?? currentUser?.projectId ?? null,
       status: dto.status ?? UnderStatus.ACTIVE,
-    });
+    } as any);
 
     return this.findOne(record.uuid);
   }
 
-  async findAll(query: QueryUnderDto) {
+  async findAll(query: QueryUnderDto, currentUser?: any) {
     const {
       page = 1,
       limit = 10,
@@ -67,11 +71,13 @@ export class UnderService {
         : (page - 1) * limit;
 
     const where: any = {};
-    if (query.orgId) {
-      where.orgId = query.orgId;
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
     }
-    if ((query as any).projectId) {
-      where.projectId = (query as any).projectId;
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
     }
 
     if (search) {
@@ -121,7 +127,7 @@ export class UnderService {
     };
   }
 
-  async findOne(uuid: string): Promise<Under> {
+  async findOne(uuid: string, currentUser?: any): Promise<Under> {
     const record = await this.underModel.findOne({
       where: { uuid } as any,
     });
@@ -135,10 +141,7 @@ export class UnderService {
     return record;
   }
 
-  async update(
-    uuid: string,
-    dto: UpdateUnderDto,
-  ): Promise<Under> {
+  async update(uuid: string, dto: UpdateUnderDto, userId?: number, currentUser?: any): Promise<Under> {
     const record = await this.underModel.findOne({
       where: { uuid } as any,
     });
@@ -172,14 +175,12 @@ export class UnderService {
       ...dto,
       updatedBy:
         dto.addedById ?? record.updatedBy,
-    });
+    } as any);
 
     return this.findOne(uuid);
   }
 
-  async remove(
-    uuid: string,
-  ): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const record = await this.underModel.findOne({
       where: { uuid } as any,
     });
@@ -193,7 +194,8 @@ export class UnderService {
     // status → inactive + soft delete
     await record.update({
       status: UnderStatus.INACTIVE,
-    });
+      deletedBy: userId ? String(userId) : null,
+    } as any);
 
     await record.destroy();
 
@@ -202,7 +204,7 @@ export class UnderService {
     };
   }
 
-  async restore(uuid: string): Promise<Under> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<Under> {
     const record = await this.underModel.findOne({
       where: { uuid } as any,
       paranoid: false,
@@ -224,7 +226,9 @@ export class UnderService {
     await record.restore();
     await record.update({
       status: UnderStatus.ACTIVE,
-    });
+      deletedBy: null,
+      updatedBy: userId ? String(userId) : null,
+    } as any);
 
     return this.findOne(uuid);
   }

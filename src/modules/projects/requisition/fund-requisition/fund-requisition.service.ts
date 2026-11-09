@@ -29,9 +29,13 @@ export class FundRequisitionService {
   ) {}
 
   // CREATE
-  async create(dto: CreateFundRequisitionDto) {
+  async create(
+    dto: CreateFundRequisitionDto,
+    userId?: number,
+    currentUser?: any,
+  ) {
     const fundRequisition =
-      await this.fundRequisitionModel.create({
+      await this.fundRequisitionModel.create(({
         date: new Date(dto.date),
 
         projectType: dto.projectType,
@@ -58,7 +62,7 @@ export class FundRequisitionService {
         addedById: dto.addedById,
         createdBy: dto.createdBy,
         updatedBy: dto.updatedBy,
-      });
+      }) as any);
 
     return await this.findOne(
       fundRequisition.uuid,
@@ -66,7 +70,10 @@ export class FundRequisitionService {
   }
 
   // FIND ALL
-  async findAll(query: QueryFundRequisitionDto) {
+  async findAll(
+    query: QueryFundRequisitionDto,
+    currentUser?: any,
+  ) {
     const {
       page = 1,
       limit = 10,
@@ -248,7 +255,7 @@ export class FundRequisitionService {
   }
 
   // FIND ONE
-  async findOne(uuid: string) {
+  async findOne(uuid: string, currentUser?: any) {
     const where = {
       uuid,
     } as WhereOptions<FundRequisitionAttributes>;
@@ -272,6 +279,8 @@ export class FundRequisitionService {
   async update(
     uuid: string,
     dto: UpdateFundRequisitionDto,
+    userId?: number,
+    currentUser?: any,
   ) {
     const where = {
       uuid,
@@ -295,7 +304,7 @@ export class FundRequisitionService {
       );
     }
 
-    await fundRequisition.update({
+    await fundRequisition.update(({
       ...(dto.date !== undefined && {
         date: new Date(dto.date),
       }),
@@ -355,13 +364,13 @@ export class FundRequisitionService {
       ...(dto.updatedBy !== undefined && {
         updatedBy: dto.updatedBy,
       }),
-    });
+    }) as any);
 
     return await this.findOne(uuid);
   }
 
   // DELETE
-  async remove(uuid: string) {
+  async remove(uuid: string, userId?: number, currentUser?: any) {
     const where = {
       uuid,
     } as WhereOptions<FundRequisitionAttributes>;
@@ -386,7 +395,7 @@ export class FundRequisitionService {
   }
 
   // RESTORE
-  async restore(uuid: string) {
+  async restore(uuid: string, userId?: number, currentUser?: any) {
     const where = {
       uuid,
     } as WhereOptions<FundRequisitionAttributes>;
