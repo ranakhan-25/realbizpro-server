@@ -1,5 +1,5 @@
 // Auto-generated types for InvMaterialUsage
-// Source: src\database\models\inventory\inv_material_usage.model.ts
+// Source: src/database/models/inventory/inv_material_usage.model.ts
 
 import type { InvMaterialUsageItem } from '../models/inventory/inv_material_usage_item.model';
 

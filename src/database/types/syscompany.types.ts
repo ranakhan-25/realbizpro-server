@@ -1,5 +1,5 @@
 // Auto-generated types for SysCompany
-// Source: src\database\models\system\sys_company.model.ts
+// Source: src/database/models/system/sys_company.model.ts
 
 import type { ProcurementRfq } from '../models/procurement/rfq/pr_rfq.model';
 import type { ProcurementAssetRfq } from '../models/procurement/rfq/pr_asset_rfq.model';

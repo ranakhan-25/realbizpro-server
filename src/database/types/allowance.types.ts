@@ -1,5 +1,5 @@
 // Auto-generated types for Allowance
-// Source: src\database\models\hrm\employee\hrm_allowance_model.ts
+// Source: src/database/models/hrm/employee/hrm_allowance_model.ts
 
 import { AllowanceType } from '../models/hrm/employee/hrm_payment_enum';
 import { PaymentType } from '../models/hrm/employee/hrm_payment_enum';

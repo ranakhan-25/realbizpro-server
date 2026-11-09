@@ -1,5 +1,5 @@
 // Auto-generated types for CrRecoveryLog
-// Source: src\database\models\credit-realization\cr_recovery_log.model.ts
+// Source: src/database/models/credit-realization/cr_recovery_log.model.ts
 
 import type { CrSaleAgreement } from '../models/credit-realization/cr_sale_agreement.model';
 
