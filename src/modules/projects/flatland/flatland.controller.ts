@@ -36,7 +36,7 @@ export class FlatLandController {
   findAll(
     @Query() query: QueryFlatLandDto, @CurrentUser() currentUser: any
   ) {
-    return this.flatLandService.findAll(query, currentUser);
+    return this.flatLandService.findAll(query, undefined, currentUser);
   }
 
   @Get(':uuid')

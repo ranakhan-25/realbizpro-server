@@ -32,7 +32,7 @@ export class ProjectController {
   //   return this.projectService.getDashboardSummary();
   // }
   @Get('reports/details')
-  @Permissions('read_projects_project')
+  @Permissions('list_projects_project')
   @ApiOperation({ summary: 'Project details report' })
   detailsReport(
     @CurrentUser() currentUser: any
@@ -41,7 +41,7 @@ export class ProjectController {
   }
 
   @Get('reports/summary')
-  @Permissions('read_projects_project')
+  @Permissions('list_projects_project')
   @ApiOperation({ summary: 'Project summary report' })
   summaryReport(
     @CurrentUser() currentUser: any
@@ -50,7 +50,7 @@ export class ProjectController {
   }
 
   @Get('reports/at-a-glance')
-  @Permissions('read_projects_project')
+  @Permissions('list_projects_project')
   @ApiOperation({ summary: 'Project at-a-glance report' })
   atAGlanceReport(
     @CurrentUser() currentUser: any
@@ -59,7 +59,7 @@ export class ProjectController {
   }
 
   @Get('reports/financial')
-  @Permissions('read_projects_project')
+  @Permissions('list_projects_project')
   @ApiOperation({ summary: 'Project budget report' })
   financialReport(
     @CurrentUser() currentUser: any
@@ -68,7 +68,7 @@ export class ProjectController {
   }
 
   @Get('reports/progress')
-  @Permissions('read_projects_project')
+  @Permissions('list_projects_project')
   @ApiOperation({ summary: 'Project progress report' })
   progressReport(
     @CurrentUser() currentUser: any
@@ -77,7 +77,7 @@ export class ProjectController {
   }
 
   @Get('reports/income/project-wise')
-  @Permissions('read_projects_project')
+  @Permissions('list_projects_project')
   @ApiOperation({ summary: 'Project-wise income report' })
   projectIncomeReport(
     @CurrentUser() currentUser: any
@@ -86,7 +86,7 @@ export class ProjectController {
   }
 
   @Get('reports/income/site-wise')
-  @Permissions('read_projects_project')
+  @Permissions('list_projects_project')
   @ApiOperation({ summary: 'Site-wise project report' })
   siteIncomeReport(
     @CurrentUser() currentUser: any

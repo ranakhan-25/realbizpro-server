@@ -22,7 +22,7 @@ export class ContractorController {
   ) {}
 
   @Get('reports/at-a-glance')
-  @Permissions('read_projects_contractor')
+  @Permissions('list_projects_contractor')
   @ApiOperation({ summary: 'Contractor at-a-glance report' })
   atAGlanceReport(
     @Query() query: QueryContractorDto, @CurrentUser() currentUser: any
@@ -31,7 +31,7 @@ export class ContractorController {
   }
 
   @Get('reports/project-summary')
-  @Permissions('read_projects_contractor')
+  @Permissions('list_projects_contractor')
   @ApiOperation({ summary: 'Contractor summary report' })
   projectSummaryReport(
     @Query() query: QueryContractorDto, @CurrentUser() currentUser: any

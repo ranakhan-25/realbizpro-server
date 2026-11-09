@@ -24,8 +24,15 @@ export class ProjectShareAssignmentController {
     private readonly assignmentService: ProjectShareAssignmentService,
   ) {}
 
+  @Get('reports')
+  @Permissions('list_projects_project_share_assignment')
+  @ApiOperation({ summary: 'List project share report rows' })
+  report(@CurrentUser() currentUser: any) {
+    return this.assignmentService.findReport('all', currentUser);
+  }
+
   @Get('reports/collection')
-  @Permissions('read_projects_project_share_assignment')
+  @Permissions('list_projects_project_share_assignment')
   @ApiOperation({
     summary: 'List share collection report rows',
   })
@@ -36,7 +43,7 @@ export class ProjectShareAssignmentController {
   }
 
   @Get('reports/penalty')
-  @Permissions('read_projects_project_share_assignment')
+  @Permissions('list_projects_project_share_assignment')
   @ApiOperation({
     summary: 'List share penalty report rows',
   })
@@ -47,7 +54,7 @@ export class ProjectShareAssignmentController {
   }
 
   @Get('reports/holders-point')
-  @Permissions('read_projects_project_share_assignment')
+  @Permissions('list_projects_project_share_assignment')
   @ApiOperation({
     summary:
       'List shareholder points report rows',

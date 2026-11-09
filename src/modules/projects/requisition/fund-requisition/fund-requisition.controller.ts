@@ -35,7 +35,7 @@ export class FundRequisitionController {
   }
 
   @Get('reports')
-  @Permissions('read_projects_fund_requisition')
+  @Permissions('list_projects_fund_requisition')
   @ApiOperation({
     summary: 'Get fund requisition report rows (paginated and filterable)',
   })

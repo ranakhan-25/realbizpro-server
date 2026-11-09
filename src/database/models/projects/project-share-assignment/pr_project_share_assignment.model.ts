@@ -50,10 +50,11 @@ export class ProjectShareAssignment extends BaseModel<
   // ─────────────── Project Relation ───────────────
   @ForeignKey(() => Project)
   @Column({
-              field: 'project_id',
-              type: DataType.UUID,
-              allowNull: false,
-            })
+    // This table's existing PostgreSQL column is named "projectId".
+    // Keep Sequelize mapped to that column instead of "project_id".
+    type: DataType.UUID,
+    allowNull: false,
+  })
   declare projectId: string;
 
   @BelongsTo(() => Project, {
