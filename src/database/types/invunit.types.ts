@@ -1,5 +1,5 @@
 // Auto-generated types for InvUnit
-// Source: src/database/models/inventory/inv_unit.model.ts
+// Source: src\database\models\inventory\inv_unit.model.ts
 
 import type { InvItem } from '../models/inventory/inv_item.model';
 

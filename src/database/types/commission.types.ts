@@ -1,5 +1,5 @@
 // Auto-generated types for Commission
-// Source: src/database/models/hrm/employee/hrm_commission_model.ts
+// Source: src\database\models\hrm\employee\hrm_commission_model.ts
 
 import type { EmployeeList } from '../models/hrm/employee/hrm_employeeList_model';
 import type { SysOrganization } from '../models/system/sys_organization.model';

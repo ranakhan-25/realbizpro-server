@@ -1,5 +1,5 @@
 // Auto-generated types for SupplierAccounts
-// Source: src/database/models/projects/contract/pr_supplier_accounts.model.ts
+// Source: src\database\models\projects\contract\pr_supplier_accounts.model.ts
 
 import { SupplierAccountsStatus } from '../models/projects/contract/pr_supplier_accounts.model';
 

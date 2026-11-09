@@ -1,5 +1,5 @@
 // Auto-generated types for EmployeeList
-// Source: src/database/models/hrm/employee/hrm_employeeList_model.ts
+// Source: src\database\models\hrm\employee\hrm_employeeList_model.ts
 
 import { MaritalStatus } from '../models/hrm/employee/hrm_employeeList_model';
 import { EmployeeListStatus } from '../models/hrm/employee/hrm_employeeList_model';
