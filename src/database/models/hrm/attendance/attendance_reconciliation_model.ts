@@ -32,14 +32,14 @@ export enum AttendanceReconciliationStatus {
 }
 
 @Table({
-  tableName: 'attendance_reconciliation',
+  tableName: 'hrm_attendance_reconciliation',
+  underscored: true,
   timestamps: true,
   paranoid: true,
-  underscored: false,
   indexes: [
     {
       name: 'AttendanceReconciliation_employeeId_idx',
-      fields: ['employeeId'],
+      fields: ['employee_id'],
     },
     {
       name: 'AttendanceReconciliation_date_idx',
@@ -51,7 +51,7 @@ export enum AttendanceReconciliationStatus {
     },
     {
       name: 'AttendanceReconciliation_requestType_idx',
-      fields: ['requestType'],
+      fields: ['request_type'],
     },
     {
       name: 'AttendanceReconciliation_deletedAt_idx',

@@ -24,18 +24,18 @@ export enum BonusGenerateStatus {
 }
 
 @Table({
-  tableName: 'bonus_generate',
+  tableName: 'hrm_bonus_generate',
+  underscored: true,
   timestamps: true,
   paranoid: true,
-  underscored: false,
   indexes: [
     {
       name: 'BonusGenerate_bonusId_idx',
-      fields: ['bonusId'],
+      fields: ['bonus_id'],
     },
     {
       name: 'BonusGenerate_employeeId_idx',
-      fields: ['employeeId'],
+      fields: ['employee_id'],
     },
     {
       name: 'BonusGenerate_deletedAt_idx',

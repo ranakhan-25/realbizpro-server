@@ -19,10 +19,10 @@ export enum UnderStatus {
 }
 
 @Table({
-  tableName: 'under',
+  tableName: 'hrm_under',
+  underscored: true,
   timestamps: true,
   paranoid: true,
-  underscored: false,
   indexes: [
     { name: 'Under_name_idx', fields: ['name'] },
     {

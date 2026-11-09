@@ -26,18 +26,18 @@ export enum LeaveApplicationStatus {
 }
 
 @Table({
-  tableName: 'leave_application',
+  tableName: 'hrm_leave_application',
+  underscored: true,
   timestamps: true,
   paranoid: true,
-  underscored: false,
   indexes: [
     {
       name: 'LeaveApplication_employeeId_idx',
-      fields: ['employeeId'],
+      fields: ['employee_id'],
     },
     {
       name: 'LeaveApplication_leaveTypeId_idx',
-      fields: ['leaveTypeId'],
+      fields: ['leave_type_id'],
     },
     {
       name: 'LeaveApplication_status_idx',
@@ -45,11 +45,11 @@ export enum LeaveApplicationStatus {
     },
     {
       name: 'LeaveApplication_fromDate_idx',
-      fields: ['fromDate'],
+      fields: ['from_date'],
     },
     {
       name: 'LeaveApplication_toDate_idx',
-      fields: ['toDate'],
+      fields: ['to_date'],
     },
     {
       name: 'LeaveApplication_deletedAt_idx',

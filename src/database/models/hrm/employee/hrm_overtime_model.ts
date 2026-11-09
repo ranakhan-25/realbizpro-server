@@ -18,14 +18,14 @@ import { SysOrganization } from "src/database/models/system/sys_organization.mod
 import { Project } from "src/database/models/projects/project/pr_project.model";
 
 @Table({
-  tableName: 'overtime',
+  tableName: 'hrm_overtime',
+  underscored: true,
   timestamps: true,
   paranoid: true,
-  underscored: false,
   indexes: [
     {
       name: 'Overtime_employeeId_idx',
-      fields: ['employeeId'],
+      fields: ['employee_id'],
     },
     {
       name: 'Overtime_deletedAt_idx',

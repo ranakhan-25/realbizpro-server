@@ -26,14 +26,14 @@ export enum ShiftDayName {
 }
 
 @Table({
-  tableName: 'shift_schedule',
+  tableName: 'hrm_shift_schedule',
+  underscored: true,
   timestamps: true,
   paranoid: true,
-  underscored: false,
   indexes: [
     {
       name: 'ShiftSchedule_shiftId_idx',
-      fields: ['shiftId'],
+      fields: ['shift_id'],
     },
     {
       name: 'ShiftSchedule_deletedAt_idx',
@@ -53,7 +53,7 @@ export class ShiftSchedule
     type: DataType.UUID,
     allowNull: false,
     references: {
-      model: 'shift',
+      model: 'hrm_shift',
       key: 'uuid',
     },
   })

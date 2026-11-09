@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {
   Column,
   DataType,
@@ -20,10 +21,10 @@ export enum DepartmentStatus {
 }
 
 @Table({
-  tableName: 'department',
+  tableName: 'hrm_department',
+  underscored: true,
   timestamps: true,
   paranoid: true,
-  underscored: false,
   indexes: [
     {
       name: 'Department_name_idx',
@@ -31,7 +32,7 @@ export enum DepartmentStatus {
     },
     {
       name: 'Department_departmentHeadId_idx',
-      fields: ['departmentHeadId'],
+      fields: ['department_head_id'],
     },
     {
       name: 'Department_deletedAt_idx',
@@ -56,14 +57,14 @@ export class Department
   @Column({
     type: DataType.STRING,
     allowNull: true,
-    field: 'departmentHeadId',
+    field: 'department_head_id',
   })
   declare departmentHeadId?: string;
 
   @Column({
     type: DataType.STRING,
     allowNull: true,
-    field: 'addedById',
+    field: 'added_by_id',
   })
   declare addedById?: string;
 
