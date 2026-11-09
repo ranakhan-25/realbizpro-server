@@ -31,7 +31,7 @@ export class ProjectBillingRecordService {
     return resource as ProjectBillingResource;
   }
 
-  async create(resourceName: string, dto: CreateProjectBillingRecordDto, userId?: number) {
+  async create(resourceName: string, dto: CreateProjectBillingRecordDto, userId?: number, currentUser?: any) {
     const resource = this.validateResource(resourceName);
     const uuid = await this.sequelize.transaction(async (transaction) => {
       const project = await this.projectModel.findOne({
@@ -58,7 +58,10 @@ export class ProjectBillingRecordService {
     return this.findOne(resource, uuid);
   }
 
-  async findAll(resourceName: string, query: QueryProjectBillingRecordDto) {
+  async findAll(
+    resourceName: string, query: QueryProjectBillingRecordDto,
+    currentUser?: any,
+  ) {
     const resource = this.validateResource(resourceName);
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
@@ -90,7 +93,7 @@ export class ProjectBillingRecordService {
     };
   }
 
-  async findOne(resourceName: string, uuid: string) {
+  async findOne(resourceName: string, uuid: string, currentUser?: any) {
     const resource = this.validateResource(resourceName);
     const record = await this.recordModel.findOne({
       where: { uuid, resource } as WhereOptions<ProjectBillingRecord>,
@@ -104,12 +107,7 @@ export class ProjectBillingRecordService {
     return record;
   }
 
-  async update(
-    resourceName: string,
-    uuid: string,
-    dto: UpdateProjectBillingRecordDto,
-    userId?: number,
-  ) {
+  async update(resourceName: string, uuid: string, dto: UpdateProjectBillingRecordDto, userId?: number, currentUser?: any) {
     const resource = this.validateResource(resourceName);
     await this.sequelize.transaction(async (transaction) => {
       const record = await this.recordModel.findOne({
@@ -143,7 +141,7 @@ export class ProjectBillingRecordService {
     return this.findOne(resource, uuid);
   }
 
-  async remove(resourceName: string, uuid: string) {
+  async remove(resourceName: string, uuid: string, userId?: number, currentUser?: any) {
     const resource = this.validateResource(resourceName);
     const record = await this.recordModel.findOne({
       where: { uuid, resource } as WhereOptions<ProjectBillingRecord>,

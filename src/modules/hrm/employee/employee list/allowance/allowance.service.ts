@@ -61,6 +61,8 @@ export class AllowanceService {
 
   async create(
     dto: CreateAllowanceDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<Allowance> {
     await this.ensureEmployeeExists(
       dto.employeeId,
@@ -73,13 +75,15 @@ export class AllowanceService {
     const record =
       await this.allowanceModel.create({
         ...dto,
-        createdBy: dto.createdBy ?? dto.addedById,
-      });
+        createdBy: userId ? String(userId) : (dto as any).createdBy ?? (dto as any).addedById ?? null,
+        orgId: (dto as any).orgId ?? currentUser?.orgId ?? null,
+        projectId: (dto as any).projectId ?? currentUser?.projectId ?? null,
+      } as any);
 
     return this.findOne(record.uuid);
   }
 
-  async findAll(query: QueryAllowanceDto) {
+  async findAll(query: QueryAllowanceDto, currentUser?: any) {
     const {
       page = 1,
       limit = 10,
@@ -99,11 +103,13 @@ export class AllowanceService {
         : (page - 1) * limit;
 
     const where: any = {};
-    if (query.orgId) {
-      where.orgId = query.orgId;
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
     }
-    if ((query as any).projectId) {
-      where.projectId = (query as any).projectId;
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
     }
 
     if (employeeId) {
@@ -163,9 +169,7 @@ export class AllowanceService {
     };
   }
 
-  async findOne(
-    uuid: string,
-  ): Promise<Allowance> {
+  async findOne(uuid: string, currentUser?: any): Promise<Allowance> {
     const record =
       await this.allowanceModel.findOne({
         where: { uuid } as any,
@@ -180,10 +184,7 @@ export class AllowanceService {
     return record;
   }
 
-  async update(
-    uuid: string,
-    dto: UpdateAllowanceDto,
-  ): Promise<Allowance> {
+  async update(uuid: string, dto: UpdateAllowanceDto, userId?: number, currentUser?: any): Promise<Allowance> {
     const record =
       await this.allowanceModel.findOne({
         where: { uuid } as any,
@@ -215,14 +216,12 @@ export class AllowanceService {
       ...dto,
       updatedBy:
         dto.addedById ?? record.updatedBy,
-    });
+    } as any);
 
     return this.findOne(uuid);
   }
 
-  async remove(
-    uuid: string,
-  ): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const record =
       await this.allowanceModel.findOne({
         where: { uuid } as any,
@@ -235,6 +234,7 @@ export class AllowanceService {
     }
 
     // soft delete
+    await record.update({ deletedBy: userId ? String(userId) : null } as any);
     await record.destroy();
 
     return {
@@ -242,9 +242,7 @@ export class AllowanceService {
     };
   }
 
-  async restore(
-    uuid: string,
-  ): Promise<Allowance> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<Allowance> {
     const record =
       await this.allowanceModel.findOne({
         where: { uuid } as any,
@@ -264,6 +262,7 @@ export class AllowanceService {
     }
 
     await record.restore();
+    await record.update({ deletedBy: null, updatedBy: userId ? String(userId) : null } as any);
 
     return this.findOne(uuid);
   }

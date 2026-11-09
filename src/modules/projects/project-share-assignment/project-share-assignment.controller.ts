@@ -1,21 +1,10 @@
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { CurrentUser, CurrentUserId } from 'src/common/decorators/auth.decorators';
 /* eslint-disable prettier/prettier */
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  ParseUUIDPipe,
-  Patch,
-  Post,
-  Query,
-  Req,
-} from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { CreateProjectShareAssignmentDto } from './dto/create-project-share-assignment.dto';
 import { QueryProjectShareAssignmentDto } from './dto/query-project-share-assignment.dto';
@@ -28,6 +17,7 @@ type AuthenticatedRequest = Request & {
 
 @ApiTags('CRM | Property | Share/Package')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('project-share-assignments')
 export class ProjectShareAssignmentController {
   constructor(
@@ -35,102 +25,114 @@ export class ProjectShareAssignmentController {
   ) {}
 
   @Get('reports/collection')
+  @Permissions('read_projects_project_share_assignment')
   @ApiOperation({
     summary: 'List share collection report rows',
   })
-  collectionReport() {
-    return this.assignmentService.findReport(
-      'collection',
-    );
+  collectionReport(
+    @CurrentUser() currentUser: any
+  ) {
+    return this.assignmentService.findReport('collection', currentUser);
   }
 
   @Get('reports/penalty')
+  @Permissions('read_projects_project_share_assignment')
   @ApiOperation({
     summary: 'List share penalty report rows',
   })
-  penaltyReport() {
-    return this.assignmentService.findReport(
-      'penalty',
-    );
+  penaltyReport(
+    @CurrentUser() currentUser: any
+  ) {
+    return this.assignmentService.findReport('penalty', currentUser);
   }
 
   @Get('reports/holders-point')
+  @Permissions('read_projects_project_share_assignment')
   @ApiOperation({
     summary:
       'List shareholder points report rows',
   })
-  holdersPointReport() {
-    return this.assignmentService.findReport(
-      'holders-point',
-    );
+  holdersPointReport(
+    @CurrentUser() currentUser: any
+  ) {
+    return this.assignmentService.findReport('holders-point', currentUser);
   }
 
   @Post()
+  @Permissions('create_projects_project_share_assignment')
   @ApiOperation({
     summary: 'Create a share assignment',
   })
   create(
-    @Body() dto: CreateProjectShareAssignmentDto,
-    @Req() request: AuthenticatedRequest,
+    @Body() dto: CreateProjectShareAssignmentDto, @CurrentUserId() userId: number, @CurrentUser() currentUser: any
   ) {
-    return this.assignmentService.create(
-      dto,
-      request.user?.id,
-    );
+    return this.assignmentService.create(dto,
+      userId, currentUser);
   }
 
   @Get()
+  @Permissions('list_projects_project_share_assignment')
   @ApiOperation({
     summary: 'List share assignments',
   })
   findAll(
     @Query()
-    query: QueryProjectShareAssignmentDto,
+    query: QueryProjectShareAssignmentDto, @CurrentUser() currentUser: any
   ) {
-    return this.assignmentService.findAll(query);
+    return this.assignmentService.findAll(query, currentUser);
   }
 
   @Get('dropdowns')
+  @Permissions('read_projects_project_share_assignment')
   @ApiOperation({ summary: 'Get project, project type, and site dropdown data for share/package records' })
-  dropdowns() { return this.assignmentService.dropdowns(); }
+  dropdowns(
+    @CurrentUser() currentUser: any
+  ) {
+    return this.assignmentService.dropdowns();
+  }
 
   @Get(':uuid')
+  @Permissions('read_projects_project_share_assignment')
   @ApiOperation({
     summary: 'Get a share assignment by UUID',
   })
   findOne(
-    @Param('uuid', ParseUUIDPipe) uuid: string,
+    @Param('uuid', ParseUUIDPipe) uuid: string, @CurrentUser() currentUser: any
   ) {
-    return this.assignmentService.findOne(uuid);
+    return this.assignmentService.findOne(uuid, currentUser);
   }
 
   @Patch(':uuid')
+  @Permissions('update_projects_project_share_assignment')
   @ApiOperation({
     summary: 'Update a share assignment',
   })
   update(
     @Param('uuid', ParseUUIDPipe) uuid: string,
-    @Body() dto: UpdateProjectShareAssignmentDto,
-    @Req() request: AuthenticatedRequest,
+    @Body() dto: UpdateProjectShareAssignmentDto, @CurrentUserId() userId: number, @CurrentUser() currentUser: any
   ) {
-    return this.assignmentService.update(
-      uuid,
+    return this.assignmentService.update(uuid,
       dto,
-      request.user?.id,
-    );
+      userId, currentUser);
   }
 
   @Delete(':uuid')
+  @Permissions('delete_projects_project_share_assignment')
   @ApiOperation({
     summary: 'Soft-delete a share assignment',
   })
   remove(
-    @Param('uuid', ParseUUIDPipe) uuid: string,
+    @Param('uuid', ParseUUIDPipe) uuid: string, @CurrentUserId() userId: number, @CurrentUser() currentUser: any
   ) {
-    return this.assignmentService.remove(uuid);
+    return this.assignmentService.remove(uuid, userId, currentUser);
   }
 
   @Patch(':uuid/restore')
+  @Permissions('update_projects_project_share_assignment')
   @ApiOperation({ summary: 'Restore a deleted share/package assignment' })
-  restore(@Param('uuid', ParseUUIDPipe) uuid: string) { return this.assignmentService.restore(uuid); }
+  restore(
+    @Param('uuid', ParseUUIDPipe) uuid: string, @CurrentUserId() userId: number, @CurrentUser() currentUser: any
+  ) {
+    return this.assignmentService.restore(uuid, userId, currentUser);
+  }
 }

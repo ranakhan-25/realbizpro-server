@@ -41,6 +41,7 @@ export class ProjectShareAssignmentService {
   async create(
     dto: CreateProjectShareAssignmentDto,
     userId?: number,
+    currentUser?: any,
   ) {
     const uuid = await this.sequelize.transaction(
       async (transaction) => {
@@ -145,6 +146,7 @@ export class ProjectShareAssignmentService {
 
   async findAll(
     query: QueryProjectShareAssignmentDto,
+    currentUser?: any,
   ) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
@@ -230,7 +232,7 @@ export class ProjectShareAssignmentService {
     };
   }
 
-  async findOne(uuid: string) {
+  async findOne(uuid: string, currentUser?: any) {
     const assignment =
       await this.assignmentModel.findOne({
         where: {
@@ -281,6 +283,7 @@ export class ProjectShareAssignmentService {
     uuid: string,
     dto: UpdateProjectShareAssignmentDto,
     userId?: number,
+    currentUser?: any,
   ) {
     await this.sequelize.transaction(
       async (transaction) => {
@@ -386,7 +389,7 @@ export class ProjectShareAssignmentService {
     return this.findOne(uuid);
   }
 
-  async remove(uuid: string) {
+  async remove(uuid: string, userId?: number, currentUser?: any) {
     const assignment =
       await this.assignmentModel.findOne({
         where: {
@@ -404,7 +407,7 @@ export class ProjectShareAssignmentService {
     };
   }
 
-  async restore(uuid: string) {
+  async restore(uuid: string, userId?: number, currentUser?: any) {
     const assignment = await this.assignmentModel.findOne({ where: { uuid } as WhereOptions<ProjectShareAssignment>, paranoid: false });
     if (!assignment) throw new NotFoundException(`Share assignment "${uuid}" not found`);
     if (!assignment.deletedAt) throw new BadRequestException(`Share assignment "${uuid}" is not deleted`);
@@ -415,6 +418,7 @@ export class ProjectShareAssignmentService {
   async findReport(
     kind:
       'collection' | 'penalty' | 'holders-point',
+    currentUser?: any,
   ) {
     const criteria: WhereOptions<ProjectShareAssignment> =
       kind === 'collection'

@@ -17,9 +17,12 @@ export class ChequeService {
     private readonly chequeRangeModel: typeof ChequeRange,
   ) {}
 
-  async create(dto: CreateChequeDto): Promise<Cheque> {
+  async create(dto: CreateChequeDto, userId?: number, currentUser?: any): Promise<Cheque> {
     try {
       return await this.chequeModel.create({
+        createdBy: userId ? String(userId) : (dto as any).createdBy ?? null,
+        orgId: (dto as any).orgId ?? currentUser?.orgId ?? null,
+        projectId: (dto as any).projectId ?? currentUser?.projectId ?? null,
         ...dto,
         ...(dto.instrumentDate ? { instrumentDate: new Date(dto.instrumentDate) } : {}),
       } as any);
@@ -29,13 +32,17 @@ export class ChequeService {
     }
   }
 
-  async findAll(query: any) {
+  async findAll(query: any, currentUser?: any) {
     const { page = '1', limit = '10', search, cashBank, ...filters } = query;
     const pageNum = parseInt(page, 10);
     const limitNum = parseInt(limit, 10);
     const offset = (pageNum - 1) * limitNum;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) where.orgId = effectiveOrgId;
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) where.projectId = effectiveProjectId;
     Object.keys(filters).forEach((k) => {
       if (filters[k] !== undefined && filters[k] !== null && filters[k] !== '') {
         where[k] = filters[k];
@@ -83,7 +90,7 @@ export class ChequeService {
     };
   }
 
-  async findOne(uuid: string): Promise<Cheque> {
+  async findOne(uuid: string, currentUser?: any): Promise<Cheque> {
     const cheque = await this.chequeModel.findOne({
       where: { uuid },
       
@@ -97,7 +104,7 @@ export class ChequeService {
     return value as Cheque;
   }
 
-  async update(uuid: string, dto: UpdateListOfChequeDto): Promise<Cheque> {
+  async update(uuid: string, dto: UpdateListOfChequeDto, userId?: number, currentUser?: any): Promise<Cheque> {
     const cheque = await this.chequeModel.findOne({ where: { uuid } });
     if (!cheque) throw new NotFoundException(`Cheque ${uuid} not found`);
     const { instrumentDate, ...updates } = dto;
@@ -108,20 +115,22 @@ export class ChequeService {
     return this.findOne(uuid);
   }
 
-  async remove(uuid: string): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const cheque = await this.chequeModel.findOne({ where: { uuid } });
     if (!cheque) throw new NotFoundException(`Cheque ${uuid} not found`);
+    await cheque.update({ deletedBy: userId ? String(userId) : null } as any);
     await cheque.destroy();
     return { message: 'Cheque deleted successfully.' };
   }
 
-  async restore(uuid: string): Promise<Cheque> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<Cheque> {
     const cheque = await this.chequeModel.findOne({
       where: { uuid },
       paranoid: false,
     });
     if (!cheque) throw new NotFoundException(`Cheque ${uuid} not found`);
     await cheque.restore();
+    await cheque.update({ deletedBy: null, updatedBy: userId ? String(userId) : null } as any);
     return cheque;
   }
 }

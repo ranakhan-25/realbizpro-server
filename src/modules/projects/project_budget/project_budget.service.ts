@@ -26,7 +26,11 @@ export class ProjectBudgetService {
     return BudgetStatus.ON_TRACK;
   }
 
-  async create(createDto: CreateProjectBudgetDto): Promise<ProjectBudget> {
+  async create(
+    createDto: CreateProjectBudgetDto,
+    userId?: number,
+    currentUser?: any,
+  ): Promise<ProjectBudget> {
     try {
       // If revisedAmount is not provided, default it to plannedAmount
       const revisedAmount = createDto.revisedAmount ?? createDto.plannedAmount;
@@ -35,6 +39,9 @@ export class ProjectBudgetService {
       const status = createDto.status || this.calculateStatus(createDto.plannedAmount, revisedAmount);
 
       return await this.budgetModel.create({
+        createdBy: userId ? String(userId) : null,
+        orgId: currentUser?.orgId ?? null,
+        projectId: currentUser?.projectId ?? null,
         ...createDto,
         revisedAmount,
         status,
@@ -47,7 +54,10 @@ export class ProjectBudgetService {
     }
   }
 
-  async findAll(query: QueryProjectBudgetDto) {
+  async findAll(
+    query: QueryProjectBudgetDto,
+    currentUser?: any,
+  ) {
     const { page = '1', limit = '10', search, ...filters } = query;
     
     const pageNum = parseInt(page, 10);
@@ -114,7 +124,7 @@ export class ProjectBudgetService {
     };
   }
 
-  async findOne(uuid: string): Promise<ProjectBudget> {
+  async findOne(uuid: string, currentUser?: any): Promise<ProjectBudget> {
     const budget = await this.budgetModel.findOne({ where: { uuid } });
     if (!budget) {
       throw new NotFoundException(`Budget with UUID ${uuid} not found`);
@@ -122,7 +132,12 @@ export class ProjectBudgetService {
     return budget;
   }
 
-  async update(uuid: string, updateDto: UpdateProjectBudgetDto): Promise<ProjectBudget> {
+  async update(
+    uuid: string,
+    updateDto: UpdateProjectBudgetDto,
+    userId?: number,
+    currentUser?: any,
+  ): Promise<ProjectBudget> {
     const budget = await this.findOne(uuid);
     
     const planned = updateDto.plannedAmount ?? Number(budget.plannedAmount);
@@ -131,25 +146,22 @@ export class ProjectBudgetService {
     // Recalculate status if amounts are changing
     const status = updateDto.status || this.calculateStatus(planned, revised);
 
-    return budget.update({
+    return budget.update(({
       ...updateDto,
       revisedAmount: revised,
       status,
-    });
+    }) as any);
   }
 
-  async remove(uuid: string, deletedBy?: string): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const budget = await this.findOne(uuid);
     
-    if (deletedBy) {
-      await budget.update({ deletedBy });
-    }
-    
+    await budget.update({ deletedBy: userId ? String(userId) : null } as any);
     await budget.destroy(); // Soft delete
     return { message: 'Budget entry deleted successfully' };
   }
 
-  async restore(uuid: string): Promise<ProjectBudget> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<ProjectBudget> {
     const budget = await this.budgetModel.findOne({ 
       where: { uuid },
       paranoid: false 
@@ -164,11 +176,12 @@ export class ProjectBudgetService {
     }
 
     await budget.restore();
+    await budget.update({ deletedBy: null, updatedBy: userId ? String(userId) : null } as any);
     return budget;
   }
 
   // Helper endpoint to get summary totals for the top cards (Planned Total, Revised Total, Overall Variance)
-  async getSummary(projectUuid: string) {
+  async getSummary(projectUuid: string, currentUser?: any) {
     const budgets = await this.budgetModel.findAll({ where: { projectUuid } });
     
     let plannedTotal = 0;

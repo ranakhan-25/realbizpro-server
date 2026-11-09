@@ -14,7 +14,11 @@ export class UnitPlotService {
     @InjectModel(UnitPlot) private readonly unitPlotModel: typeof UnitPlot,
   ) {}
 
-  async create(dto: CreateUnitPlotDto): Promise<UnitPlot> {
+  async create(
+    dto: CreateUnitPlotDto,
+    userId?: number,
+    currentUser?: any,
+  ): Promise<UnitPlot> {
     try {
       return await this.unitPlotModel.create(dto as any);
     } catch (error) {
@@ -25,13 +29,24 @@ export class UnitPlotService {
     }
   }
 
-  async findAll(query: QueryUnitPlotDto) {
+  async findAll(
+    query: QueryUnitPlotDto,
+    currentUser?: any,
+  ) {
     const { page = '1', limit = '10', search, ...filters } = query;
     const pageNum = parseInt(page, 10);
     const limitNum = parseInt(limit, 10);
     const offset = (pageNum - 1) * limitNum;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
     if ((query as any)?.orgId) {
       where.orgId = (query as any).orgId;
     }
@@ -70,24 +85,29 @@ export class UnitPlotService {
     };
   }
 
-  async findOne(uuid: string): Promise<UnitPlot> {
+  async findOne(uuid: string, currentUser?: any): Promise<UnitPlot> {
     const plot = await this.unitPlotModel.findOne({ where: { uuid } });
     if (!plot) throw new NotFoundException(`UnitPlot ${uuid} not found`);
     return plot;
   }
 
-  async update(uuid: string, dto: UpdateUnitPlotDto): Promise<UnitPlot> {
+  async update(
+    uuid: string,
+    dto: UpdateUnitPlotDto,
+    userId?: number,
+    currentUser?: any,
+  ): Promise<UnitPlot> {
     const plot = await this.findOne(uuid);
     return plot.update(dto as any);
   }
 
-  async remove(uuid: string): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const plot = await this.findOne(uuid);
     await plot.destroy();
     return { message: 'UnitPlot deleted successfully' };
   }
 
-  async restore(uuid: string): Promise<UnitPlot> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<UnitPlot> {
     const plot = await this.unitPlotModel.findOne({ where: { uuid }, paranoid: false });
     if (!plot) throw new NotFoundException(`UnitPlot ${uuid} not found`);
     if (!plot.deletedAt) throw new BadRequestException('UnitPlot is not deleted');

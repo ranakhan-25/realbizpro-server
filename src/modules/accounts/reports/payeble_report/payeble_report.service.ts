@@ -16,9 +16,14 @@ export class PayableReportService {
     private readonly payableModel: typeof PayableReport,
   ) {}
 
-  async create(dto: CreatePayableReportDto): Promise<PayableReport> {
+  async create(dto: CreatePayableReportDto, userId?: number, currentUser?: any): Promise<PayableReport> {
     try {
-      return await this.payableModel.create(dto as any);
+      return await this.payableModel.create({
+        ...dto,
+        createdBy: userId ? String(userId) : (dto as any).createdBy ?? null,
+        orgId: (dto as any).orgId ?? currentUser?.orgId ?? null,
+        projectId: (dto as any).projectId ?? currentUser?.projectId ?? null,
+      } as any);
     } catch (error) {
       // ✅ আসল এররটি টার্মিনালে দেখুন
       console.error("❌ PayableReport Create Error:", error);
@@ -30,13 +35,17 @@ export class PayableReportService {
     }
   }
 
-  async findAll(query: QueryPayableReportDto) {
+  async findAll(query: QueryPayableReportDto, currentUser?: any) {
     const { page = '1', limit = '10', search, ...filters } = query;
     const pageNum = parseInt(page, 10);
     const limitNum = parseInt(limit, 10);
     const offset = (pageNum - 1) * limitNum;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) where.orgId = effectiveOrgId;
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) where.projectId = effectiveProjectId;
     Object.keys(filters).forEach((k) => {
       if (filters[k] !== undefined && filters[k] !== null && filters[k] !== '') {
         where[k] = filters[k];
@@ -60,28 +69,30 @@ export class PayableReportService {
     };
   }
 
-  async findOne(uuid: string): Promise<PayableReport> {
+  async findOne(uuid: string, currentUser?: any): Promise<PayableReport> {
     const row = await this.payableModel.findOne({ where: { uuid } });
     if (!row) throw new NotFoundException(`Payable entry ${uuid} not found`);
     return row;
   }
 
-  async update(uuid: string, dto: UpdatePayableReportDto): Promise<PayableReport> {
+  async update(uuid: string, dto: UpdatePayableReportDto, userId?: number, currentUser?: any): Promise<PayableReport> {
     const row = await this.findOne(uuid);
     return row.update(dto as any);
   }
 
-  async remove(uuid: string): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const row = await this.findOne(uuid);
+    await row.update({ deletedBy: userId ? String(userId) : null } as any);
     await row.destroy();
     return { message: 'Payable entry deleted successfully' };
   }
 
-  async restore(uuid: string): Promise<PayableReport> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<PayableReport> {
     const row = await this.payableModel.findOne({ where: { uuid }, paranoid: false });
     if (!row) throw new NotFoundException(`Payable entry ${uuid} not found`);
     if (!row.deletedAt) throw new BadRequestException('Entry is not deleted');
     await row.restore();
+    await row.update({ deletedBy: null, updatedBy: userId ? String(userId) : null } as any);
     return this.findOne(uuid);
   }
 }

@@ -1,96 +1,85 @@
 /* eslint-disable prettier/prettier */
 
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Query,
-} from '@nestjs/common';
-
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
-
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AttendanceService } from './attendance.service';
 import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { QueryAttendanceDto } from './dto/query-attendance.dto';
 import { UpdateAttendanceDto } from './dto/update-attendance.dto';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { CurrentUser, CurrentUserId } from 'src/common/decorators/auth.decorators';
 
 @ApiTags('HRM | Employee | Attendance')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('attendance')
 export class AttendanceController {
-  constructor(
-    private readonly attendanceService: AttendanceService,
-  ) {}
+  constructor(private readonly attendanceService: AttendanceService) {}
 
   @Post()
-  @ApiOperation({
-    summary: 'Create a new attendance',
-  })
+  @Permissions('create_attendance')
+  @ApiOperation({ summary: 'Create attendance' })
   create(
-    @Body()
-    createAttendanceDto: CreateAttendanceDto,
+    @Body() dto: CreateAttendanceDto,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.attendanceService.create(
-      createAttendanceDto,
-    );
+    return this.attendanceService.create(dto, userId, currentUser);
   }
 
   @Get()
-  @ApiOperation({
-    summary:
-      'Get all attendance records (paginated)',
-  })
+  @Permissions('list_attendance')
+  @ApiOperation({ summary: 'Get all attendances (paginated)' })
   findAll(
-    @Query()
-    query: QueryAttendanceDto,
+    @Query() query: QueryAttendanceDto,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.attendanceService.findAll(query);
+    return this.attendanceService.findAll(query, currentUser);
   }
 
   @Get(':uuid')
-  @ApiOperation({
-    summary: 'Get attendance by UUID',
-  })
-  findOne(@Param('uuid') uuid: string) {
-    return this.attendanceService.findOne(uuid);
+  @Permissions('read_attendance')
+  @ApiOperation({ summary: 'Get attendance by UUID' })
+  findOne(
+    @Param('uuid') uuid: string,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.attendanceService.findOne(uuid, currentUser);
   }
 
   @Patch(':uuid')
-  @ApiOperation({
-    summary: 'Update attendance',
-  })
+  @Permissions('update_attendance')
+  @ApiOperation({ summary: 'Update attendance' })
   update(
     @Param('uuid') uuid: string,
-    @Body()
-    updateAttendanceDto: UpdateAttendanceDto,
+    @Body() dto: UpdateAttendanceDto,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.attendanceService.update(
-      uuid,
-      updateAttendanceDto,
-    );
+    return this.attendanceService.update(uuid, dto, userId, currentUser);
   }
 
   @Delete(':uuid')
-  @ApiOperation({
-    summary: 'Soft delete attendance',
-  })
-  remove(@Param('uuid') uuid: string) {
-    return this.attendanceService.remove(uuid);
+  @Permissions('delete_attendance')
+  @ApiOperation({ summary: 'Delete attendance' })
+  remove(
+    @Param('uuid') uuid: string,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.attendanceService.remove(uuid, userId, currentUser);
   }
 
   @Patch(':uuid/restore')
-  @ApiOperation({
-    summary: 'Restore soft-deleted attendance',
-  })
-  restore(@Param('uuid') uuid: string) {
-    return this.attendanceService.restore(uuid);
+  @Permissions('update_attendance')
+  @ApiOperation({ summary: 'Restore soft-deleted attendance' })
+  restore(
+    @Param('uuid') uuid: string,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.attendanceService.restore(uuid, userId, currentUser);
   }
 }

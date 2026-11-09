@@ -1,22 +1,12 @@
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { CurrentUser, CurrentUserId } from 'src/common/decorators/auth.decorators';
 /* eslint-disable prettier/prettier */
 
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Query,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiParam,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 
 
 import { CategoryService } from './category.service';
@@ -27,6 +17,7 @@ import { QueryCategoryDto } from './dto/query-category.dto';
 
 @ApiTags('Project | Billing | Category')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('category')
 export class CategoryController {
   constructor(
@@ -35,24 +26,31 @@ export class CategoryController {
 
   // CREATE
   @Post()
+  @Permissions('create_projects_category')
   @ApiOperation({
     summary: 'Create a new category',
   })
-  create(@Body() dto: CreateCategoryDto) {
-    return this.categoryService.create(dto);
+  create(
+    @Body() dto: CreateCategoryDto, @CurrentUserId() userId: number, @CurrentUser() currentUser: any
+  ) {
+    return this.categoryService.create(dto, userId, currentUser);
   }
 
   // FIND ALL
   @Get()
+  @Permissions('list_projects_category')
   @ApiOperation({
     summary: 'Get all categories (paginated)',
   })
-  findAll(@Query() query: QueryCategoryDto) {
-    return this.categoryService.findAll(query);
+  findAll(
+    @Query() query: QueryCategoryDto, @CurrentUser() currentUser: any
+  ) {
+    return this.categoryService.findAll(query, currentUser);
   }
 
   // FIND ONE
   @Get(':uuid')
+  @Permissions('read_projects_category')
   @ApiOperation({
     summary: 'Get category by UUID',
   })
@@ -60,12 +58,15 @@ export class CategoryController {
     name: 'uuid',
     description: 'Category UUID',
   })
-  findOne(@Param('uuid') uuid: string) {
-    return this.categoryService.findOne(uuid);
+  findOne(
+    @Param('uuid') uuid: string, @CurrentUser() currentUser: any
+  ) {
+    return this.categoryService.findOne(uuid, currentUser);
   }
 
   // UPDATE
   @Patch(':uuid')
+  @Permissions('update_projects_category')
   @ApiOperation({
     summary: 'Update category by UUID',
   })
@@ -75,13 +76,14 @@ export class CategoryController {
   })
   update(
     @Param('uuid') uuid: string,
-    @Body() dto: UpdateCategoryDto,
+    @Body() dto: UpdateCategoryDto, @CurrentUserId() userId: number, @CurrentUser() currentUser: any
   ) {
-    return this.categoryService.update(uuid, dto);
+    return this.categoryService.update(uuid, dto, userId, currentUser);
   }
 
   // DELETE
   @Delete(':uuid')
+  @Permissions('delete_projects_category')
   @ApiOperation({
     summary: 'Delete category by UUID',
   })
@@ -89,12 +91,15 @@ export class CategoryController {
     name: 'uuid',
     description: 'Category UUID',
   })
-  remove(@Param('uuid') uuid: string) {
-    return this.categoryService.remove(uuid);
+  remove(
+    @Param('uuid') uuid: string, @CurrentUserId() userId: number, @CurrentUser() currentUser: any
+  ) {
+    return this.categoryService.remove(uuid, userId, currentUser);
   }
 
   // RESTORE
   @Patch(':uuid/restore')
+  @Permissions('update_projects_category')
   @ApiOperation({
     summary: 'Restore deleted category',
   })
@@ -102,7 +107,9 @@ export class CategoryController {
     name: 'uuid',
     description: 'Category UUID',
   })
-  restore(@Param('uuid') uuid: string) {
-    return this.categoryService.restore(uuid);
+  restore(
+    @Param('uuid') uuid: string, @CurrentUserId() userId: number, @CurrentUser() currentUser: any
+  ) {
+    return this.categoryService.restore(uuid, userId, currentUser);
   }
 }

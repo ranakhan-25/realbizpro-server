@@ -14,9 +14,16 @@ export class ProjectMilestoneService {
     private readonly milestoneModel: typeof ProjectMilestone,
   ) {}
 
-  async create(dto: CreateProjectMilestoneDto): Promise<ProjectMilestone> {
+  async create(
+    dto: CreateProjectMilestoneDto,
+    userId?: number,
+    currentUser?: any,
+  ): Promise<ProjectMilestone> {
     try {
       return await this.milestoneModel.create({
+        createdBy: userId ? String(userId) : null,
+        orgId: currentUser?.orgId ?? null,
+        projectId: currentUser?.projectId ?? null,
         ...dto,
         plannedDate: new Date(dto.plannedDate),
         ...(dto.actualDate ? { actualDate: new Date(dto.actualDate) } : {}),
@@ -30,7 +37,10 @@ export class ProjectMilestoneService {
   }
 
   // ✅ ৫০০ এরর ফিক্স করার জন্য findAll মেথড
-  async findAll(query: QueryProjectMilestoneDto) {
+  async findAll(
+    query: QueryProjectMilestoneDto,
+    currentUser?: any,
+  ) {
     const { page = '1', limit = '10', status, projectUuid, search } = query;
     
     const pageNum = parseInt(String(page), 10);
@@ -38,6 +48,14 @@ export class ProjectMilestoneService {
     const offset = (pageNum - 1) * limitNum;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
     if ((query as any)?.orgId) {
       where.orgId = (query as any).orgId;
     }
@@ -70,13 +88,18 @@ export class ProjectMilestoneService {
     };
   }
 
-  async findOne(uuid: string): Promise<ProjectMilestone> {
+  async findOne(uuid: string, currentUser?: any): Promise<ProjectMilestone> {
     const milestone = await this.milestoneModel.findOne({ where: { uuid } });
     if (!milestone) throw new NotFoundException(`Milestone ${uuid} not found`);
     return milestone;
   }
 
-  async update(uuid: string, dto: UpdateProjectMilestoneDto): Promise<ProjectMilestone> {
+  async update(
+    uuid: string,
+    dto: UpdateProjectMilestoneDto,
+    userId?: number,
+    currentUser?: any,
+  ): Promise<ProjectMilestone> {
     const milestone = await this.findOne(uuid);
     
     const updateData: any = { ...dto };
@@ -87,7 +110,7 @@ export class ProjectMilestoneService {
     return this.findOne(uuid);
   }
 
-  async remove(uuid: string): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const milestone = await this.findOne(uuid);
     await milestone.destroy();
     return { message: 'Milestone deleted successfully' };

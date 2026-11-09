@@ -8,7 +8,6 @@ import { CreateItemEntryDto } from './dto/create-item_entry.dto';
 import { QueryItemEntryDto } from './dto/query-item_entry.dto';
 import { UpdateItemEntryDto } from './dto/update-item_entry.dto';
 
-
 @Injectable()
 export class ItemEntryService {
   constructor(
@@ -16,13 +15,16 @@ export class ItemEntryService {
     private readonly itemModel: typeof ItemEntry,
   ) {}
 
-  async create(dto: CreateItemEntryDto): Promise<ItemEntry> {
+  async create(dto: CreateItemEntryDto, userId?: number, currentUser?: any): Promise<ItemEntry> {
     try {
       return await this.itemModel.create({
         ...dto,
         acquisitionDate: new Date(dto.acquisitionDate),
         bookValue: dto.bookValue ?? dto.originalValue,
         depreciableValue: dto.depreciableValue ?? dto.originalValue,
+        createdBy: userId ? String(userId) : (dto as any).createdBy ?? null,
+        orgId: (dto as any).orgId ?? currentUser?.orgId ?? null,
+        projectId: (dto as any).projectId ?? currentUser?.projectId ?? null,
       } as any);
     } catch (error) {
       if (error.name === 'SequelizeUniqueConstraintError') {
@@ -32,7 +34,7 @@ export class ItemEntryService {
     }
   }
 
-  async findAll(query: QueryItemEntryDto) {
+  async findAll(query: QueryItemEntryDto, currentUser?: any) {
     const { page = '1', limit = '10', search, ...filters } = query;
     const pageNum = parseInt(page, 10);
     const limitNum = parseInt(limit, 10);
@@ -44,6 +46,16 @@ export class ItemEntryService {
         where[k] = filters[k];
       }
     });
+
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
 
     if (search) {
       where[Op.or] = [
@@ -65,18 +77,27 @@ export class ItemEntryService {
     };
   }
 
-  async findOne(uuid: string): Promise<ItemEntry> {
+  async findOne(uuid: string, currentUser?: any): Promise<ItemEntry> {
+    const where: any = { uuid };
+    if (currentUser?.orgId) {
+      where.orgId = currentUser.orgId;
+    }
     const item = await this.itemModel.findOne({
-      where: { uuid },
+      where,
       paranoid: false,
     });
     if (!item) throw new NotFoundException(`Item ${uuid} not found`);
     return item;
   }
 
-  async update(uuid: string, dto: UpdateItemEntryDto): Promise<ItemEntry> {
-    const item = await this.findOne(uuid);
-    const updateData: any = { ...dto };
+  async update(uuid: string, dto: UpdateItemEntryDto, userId?: number, currentUser?: any): Promise<ItemEntry> {
+    const item = await this.findOne(uuid, currentUser);
+    const updateData: any = {
+      ...dto,
+      updatedBy: userId ? String(userId) : item.updatedBy ?? null,
+      ...(dto.orgId !== undefined ? { orgId: dto.orgId } : {}),
+      ...(dto.projectId !== undefined ? { projectId: dto.projectId } : {}),
+    };
     if (dto.acquisitionDate) updateData.acquisitionDate = new Date(dto.acquisitionDate);
     const originalValue =
       dto.originalValue !== undefined ? Number(dto.originalValue) : Number(item.originalValue);
@@ -89,8 +110,9 @@ export class ItemEntryService {
     return item.update(updateData);
   }
 
-  async remove(uuid: string): Promise<{ message: string }> {
-    const item = await this.findOne(uuid);
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
+    const item = await this.findOne(uuid, currentUser);
+    await item.update({ deletedBy: userId ? String(userId) : null } as any);
     await item.destroy();
     return { message: 'Item deleted successfully' };
   }

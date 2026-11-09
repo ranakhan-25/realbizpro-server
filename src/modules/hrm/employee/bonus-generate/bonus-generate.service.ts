@@ -88,6 +88,8 @@ export class BonusGenerateService {
 
   async create(
     dto: CreateBonusGenerateDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<BonusGenerate> {
     await this.ensureBonusExists(dto.bonusId);
     await this.ensureEmployeeExists(
@@ -101,16 +103,18 @@ export class BonusGenerateService {
     const record =
       await this.bonusGenerateModel.create({
         ...dto,
-        createdBy: dto.createdBy ?? dto.addedById,
+        createdBy: userId ? String(userId) : (dto as any).createdBy ?? (dto as any).addedById ?? null,
+        orgId: (dto as any).orgId ?? currentUser?.orgId ?? null,
+        projectId: (dto as any).projectId ?? currentUser?.projectId ?? null,
         status:
           dto.status ??
           BonusGenerateStatus.ACTIVE,
-      });
+      } as any);
 
     return this.findOne(record.uuid);
   }
 
-  async findAll(query: QueryBonusGenerateDto) {
+  async findAll(query: QueryBonusGenerateDto, currentUser?: any) {
     const {
       page = 1,
       limit = 10,
@@ -129,11 +133,13 @@ export class BonusGenerateService {
         : (page - 1) * limit;
 
     const where: any = {};
-    if (query.orgId) {
-      where.orgId = query.orgId;
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
     }
-    if ((query as any).projectId) {
-      where.projectId = (query as any).projectId;
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
     }
 
     if (bonusId) {
@@ -189,9 +195,7 @@ export class BonusGenerateService {
     };
   }
 
-  async findOne(
-    uuid: string,
-  ): Promise<BonusGenerate> {
+  async findOne(uuid: string, currentUser?: any): Promise<BonusGenerate> {
     const record =
       await this.bonusGenerateModel.findOne({
         where: { uuid } as any,
@@ -206,10 +210,7 @@ export class BonusGenerateService {
     return record;
   }
 
-  async update(
-    uuid: string,
-    dto: UpdateBonusGenerateDto,
-  ): Promise<BonusGenerate> {
+  async update(uuid: string, dto: UpdateBonusGenerateDto, userId?: number, currentUser?: any): Promise<BonusGenerate> {
     const record =
       await this.bonusGenerateModel.findOne({
         where: { uuid } as any,
@@ -250,14 +251,12 @@ export class BonusGenerateService {
       ...dto,
       updatedBy:
         dto.addedById ?? record.updatedBy,
-    });
+    } as any);
 
     return this.findOne(uuid);
   }
 
-  async remove(
-    uuid: string,
-  ): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const record =
       await this.bonusGenerateModel.findOne({
         where: { uuid } as any,
@@ -272,7 +271,8 @@ export class BonusGenerateService {
     // status → inactive + soft delete
     await record.update({
       status: BonusGenerateStatus.INACTIVE,
-    });
+      deletedBy: userId ? String(userId) : null,
+    } as any);
 
     await record.destroy();
 
@@ -281,9 +281,7 @@ export class BonusGenerateService {
     };
   }
 
-  async restore(
-    uuid: string,
-  ): Promise<BonusGenerate> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<BonusGenerate> {
     const record =
       await this.bonusGenerateModel.findOne({
         where: { uuid } as any,
@@ -313,7 +311,9 @@ export class BonusGenerateService {
     await record.restore();
     await record.update({
       status: BonusGenerateStatus.ACTIVE,
-    });
+      deletedBy: null,
+      updatedBy: userId ? String(userId) : null,
+    } as any);
 
     return this.findOne(uuid);
   }

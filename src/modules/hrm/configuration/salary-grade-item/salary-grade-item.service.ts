@@ -28,6 +28,8 @@ export class SalaryGradeItemService {
 
   async create(
     dto: CreateSalaryGradeItemDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<SalaryGradeItem> {
     const { addedById, ...data } = dto;
 
@@ -35,14 +37,14 @@ export class SalaryGradeItemService {
       await this.salaryGradeItemModel.create({
         ...data,
         createdBy: addedById ?? null,
-      });
+      } as any);
 
     return this.findOne(record.uuid);
   }
 
   // ---------- FIND ALL ----------
 
-  async findAll(query: QuerySalaryGradeItemDto) {
+  async findAll(query: QuerySalaryGradeItemDto, currentUser?: any) {
     const {
       page = 1,
       limit = 10,
@@ -61,11 +63,13 @@ export class SalaryGradeItemService {
         : (page - 1) * limit;
 
     const where: any = {};
-    if (query.orgId) {
-      where.orgId = query.orgId;
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
     }
-    if ((query as any).projectId) {
-      where.projectId = (query as any).projectId;
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
     }
 
     // Filter by allowance/deduction type
@@ -129,13 +133,11 @@ export class SalaryGradeItemService {
 
   // ---------- FIND ONE ----------
 
-  async findOne(
-    uuid: string,
-  ): Promise<SalaryGradeItem> {
+  async findOne(uuid: string, currentUser?: any): Promise<SalaryGradeItem> {
     const record =
       await this.salaryGradeItemModel.findOne({
         where: { uuid } as any,
-      });
+      } as any);
 
     if (!record) {
       throw new NotFoundException(
@@ -148,10 +150,7 @@ export class SalaryGradeItemService {
 
   // ---------- UPDATE ----------
 
-  async update(
-    uuid: string,
-    dto: UpdateSalaryGradeItemDto,
-  ): Promise<SalaryGradeItem> {
+  async update(uuid: string, dto: UpdateSalaryGradeItemDto, userId?: number, currentUser?: any): Promise<SalaryGradeItem> {
     const record =
       await this.salaryGradeItemModel.findOne({
         where: { uuid } as any,
@@ -169,17 +168,14 @@ export class SalaryGradeItemService {
       ...updateData,
       updatedBy:
         addedById ?? record.updatedBy ?? null,
-    });
+    } as any);
 
     return this.findOne(uuid);
   }
 
   // ---------- SOFT DELETE ----------
 
-  async remove(
-    uuid: string,
-    deletedById?: string,
-  ): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const record =
       await this.salaryGradeItemModel.findOne({
         where: { uuid } as any,
@@ -191,14 +187,8 @@ export class SalaryGradeItemService {
       );
     }
 
-    // Save the user ID before soft deleting
-    if (deletedById) {
-      await record.update({
-        deletedBy: deletedById,
-      });
-    }
-
     // Requires paranoid: true in the model
+    await record.update({ deletedBy: userId ? String(userId) : null } as any);
     await record.destroy();
 
     return {
@@ -208,9 +198,7 @@ export class SalaryGradeItemService {
 
   // ---------- RESTORE ----------
 
-  async restore(
-    uuid: string,
-  ): Promise<SalaryGradeItem> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<SalaryGradeItem> {
     const record =
       await this.salaryGradeItemModel.findOne({
         where: { uuid } as any,
@@ -230,6 +218,7 @@ export class SalaryGradeItemService {
     }
 
     await record.restore();
+    await record.update({ deletedBy: null, updatedBy: userId ? String(userId) : null } as any);
 
     return this.findOne(uuid);
   }

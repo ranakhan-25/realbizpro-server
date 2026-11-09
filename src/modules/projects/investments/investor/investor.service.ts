@@ -33,6 +33,8 @@ export class InvestorService {
 
   async create(
     dto: CreateInvestorDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<Investor> {
     const existing =
       await this.investorModel.findOne({
@@ -62,7 +64,7 @@ export class InvestorService {
     }
 
     const investor =
-      await this.investorModel.create({
+      await this.investorModel.create(({
         code: dto.code,
         name: dto.name,
         mobileNo: dto.mobileNo,
@@ -77,7 +79,7 @@ export class InvestorService {
         orgId: dto.orgId,
         status:
           dto.status ?? InvestorStatus.ACTIVE,
-      });
+      }) as any);
 
     // Create nominees
     if (dto.nominees && dto.nominees.length > 0) {
@@ -99,7 +101,10 @@ export class InvestorService {
     return this.findOne(investor.uuid);
   }
 
-  async findAll(query: QueryInvestorDto) {
+  async findAll(
+    query: QueryInvestorDto,
+    currentUser?: any,
+  ) {
     const {
       page = 1,
       limit = 10,
@@ -119,6 +124,14 @@ export class InvestorService {
         : (page - 1) * limit;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
     if ((query as any)?.orgId) {
       where.orgId = (query as any).orgId;
     }
@@ -235,7 +248,7 @@ export class InvestorService {
     };
   }
 
-  async findOne(uuid: string): Promise<Investor> {
+  async findOne(uuid: string, currentUser?: any): Promise<Investor> {
     const investor =
       await this.investorModel.findOne({
         where: {
@@ -262,6 +275,8 @@ export class InvestorService {
   async update(
     uuid: string,
     dto: UpdateInvestorDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<Investor> {
     const investor =
       await this.investorModel.findOne({
@@ -342,9 +357,7 @@ export class InvestorService {
     return this.findOne(uuid);
   }
 
-  async remove(
-    uuid: string,
-  ): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const investor =
       await this.investorModel.findOne({
         where: {
@@ -359,9 +372,9 @@ export class InvestorService {
     }
 
     // Status → inactive
-    await investor.update({
+    await investor.update(({
       status: InvestorStatus.INACTIVE,
-    });
+    }) as any);
 
     // Soft delete
     await investor.destroy();
@@ -371,7 +384,7 @@ export class InvestorService {
     };
   }
 
-  async restore(uuid: string): Promise<Investor> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<Investor> {
     const investor =
       await this.investorModel.findOne({
         where: {
@@ -397,9 +410,9 @@ export class InvestorService {
     await investor.restore();
 
     // Status → active
-    await investor.update({
+    await investor.update(({
       status: InvestorStatus.ACTIVE,
-    });
+    }) as any);
 
     return this.findOne(uuid);
   }
