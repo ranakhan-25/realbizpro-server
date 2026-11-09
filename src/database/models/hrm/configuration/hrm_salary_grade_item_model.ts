@@ -23,13 +23,14 @@ export enum SalaryGradeItemType {
 }
 
 @Table({
-  tableName: 'salary_grade_item',
+  tableName: 'hrm_salary_grade_item',
+  underscored: true,
   timestamps: true,
   paranoid: true,
   indexes: [
     {
       name: 'SalaryGradeItem_setupId_idx',
-      fields: ['setupId'],
+      fields: ['setup_id'],
     },
     {
       name: 'SalaryGradeItem_deletedAt_idx',

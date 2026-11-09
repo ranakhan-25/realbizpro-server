@@ -19,14 +19,14 @@ import { Project } from "src/database/models/projects/project/pr_project.model";
 // fix: Allowance model theke na, alada enum file theke
 
 @Table({
-  tableName: 'saturation_deduction',
+  tableName: 'hrm_saturation_deduction',
+  underscored: true,
   timestamps: true,
   paranoid: true,
-  underscored: false,
   indexes: [
     {
       name: 'SaturationDeduction_employeeId_idx',
-      fields: ['employeeId'],
+      fields: ['employee_id'],
     },
     {
       name: 'SaturationDeduction_deletedAt_idx',

@@ -15,7 +15,8 @@ import { Attendance } from './hrm_attendance_model';
 import { SysOrganization } from "src/database/models/system/sys_organization.model";
 
 @Table({
-  tableName: 'month_year',
+  tableName: 'hrm_month_year',
+  underscored: true,
   timestamps: true,
   paranoid: true,
   indexes: [
@@ -26,11 +27,11 @@ import { SysOrganization } from "src/database/models/system/sys_organization.mod
     },
     {
       name: 'MonthYear_startDate_idx',
-      fields: ['startDate'],
+      fields: ['start_date'],
     },
     {
       name: 'MonthYear_endDate_idx',
-      fields: ['endDate'],
+      fields: ['end_date'],
     },
   ],
 })

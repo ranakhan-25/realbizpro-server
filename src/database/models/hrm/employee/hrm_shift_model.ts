@@ -19,10 +19,10 @@ export enum ShiftStatus {
 }
 
 @Table({
-  tableName: 'shift',
+  tableName: 'hrm_shift',
+  underscored: true,
   timestamps: true,
   paranoid: true,
-  underscored: false,
   indexes: [
     {
       name: 'Shift_name_idx',

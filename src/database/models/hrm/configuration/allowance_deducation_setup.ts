@@ -27,7 +27,8 @@ export enum PaymentTypeEnum {
 }
 
 @Table({
-  tableName: 'allowance_deduction_setup',
+  tableName: 'hrm_allowance_deduction_setup',
+  underscored: true,
   timestamps: true,
   paranoid: true,
 })
