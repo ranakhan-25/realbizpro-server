@@ -1,5 +1,5 @@
 // Auto-generated types for ProjectShareConfiguration
-// Source: src\database\models\projects\project-share-configuration\pr_project_share_configuration.model.ts
+// Source: src/database/models/projects/project-share-configuration/pr_project_share_configuration.model.ts
 
 import type { Project } from '../models/projects/project/pr_project.model';
 import type { SysOrganization } from '../models/system/sys_organization.model';

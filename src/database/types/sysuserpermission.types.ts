@@ -1,5 +1,5 @@
 // Auto-generated types for SysUserPermission
-// Source: src\database\models\system\sys_user_permission.model.ts
+// Source: src/database/models/system/sys_user_permission.model.ts
 
 import type { SysUser } from '../models/system/sys_user.model';
 import type { SysPermission } from '../models/system/sys_permission.model';
