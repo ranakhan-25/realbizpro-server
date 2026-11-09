@@ -12,6 +12,7 @@ import {
   Min,
 } from 'class-validator';
 import { SubCategoryType } from 'src/database/models/projects/billing/pr_sub_category.model';
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class QuerySubCategoryDto {
   @IsOptional()
@@ -47,4 +48,7 @@ export class QuerySubCategoryDto {
   )
   @IsUUID()
   categoryId?: string;
+    @ApiPropertyOptional({ description: 'Filter by organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
 }

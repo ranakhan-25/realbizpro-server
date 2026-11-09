@@ -12,6 +12,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApproveStatus, PaymentStatus } from 'src/database/models/projects/fund-requisition/pr_fund_requisition.model';
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class QueryFundRequisitionDto {
   @IsOptional()
@@ -103,4 +104,7 @@ export class QueryFundRequisitionDto {
   @Type(() => Boolean)
   @IsBoolean()
   withDeleted?: boolean;
+    @ApiPropertyOptional({ description: 'Filter by organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
 }

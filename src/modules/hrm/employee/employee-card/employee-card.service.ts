@@ -25,6 +25,12 @@ export class EmployeeCardService {
     const skip = (page - 1) * limit;
 
     const where: any = {};
+    if (query.orgId) {
+      where.orgId = query.orgId;
+    }
+    if ((query as any).projectId) {
+      where.projectId = (query as any).projectId;
+    }
 
     if (departmentId) {
       where.departmentId = departmentId;

@@ -2,7 +2,7 @@
 
 import { IsString, IsUUID, IsEnum, IsOptional, IsNumberString } from 'class-validator';
 import { TaskPriority, TaskStatus } from 'src/database/models/projects/task/pr_task.model';
-
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class QueryProjectTaskDto {
   @IsUUID()
@@ -36,4 +36,11 @@ export class QueryProjectTaskDto {
   @IsNumberString()
   @IsOptional()
   limit?: string;
+    @ApiPropertyOptional({ description: 'Filter by organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Filter by project ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 }

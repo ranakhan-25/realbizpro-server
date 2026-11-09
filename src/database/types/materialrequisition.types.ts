@@ -10,6 +10,7 @@ import type { BillingCategory } from '../models/projects/billing/pr_category.mod
 import type { MaterialRequisitionItem } from '../models/projects/material-requisition-item/pr_material_requisition_item.model';
 import type { ProcurementRfq } from '../models/procurement/rfq/pr_rfq.model';
 import type { ProcurementAssetRfq } from '../models/procurement/rfq/pr_asset_rfq.model';
+import type { SysOrganization } from '../models/system/sys_organization.model';
 
 export interface MaterialRequisitionAttributes {
   id: number;
@@ -36,6 +37,7 @@ export interface MaterialRequisitionAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
 
   // Relations
   project?: Project;
@@ -44,6 +46,7 @@ export interface MaterialRequisitionAttributes {
   items?: MaterialRequisitionItem[];
   procurementRfqs?: ProcurementRfq[];
   procurementAssetRfqs?: ProcurementAssetRfq[];
+  organization?: SysOrganization;
 }
 
 export interface MaterialRequisitionCreationAttributes {
@@ -66,6 +69,7 @@ export interface MaterialRequisitionCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
 }
 
 export type MaterialRequisitionUpdateAttributes = Partial<MaterialRequisitionCreationAttributes>;
@@ -78,4 +82,5 @@ export interface MaterialRequisitionWithRelations extends MaterialRequisitionAtt
   items?: MaterialRequisitionItem[];
   procurementRfqs?: ProcurementRfq[];
   procurementAssetRfqs?: ProcurementAssetRfq[];
+  organization?: SysOrganization;
 }

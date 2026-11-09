@@ -19,6 +19,7 @@ import { InvoiceItem } from './pr_invoice_item.model';
 import { Project } from 'src/database/models/projects/project/pr_project.model';
 import { ProjectType } from 'src/database/models/projects/project-type/pr_project_type.model';
 import { CustomerAccount } from '../contract/pr_customer_accounts.model';
+import { SysOrganization } from "src/database/models/system/sys_organization.model";
 
 @Table({
   tableName: 'invoices',
@@ -63,9 +64,10 @@ export class Invoice extends BaseModel<
 
   @ForeignKey(() => Project)
   @Column({
-    type: DataType.UUID,
-    allowNull: true,
-  })
+              field: 'project_id',
+              type: DataType.UUID,
+              allowNull: true,
+            })
   declare projectId?: string;
 
   @BelongsTo(() => Project, {
@@ -133,21 +135,24 @@ export class Invoice extends BaseModel<
   declare contentBody?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'created_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare createdBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'updated_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare updatedBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'deleted_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare deletedBy?: string;
 
   @HasMany(() => InvoiceItem, {
@@ -156,4 +161,18 @@ export class Invoice extends BaseModel<
     as: 'items',
   })
   declare items?: InvoiceItem[];
+    @ForeignKey(() => SysOrganization)
+    @Column({
+            type: DataType.BIGINT,
+            allowNull: true,
+            field: 'org_id',
+            defaultValue: null,
+          })
+    declare orgId?: number | null;
+    @BelongsTo(() => SysOrganization, {
+            foreignKey: 'orgId',
+            targetKey: 'id',
+            as: 'organization',
+          })
+    declare organization?: SysOrganization;
 }

@@ -47,7 +47,7 @@ export class HolidayService {
     const record = await this.holidayModel.create(
       {
         ...dto,
-        createdBy: dto.addedById,
+        createdBy: dto.createdBy ?? dto.addedById,
         status:
           dto.status ?? HolidayStatus.ACTIVE,
       },
@@ -76,6 +76,12 @@ export class HolidayService {
         : (page - 1) * limit;
 
     const where: any = {};
+    if (query.orgId) {
+      where.orgId = query.orgId;
+    }
+    if ((query as any).projectId) {
+      where.projectId = (query as any).projectId;
+    }
 
     if (search) {
       where[Op.or] = [

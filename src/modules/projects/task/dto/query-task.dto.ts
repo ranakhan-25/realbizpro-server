@@ -104,4 +104,11 @@ export class QueryTaskDto {
   )
   @IsBoolean()
   withDeleted?: boolean = false;
+    @ApiPropertyOptional({ description: 'Filter by organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Filter by project ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 }

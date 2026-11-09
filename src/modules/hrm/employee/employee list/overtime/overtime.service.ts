@@ -51,7 +51,7 @@ export class OvertimeService {
     const record =
       await this.overtimeModel.create({
         ...dto,
-        createdBy: dto.addedById,
+        createdBy: dto.createdBy ?? dto.addedById,
       });
 
     return this.findOne(record.uuid);
@@ -75,6 +75,12 @@ export class OvertimeService {
         : (page - 1) * limit;
 
     const where: any = {};
+    if (query.orgId) {
+      where.orgId = query.orgId;
+    }
+    if ((query as any).projectId) {
+      where.projectId = (query as any).projectId;
+    }
 
     if (employeeId) {
       where.employeeId = employeeId;

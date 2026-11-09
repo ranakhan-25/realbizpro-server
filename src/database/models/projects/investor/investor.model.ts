@@ -4,8 +4,7 @@ import {
   Column,
   DataType,
   HasMany,
-  Table,
-} from 'sequelize-typescript';
+  Table, ForeignKey, BelongsTo } from 'sequelize-typescript';
 
 import { BaseModel } from 'src/database/base.model';
 
@@ -16,6 +15,7 @@ import {
 } from 'src/database/types/investor.types';
 
 import { InvestorNominee } from './investor_nominee.model';
+import { SysOrganization } from "src/database/models/system/sys_organization.model";
 
 export enum InvestorGroupTier {
   TIER_1 = 'Tier 1 - Primary Investor',
@@ -114,21 +114,24 @@ export class Investor
   declare addedById?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'created_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare createdBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'updated_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare updatedBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'deleted_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare deletedBy?: string;
 
   @Column({
@@ -139,4 +142,18 @@ export class Investor
     defaultValue: InvestorStatus.ACTIVE,
   })
   declare status: InvestorStatus;
+    @ForeignKey(() => SysOrganization)
+    @Column({
+            type: DataType.BIGINT,
+            allowNull: true,
+            field: 'org_id',
+            defaultValue: null,
+          })
+    declare orgId?: number | null;
+    @BelongsTo(() => SysOrganization, {
+            foreignKey: 'orgId',
+            targetKey: 'id',
+            as: 'organization',
+          })
+    declare organization?: SysOrganization;
 }

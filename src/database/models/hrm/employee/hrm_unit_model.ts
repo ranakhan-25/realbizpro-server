@@ -3,8 +3,7 @@ import {
   Column,
   DataType,
   HasMany,
-  Table,
-} from 'sequelize-typescript';
+  Table, ForeignKey, BelongsTo } from 'sequelize-typescript';
 import { BaseModel } from 'src/database/base.model';
 import {
   UnitAttributes,
@@ -12,6 +11,7 @@ import {
   UnitUpdateAttributes,
 } from 'src/database/types/unit.types';
 import { EmployeeList } from './hrm_employeeList_model';
+import { SysOrganization } from "src/database/models/system/sys_organization.model";
 
 export enum UnitStatus {
   ACTIVE = 'active',
@@ -52,21 +52,24 @@ export class Unit
   declare addedById?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          type: DataType.STRING,
+          allowNull: true,
+          field: 'created_by',
+        })
   declare createdBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          type: DataType.STRING,
+          allowNull: true,
+          field: 'updated_by',
+        })
   declare updatedBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          type: DataType.STRING,
+          allowNull: true,
+          field: 'deleted_by',
+        })
   declare deletedBy?: string;
 
   @Column({
@@ -84,4 +87,18 @@ export class Unit
     as: 'employees',
   })
   declare employees?: EmployeeList[];
+    @ForeignKey(() => SysOrganization)
+    @Column({
+            type: DataType.BIGINT,
+            allowNull: true,
+            field: 'org_id',
+            defaultValue: null,
+          })
+    declare orgId?: number | null;
+    @BelongsTo(() => SysOrganization, {
+            foreignKey: 'orgId',
+            targetKey: 'id',
+            as: 'organization',
+          })
+    declare organization?: SysOrganization;
 }

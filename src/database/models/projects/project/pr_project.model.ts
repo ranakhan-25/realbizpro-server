@@ -52,6 +52,7 @@ import { CrmLeadPipeline } from 'src/database/models/crm/lead/crm-lead-pipeline.
 import { LeadPropertyInterest } from 'src/database/models/crm/lead/crm-lead-property-interest.model';
 import { Lead } from 'src/database/models/crm/lead/crm-lead.model';
 import { CrmLeadNegotiation } from 'src/database/models/crm/call-center/crm-lead-negotiation.model';
+import { SysOrganization } from "src/database/models/system/sys_organization.model";
 
 export enum ProjectStatus {
   ACTIVE = 'ACTIVE',
@@ -415,20 +416,37 @@ export class Project
   declare crmNegotiations?: CrmLeadNegotiation[];
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'created_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare createdBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'updated_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare updatedBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'deleted_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare deletedBy?: string;
+    @ForeignKey(() => SysOrganization)
+    @Column({
+            type: DataType.BIGINT,
+            allowNull: true,
+            field: 'org_id',
+            defaultValue: null,
+          })
+    declare orgId?: number | null;
+    @BelongsTo(() => SysOrganization, {
+            foreignKey: 'orgId',
+            targetKey: 'id',
+            as: 'organization',
+          })
+    declare organization?: SysOrganization;
 }

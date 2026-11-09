@@ -16,6 +16,7 @@ import { BaseModel } from 'src/database/base.model';
 import { Project } from '../project/pr_project.model';
 import { ProjectType } from '../project-type/pr_project_type.model';
 import { Site } from '../project-site/pr_project_site.model';
+import { SysOrganization } from "src/database/models/system/sys_organization.model";
 
 @Table({
   tableName: 'pr_project_share_assignments',
@@ -49,9 +50,10 @@ export class ProjectShareAssignment extends BaseModel<
   // ─────────────── Project Relation ───────────────
   @ForeignKey(() => Project)
   @Column({
-    type: DataType.UUID,
-    allowNull: false,
-  })
+              field: 'project_id',
+              type: DataType.UUID,
+              allowNull: false,
+            })
   declare projectId: string;
 
   @BelongsTo(() => Project, {
@@ -237,20 +239,37 @@ export class ProjectShareAssignment extends BaseModel<
 
   // ─────────────── Audit ───────────────
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'created_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare createdBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'updated_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare updatedBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'deleted_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare deletedBy?: string;
+    @ForeignKey(() => SysOrganization)
+    @Column({
+            type: DataType.BIGINT,
+            allowNull: true,
+            field: 'org_id',
+            defaultValue: null,
+          })
+    declare orgId?: number | null;
+    @BelongsTo(() => SysOrganization, {
+            foreignKey: 'orgId',
+            targetKey: 'id',
+            as: 'organization',
+          })
+    declare organization?: SysOrganization;
 }

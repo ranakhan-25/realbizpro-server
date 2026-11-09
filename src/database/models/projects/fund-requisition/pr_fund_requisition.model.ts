@@ -3,8 +3,7 @@
 import {
   Column,
   DataType,
-  Table,
-} from 'sequelize-typescript';
+  Table, ForeignKey, BelongsTo } from 'sequelize-typescript';
 import { BaseModel } from 'src/database/base.model';
 
 import {
@@ -12,6 +11,8 @@ import {
   FundRequisitionCreationAttributes,
   FundRequisitionUpdateAttributes,
 } from 'src/database/types/fundrequisition.types';
+import { SysOrganization } from "src/database/models/system/sys_organization.model";
+import { Project } from "src/database/models/projects/project/pr_project.model";
 
 export enum PaymentStatus {
   PAYMENT_LEFT = 'Payment Left',
@@ -51,9 +52,11 @@ export class FundRequisition
   declare projectType?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'project_id',
+          type: DataType.STRING,
+          allowNull: true,
+        })
+    @ForeignKey(() => Project)
   declare projectId?: string;
 
   @Column({
@@ -131,20 +134,43 @@ export class FundRequisition
   declare addedById?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'created_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare createdBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'updated_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare updatedBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'deleted_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare deletedBy?: string;
+    @ForeignKey(() => SysOrganization)
+    @Column({
+            type: DataType.BIGINT,
+            allowNull: true,
+            field: 'org_id',
+            defaultValue: null,
+          })
+    declare orgId?: number | null;
+    @BelongsTo(() => SysOrganization, {
+            foreignKey: 'orgId',
+            targetKey: 'id',
+            as: 'organization',
+          })
+    declare organization?: SysOrganization;
+    @BelongsTo(() => Project, {
+            foreignKey: 'projectId',
+            targetKey: 'uuid',
+            as: 'project',
+          })
+    declare project?: Project;
 }

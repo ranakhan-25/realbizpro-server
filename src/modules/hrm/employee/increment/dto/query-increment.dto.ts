@@ -18,8 +18,7 @@ import {
   IsOptional,
   IsUUID,
   Max,
-  Min,
-} from 'class-validator';
+  Min, IsString } from 'class-validator';
 import { IncrementStatus } from 'src/database/models/hrm/employee/hrm_increment_model';
 
 export class QueryIncrementDto {
@@ -127,4 +126,11 @@ export class QueryIncrementDto {
   )
   @IsBoolean()
   withDeleted?: boolean = false;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Project UUID or ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 }

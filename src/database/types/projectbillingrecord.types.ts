@@ -4,6 +4,7 @@
 import { ProjectBillingResource } from '../models/projects/billing/pr_project_billing_record.model';
 
 import type { Project } from '../models/projects/project/pr_project.model';
+import type { SysOrganization } from '../models/system/sys_organization.model';
 
 export interface ProjectBillingRecordAttributes {
   id: number;
@@ -23,9 +24,11 @@ export interface ProjectBillingRecordAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
 
   // Relations
   project?: Project;
+  organization?: SysOrganization;
 }
 
 export interface ProjectBillingRecordCreationAttributes {
@@ -41,6 +44,7 @@ export interface ProjectBillingRecordCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
 }
 
 export type ProjectBillingRecordUpdateAttributes = Partial<ProjectBillingRecordCreationAttributes>;
@@ -48,4 +52,5 @@ export type ProjectBillingRecordUpdateAttributes = Partial<ProjectBillingRecordC
 // Helper type for including relations
 export interface ProjectBillingRecordWithRelations extends ProjectBillingRecordAttributes {
   project?: Project;
+  organization?: SysOrganization;
 }

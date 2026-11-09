@@ -29,7 +29,7 @@ export class LeaveTypeService {
     const record =
       await this.leaveTypeModel.create({
         ...dto,
-        createdBy: dto.addedById,
+        createdBy: dto.createdBy ?? dto.addedById,
         status:
           dto.status ?? LeaveTypeStatus.ACTIVE,
       });
@@ -55,6 +55,12 @@ export class LeaveTypeService {
         : (page - 1) * limit;
 
     const where: any = {};
+    if (query.orgId) {
+      where.orgId = query.orgId;
+    }
+    if ((query as any).projectId) {
+      where.projectId = (query as any).projectId;
+    }
 
     if (search) {
       where.name = { [Op.iLike]: `%${search}%` };

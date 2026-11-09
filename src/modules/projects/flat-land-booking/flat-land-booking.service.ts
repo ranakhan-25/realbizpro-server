@@ -185,9 +185,15 @@ export class FlatLandBookingService {
           ],
         }
       : {};
-    const where: WhereOptions<FlatLandBooking> = {
+    const where: any = {
       [Op.and]: [reportWhere, searchWhere],
     };
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      where.projectId = (query as any).projectId;
+    }
     const { rows, count } = await this.bookingModel.findAndCountAll({
       where: where as WhereOptions<FlatLandBooking>,
       include: [

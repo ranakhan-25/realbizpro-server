@@ -66,7 +66,7 @@ export class MaterialRequisitionItemService {
           }
         : {};
 
-    const filters = {
+    const filters: any = {
       ...where,
       ...(query.materialRequisitionId
         ? {
@@ -74,7 +74,8 @@ export class MaterialRequisitionItemService {
               query.materialRequisitionId,
           }
         : {}),
-    } as WhereOptions<MaterialRequisitionItem>;
+      ...(query.orgId ? { orgId: query.orgId } : {}),
+    };
 
     const { rows, count } =
       await this.itemModel.findAndCountAll({
@@ -103,10 +104,8 @@ export class MaterialRequisitionItemService {
   }
 
   async findOne(uuid: string) {
-    const where: WhereOptions<MaterialRequisitionItem> =
-      { uuid };
     const item = await this.itemModel.findOne({
-      where: where as WhereOptions,
+      where: { uuid } as WhereOptions,
       include: [
         {
           model: this.requisitionModel,

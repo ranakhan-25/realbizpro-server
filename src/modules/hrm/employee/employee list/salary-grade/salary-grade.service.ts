@@ -43,7 +43,7 @@ export class SalaryGradeService {
     const record =
       await this.salaryGradeModel.create({
         ...dto,
-        createdBy: dto.addedById,
+        createdBy: dto.createdBy ?? dto.addedById,
         status:
           dto.status ?? SalaryGradeStatus.ACTIVE,
       });
@@ -69,6 +69,12 @@ export class SalaryGradeService {
         : (page - 1) * limit;
 
     const where: any = {};
+    if (query.orgId) {
+      where.orgId = query.orgId;
+    }
+    if ((query as any).projectId) {
+      where.projectId = (query as any).projectId;
+    }
 
     if (search) {
       where.name = { [Op.like]: `%${search}%` };

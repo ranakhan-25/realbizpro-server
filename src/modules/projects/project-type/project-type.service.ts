@@ -24,7 +24,7 @@ export class ProjectTypeService {
 
     const projectType = await this.projectTypeModel.create({
       ...dto,
-      createdBy: userId,
+      createdBy: userId ? String(userId) : undefined,
     });
     return projectType;
   }
@@ -100,7 +100,7 @@ export class ProjectTypeService {
 
     await projectType.update({
       ...dto,
-      updatedBy: userId,
+      updatedBy: userId ? String(userId) : undefined,
     });
     return projectType;
   }

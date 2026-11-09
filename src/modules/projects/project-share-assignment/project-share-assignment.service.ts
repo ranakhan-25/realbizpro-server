@@ -152,6 +152,12 @@ export class ProjectShareAssignmentService {
 
     const where: WhereOptions<ProjectShareAssignment> =
       {};
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      where.projectId = (query as any).projectId;
+    }
 
     if (query.projectId)
       where.projectId = query.projectId;

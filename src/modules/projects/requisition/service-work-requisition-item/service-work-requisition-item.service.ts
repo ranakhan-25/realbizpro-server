@@ -92,8 +92,11 @@ export class ServiceWorkRequisitionItemService {
     const calculatedSkip =
       skip ?? (page - 1) * limit;
 
-    const where: WhereOptions<ServiceWorkRequisitionItemAttributes> =
+    const where: any =
       {};
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
 
     // =========================
     // SEARCH

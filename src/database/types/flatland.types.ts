@@ -7,6 +7,7 @@ import type { Project } from '../models/projects/project/pr_project.model';
 import type { FlatLandBooking } from '../models/projects/flat-land-booking/pr_flat_land_booking.model';
 import type { FlatLandOffer } from '../models/projects/flat-land-offer/pr_flat_land_offer.model';
 import type { CrmLeadNegotiation } from '../models/crm/call-center/crm-lead-negotiation.model';
+import type { SysOrganization } from '../models/system/sys_organization.model';
 
 export interface FlatLandAttributes {
   id: number;
@@ -48,12 +49,14 @@ export interface FlatLandAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
 
   // Relations
   project?: Project;
   bookings?: FlatLandBooking[];
   offers?: FlatLandOffer[];
   crmNegotiations?: CrmLeadNegotiation[];
+  organization?: SysOrganization;
 }
 
 export interface FlatLandCreationAttributes {
@@ -91,6 +94,7 @@ export interface FlatLandCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
 }
 
 export type FlatLandUpdateAttributes = Partial<FlatLandCreationAttributes>;
@@ -101,4 +105,5 @@ export interface FlatLandWithRelations extends FlatLandAttributes {
   bookings?: FlatLandBooking[];
   offers?: FlatLandOffer[];
   crmNegotiations?: CrmLeadNegotiation[];
+  organization?: SysOrganization;
 }

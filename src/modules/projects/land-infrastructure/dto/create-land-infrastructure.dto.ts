@@ -27,4 +27,11 @@ export class CreateLandInfrastructureDto {
   @IsOptional()
   @IsString()
   details?: string;
+    @ApiPropertyOptional({ example: 'user-uuid' })
+    @IsOptional()
+    @IsString()
+    createdBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
 }

@@ -52,4 +52,11 @@ export class CreateProjectBillingRecordDto {
   @IsOptional()
   @IsObject()
   details?: Record<string, unknown>;
+    @ApiPropertyOptional({ example: 'user-uuid' })
+    @IsOptional()
+    @IsString()
+    createdBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
 }

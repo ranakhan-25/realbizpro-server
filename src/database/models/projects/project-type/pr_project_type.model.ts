@@ -3,8 +3,7 @@ import {
   Column,
   DataType,
   HasMany,
-  Table,
-} from 'sequelize-typescript';
+  Table, ForeignKey, BelongsTo } from 'sequelize-typescript';
 import { BaseModel } from '../../../base.model';
 import {
   ProjectTypeAttributes,
@@ -25,6 +24,7 @@ import { ProcurementPurchaseBill } from '../../procurement/purchase-bill/pr_purc
 import { ProcurementAssetPurchaseBill } from '../../procurement/purchase-bill/pr_asset_purchase_bill.model';
 import { ProcurementAssetGrn } from '../../procurement/grn/pr_asset_grn.model';
 import { Project } from '../project/pr_project.model';
+import { SysOrganization } from "src/database/models/system/sys_organization.model";
 
 @Table({
   tableName: 'project_types',
@@ -87,22 +87,25 @@ export class ProjectType
 
   // ─── Audit fields ───────────────────────────────────────
   @Column({
-    type: DataType.INTEGER, // change to STRING / UUID if needed
-    allowNull: true,
-  })
-  declare createdBy?: number;
+          field: 'created_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
+  declare createdBy?: string;
 
   @Column({
-    type: DataType.INTEGER,
-    allowNull: true,
-  })
-  declare updatedBy?: number;
+          field: 'updated_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
+  declare updatedBy?: any;
 
   @Column({
-    type: DataType.INTEGER,
-    allowNull: true,
-  })
-  declare deletedBy?: number;
+          field: 'deleted_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
+  declare deletedBy?: string;
 
   // Image e dekha format: P + 7 digit (e.g. P4773027)
   @BeforeValidate
@@ -111,4 +114,19 @@ export class ProjectType
       instance.code = `P${Math.floor(1000000 + Math.random() * 9000000)}`;
     }
   }
+
+    @ForeignKey(() => SysOrganization)
+    @Column({
+            type: DataType.BIGINT,
+            allowNull: true,
+            field: 'org_id',
+            defaultValue: null,
+          })
+    declare orgId?: number | null;
+    @BelongsTo(() => SysOrganization, {
+            foreignKey: 'orgId',
+            targetKey: 'id',
+            as: 'organization',
+          })
+    declare organization?: SysOrganization;
 }

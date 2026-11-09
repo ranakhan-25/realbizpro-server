@@ -3,6 +3,9 @@
 
 import { BoqComparisonStatus } from '../models/projects/boqcomparison/boq-comparison.model';
 
+import type { SysOrganization } from '../models/system/sys_organization.model';
+import type { Project } from '../models/projects/project/pr_project.model';
+
 export interface BoqComparisonAttributes {
   id: number;
   uuid: string;
@@ -25,6 +28,12 @@ export interface BoqComparisonAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
+  projectId?: string | null;
+
+  // Relations
+  organization?: SysOrganization;
+  project?: Project;
 }
 
 export interface BoqComparisonCreationAttributes {
@@ -44,11 +53,14 @@ export interface BoqComparisonCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
+  projectId?: string | null;
 }
 
 export type BoqComparisonUpdateAttributes = Partial<BoqComparisonCreationAttributes>;
 
 // Helper type for including relations
 export interface BoqComparisonWithRelations extends BoqComparisonAttributes {
-  // No relations defined
+  organization?: SysOrganization;
+  project?: Project;
 }

@@ -71,7 +71,7 @@ export class MaterialRequisitionService {
   ) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
-    const where: WhereOptions<MaterialRequisition> =
+    const where: any =
       query.search
         ? {
             [Op.or]: [
@@ -93,6 +93,8 @@ export class MaterialRequisitionService {
             ],
           }
         : {};
+    if (query.orgId) where.orgId = query.orgId;
+    if (query.projectId) where.projectId = query.projectId;
 
     const { rows, count } =
       await this.requisitionModel.findAndCountAll(
@@ -135,11 +137,9 @@ export class MaterialRequisitionService {
   }
 
   async findOne(uuid: string) {
-    const where: WhereOptions<MaterialRequisition> =
-      { uuid };
     const requisition =
       await this.requisitionModel.findOne({
-        where: where as WhereOptions,
+        where: { uuid } as WhereOptions,
         include: [
           {
             model: this.projectModel,
