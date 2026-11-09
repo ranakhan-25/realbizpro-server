@@ -9,7 +9,7 @@ import {
   IsIn
 } from 'class-validator';
 import { PartyType } from 'src/database/models/projects/project_party/pr_project_party_model';
-
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class QueryProjectPartyDto {
   @IsUUID()
@@ -40,4 +40,11 @@ export class QueryProjectPartyDto {
   @IsNumberString()
   @IsOptional()
   limit?: string;
+    @ApiPropertyOptional({ description: 'Filter by organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Filter by project ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 }

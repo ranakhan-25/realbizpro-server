@@ -10,7 +10,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ControlType } from 'src/database/models/projects/project_control/pr_project_control_model';
-
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class CreateProjectControlDto {
   @IsUUID()
@@ -43,4 +43,15 @@ export class CreateProjectControlDto {
   @IsString()
   @IsOptional()
   addedById?: string;
+    @ApiPropertyOptional({ example: 'user-uuid' })
+    @IsOptional()
+    @IsString()
+    createdBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Project UUID or ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 }

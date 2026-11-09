@@ -11,7 +11,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { CostHeadType, CostRefType } from 'src/database/models/projects/project_cost/pr_project_cost_model';
-
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class CreateProjectCostDto {
   @IsUUID()
@@ -62,4 +62,15 @@ export class CreateProjectCostDto {
   @IsString()
   @IsOptional()
   addedById?: string;
+    @ApiPropertyOptional({ example: 'user-uuid' })
+    @IsOptional()
+    @IsString()
+    createdBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Project UUID or ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 }

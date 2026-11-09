@@ -2,8 +2,7 @@ import {
   Column,
   DataType,
   HasMany,
-  Table,
-} from 'sequelize-typescript';
+  Table, ForeignKey, BelongsTo } from 'sequelize-typescript';
 import { BaseModel } from 'src/database/base.model';
 import type {
   DepartmentAttributes,
@@ -13,6 +12,7 @@ import type {
 import { Designation } from './hrm_designation_model';
 import { EmployeeList } from './hrm_employeeList_model';
 import { Attendance } from './hrm_attendance_model';
+import { SysOrganization } from "src/database/models/system/sys_organization.model";
 
 export enum DepartmentStatus {
   ACTIVE = 'active',
@@ -56,12 +56,14 @@ export class Department
   @Column({
     type: DataType.STRING,
     allowNull: true,
+    field: 'departmentHeadId',
   })
   declare departmentHeadId?: string;
 
   @Column({
     type: DataType.STRING,
     allowNull: true,
+    field: 'addedById',
   })
   declare addedById?: string;
 
@@ -112,4 +114,18 @@ export class Department
     as: 'attendances',
   })
   declare attendances?: Attendance[];
+    @ForeignKey(() => SysOrganization)
+    @Column({
+            type: DataType.BIGINT,
+            allowNull: true,
+            field: 'org_id',
+            defaultValue: null,
+          })
+    declare orgId?: number | null;
+    @BelongsTo(() => SysOrganization, {
+            foreignKey: 'orgId',
+            targetKey: 'id',
+            as: 'organization',
+          })
+    declare organization?: SysOrganization;
 }

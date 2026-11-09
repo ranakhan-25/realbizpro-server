@@ -2,6 +2,7 @@
 // Source: src\database\models\projects\boq\pr_boq.model.ts
 
 import type { Project } from '../models/projects/project/pr_project.model';
+import type { SysOrganization } from '../models/system/sys_organization.model';
 
 export interface BoqAttributes {
   id: number;
@@ -24,9 +25,11 @@ export interface BoqAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
 
   // Relations
   project?: Project | null;
+  organization?: SysOrganization;
 }
 
 export interface BoqCreationAttributes {
@@ -45,6 +48,7 @@ export interface BoqCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
 }
 
 export type BoqUpdateAttributes = Partial<BoqCreationAttributes>;
@@ -52,4 +56,5 @@ export type BoqUpdateAttributes = Partial<BoqCreationAttributes>;
 // Helper type for including relations
 export interface BoqWithRelations extends BoqAttributes {
   project?: Project | null;
+  organization?: SysOrganization;
 }

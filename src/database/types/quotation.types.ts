@@ -3,6 +3,7 @@
 
 import type { BillingCategory } from '../models/projects/billing/pr_category.model';
 import type { BillingSubCategory } from '../models/projects/billing/pr_sub_category.model';
+import type { SysOrganization } from '../models/system/sys_organization.model';
 
 export interface QuotationAttributes {
   id: number;
@@ -40,10 +41,12 @@ export interface QuotationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
 
   // Relations
   category?: BillingCategory;
   subCategory?: BillingSubCategory;
+  organization?: SysOrganization;
 }
 
 export interface QuotationCreationAttributes {
@@ -77,6 +80,7 @@ export interface QuotationCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
 }
 
 export type QuotationUpdateAttributes = Partial<QuotationCreationAttributes>;
@@ -85,4 +89,5 @@ export type QuotationUpdateAttributes = Partial<QuotationCreationAttributes>;
 export interface QuotationWithRelations extends QuotationAttributes {
   category?: BillingCategory;
   subCategory?: BillingSubCategory;
+  organization?: SysOrganization;
 }

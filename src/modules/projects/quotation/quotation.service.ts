@@ -53,6 +53,12 @@ export class QuotationService {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const where: WhereOptions<Quotation> = {};
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      where.projectId = (query as any).projectId;
+    }
 
     if (query.search?.trim()) {
       const search = `%${query.search.trim()}%`;

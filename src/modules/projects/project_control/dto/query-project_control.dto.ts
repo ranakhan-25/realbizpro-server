@@ -2,7 +2,7 @@
 
 import { IsString, IsUUID, IsEnum, IsOptional, IsNumberString } from 'class-validator';
 import { ControlStatus, ControlType } from 'src/database/models/projects/project_control/pr_project_control_model';
-
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class QueryProjectControlDto {
   @IsUUID()
@@ -28,4 +28,11 @@ export class QueryProjectControlDto {
   @IsNumberString()
   @IsOptional()
   limit?: string;
+    @ApiPropertyOptional({ description: 'Filter by organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Filter by project ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 }

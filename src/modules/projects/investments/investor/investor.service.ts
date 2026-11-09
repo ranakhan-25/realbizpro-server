@@ -73,6 +73,8 @@ export class InvestorService {
         groupTier: dto.groupTier,
         underGroup: dto.underGroup,
         addedById: dto.addedById,
+        createdBy: dto.createdBy ?? dto.addedById,
+        orgId: dto.orgId,
         status:
           dto.status ?? InvestorStatus.ACTIVE,
       });
@@ -117,6 +119,18 @@ export class InvestorService {
         : (page - 1) * limit;
 
     const where: any = {};
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      where.projectId = (query as any).projectId;
+    }
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      where.projectId = (query as any).projectId;
+    }
 
     if (search) {
       where[Op.or] = [

@@ -63,7 +63,7 @@ export class ZkTecoDeviceService {
       await this.zkTecoDeviceModel.create({
         ...dto,
         ...connection,
-        createdBy: dto.addedById,
+        createdBy: dto.createdBy ?? dto.addedById,
         status:
           dto.status ?? ZkTecoDeviceStatus.ACTIVE,
       } as any);
@@ -90,6 +90,12 @@ export class ZkTecoDeviceService {
         : (page - 1) * limit;
 
     const where: any = {};
+    if (query.orgId) {
+      where.orgId = query.orgId;
+    }
+    if ((query as any).projectId) {
+      where.projectId = (query as any).projectId;
+    }
 
     if (search) {
       where[Op.or] = [

@@ -55,4 +55,11 @@ export class CreateDesignationDto {
   @IsOptional()
   @IsEnum(DesignationStatus)
   status?: DesignationStatus;
+    @ApiPropertyOptional({ example: 'user-uuid' })
+    @IsOptional()
+    @IsString()
+    createdBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
 }

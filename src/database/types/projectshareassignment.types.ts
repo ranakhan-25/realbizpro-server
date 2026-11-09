@@ -4,6 +4,7 @@
 import type { Project } from '../models/projects/project/pr_project.model';
 import type { ProjectType } from '../models/projects/project-type/pr_project_type.model';
 import type { Site } from '../models/projects/project-site/pr_project_site.model';
+import type { SysOrganization } from '../models/system/sys_organization.model';
 
 export interface ProjectShareAssignmentAttributes {
   id: number;
@@ -36,11 +37,13 @@ export interface ProjectShareAssignmentAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
 
   // Relations
   project?: Project;
   projectType?: ProjectType;
   site?: Site;
+  organization?: SysOrganization;
 }
 
 export interface ProjectShareAssignmentCreationAttributes {
@@ -69,6 +72,7 @@ export interface ProjectShareAssignmentCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
 }
 
 export type ProjectShareAssignmentUpdateAttributes = Partial<ProjectShareAssignmentCreationAttributes>;
@@ -78,4 +82,5 @@ export interface ProjectShareAssignmentWithRelations extends ProjectShareAssignm
   project?: Project;
   projectType?: ProjectType;
   site?: Site;
+  organization?: SysOrganization;
 }

@@ -11,6 +11,7 @@ import {
   IsArray
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class CreateProjectProgressDto {
   @IsUUID()
@@ -50,4 +51,11 @@ export class CreateProjectProgressDto {
   @IsString()
   @IsOptional()
   createdBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Project UUID or ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 }

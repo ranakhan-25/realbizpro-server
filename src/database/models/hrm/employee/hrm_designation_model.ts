@@ -16,6 +16,7 @@ import type {
 import { Department } from './hrm_department_model';
 import { EmployeeList } from './hrm_employeeList_model';
 import { Increment } from './hrm_increment_model';
+import { SysOrganization } from "src/database/models/system/sys_organization.model";
 
 export enum DesignationStatus {
   ACTIVE = 'active',
@@ -81,6 +82,7 @@ export class Designation
   @Column({
     type: DataType.STRING,
     allowNull: true,
+    field: 'addedById',
   })
   declare addedById?: string;
 
@@ -123,4 +125,18 @@ export class Designation
     as: 'increments',
   })
   declare increments?: Increment[];
+    @ForeignKey(() => SysOrganization)
+    @Column({
+            type: DataType.BIGINT,
+            allowNull: true,
+            field: 'org_id',
+            defaultValue: null,
+          })
+    declare orgId?: number | null;
+    @BelongsTo(() => SysOrganization, {
+            foreignKey: 'orgId',
+            targetKey: 'id',
+            as: 'organization',
+          })
+    declare organization?: SysOrganization;
 }

@@ -18,6 +18,7 @@ import { BaseModel } from 'src/database/base.model';
 import { BillingCategory } from './pr_category.model';
 import { BillingSubCategory } from './pr_sub_category.model';
 import { InvoiceItem } from './pr_invoice_item.model';
+import { SysOrganization } from "src/database/models/system/sys_organization.model";
 
 @Table({
   tableName: 'items',
@@ -110,21 +111,24 @@ export class Item extends BaseModel<
   declare isActive: boolean;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'created_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare createdBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'updated_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare updatedBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'deleted_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare deletedBy?: string;
 
   @HasMany(() => InvoiceItem, {
@@ -133,4 +137,18 @@ export class Item extends BaseModel<
     as: 'invoiceItems',
   })
   declare invoiceItems?: InvoiceItem[];
+    @ForeignKey(() => SysOrganization)
+    @Column({
+            type: DataType.BIGINT,
+            allowNull: true,
+            field: 'org_id',
+            defaultValue: null,
+          })
+    declare orgId?: number | null;
+    @BelongsTo(() => SysOrganization, {
+            foreignKey: 'orgId',
+            targetKey: 'id',
+            as: 'organization',
+          })
+    declare organization?: SysOrganization;
 }

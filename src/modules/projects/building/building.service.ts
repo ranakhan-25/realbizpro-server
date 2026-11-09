@@ -51,6 +51,9 @@ export class BuildingService {
         status: dto.status ?? 'Active',
         siteUid,
         addedBy: dto.addedBy,
+        createdBy: dto.createdBy ?? dto.addedBy,
+        orgId: dto.orgId,
+        projectId: dto.projectId,
       });
       return this.findOne(building.uuid);
     } catch (error) {
@@ -74,6 +77,12 @@ export class BuildingService {
         ? Number.parseInt(query.skip, 10)
         : (page - 1) * limit;
     const where: Record<string | symbol, unknown> = {};
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      where.projectId = (query as any).projectId;
+    }
 
     if (query.search) {
       where[Op.or] = [

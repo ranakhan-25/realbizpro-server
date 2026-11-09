@@ -115,6 +115,8 @@ export class ShareConfigurationService {
           dto.isProfitDistribute ?? false,
 
         addedById: dto.addedById,
+        createdBy: dto.createdBy ?? dto.addedById,
+        orgId: dto.orgId,
 
         status:
           dto.status ??
@@ -150,6 +152,18 @@ export class ShareConfigurationService {
         : (page - 1) * limit;
 
     const where: any = {};
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      where.projectId = (query as any).projectId;
+    }
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      where.projectId = (query as any).projectId;
+    }
 
     // -------------------------------------------------------
     // Search

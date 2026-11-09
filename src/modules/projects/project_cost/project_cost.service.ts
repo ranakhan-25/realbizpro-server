@@ -51,6 +51,18 @@ export class ProjectCostService {
     const offset = (pageNum - 1) * limitNum;
 
     const whereClause: any = {};
+    if ((query as any)?.orgId) {
+      whereClause.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      whereClause.projectId = (query as any).projectId;
+    }
+    if ((query as any)?.orgId) {
+      whereClause.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      whereClause.projectId = (query as any).projectId;
+    }
     Object.keys(filters).forEach((key) => {
       const value = filters[key];
       if (value !== undefined && value !== null && value !== '') {

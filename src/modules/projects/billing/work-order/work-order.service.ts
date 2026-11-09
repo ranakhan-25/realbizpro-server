@@ -281,6 +281,12 @@ export class WorkOrderService {
     );
 
     const where: WhereOptions<WorkOrderAttributes> = {};
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      where.projectId = (query as any).projectId;
+    }
 
     if (query.projectId) {
       Object.assign(where, {

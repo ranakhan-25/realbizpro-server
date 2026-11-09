@@ -38,6 +38,18 @@ export class ProjectMilestoneService {
     const offset = (pageNum - 1) * limitNum;
 
     const where: any = {};
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      where.projectId = (query as any).projectId;
+    }
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      where.projectId = (query as any).projectId;
+    }
 
     if (status) where.status = status;
     if (projectUuid) where.projectUuid = projectUuid;

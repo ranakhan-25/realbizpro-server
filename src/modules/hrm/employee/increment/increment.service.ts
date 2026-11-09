@@ -78,7 +78,7 @@ export class IncrementService {
     const record = await this.incrementModel.create({
       ...dto,
       status: dto.status ?? IncrementStatus.ACTIVE,
-      createdBy: dto.addedById,
+      createdBy: dto.createdBy ?? dto.addedById,
     } as any);
 
     return this.findOne(record.uuid);
@@ -105,6 +105,12 @@ export class IncrementService {
         : (page - 1) * limit;
 
     const where: any = {};
+    if (query.orgId) {
+      where.orgId = query.orgId;
+    }
+    if ((query as any).projectId) {
+      where.projectId = (query as any).projectId;
+    }
 
     if (employeeId) {
       where.employeeId = employeeId;

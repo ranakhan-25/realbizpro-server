@@ -14,6 +14,7 @@ import {
   PlotFacing,
   PlotStatus,
 } from 'src/database/models/projects/unit_plot/pr_unit_plot_model';
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class CreateUnitPlotDto {
   @IsUUID()
@@ -69,4 +70,15 @@ export class CreateUnitPlotDto {
   @IsString()
   @IsOptional()
   addedById?: string;
+    @ApiPropertyOptional({ example: 'user-uuid' })
+    @IsOptional()
+    @IsString()
+    createdBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Project UUID or ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 }

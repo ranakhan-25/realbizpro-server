@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 
 import { IsString, IsUUID, IsOptional, IsNumberString, IsDateString } from 'class-validator';
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class QueryProjectProgressDto {
   @IsUUID()
@@ -26,4 +27,11 @@ export class QueryProjectProgressDto {
   @IsNumberString()
   @IsOptional()
   limit?: string;
+    @ApiPropertyOptional({ description: 'Filter by organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Filter by project ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 }

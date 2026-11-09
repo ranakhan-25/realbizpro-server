@@ -2,6 +2,7 @@
 
 import { Transform } from 'class-transformer';
 import { IsIn, IsOptional, IsString } from 'class-validator';
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class QueryBuildingDto {
   @IsOptional()
@@ -51,4 +52,11 @@ export class QueryBuildingDto {
   @IsOptional()
   @Transform(({ value }) => value === true || value === 'true')
   withDeleted?: boolean;
+    @ApiPropertyOptional({ description: 'Filter by organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Filter by project ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 }

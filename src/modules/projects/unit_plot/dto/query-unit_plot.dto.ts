@@ -12,6 +12,7 @@ import {
   PlotFacing,
   PlotStatus,
 } from 'src/database/models/projects/unit_plot/pr_unit_plot_model';
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class QueryUnitPlotDto {
   @IsUUID()
@@ -41,4 +42,11 @@ export class QueryUnitPlotDto {
   @IsNumberString()
   @IsOptional()
   limit?: string;
+    @ApiPropertyOptional({ description: 'Filter by organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Filter by project ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 }

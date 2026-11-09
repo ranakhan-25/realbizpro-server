@@ -1,14 +1,14 @@
 import {
   Column,
   DataType,
-  Table,
-} from 'sequelize-typescript';
+  Table, ForeignKey, BelongsTo } from 'sequelize-typescript';
 import { BaseModel } from 'src/database/base.model';
 import {
   SalaryGradeAttributes,
   SalaryGradeCreationAttributes,
   SalaryGradeUpdateAttributes,
 } from 'src/database/types/salarygrade.types';
+import { SysOrganization } from "src/database/models/system/sys_organization.model";
 
 export enum SalaryGradeStatus {
   ACTIVE = 'active',
@@ -52,21 +52,24 @@ export class SalaryGrade
   declare addedById?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          type: DataType.STRING,
+          allowNull: true,
+          field: 'created_by',
+        })
   declare createdBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          type: DataType.STRING,
+          allowNull: true,
+          field: 'updated_by',
+        })
   declare updatedBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          type: DataType.STRING,
+          allowNull: true,
+          field: 'deleted_by',
+        })
   declare deletedBy?: string;
 
   @Column({
@@ -77,4 +80,18 @@ export class SalaryGrade
     defaultValue: SalaryGradeStatus.ACTIVE,
   })
   declare status: SalaryGradeStatus;
+    @ForeignKey(() => SysOrganization)
+    @Column({
+            type: DataType.BIGINT,
+            allowNull: true,
+            field: 'org_id',
+            defaultValue: null,
+          })
+    declare orgId?: number | null;
+    @BelongsTo(() => SysOrganization, {
+            foreignKey: 'orgId',
+            targetKey: 'id',
+            as: 'organization',
+          })
+    declare organization?: SysOrganization;
 }

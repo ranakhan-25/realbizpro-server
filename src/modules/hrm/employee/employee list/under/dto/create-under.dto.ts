@@ -48,4 +48,11 @@ export class CreateUnderDto {
   @IsOptional()
   @IsEnum(UnderStatus)
   status?: UnderStatus;
+    @ApiPropertyOptional({ example: 'user-uuid' })
+    @IsOptional()
+    @IsString()
+    createdBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
 }

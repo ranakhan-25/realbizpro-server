@@ -52,7 +52,7 @@ export class EmployeeSalaryService {
     const record =
       await this.employeeSalaryModel.create({
         ...dto,
-        createdBy: dto.addedById,
+        createdBy: dto.createdBy ?? dto.addedById,
       });
 
     return this.findOne(record.uuid);
@@ -75,6 +75,12 @@ export class EmployeeSalaryService {
         : (page - 1) * limit;
 
     const where: any = {};
+    if (query.orgId) {
+      where.orgId = query.orgId;
+    }
+    if ((query as any).projectId) {
+      where.projectId = (query as any).projectId;
+    }
 
     if (employeeId) {
       where.employeeId = employeeId;

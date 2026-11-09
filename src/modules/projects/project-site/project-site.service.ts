@@ -50,7 +50,7 @@ export class ProjectSiteService {
       const site = await this.siteModel.create(
         {
           ...dto,
-          createdBy: userId,
+          createdBy: userId ? String(userId) : undefined,
         },
         { transaction },
       );
@@ -152,7 +152,7 @@ export class ProjectSiteService {
       await site.update(
         {
           ...dto,
-          updatedBy: userId,
+          updatedBy: userId ? String(userId) : undefined,
         },
         { transaction },
       );

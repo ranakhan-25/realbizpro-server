@@ -9,6 +9,7 @@ import type { BillingSubCategory } from '../models/projects/billing/pr_sub_categ
 import type { Site } from '../models/projects/project-site/pr_project_site.model';
 import type { ServiceWorkRequisitionItem } from '../models/projects/service-work-requisition-item/pr_service_work_requisition_item.model';
 import type { ProcurementWorkOrder } from '../models/procurement/work-order/pr_procurement_work_order.model';
+import type { SysOrganization } from '../models/system/sys_organization.model';
 
 export interface ServiceWorkRequisitionAttributes {
   id: number;
@@ -31,6 +32,8 @@ export interface ServiceWorkRequisitionAttributes {
   updatedBy?: string | null;
   deletedBy?: string | null;
   status: ServiceWorkRequisitionStatus;
+  orgId?: number | null;
+  projectId?: string | null;
 
   // Relations
   project?: Project;
@@ -39,6 +42,7 @@ export interface ServiceWorkRequisitionAttributes {
   constructionSite?: Site;
   items?: ServiceWorkRequisitionItem[];
   procurementWorkOrders?: ProcurementWorkOrder[];
+  organization?: SysOrganization;
 }
 
 export interface ServiceWorkRequisitionCreationAttributes {
@@ -57,6 +61,8 @@ export interface ServiceWorkRequisitionCreationAttributes {
   updatedBy?: string | null;
   deletedBy?: string | null;
   status?: ServiceWorkRequisitionStatus; // Has default value
+  orgId?: number | null;
+  projectId?: string | null;
 }
 
 export type ServiceWorkRequisitionUpdateAttributes = Partial<ServiceWorkRequisitionCreationAttributes>;
@@ -69,4 +75,5 @@ export interface ServiceWorkRequisitionWithRelations extends ServiceWorkRequisit
   constructionSite?: Site;
   items?: ServiceWorkRequisitionItem[];
   procurementWorkOrders?: ProcurementWorkOrder[];
+  organization?: SysOrganization;
 }

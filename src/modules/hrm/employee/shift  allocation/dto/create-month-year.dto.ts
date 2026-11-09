@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 import {
   Transform,
@@ -13,8 +13,7 @@ import {
   IsNotEmpty,
   IsString,
   Max,
-  Min,
-} from 'class-validator';
+  Min, IsOptional } from 'class-validator';
 
 export class CreateMonthYearDto {
   @ApiProperty({
@@ -63,4 +62,11 @@ export class CreateMonthYearDto {
     },
   )
   endDate: string;
+    @ApiPropertyOptional({ example: 'user-uuid' })
+    @IsOptional()
+    @IsString()
+    createdBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
 }

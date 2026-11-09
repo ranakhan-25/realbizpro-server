@@ -12,6 +12,7 @@ import {
 } from 'sequelize-typescript';
 import { BaseModel } from 'src/database/base.model';
 import { Project } from '../project/pr_project.model';
+import { SysOrganization } from "src/database/models/system/sys_organization.model";
 
 @Table({
   tableName: 'pr_project_share_configurations',
@@ -31,9 +32,10 @@ export class ProjectShareConfiguration extends BaseModel<
 > {
   @ForeignKey(() => Project)
   @Column({
-    type: DataType.UUID,
-    allowNull: false,
-  })
+              field: 'project_id',
+              type: DataType.UUID,
+              allowNull: false,
+            })
   declare projectId: string;
 
   @BelongsTo(() => Project, {
@@ -82,20 +84,37 @@ export class ProjectShareConfiguration extends BaseModel<
   declare status: 'active' | 'inactive';
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'created_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare createdBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'updated_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare updatedBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'deleted_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare deletedBy?: string;
+    @ForeignKey(() => SysOrganization)
+    @Column({
+            type: DataType.BIGINT,
+            allowNull: true,
+            field: 'org_id',
+            defaultValue: null,
+          })
+    declare orgId?: number | null;
+    @BelongsTo(() => SysOrganization, {
+            foreignKey: 'orgId',
+            targetKey: 'id',
+            as: 'organization',
+          })
+    declare organization?: SysOrganization;
 }

@@ -71,7 +71,7 @@ export class LoanService {
 
     const record = await this.loanModel.create({
       ...dto,
-      createdBy: dto.addedById,
+      createdBy: dto.createdBy ?? dto.addedById,
     });
 
     return this.findOne(record.uuid);
@@ -97,6 +97,12 @@ export class LoanService {
         : (page - 1) * limit;
 
     const where: any = {};
+    if (query.orgId) {
+      where.orgId = query.orgId;
+    }
+    if ((query as any).projectId) {
+      where.projectId = (query as any).projectId;
+    }
 
     if (employeeId) {
       where.employeeId = employeeId;

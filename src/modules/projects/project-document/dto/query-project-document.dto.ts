@@ -1,3 +1,13 @@
 import { PaginateDto } from 'src/common/dto/paginate.dto';
+import { ApiPropertyOptional } from "@nestjs/swagger";
+import { IsOptional, IsString } from "class-validator";
 
-export class QueryProjectDocumentDto extends PaginateDto {}
+export class QueryProjectDocumentDto extends PaginateDto {
+    @ApiPropertyOptional({ description: 'Filter by organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Filter by project ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
+}

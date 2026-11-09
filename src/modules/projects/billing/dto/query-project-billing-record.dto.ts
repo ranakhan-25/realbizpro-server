@@ -7,4 +7,11 @@ export class QueryProjectBillingRecordDto extends PartialType(PaginateDto) {
   @IsOptional()
   @IsString()
   resource?: string;
+    @ApiPropertyOptional({ description: 'Filter by organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Filter by project ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 }

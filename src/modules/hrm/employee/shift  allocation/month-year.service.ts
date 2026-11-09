@@ -100,6 +100,12 @@ export class MonthYearService {
         : (page - 1) * limit;
 
     const where: any = {};
+    if (query.orgId) {
+      where.orgId = query.orgId;
+    }
+    if ((query as any).projectId) {
+      where.projectId = (query as any).projectId;
+    }
 
     if (search) {
       where.month = { [Op.like]: `%${search}%` };

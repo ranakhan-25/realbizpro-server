@@ -44,7 +44,7 @@ export class EmployeeTypeService {
     const record =
       await this.employeeTypeModel.create({
         ...dto,
-        createdBy: dto.addedById,
+        createdBy: dto.createdBy ?? dto.addedById,
         status:
           dto.status ?? EmployeeTypeStatus.ACTIVE,
       });
@@ -70,6 +70,12 @@ export class EmployeeTypeService {
         : (page - 1) * limit;
 
     const where: any = {};
+    if (query.orgId) {
+      where.orgId = query.orgId;
+    }
+    if ((query as any).projectId) {
+      where.projectId = (query as any).projectId;
+    }
 
     if (search) {
       where.name = { [Op.like]: `%${search}%` };

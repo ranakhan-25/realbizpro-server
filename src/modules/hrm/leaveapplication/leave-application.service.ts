@@ -101,7 +101,7 @@ export class LeaveApplicationService {
     const record =
       await this.leaveApplicationModel.create({
         ...dto,
-        createdBy: dto.addedById,
+        createdBy: dto.createdBy ?? dto.addedById,
         status:
           dto.status ??
           LeaveApplicationStatus.PENDING,
@@ -135,6 +135,12 @@ export class LeaveApplicationService {
         : (page - 1) * limit;
 
     const where: any = {};
+    if (query.orgId) {
+      where.orgId = query.orgId;
+    }
+    if ((query as any).projectId) {
+      where.projectId = (query as any).projectId;
+    }
 
     if (search) {
       where.reason = {
