@@ -43,6 +43,10 @@ export class ProjectShareAssignmentService {
     userId?: number,
     currentUser?: any,
   ) {
+    if (!dto.projectId) {
+      throw new BadRequestException('Project is required');
+    }
+
     const uuid = await this.sequelize.transaction(
       async (transaction) => {
         // Project check
@@ -113,6 +117,9 @@ export class ProjectShareAssignmentService {
           await this.assignmentModel.create(
             {
               ...rest,
+              // Use the UUID from the verified project record so the required
+              // foreign key cannot be omitted by a partially populated DTO.
+              projectId: project.uuid,
               ...(assignedAt
                 ? {
                     assignedAt: new Date(
@@ -417,7 +424,7 @@ export class ProjectShareAssignmentService {
 
   async findReport(
     kind:
-      'collection' | 'penalty' | 'holders-point',
+      'all' | 'collection' | 'penalty' | 'holders-point',
     currentUser?: any,
   ) {
     const criteria: WhereOptions<ProjectShareAssignment> =
