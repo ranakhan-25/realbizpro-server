@@ -233,6 +233,7 @@ import { BookingDetailsModule } from './modules/sales_management/booking_details
 import { BookingCreatepageModule } from './modules/sales_management/booking_createpage/booking_createpage.module';
 import { HoldModalModule } from './modules/sales_management/inventory/hold_modal/hold_modal.module';
 import { PricingFormModule } from './modules/sales_management/inventory/pricing_form/pricing_form.module';
+import { DiscountModule } from './modules/sales_management/discounts/discounts_form/discounts_form.module';
 
 
 @Module({
@@ -493,6 +494,7 @@ import { PricingFormModule } from './modules/sales_management/inventory/pricing_
     BookingCreatepageModule,
     HoldModalModule,
     PricingFormModule,
+    DiscountModule,
 
   ],
   controllers: [AppController, HealthController],

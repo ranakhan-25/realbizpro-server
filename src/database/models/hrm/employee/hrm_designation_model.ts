@@ -23,7 +23,7 @@ export enum DesignationStatus {
 }
 
 @Table({
-  tableName: 'hrm_designation',
+  tableName: 'designation',
   timestamps: true,
   paranoid: true,
   underscored: false,
@@ -34,7 +34,7 @@ export enum DesignationStatus {
     },
     {
       name: 'Designation_departmentId_idx',
-      fields: ['department_Id'],
+      fields: ['departmentId'],
     },
     {
       name: 'Designation_departmentId_name_unique',
@@ -57,7 +57,6 @@ export class Designation
   @Column({
     type: DataType.STRING,
     allowNull: false,
-    field: 'name',
   })
   declare name: string;
 
@@ -66,7 +65,7 @@ export class Designation
     type: DataType.UUID,
     allowNull: false,
     references: {
-      model: 'hrm_department',
+      model: 'department',
       key: 'uuid',
     },
   })
@@ -82,28 +81,24 @@ export class Designation
   @Column({
     type: DataType.STRING,
     allowNull: true,
-    field: 'added_by_id',
   })
   declare addedById?: string;
 
   @Column({
     type: DataType.STRING,
     allowNull: true,
-    field: 'created_by',
   })
   declare createdBy?: string;
 
   @Column({
     type: DataType.STRING,
     allowNull: true,
-    field: 'updated_by',
   })
   declare updatedBy?: string;
 
   @Column({
     type: DataType.STRING,
     allowNull: true,
-    field: 'deleted_by',
   })
   declare deletedBy?: string;
 
