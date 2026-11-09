@@ -41,10 +41,7 @@ export class DatabaseSyncService implements OnApplicationBootstrap {
     }
 
     try {
-      await this.sequelize.sync({
-        force: false,
-        alter: false,
-      });
+      await this.syncWithDuplicateIndexRecovery();
 
       this.logger.log('Database synchronized');
     } catch (error: any) {
@@ -66,5 +63,43 @@ export class DatabaseSyncService implements OnApplicationBootstrap {
 
       throw error;
     }
+  }
+
+  private async syncWithDuplicateIndexRecovery(): Promise<void> {
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      try {
+        await this.sequelize.sync({
+          force: false,
+          alter: false,
+        });
+        return;
+      } catch (error: any) {
+        if (error?.parent?.code !== '42P07') {
+          throw error;
+        }
+
+        const indexName = this.getCreatedIndexName(error?.sql);
+        if (!indexName) {
+          throw error;
+        }
+
+        const safeIndexName = indexName.replaceAll('"', '""');
+        await this.sequelize.query(
+          `DROP INDEX IF EXISTS "${safeIndexName}"`,
+        );
+        this.logger.warn(
+          `Dropped duplicate index "${indexName}" before database sync retry.`,
+        );
+      }
+    }
+
+    throw new Error('Database sync exceeded duplicate index recovery retries');
+  }
+
+  private getCreatedIndexName(sql?: string): string | undefined {
+    const match = sql?.match(
+      /CREATE\s+(?:UNIQUE\s+)?INDEX\s+(?:IF\s+NOT\s+EXISTS\s+)?"([^"]+)"/i,
+    );
+    return match?.[1];
   }
 }
