@@ -28,9 +28,14 @@ export class TaskService {
 
   async create(
     dto: CreateTaskDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<Task> {
     const task =
       await this.taskModel.create({
+        createdBy: userId ? String(userId) : null,
+        orgId: currentUser?.orgId ?? null,
+        projectId: currentUser?.projectId ?? null,
         ...dto,
         progress: dto.progress ?? 0,
         status:
@@ -48,7 +53,10 @@ export class TaskService {
   // FIND ALL
   // =========================
 
-  async findAll(query: QueryTaskDto) {
+  async findAll(
+    query: QueryTaskDto,
+    currentUser?: any,
+  ) {
     const {
       page = 1,
       limit = 10,
@@ -67,6 +75,26 @@ export class TaskService {
         : (page - 1) * limit;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      where.projectId = (query as any).projectId;
+    }
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      where.projectId = (query as any).projectId;
+    }
 
     if (search) {
       where[Op.or] = [
@@ -145,6 +173,7 @@ export class TaskService {
 
   async findOne(
     uuid: string,
+    currentUser?: any,
   ): Promise<Task> {
     const task =
       await this.taskModel.findOne({
@@ -167,6 +196,8 @@ export class TaskService {
   async update(
     uuid: string,
     dto: UpdateTaskDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<Task> {
     const task =
       await this.taskModel.findOne({
@@ -188,9 +219,7 @@ export class TaskService {
   // REMOVE / SOFT DELETE
   // =========================
 
-  async remove(
-    uuid: string,
-  ): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const task =
       await this.taskModel.findOne({
         where: { uuid } as any,
@@ -217,9 +246,7 @@ export class TaskService {
   // RESTORE
   // =========================
 
-  async restore(
-    uuid: string,
-  ): Promise<Task> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<Task> {
     const task =
       await this.taskModel.findOne({
         where: {

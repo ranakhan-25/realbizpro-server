@@ -14,6 +14,7 @@ import type { ProcurementAssetPurchaseOrder } from '../models/procurement/purcha
 import type { ProcurementGrn } from '../models/procurement/grn/pr_grn.model';
 import type { ProcurementAssetGrn } from '../models/procurement/grn/pr_asset_grn.model';
 import type { ProcurementHireOrder } from '../models/procurement/equipment-hire/pr_hire_order.model';
+import type { SysOrganization } from '../models/system/sys_organization.model';
 
 export interface SiteAttributes {
   id: number;
@@ -26,9 +27,10 @@ export interface SiteAttributes {
   location?: string | null;
   description?: string | null;
   projectId: string;
-  createdBy?: number | null;
-  updatedBy?: number | null;
-  deletedBy?: number | null;
+  createdBy?: string | null;
+  updatedBy?: any | null;
+  deletedBy?: string | null;
+  orgId?: number | null;
 
   // Relations
   project?: Project;
@@ -44,6 +46,7 @@ export interface SiteAttributes {
   procurementGrns?: ProcurementGrn[];
   procurementAssetGrns?: ProcurementAssetGrn[];
   equipmentHireOrders?: ProcurementHireOrder[];
+  organization?: SysOrganization;
 }
 
 export interface SiteCreationAttributes {
@@ -52,9 +55,10 @@ export interface SiteCreationAttributes {
   location?: string | null;
   description?: string | null;
   projectId: string;
-  createdBy?: number | null;
-  updatedBy?: number | null;
-  deletedBy?: number | null;
+  createdBy?: string | null;
+  updatedBy?: any | null;
+  deletedBy?: string | null;
+  orgId?: number | null;
 }
 
 export type SiteUpdateAttributes = Partial<SiteCreationAttributes>;
@@ -74,4 +78,5 @@ export interface SiteWithRelations extends SiteAttributes {
   procurementGrns?: ProcurementGrn[];
   procurementAssetGrns?: ProcurementAssetGrn[];
   equipmentHireOrders?: ProcurementHireOrder[];
+  organization?: SysOrganization;
 }

@@ -3,8 +3,7 @@ import {
   Column,
   DataType,
   HasMany,
-  Table,
-} from 'sequelize-typescript';
+  Table, ForeignKey, BelongsTo } from 'sequelize-typescript';
 import { BaseModel } from 'src/database/base.model';
 import type {
   BonusAttributes,
@@ -12,6 +11,8 @@ import type {
   BonusUpdateAttributes,
 } from 'src/database/types/bonus.types';
 import { BonusGenerate } from './hrm_bonus_generate_model';
+import { SysOrganization } from "src/database/models/system/sys_organization.model";
+import { Project } from "src/database/models/projects/project/pr_project.model";
 
 export enum BonusStatus {
   ACTIVE = 'active',
@@ -19,10 +20,10 @@ export enum BonusStatus {
 }
 
 @Table({
-  tableName: 'bonus',
+  tableName: 'hrm_bonus',
+  underscored: true,
   timestamps: true,
   paranoid: true,
-  underscored: false,
   indexes: [
     {
       name: 'Bonus_name_idx',
@@ -30,7 +31,7 @@ export enum BonusStatus {
     },
     {
       name: 'Bonus_festivalDate_idx',
-      fields: ['festivalDate'],
+      fields: ['festival_date'],
     },
     {
       name: 'Bonus_deletedAt_idx',
@@ -70,21 +71,24 @@ export class Bonus
   declare addedById?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          type: DataType.STRING,
+          allowNull: true,
+          field: 'created_by',
+        })
   declare createdBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          type: DataType.STRING,
+          allowNull: true,
+          field: 'updated_by',
+        })
   declare updatedBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          type: DataType.STRING,
+          allowNull: true,
+          field: 'deleted_by',
+        })
   declare deletedBy?: string;
 
   @Column({
@@ -101,4 +105,32 @@ export class Bonus
     as: 'bonusGenerates',
   })
   declare bonusGenerates?: BonusGenerate[];
+    @ForeignKey(() => SysOrganization)
+    @Column({
+            type: DataType.BIGINT,
+            allowNull: true,
+            field: 'org_id',
+            defaultValue: null,
+          })
+    declare orgId?: number | null;
+    @BelongsTo(() => SysOrganization, {
+            foreignKey: 'orgId',
+            targetKey: 'id',
+            as: 'organization',
+          })
+    declare organization?: SysOrganization;
+    @ForeignKey(() => Project)
+    @Column({
+            type: DataType.UUID,
+            allowNull: true,
+            field: 'project_id',
+            defaultValue: null,
+          })
+    declare projectId?: string | null;
+    @BelongsTo(() => Project, {
+            foreignKey: 'projectId',
+            targetKey: 'uuid',
+            as: 'project',
+          })
+    declare project?: Project;
 }

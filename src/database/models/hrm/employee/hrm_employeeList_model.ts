@@ -33,6 +33,8 @@ import { BonusGenerate } from './hrm_bonus_generate_model';
 import { Shift } from './hrm_shift_model';
 import { AttendanceReconciliation } from '../attendance/attendance_reconciliation_model';
 import { LeaveApplication } from '../leaveapplication/leaveapplication_modes';
+import { SysOrganization } from "src/database/models/system/sys_organization.model";
+import { Project } from "src/database/models/projects/project/pr_project.model";
 
 export enum EmployeeListStatus {
   ACTIVE = 'active',
@@ -46,10 +48,74 @@ export enum MaritalStatus {
 }
 
 @Table({
-  tableName: 'employee_list',
+  tableName: 'hrm_employee_list',
+  underscored: true,
   timestamps: true,
   paranoid: true,
   underscored: false,
+  indexes: [
+    {
+      name: 'EmployeeList_employeeCode_idx',
+      fields: ['employee_code'],
+      unique: true,
+    },
+    {
+      name: 'EmployeeList_name_idx',
+      fields: ['name'],
+    },
+    {
+      name: 'EmployeeList_email_idx',
+      fields: ['email'],
+    },
+    {
+      name: 'EmployeeList_phone_idx',
+      fields: ['phone'],
+    },
+    {
+      name: 'EmployeeList_nid_idx',
+      fields: ['nid'],
+    },
+    {
+      name: 'EmployeeList_departmentId_idx',
+      fields: ['department_id'],
+    },
+    {
+      name: 'EmployeeList_designationId_idx',
+      fields: ['designation_id'],
+    },
+    {
+      name: 'EmployeeList_unitId_idx',
+      fields: ['unit_id'],
+    },
+    {
+      name: 'EmployeeList_sectionId_idx',
+      fields: ['section_id'],
+    },
+    {
+      name: 'EmployeeList_salaryGradeId_idx',
+      fields: ['salary_grade_id'],
+    },
+    {
+      name: 'EmployeeList_shiftId_idx',
+      fields: ['shift_id'],
+    },
+    {
+      name: 'EmployeeList_employeeTypeId_idx',
+      fields: ['employee_type_id'],
+    },
+    {
+      name: 'EmployeeList_underId_idx',
+      fields: ['under_id'],
+    },
+    {
+      name: 'EmployeeList_status_idx',
+      fields: ['status'],
+    },
+    {
+      name: 'EmployeeList_deletedAt_idx',
+      fields: ['deleted_at'],
+    },
+  ],
 })
 export class EmployeeList
   extends BaseModel<
@@ -347,21 +413,24 @@ export class EmployeeList
   declare addedById?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          type: DataType.STRING,
+          allowNull: true,
+          field: 'created_by',
+        })
   declare createdBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          type: DataType.STRING,
+          allowNull: true,
+          field: 'updated_by',
+        })
   declare updatedBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          type: DataType.STRING,
+          allowNull: true,
+          field: 'deleted_by',
+        })
   declare deletedBy?: string;
 
   @HasMany(() => EmployeeSalary, {
@@ -435,4 +504,32 @@ export class EmployeeList
     as: 'leaveApplications',
   })
   declare leaveApplications?: LeaveApplication[];
+    @ForeignKey(() => SysOrganization)
+    @Column({
+            type: DataType.BIGINT,
+            allowNull: true,
+            field: 'org_id',
+            defaultValue: null,
+          })
+    declare orgId?: number | null;
+    @BelongsTo(() => SysOrganization, {
+            foreignKey: 'orgId',
+            targetKey: 'id',
+            as: 'organization',
+          })
+    declare organization?: SysOrganization;
+    @ForeignKey(() => Project)
+    @Column({
+            type: DataType.UUID,
+            allowNull: true,
+            field: 'project_id',
+            defaultValue: null,
+          })
+    declare projectId?: string | null;
+    @BelongsTo(() => Project, {
+            foreignKey: 'projectId',
+            targetKey: 'uuid',
+            as: 'project',
+          })
+    declare project?: Project;
 }

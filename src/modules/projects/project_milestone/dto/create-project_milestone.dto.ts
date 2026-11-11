@@ -1,7 +1,8 @@
 /* eslint-disable prettier/prettier */
 import { IsString, IsUUID, IsEnum, IsOptional, IsNumber, IsISO8601, Min, Max } from 'class-validator';
 import { Type } from 'class-transformer';
-import { MilestoneStatus } from 'src/database/models/projects/project_milestone/pr_project_milestone_model'; // ✅ সঠিক পাথ
+import { MilestoneStatus } from 'src/database/models/projects/project_milestone/pr_project_milestone_model';
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class CreateProjectMilestoneDto {
   @IsUUID()
@@ -42,4 +43,15 @@ export class CreateProjectMilestoneDto {
   @IsString()
   @IsOptional()
   addedBy?: string;
+    @ApiPropertyOptional({ example: 'user-uuid' })
+    @IsOptional()
+    @IsString()
+    createdBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Project UUID or ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 }

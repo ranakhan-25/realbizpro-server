@@ -56,4 +56,11 @@ export class CreateProjectSiteDto {
   @IsUUID()
   @IsNotEmpty({ message: 'Project is required' })
   projectId: string;
+    @ApiPropertyOptional({ example: 'user-uuid' })
+    @IsOptional()
+    @IsString()
+    createdBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
 }

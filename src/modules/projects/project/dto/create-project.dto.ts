@@ -121,4 +121,11 @@ export class CreateProjectDto {
   @IsOptional()
   @IsEnum(ProjectStatus)
   status?: ProjectStatus;
+    @ApiPropertyOptional({ example: 'user-uuid' })
+    @IsOptional()
+    @IsString()
+    createdBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
 }

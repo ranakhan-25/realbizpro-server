@@ -26,6 +26,8 @@ export class BonusService {
 
   async create(
     dto: CreateBonusDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<Bonus> {
     // same name + same festival date duplicate block
     // (same name different year allowed, e.g. Eid bonus every year)
@@ -45,14 +47,16 @@ export class BonusService {
 
     const bonus = await this.bonusModel.create({
       ...dto,
-      createdBy: dto.addedById,
+      createdBy: userId ? String(userId) : (dto as any).createdBy ?? (dto as any).addedById ?? null,
+        orgId: (dto as any).orgId ?? currentUser?.orgId ?? null,
+        projectId: (dto as any).projectId ?? currentUser?.projectId ?? null,
       status: dto.status ?? BonusStatus.ACTIVE,
     } as any);
 
     return this.findOne(bonus.uuid);
   }
 
-  async findAll(query: QueryBonusDto) {
+  async findAll(query: QueryBonusDto, currentUser?: any) {
     const {
       page = 1,
       limit = 10,
@@ -72,6 +76,14 @@ export class BonusService {
         : (page - 1) * limit;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
 
     if (search) {
       where.name = { [Op.iLike]: `%${search}%` };
@@ -105,7 +117,7 @@ export class BonusService {
         offset,
         order: [[sortBy, sortOrder]],
         paranoid: !withDeleted,
-      });
+      } as any);
 
     const totalPages =
       Math.ceil(count / limit) || 1;
@@ -137,7 +149,7 @@ export class BonusService {
     };
   }
 
-  async findOne(uuid: string): Promise<Bonus> {
+  async findOne(uuid: string, currentUser?: any): Promise<Bonus> {
     const bonus = await this.bonusModel.findOne({
       where: { uuid } as any,
     });
@@ -151,10 +163,7 @@ export class BonusService {
     return bonus;
   }
 
-  async update(
-    uuid: string,
-    dto: UpdateBonusDto,
-  ): Promise<Bonus> {
+  async update(uuid: string, dto: UpdateBonusDto, userId?: number, currentUser?: any): Promise<Bonus> {
     const bonus = await this.bonusModel.findOne({
       where: { uuid } as any,
     });
@@ -194,9 +203,7 @@ export class BonusService {
     return this.findOne(uuid);
   }
 
-  async remove(
-    uuid: string,
-  ): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const bonus = await this.bonusModel.findOne({
       where: { uuid } as any,
     });
@@ -210,7 +217,8 @@ export class BonusService {
     // status → inactive + soft delete
     await bonus.update({
       status: BonusStatus.INACTIVE,
-    });
+      deletedBy: userId ? String(userId) : null,
+    } as any);
 
     await bonus.destroy();
 
@@ -219,7 +227,7 @@ export class BonusService {
     };
   }
 
-  async restore(uuid: string): Promise<Bonus> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<Bonus> {
     const bonus = await this.bonusModel.findOne({
       where: { uuid } as any,
       paranoid: false,
@@ -241,7 +249,9 @@ export class BonusService {
     await bonus.restore();
     await bonus.update({
       status: BonusStatus.ACTIVE,
-    });
+      deletedBy: null,
+      updatedBy: userId ? String(userId) : null,
+    } as any);
 
     return this.findOne(uuid);
   }

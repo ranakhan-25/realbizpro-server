@@ -21,7 +21,8 @@ export class MaterialRequisitionItemService {
 
   async create(
     dto: CreateMaterialRequisitionItemDto,
-    userId?: string,
+    userId?: number,
+    currentUser?: any,
   ) {
     const parentWhere: WhereOptions<MaterialRequisition> =
       {
@@ -37,14 +38,15 @@ export class MaterialRequisitionItemService {
       );
     }
 
-    return this.itemModel.create({
+    return this.itemModel.create(({
       ...dto,
-      createdBy: userId,
-    });
+      createdBy: (userId ? String(userId) : null) as any,
+    }) as any);
   }
 
   async findAll(
     query: QueryMaterialRequisitionItemDto,
+    currentUser?: any,
   ) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
@@ -66,7 +68,7 @@ export class MaterialRequisitionItemService {
           }
         : {};
 
-    const filters = {
+    const filters: any = {
       ...where,
       ...(query.materialRequisitionId
         ? {
@@ -74,7 +76,8 @@ export class MaterialRequisitionItemService {
               query.materialRequisitionId,
           }
         : {}),
-    } as WhereOptions<MaterialRequisitionItem>;
+      ...(query.orgId ? { orgId: query.orgId } : {}),
+    };
 
     const { rows, count } =
       await this.itemModel.findAndCountAll({
@@ -102,11 +105,9 @@ export class MaterialRequisitionItemService {
     };
   }
 
-  async findOne(uuid: string) {
-    const where: WhereOptions<MaterialRequisitionItem> =
-      { uuid };
+  async findOne(uuid: string, currentUser?: any) {
     const item = await this.itemModel.findOne({
-      where: where as WhereOptions,
+      where: { uuid } as WhereOptions,
       include: [
         {
           model: this.requisitionModel,
@@ -125,7 +126,8 @@ export class MaterialRequisitionItemService {
   async update(
     uuid: string,
     dto: UpdateMaterialRequisitionItemDto,
-    userId?: string,
+    userId?: number,
+    currentUser?: any,
   ) {
     const item = await this.findOne(uuid);
 
@@ -145,15 +147,15 @@ export class MaterialRequisitionItemService {
       }
     }
 
-    return item.update({
+    return item.update(({
       ...dto,
-      updatedBy: userId,
-    });
+      updatedBy: (userId ? String(userId) : null) as any,
+    }) as any);
   }
 
-  async remove(uuid: string, userId?: string) {
+  async remove(uuid: string, userId?: number, currentUser?: any) {
     const item = await this.findOne(uuid);
-    await item.update({ deletedBy: userId });
+    await item.update(({ deletedBy: userId }) as any);
     await item.destroy();
     return {
       message:

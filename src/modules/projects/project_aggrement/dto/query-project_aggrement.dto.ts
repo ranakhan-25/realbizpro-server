@@ -12,6 +12,7 @@ import {
   AgreementType,
   AgreementStatus,
 } from 'src/database/models/projects/project_aggrement/pr_project_aggrement_model';
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class QueryProjectAgreementDto {
   @IsUUID()
@@ -49,4 +50,11 @@ export class QueryProjectAgreementDto {
   @IsNumberString()
   @IsOptional()
   limit?: string;
+    @ApiPropertyOptional({ description: 'Filter by organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Filter by project ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 }

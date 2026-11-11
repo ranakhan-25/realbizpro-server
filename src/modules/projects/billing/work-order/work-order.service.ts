@@ -227,7 +227,11 @@ export class WorkOrderService {
     return payload;
   }
 
-  async create(body: AnyPayload) {
+  async create(
+    body: AnyPayload,
+    userId?: number,
+    currentUser?: any,
+  ) {
     if (
       !body ||
       typeof body !== 'object' ||
@@ -269,7 +273,10 @@ export class WorkOrderService {
     return this.findOne(order.uuid);
   }
 
-  async findAll(query: AnyPayload) {
+  async findAll(
+    query: AnyPayload,
+    currentUser?: any,
+  ) {
     const page = Math.max(
       Number(query.page) || 1,
       1,
@@ -281,6 +288,12 @@ export class WorkOrderService {
     );
 
     const where: WhereOptions<WorkOrderAttributes> = {};
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      where.projectId = (query as any).projectId;
+    }
 
     if (query.projectId) {
       Object.assign(where, {
@@ -327,7 +340,7 @@ export class WorkOrderService {
     };
   }
 
-  async findOne(uuid: string) {
+  async findOne(uuid: string, currentUser?: any) {
     const row = await this.model.findOne({
       where: { uuid },
       include: this.includes,
@@ -342,7 +355,12 @@ export class WorkOrderService {
     return row;
   }
 
-  async update(uuid: string, body: AnyPayload) {
+  async update(
+    uuid: string,
+    body: AnyPayload,
+    userId?: number,
+    currentUser?: any,
+  ) {
     const row = await this.model.findOne({
       where: { uuid },
     });
@@ -403,7 +421,7 @@ export class WorkOrderService {
     return this.findOne(uuid);
   }
 
-  async remove(uuid: string) {
+  async remove(uuid: string, userId?: number, currentUser?: any) {
     const row = await this.model.findOne({
       where: { uuid },
     });

@@ -12,6 +12,7 @@ import {
   Min,
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class QueryServiceWorkRequisitionItemDto {
   @IsUUID()
@@ -111,4 +112,11 @@ export class QueryServiceWorkRequisitionItemDto {
   @IsBoolean()
   @IsOptional()
   withDeleted?: boolean = false;
+    @ApiPropertyOptional({ description: 'Filter by organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Filter by project ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 }

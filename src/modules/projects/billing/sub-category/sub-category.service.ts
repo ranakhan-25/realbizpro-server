@@ -26,7 +26,11 @@ export class SubCategoryService {
   ) {}
 
   // CREATE
-  async create(dto: CreateSubCategoryDto) {
+  async create(
+    dto: CreateSubCategoryDto,
+    userId?: number,
+    currentUser?: any,
+  ) {
     const existingSubCategory =
       await this.billingSubCategoryModel.findOne({
         where: {
@@ -41,7 +45,7 @@ export class SubCategoryService {
     }
 
     const subCategory =
-      await this.billingSubCategoryModel.create({
+      await this.billingSubCategoryModel.create(({
         type: dto.type,
         categoryId: dto.categoryId,
         code: dto.code,
@@ -49,13 +53,16 @@ export class SubCategoryService {
         description: dto.description,
         createdBy: dto.createdBy,
         updatedBy: dto.updatedBy,
-      });
+      }) as any);
 
     return subCategory;
   }
 
   // GET ALL
-  async findAll(query: QuerySubCategoryDto) {
+  async findAll(
+    query: QuerySubCategoryDto,
+    currentUser?: any,
+  ) {
     const page = Number(query.page) || 1;
     const limit = Number(query.limit) || 10;
 
@@ -65,6 +72,26 @@ export class SubCategoryService {
         : (page - 1) * limit;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      where.projectId = (query as any).projectId;
+    }
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      where.projectId = (query as any).projectId;
+    }
 
     // Type filter
     if (query.type) {
@@ -145,7 +172,7 @@ export class SubCategoryService {
   }
 
   // GET ONE
-  async findOne(uuid: string) {
+  async findOne(uuid: string, currentUser?: any) {
     const subCategory =
       await this.billingSubCategoryModel.findOne({
         where: {
@@ -176,6 +203,8 @@ export class SubCategoryService {
   async update(
     uuid: string,
     dto: UpdateSubCategoryDto,
+    userId?: number,
+    currentUser?: any,
   ) {
     const subCategory =
       await this.billingSubCategoryModel.findOne({
@@ -214,15 +243,15 @@ export class SubCategoryService {
       }
     }
 
-    await subCategory.update({
+    await subCategory.update(({
       ...dto,
-    });
+    }) as any);
 
     return subCategory;
   }
 
   // DELETE
-  async remove(uuid: string) {
+  async remove(uuid: string, userId?: number, currentUser?: any) {
     const subCategory =
       await this.billingSubCategoryModel.findOne({
         where: {
@@ -242,7 +271,7 @@ export class SubCategoryService {
   }
 
   // RESTORE
-  async restore(uuid: string) {
+  async restore(uuid: string, userId?: number, currentUser?: any) {
     const subCategory =
       await this.billingSubCategoryModel.findOne({
         where: {

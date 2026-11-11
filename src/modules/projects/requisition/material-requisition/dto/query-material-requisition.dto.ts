@@ -10,4 +10,11 @@ export class QueryMaterialRequisitionDto extends PaginateDto {
   @IsOptional()
   @IsString()
   declare search?: string;
+    @ApiPropertyOptional({ description: 'Filter by organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Filter by project ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 }

@@ -31,7 +31,7 @@ export class FlatLandBookingService {
     private readonly sequelize: Sequelize,
   ) {}
 
-  async create(dto: CreateFlatLandBookingDto, userId?: number) {
+  async create(dto: CreateFlatLandBookingDto, userId?: number, currentUser?: any) {
     const uuid = await this.sequelize.transaction(async (transaction) => {
       let project = dto.projectId
         ? await this.projectModel.findOne({
@@ -110,7 +110,10 @@ export class FlatLandBookingService {
     return this.findOne(uuid);
   }
 
-  async findAll(query: QueryFlatLandBookingDto) {
+  async findAll(
+    query: QueryFlatLandBookingDto,
+    currentUser?: any,
+  ) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const search = query.search?.trim();
@@ -159,6 +162,7 @@ export class FlatLandBookingService {
   async findReport(
     report: 'sales' | 'collection' | 'aging' | 'installments',
     query: QueryFlatLandBookingDto,
+    currentUser?: any,
   ) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
@@ -185,9 +189,17 @@ export class FlatLandBookingService {
           ],
         }
       : {};
-    const where: WhereOptions<FlatLandBooking> = {
+    const where: any = {
       [Op.and]: [reportWhere, searchWhere],
     };
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
     const { rows, count } = await this.bookingModel.findAndCountAll({
       where: where as WhereOptions<FlatLandBooking>,
       include: [
@@ -204,7 +216,7 @@ export class FlatLandBookingService {
     };
   }
 
-  async findPlotDistribution(query: QueryFlatLandBookingDto) {
+  async findPlotDistribution(query: QueryFlatLandBookingDto, currentUser?: any) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const search = query.search?.trim();
@@ -237,7 +249,7 @@ export class FlatLandBookingService {
     };
   }
 
-  async findOne(uuid: string) {
+  async findOne(uuid: string, currentUser?: any) {
     const booking = await this.bookingModel.findOne({
       where: { uuid } as WhereOptions<FlatLandBooking>,
       include: [
@@ -251,7 +263,7 @@ export class FlatLandBookingService {
     return booking;
   }
 
-  async update(uuid: string, dto: UpdateFlatLandBookingDto, userId?: number) {
+  async update(uuid: string, dto: UpdateFlatLandBookingDto, userId?: number, currentUser?: any) {
     await this.sequelize.transaction(async (transaction) => {
       const booking = await this.bookingModel.findOne({
         where: { uuid } as WhereOptions<FlatLandBooking>,
@@ -304,7 +316,7 @@ export class FlatLandBookingService {
     return this.findOne(uuid);
   }
 
-  async remove(uuid: string) {
+  async remove(uuid: string, userId?: number, currentUser?: any) {
     await this.sequelize.transaction(async (transaction) => {
       const booking = await this.bookingModel.findOne({
         where: { uuid } as WhereOptions<FlatLandBooking>,
@@ -328,7 +340,7 @@ export class FlatLandBookingService {
     return { message: `Flat/Land booking "${uuid}" deleted successfully` };
   }
 
-  async restore(uuid: string) {
+  async restore(uuid: string, userId?: number, currentUser?: any) {
     await this.sequelize.transaction(async transaction => {
       const booking = await this.bookingModel.findOne({ where: { uuid } as WhereOptions<FlatLandBooking>, paranoid: false, transaction });
       if (!booking) throw new NotFoundException(`Flat/Land booking "${uuid}" not found`);
@@ -337,7 +349,7 @@ export class FlatLandBookingService {
       if (!property) throw new NotFoundException(`Booked property "${booking.flatLandId}" not found`);
       if (property.status !== FlatLandStatus.AVAILABLE) throw new ConflictException('The property is no longer available for this booking');
       await booking.restore({ transaction });
-      await property.update({ status: FlatLandStatus.BOOKED, customerName: booking.customerName }, { transaction });
+      await property.update({ status: FlatLandStatus.BOOKED, customerName: booking.customerName } as any, { transaction });
     });
     return this.findOne(uuid);
   }

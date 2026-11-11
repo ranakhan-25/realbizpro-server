@@ -17,7 +17,7 @@ export class ExpenseService {
     private sequelize: Sequelize,
   ) {}
 
-  async create(createExpenseDto: CreateExpenseDto) {
+  async create(createExpenseDto: CreateExpenseDto, userId?: number, currentUser?: any) {
     const t = await this.sequelize.transaction();
 
     try {
@@ -31,6 +31,9 @@ export class ExpenseService {
       // 1. Save Master (Expense)
       const expense = await this.expenseModel.create(
         {
+          createdBy: userId ? String(userId) : (expenseData as any).createdBy ?? null,
+          orgId: (expenseData as any).orgId ?? currentUser?.orgId ?? null,
+          projectId: (expenseData as any).projectId ?? currentUser?.projectId ?? null,
           ...expenseData,
           voucherNo,
           date: new Date(expenseData.date),
@@ -82,10 +85,14 @@ export class ExpenseService {
     }
   }
 
-  async findAll(query: QueryExpenseDto) {
+  async findAll(query: QueryExpenseDto, currentUser?: any) {
     const page = Number(query.page || 1);
     const limit = Number(query.limit || 10);
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) where.orgId = effectiveOrgId;
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) where.projectId = effectiveProjectId;
 
     if (query.search) {
       where[Op.or] = [
@@ -128,7 +135,7 @@ export class ExpenseService {
     };
   }
 
-  async findOne(uuid: string): Promise<Expense> {
+  async findOne(uuid: string, currentUser?: any): Promise<Expense> {
     const expense = await this.expenseModel.findOne({
       where: { uuid },
     });
@@ -140,7 +147,7 @@ export class ExpenseService {
     return expense;
   }
 
-  async update(uuid: string, dto: UpdateExpenseDto): Promise<Expense> {
+  async update(uuid: string, dto: UpdateExpenseDto, userId?: number, currentUser?: any): Promise<Expense> {
     const transaction = await this.sequelize.transaction();
     try {
       const expense = await this.expenseModel.findOne({ where: { uuid }, transaction });
@@ -171,17 +178,18 @@ export class ExpenseService {
     }
   }
 
-  async remove(uuid: string): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     await this.findOne(uuid);
-    await this.expenseModel.destroy({ where: { uuid } });
+    const exp = await this.findOne(uuid, currentUser); await exp.update({ deletedBy: userId ? String(userId) : null } as any); await exp.destroy();
     return { message: `Expense ${uuid} deleted successfully` };
   }
 
-  async restore(uuid: string): Promise<Expense> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<Expense> {
     const expense = await this.expenseModel.findOne({ where: { uuid }, paranoid: false });
     if (!expense) throw new NotFoundException(`Expense ${uuid} not found`);
     if (!expense.deletedAt) throw new BadRequestException('Expense is not deleted');
     await expense.restore();
+      await expense.update({ deletedBy: null, updatedBy: userId ? String(userId) : null } as any);
     return this.findOne(uuid);
   }
 }

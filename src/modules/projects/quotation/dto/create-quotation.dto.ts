@@ -10,6 +10,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class QuotationItemDto {
   @IsString()
@@ -118,4 +119,11 @@ export class CreateQuotationDto {
   @IsOptional()
   @IsString()
   addedById?: string;
+    @ApiPropertyOptional({ example: 'user-uuid' })
+    @IsOptional()
+    @IsString()
+    createdBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
 }

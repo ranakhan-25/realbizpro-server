@@ -5,6 +5,8 @@ import { AllowanceType } from '../models/hrm/employee/hrm_payment_enum';
 import { PaymentType } from '../models/hrm/employee/hrm_payment_enum';
 
 import type { EmployeeList } from '../models/hrm/employee/hrm_employeeList_model';
+import type { SysOrganization } from '../models/system/sys_organization.model';
+import type { Project } from '../models/projects/project/pr_project.model';
 
 export interface AllowanceAttributes {
   id: number;
@@ -22,9 +24,13 @@ export interface AllowanceAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
+  projectId?: string | null;
 
   // Relations
   employee?: EmployeeList;
+  organization?: SysOrganization;
+  project?: Project;
 }
 
 export interface AllowanceCreationAttributes {
@@ -38,6 +44,8 @@ export interface AllowanceCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
+  projectId?: string | null;
 }
 
 export type AllowanceUpdateAttributes = Partial<AllowanceCreationAttributes>;
@@ -45,4 +53,6 @@ export type AllowanceUpdateAttributes = Partial<AllowanceCreationAttributes>;
 // Helper type for including relations
 export interface AllowanceWithRelations extends AllowanceAttributes {
   employee?: EmployeeList;
+  organization?: SysOrganization;
+  project?: Project;
 }

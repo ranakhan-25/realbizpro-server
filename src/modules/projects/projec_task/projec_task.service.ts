@@ -16,7 +16,11 @@ export class ProjectTaskService {
     private readonly taskModel: typeof ProjectTask,
   ) {}
 
-  async create(createDto: CreateProjectTaskDto): Promise<ProjectTask> {
+  async create(
+    createDto: CreateProjectTaskDto,
+    userId?: number,
+    currentUser?: any,
+  ): Promise<ProjectTask> {
     try {
       return await this.taskModel.create(createDto as any);
     } catch (error) {
@@ -27,7 +31,10 @@ export class ProjectTaskService {
     }
   }
 
-  async findAll(query: QueryProjectTaskDto) {
+  async findAll(
+    query: QueryProjectTaskDto,
+    currentUser?: any,
+  ) {
     const { page = '1', limit = '10', search, ...filters } = query;
     
     const pageNum = parseInt(page, 10);
@@ -35,6 +42,18 @@ export class ProjectTaskService {
     const offset = (pageNum - 1) * limitNum;
 
     const whereClause: any = {};
+    if ((query as any)?.orgId) {
+      whereClause.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      whereClause.projectId = (query as any).projectId;
+    }
+    if ((query as any)?.orgId) {
+      whereClause.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      whereClause.projectId = (query as any).projectId;
+    }
     Object.keys(filters).forEach((key) => {
       const value = filters[key];
       if (value !== undefined && value !== null && value !== '') {
@@ -69,7 +88,7 @@ export class ProjectTaskService {
   }
 
   // ✅ Fix: Find by uuid instead of uid
-  async findOne(uuid: string): Promise<ProjectTask> {
+  async findOne(uuid: string, currentUser?: any): Promise<ProjectTask> {
     const task = await this.taskModel.findOne({ where: { uuid } });
     if (!task) {
       throw new NotFoundException(`Task with UUID ${uuid} not found`);
@@ -78,30 +97,32 @@ export class ProjectTaskService {
   }
 
   // ✅ Fix: Update by uuid
-  async update(uuid: string, updateDto: UpdateProjectTaskDto): Promise<ProjectTask> {
+  async update(
+    uuid: string,
+    updateDto: UpdateProjectTaskDto,
+    userId?: number,
+    currentUser?: any,
+  ): Promise<ProjectTask> {
     const task = await this.findOne(uuid);
     const { dueDate, ...attributes } = updateDto;
 
-    return task.update({
+    return task.update(({
       ...attributes,
       ...(dueDate !== undefined ? { dueDate: new Date(dueDate) } : {}),
-    });
+    }) as any);
   }
 
   // ✅ Fix: Remove by uuid
-  async remove(uuid: string, deletedBy?: string): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const task = await this.findOne(uuid);
     
-    if (deletedBy) {
-      await task.update({ deletedBy });
-    }
-    
+    await task.update({ deletedBy: userId ? String(userId) : null } as any);
     await task.destroy();
     return { message: 'Task deleted successfully' };
   }
 
   // ✅ Fix: Restore by uuid
-  async restore(uuid: string): Promise<ProjectTask> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<ProjectTask> {
     const task = await this.taskModel.findOne({ 
       where: { uuid },
       paranoid: false 
@@ -116,6 +137,7 @@ export class ProjectTaskService {
     }
 
     await task.restore();
+    await task.update({ deletedBy: null, updatedBy: userId ? String(userId) : null } as any);
     return task;
   }
 }

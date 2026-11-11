@@ -93,4 +93,11 @@ export class CreateHolidayDto {
   @IsOptional()
   @IsEnum(HolidayStatus)
   status?: HolidayStatus;
+    @ApiPropertyOptional({ example: 'user-uuid' })
+    @IsOptional()
+    @IsString()
+    createdBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
 }

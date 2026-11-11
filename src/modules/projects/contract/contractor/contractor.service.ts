@@ -27,6 +27,8 @@ export class ContractorService {
 
   async create(
     dto: CreateContractorDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<Contractor> {
     const existing =
       await this.contractorModel.findOne({
@@ -42,7 +44,7 @@ export class ContractorService {
     }
 
     const contractor =
-      await this.contractorModel.create({
+      await this.contractorModel.create(({
         code: dto.code,
         name: dto.name,
         businessName: dto.businessName,
@@ -55,14 +57,19 @@ export class ContractorService {
           : null,
         under: dto.under,
         addedById: dto.addedById,
+        createdBy: dto.createdBy ?? dto.addedById,
+        orgId: dto.orgId,
         status:
           dto.status ?? ContractorStatus.ACTIVE,
-      });
+      }) as any);
 
     return this.findOne(contractor.uuid);
   }
 
-  async findAll(query: QueryContractorDto) {
+  async findAll(
+    query: QueryContractorDto,
+    currentUser?: any,
+  ) {
     const {
       page = 1,
       limit = 10,
@@ -81,6 +88,26 @@ export class ContractorService {
         : (page - 1) * limit;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      where.projectId = (query as any).projectId;
+    }
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      where.projectId = (query as any).projectId;
+    }
 
     if (search) {
       where[Op.or] = [
@@ -158,6 +185,7 @@ export class ContractorService {
 
   async findOne(
     uuid: string,
+    currentUser?: any,
   ): Promise<Contractor> {
     const contractor =
       await this.contractorModel.findOne({
@@ -176,6 +204,8 @@ export class ContractorService {
   async update(
     uuid: string,
     dto: UpdateContractorDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<Contractor> {
     const contractor =
       await this.contractorModel.findOne({
@@ -219,9 +249,7 @@ export class ContractorService {
     return this.findOne(uuid);
   }
 
-  async remove(
-    uuid: string,
-  ): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const contractor =
       await this.contractorModel.findOne({
         where: { uuid } as any,
@@ -234,9 +262,9 @@ export class ContractorService {
     }
 
     // status → inactive + soft delete
-    await contractor.update({
+    await contractor.update(({
       status: ContractorStatus.INACTIVE,
-    });
+    }) as any);
 
     await contractor.destroy();
 
@@ -245,9 +273,7 @@ export class ContractorService {
     };
   }
 
-  async restore(
-    uuid: string,
-  ): Promise<Contractor> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<Contractor> {
     const contractor =
       await this.contractorModel.findOne({
         where: { uuid } as any,
@@ -268,9 +294,9 @@ export class ContractorService {
 
     // status → active + restore
     await contractor.restore();
-    await contractor.update({
+    await contractor.update(({
       status: ContractorStatus.ACTIVE,
-    });
+    }) as any);
 
     return this.findOne(uuid);
   }

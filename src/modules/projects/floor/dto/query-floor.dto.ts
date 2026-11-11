@@ -2,6 +2,7 @@
 
 import { IsOptional, IsString, IsInt, Min, IsBoolean } from 'class-validator';
 import { Type } from 'class-transformer';
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class QueryFloorDto {
   @IsOptional()
@@ -50,4 +51,11 @@ export class QueryFloorDto {
   @Type(() => Boolean)
   @IsBoolean()
   withDeleted?: boolean = false;
+    @ApiPropertyOptional({ description: 'Filter by organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Filter by project ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 }

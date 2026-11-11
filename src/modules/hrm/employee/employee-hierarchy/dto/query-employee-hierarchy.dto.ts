@@ -58,4 +58,11 @@ export class QueryEmployeeHierarchyDto {
   @IsOptional()
   @IsUUID('all')
   sectionId?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Project UUID or ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 }

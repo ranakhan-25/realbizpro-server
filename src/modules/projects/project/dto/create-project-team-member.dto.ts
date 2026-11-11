@@ -26,4 +26,15 @@ export class CreateProjectTeamMemberDto {
   @MaxLength(50)
   @Transform(({ value }) => (value === '' ? null : value))
   phone?: string | null;
+    @ApiPropertyOptional({ example: 'user-uuid' })
+    @IsOptional()
+    @IsString()
+    createdBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Project UUID or ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 }

@@ -15,6 +15,7 @@ import type { ProcurementGrn } from '../models/procurement/grn/pr_grn.model';
 import type { ProcurementPurchaseBill } from '../models/procurement/purchase-bill/pr_purchase_bill.model';
 import type { ProcurementAssetGrn } from '../models/procurement/grn/pr_asset_grn.model';
 import type { ProcurementAssetPurchaseBill } from '../models/procurement/purchase-bill/pr_asset_purchase_bill.model';
+import type { SysOrganization } from '../models/system/sys_organization.model';
 
 export interface ProjectTypeAttributes {
   id: number;
@@ -24,9 +25,10 @@ export interface ProjectTypeAttributes {
   deletedAt?: Date;
   code: string;
   name: string;
-  createdBy?: number | null;
-  updatedBy?: number | null;
-  deletedBy?: number | null;
+  createdBy?: string | null;
+  updatedBy?: any | null;
+  deletedBy?: string | null;
+  orgId?: number | null;
 
   // Relations
   shareAssignments?: ProjectShareAssignment[];
@@ -43,14 +45,16 @@ export interface ProjectTypeAttributes {
   procurementPurchaseBills?: ProcurementPurchaseBill[];
   procurementAssetGrns?: ProcurementAssetGrn[];
   procurementAssetPurchaseBills?: ProcurementAssetPurchaseBill[];
+  organization?: SysOrganization;
 }
 
 export interface ProjectTypeCreationAttributes {
   code: string;
   name: string;
-  createdBy?: number | null;
-  updatedBy?: number | null;
-  deletedBy?: number | null;
+  createdBy?: string | null;
+  updatedBy?: any | null;
+  deletedBy?: string | null;
+  orgId?: number | null;
 }
 
 export type ProjectTypeUpdateAttributes = Partial<ProjectTypeCreationAttributes>;
@@ -71,4 +75,5 @@ export interface ProjectTypeWithRelations extends ProjectTypeAttributes {
   procurementPurchaseBills?: ProcurementPurchaseBill[];
   procurementAssetGrns?: ProcurementAssetGrn[];
   procurementAssetPurchaseBills?: ProcurementAssetPurchaseBill[];
+  organization?: SysOrganization;
 }

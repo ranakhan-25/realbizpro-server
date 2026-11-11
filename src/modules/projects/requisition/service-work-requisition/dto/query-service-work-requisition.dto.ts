@@ -14,6 +14,7 @@ import {
 import { Transform, Type } from 'class-transformer';
 
 import { ServiceWorkRequisitionStatus } from 'src/database/models/projects/service-work-requisition/pr_service_work_requisition.model';
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class QueryServiceWorkRequisitionDto {
   @IsDateString()
@@ -113,4 +114,11 @@ export class QueryServiceWorkRequisitionDto {
   @IsBoolean()
   @IsOptional()
   withDeleted?: boolean = false;
+    @ApiPropertyOptional({ description: 'Filter by organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Filter by project ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 }

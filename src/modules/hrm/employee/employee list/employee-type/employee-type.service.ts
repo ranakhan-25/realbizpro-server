@@ -25,6 +25,8 @@ export class EmployeeTypeService {
 
   async create(
     dto: CreateEmployeeTypeDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<EmployeeType> {
     // name column unique, tai soft-deleted gulo-o check kori
     const existing =
@@ -44,15 +46,17 @@ export class EmployeeTypeService {
     const record =
       await this.employeeTypeModel.create({
         ...dto,
-        createdBy: dto.addedById,
+        createdBy: userId ? String(userId) : (dto as any).createdBy ?? (dto as any).addedById ?? null,
+        orgId: (dto as any).orgId ?? currentUser?.orgId ?? null,
+        projectId: (dto as any).projectId ?? currentUser?.projectId ?? null,
         status:
           dto.status ?? EmployeeTypeStatus.ACTIVE,
-      });
+      } as any);
 
     return this.findOne(record.uuid);
   }
 
-  async findAll(query: QueryEmployeeTypeDto) {
+  async findAll(query: QueryEmployeeTypeDto, currentUser?: any) {
     const {
       page = 1,
       limit = 10,
@@ -70,6 +74,14 @@ export class EmployeeTypeService {
         : (page - 1) * limit;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
 
     if (search) {
       where.name = { [Op.like]: `%${search}%` };
@@ -120,9 +132,7 @@ export class EmployeeTypeService {
     };
   }
 
-  async findOne(
-    uuid: string,
-  ): Promise<EmployeeType> {
+  async findOne(uuid: string, currentUser?: any): Promise<EmployeeType> {
     const record =
       await this.employeeTypeModel.findOne({
         where: { uuid } as any,
@@ -137,10 +147,7 @@ export class EmployeeTypeService {
     return record;
   }
 
-  async update(
-    uuid: string,
-    dto: UpdateEmployeeTypeDto,
-  ): Promise<EmployeeType> {
+  async update(uuid: string, dto: UpdateEmployeeTypeDto, userId?: number, currentUser?: any): Promise<EmployeeType> {
     const record =
       await this.employeeTypeModel.findOne({
         where: { uuid } as any,
@@ -175,14 +182,12 @@ export class EmployeeTypeService {
       ...dto,
       updatedBy:
         dto.addedById ?? record.updatedBy,
-    });
+    } as any);
 
     return this.findOne(uuid);
   }
 
-  async remove(
-    uuid: string,
-  ): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const record =
       await this.employeeTypeModel.findOne({
         where: { uuid } as any,
@@ -197,7 +202,8 @@ export class EmployeeTypeService {
     // status → inactive + soft delete
     await record.update({
       status: EmployeeTypeStatus.INACTIVE,
-    });
+      deletedBy: userId ? String(userId) : null,
+    } as any);
 
     await record.destroy();
 
@@ -206,9 +212,7 @@ export class EmployeeTypeService {
     };
   }
 
-  async restore(
-    uuid: string,
-  ): Promise<EmployeeType> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<EmployeeType> {
     const record =
       await this.employeeTypeModel.findOne({
         where: { uuid } as any,
@@ -231,7 +235,9 @@ export class EmployeeTypeService {
     await record.restore();
     await record.update({
       status: EmployeeTypeStatus.ACTIVE,
-    });
+      deletedBy: null,
+      updatedBy: userId ? String(userId) : null,
+    } as any);
 
     return this.findOne(uuid);
   }

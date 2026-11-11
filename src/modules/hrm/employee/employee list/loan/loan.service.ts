@@ -60,6 +60,8 @@ export class LoanService {
 
   async create(
     dto: CreateLoanDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<Loan> {
     await this.ensureEmployeeExists(
       dto.employeeId,
@@ -71,13 +73,15 @@ export class LoanService {
 
     const record = await this.loanModel.create({
       ...dto,
-      createdBy: dto.addedById,
-    });
+      createdBy: userId ? String(userId) : (dto as any).createdBy ?? (dto as any).addedById ?? null,
+        orgId: (dto as any).orgId ?? currentUser?.orgId ?? null,
+        projectId: (dto as any).projectId ?? currentUser?.projectId ?? null,
+    } as any);
 
     return this.findOne(record.uuid);
   }
 
-  async findAll(query: QueryLoanDto) {
+  async findAll(query: QueryLoanDto, currentUser?: any) {
     const {
       page = 1,
       limit = 10,
@@ -97,6 +101,14 @@ export class LoanService {
         : (page - 1) * limit;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
 
     if (employeeId) {
       where.employeeId = employeeId;
@@ -160,7 +172,7 @@ export class LoanService {
     };
   }
 
-  async findOne(uuid: string): Promise<Loan> {
+  async findOne(uuid: string, currentUser?: any): Promise<Loan> {
     const record = await this.loanModel.findOne({
       where: { uuid } as any,
     });
@@ -174,10 +186,7 @@ export class LoanService {
     return record;
   }
 
-  async update(
-    uuid: string,
-    dto: UpdateLoanDto,
-  ): Promise<Loan> {
+  async update(uuid: string, dto: UpdateLoanDto, userId?: number, currentUser?: any): Promise<Loan> {
     const record = await this.loanModel.findOne({
       where: { uuid } as any,
     });
@@ -208,14 +217,12 @@ export class LoanService {
       ...dto,
       updatedBy:
         dto.addedById ?? record.updatedBy,
-    });
+    } as any);
 
     return this.findOne(uuid);
   }
 
-  async remove(
-    uuid: string,
-  ): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const record = await this.loanModel.findOne({
       where: { uuid } as any,
     });
@@ -227,6 +234,7 @@ export class LoanService {
     }
 
     // soft delete
+    await record.update({ deletedBy: userId ? String(userId) : null } as any);
     await record.destroy();
 
     return {
@@ -234,7 +242,7 @@ export class LoanService {
     };
   }
 
-  async restore(uuid: string): Promise<Loan> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<Loan> {
     const record = await this.loanModel.findOne({
       where: { uuid } as any,
       paranoid: false,
@@ -253,6 +261,7 @@ export class LoanService {
     }
 
     await record.restore();
+    await record.update({ deletedBy: null, updatedBy: userId ? String(userId) : null } as any);
 
     return this.findOne(uuid);
   }

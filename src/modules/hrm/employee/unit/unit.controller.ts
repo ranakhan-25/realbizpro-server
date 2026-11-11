@@ -1,3 +1,5 @@
+/* eslint-disable prettier/prettier */
+
 import {
   Body,
   Controller,
@@ -7,21 +9,28 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
-
 import {
   ApiBearerAuth,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-
 import { UnitService } from './unit.service';
 import { CreateUnitDto } from './dto/create-unit.dto';
 import { QueryUnitDto } from './dto/query-unit.dto';
 import { UpdateUnitDto } from './dto/update-unit.dto';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import {
+  CurrentUser,
+  CurrentUserId,
+} from 'src/common/decorators/auth.decorators';
 
 @ApiTags('HRM | Employee | Unit')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('unit')
 export class UnitController {
   constructor(
@@ -29,65 +38,94 @@ export class UnitController {
   ) {}
 
   @Post()
-  @ApiOperation({
-    summary: 'Create a new unit',
-  })
+  @Permissions('create_unit')
+  @ApiOperation({ summary: 'Create unit' })
   create(
-    @Body()
-    createUnitDto: CreateUnitDto,
+    @Body() dto: CreateUnitDto,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.unitService.create(createUnitDto);
+    return this.unitService.create(
+      dto,
+      userId,
+      currentUser,
+    );
   }
 
   @Get()
+  @Permissions('list_unit')
   @ApiOperation({
     summary: 'Get all units (paginated)',
   })
   findAll(
-    @Query()
-    query: QueryUnitDto,
+    @Query() query: QueryUnitDto,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.unitService.findAll(query);
+    return this.unitService.findAll(
+      query,
+      currentUser,
+    );
   }
 
   @Get(':uuid')
-  @ApiOperation({
-    summary: 'Get unit by UUID',
-  })
-  findOne(@Param('uuid') uuid: string) {
-    return this.unitService.findOne(uuid);
+  @Permissions('read_unit')
+  @ApiOperation({ summary: 'Get unit by UUID' })
+  findOne(
+    @Param('uuid') uuid: string,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.unitService.findOne(
+      uuid,
+      currentUser,
+    );
   }
 
   @Patch(':uuid')
-  @ApiOperation({
-    summary: 'Update unit',
-  })
+  @Permissions('update_unit')
+  @ApiOperation({ summary: 'Update unit' })
   update(
     @Param('uuid') uuid: string,
-    @Body()
-    updateUnitDto: UpdateUnitDto,
+    @Body() dto: UpdateUnitDto,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
   ) {
     return this.unitService.update(
       uuid,
-      updateUnitDto,
+      dto,
+      userId,
+      currentUser,
     );
   }
 
   @Delete(':uuid')
-  @ApiOperation({
-    summary:
-      'Soft delete unit (status → inactive)',
-  })
-  remove(@Param('uuid') uuid: string) {
-    return this.unitService.remove(uuid);
+  @Permissions('delete_unit')
+  @ApiOperation({ summary: 'Delete unit' })
+  remove(
+    @Param('uuid') uuid: string,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.unitService.remove(
+      uuid,
+      userId,
+      currentUser,
+    );
   }
 
   @Patch(':uuid/restore')
+  @Permissions('update_unit')
   @ApiOperation({
-    summary:
-      'Restore soft-deleted unit (status → active)',
+    summary: 'Restore soft-deleted unit',
   })
-  restore(@Param('uuid') uuid: string) {
-    return this.unitService.restore(uuid);
+  restore(
+    @Param('uuid') uuid: string,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.unitService.restore(
+      uuid,
+      userId,
+      currentUser,
+    );
   }
 }

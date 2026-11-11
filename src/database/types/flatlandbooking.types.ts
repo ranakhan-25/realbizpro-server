@@ -3,6 +3,7 @@
 
 import type { Project } from '../models/projects/project/pr_project.model';
 import type { FlatLand } from '../models/projects/flatland/pr_flatland.model';
+import type { SysOrganization } from '../models/system/sys_organization.model';
 
 export interface FlatLandBookingAttributes {
   id: number;
@@ -30,10 +31,12 @@ export interface FlatLandBookingAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
 
   // Relations
   project?: Project;
   flatLand?: FlatLand;
+  organization?: SysOrganization;
 }
 
 export interface FlatLandBookingCreationAttributes {
@@ -57,6 +60,7 @@ export interface FlatLandBookingCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
 }
 
 export type FlatLandBookingUpdateAttributes = Partial<FlatLandBookingCreationAttributes>;
@@ -65,4 +69,5 @@ export type FlatLandBookingUpdateAttributes = Partial<FlatLandBookingCreationAtt
 export interface FlatLandBookingWithRelations extends FlatLandBookingAttributes {
   project?: Project;
   flatLand?: FlatLand;
+  organization?: SysOrganization;
 }

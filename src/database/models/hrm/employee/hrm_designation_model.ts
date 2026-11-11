@@ -16,6 +16,7 @@ import type {
 import { Department } from './hrm_department_model';
 import { EmployeeList } from './hrm_employeeList_model';
 import { Increment } from './hrm_increment_model';
+import { SysOrganization } from "src/database/models/system/sys_organization.model";
 
 export enum DesignationStatus {
   ACTIVE = 'active',
@@ -23,17 +24,28 @@ export enum DesignationStatus {
 }
 
 @Table({
-  tableName: 'designation',
+  tableName: 'hrm_designation',
+  underscored: true,
   timestamps: true,
   paranoid: true,
-  underscored: false,
   indexes: [
+<<<<<<< HEAD
     { name: 'Designation_name_idx', fields: ['name'] },
     { name: 'Designation_departmentId_idx', fields: ['departmentId'] },
+=======
+    {
+      name: 'Designation_name_idx',
+      fields: ['name'],
+    },
+    {
+      name: 'Designation_departmentId_idx',
+      fields: ['department_id'],
+    },
+>>>>>>> d405268836876758f11f087297f97e00b7c1a623
     {
       name: 'Designation_departmentId_name_unique',
       unique: true,
-      fields: ['departmentId', 'name'],
+      fields: ['department_id', 'name'],
     },
     { name: 'Designation_deletedAt_idx', fields: ['deleted_at'] },
   ],
@@ -56,7 +68,7 @@ export class Designation
     type: DataType.UUID,
     allowNull: false,
     references: {
-      model: 'department',
+      model: 'hrm_department',
       key: 'uuid',
     },
   })
@@ -72,6 +84,7 @@ export class Designation
   @Column({
     type: DataType.STRING,
     allowNull: true,
+    field: 'added_by_id',
   })
   declare addedById?: string;
 
@@ -114,4 +127,18 @@ export class Designation
     as: 'increments',
   })
   declare increments?: Increment[];
+    @ForeignKey(() => SysOrganization)
+    @Column({
+            type: DataType.BIGINT,
+            allowNull: true,
+            field: 'org_id',
+            defaultValue: null,
+          })
+    declare orgId?: number | null;
+    @BelongsTo(() => SysOrganization, {
+            foreignKey: 'orgId',
+            targetKey: 'id',
+            as: 'organization',
+          })
+    declare organization?: SysOrganization;
 }

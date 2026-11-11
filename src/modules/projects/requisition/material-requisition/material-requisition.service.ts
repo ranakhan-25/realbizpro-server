@@ -32,7 +32,8 @@ export class MaterialRequisitionService {
 
   async create(
     dto: CreateMaterialRequisitionDto,
-    userId?: string,
+    userId?: number,
+    currentUser?: any,
   ) {
     const uuid = await this.sequelize.transaction(
       async (transaction) => {
@@ -41,20 +42,20 @@ export class MaterialRequisitionService {
           await this.requisitionModel.create(
             {
               ...requisitionData,
-              createdBy: userId,
-              addedById: userId,
+              createdBy: (userId ? String(userId) : null) as any,
+              addedById: userId ? String(userId) : null as any,
             },
             { transaction },
           );
 
         if (items?.length) {
           await this.itemModel.bulkCreate(
-            items.map((item) => ({
+            items.map((item: any) => ({
               ...item,
               materialRequisitionId:
                 requisition.uuid,
-              createdBy: userId,
-            })),
+              createdBy: (userId ? String(userId) : null) as any,
+            })) as any,
             { transaction },
           );
         }
@@ -68,10 +69,11 @@ export class MaterialRequisitionService {
 
   async findAll(
     query: QueryMaterialRequisitionDto,
+    currentUser?: any,
   ) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
-    const where: WhereOptions<MaterialRequisition> =
+    const where: any =
       query.search
         ? {
             [Op.or]: [
@@ -93,6 +95,8 @@ export class MaterialRequisitionService {
             ],
           }
         : {};
+    if (query.orgId) where.orgId = query.orgId;
+    if (query.projectId) where.projectId = query.projectId;
 
     const { rows, count } =
       await this.requisitionModel.findAndCountAll(
@@ -134,12 +138,10 @@ export class MaterialRequisitionService {
     };
   }
 
-  async findOne(uuid: string) {
-    const where: WhereOptions<MaterialRequisition> =
-      { uuid };
+  async findOne(uuid: string, currentUser?: any) {
     const requisition =
       await this.requisitionModel.findOne({
-        where: where as WhereOptions,
+        where: { uuid } as WhereOptions,
         include: [
           {
             model: this.projectModel,
@@ -172,7 +174,8 @@ export class MaterialRequisitionService {
   async update(
     uuid: string,
     dto: UpdateMaterialRequisitionDto,
-    userId?: string,
+    userId?: number,
+    currentUser?: any,
   ) {
     await this.sequelize.transaction(
       async (transaction) => {
@@ -194,7 +197,7 @@ export class MaterialRequisitionService {
         await requisition.update(
           {
             ...requisitionData,
-            updatedBy: userId,
+            updatedBy: (userId ? String(userId) : null) as any,
           },
           { transaction },
         );
@@ -211,11 +214,11 @@ export class MaterialRequisitionService {
 
           if (items.length) {
             await this.itemModel.bulkCreate(
-              items.map((item) => ({
+              items.map((item: any) => ({
                 ...item,
                 materialRequisitionId: uuid,
-                createdBy: userId,
-              })),
+                createdBy: (userId ? String(userId) : null) as any,
+              })) as any,
               { transaction },
             );
           }
@@ -226,7 +229,7 @@ export class MaterialRequisitionService {
     return this.findOne(uuid);
   }
 
-  async remove(uuid: string, userId?: string) {
+  async remove(uuid: string, userId?: number, currentUser?: any) {
     await this.sequelize.transaction(
       async (transaction) => {
         const where: WhereOptions<MaterialRequisition> =
@@ -244,7 +247,7 @@ export class MaterialRequisitionService {
         }
 
         await requisition.update(
-          { deletedBy: userId },
+          { deletedBy: userId ? String(userId) : null } as any,
           { transaction },
         );
         await requisition.destroy({

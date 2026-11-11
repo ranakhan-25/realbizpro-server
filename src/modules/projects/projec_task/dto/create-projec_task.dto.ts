@@ -11,7 +11,7 @@ import {
   ValidateIf
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { TaskPriority, TaskStatus } from 'src/database/models/projects/project-task/pr_project-task_model';
 
 export class CreateProjectTaskDto { 
@@ -67,4 +67,15 @@ export class CreateProjectTaskDto {
   @IsString()
   @IsOptional()
   addedById?: string;
+    @ApiPropertyOptional({ example: 'user-uuid' })
+    @IsOptional()
+    @IsString()
+    createdBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Project UUID or ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 }

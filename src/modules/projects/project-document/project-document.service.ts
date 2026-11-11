@@ -26,7 +26,7 @@ export class ProjectDocumentService {
     private readonly sequelize: Sequelize,
   ) {}
 
-  async create(dto: CreateProjectDocumentDto, userId?: number) {
+  async create(dto: CreateProjectDocumentDto, userId?: number, currentUser?: any) {
     const uuid = await this.sequelize.transaction(async (transaction) => {
       const project = await this.projectModel.findOne({
         where: { uuid: dto.projectId } as WhereOptions<Project>,
@@ -51,7 +51,10 @@ export class ProjectDocumentService {
     return this.findOne(uuid);
   }
 
-  async findAll(query: QueryProjectDocumentDto) {
+  async findAll(
+    query: QueryProjectDocumentDto,
+    currentUser?: any,
+  ) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const search = query.search?.trim();
@@ -93,7 +96,7 @@ export class ProjectDocumentService {
     };
   }
 
-  async findOne(uuid: string): Promise<ProjectDocument> {
+  async findOne(uuid: string, currentUser?: any): Promise<ProjectDocument> {
     const document = await this.documentModel.findOne({
       where: { uuid } as WhereOptions<ProjectDocument>,
       include: [
@@ -116,6 +119,7 @@ export class ProjectDocumentService {
     uuid: string,
     dto: UpdateProjectDocumentDto,
     userId?: number,
+    currentUser?: any,
   ) {
     await this.sequelize.transaction(async (transaction) => {
       const document = await this.documentModel.findOne({
@@ -152,7 +156,7 @@ export class ProjectDocumentService {
     return this.findOne(uuid);
   }
 
-  async remove(uuid: string) {
+  async remove(uuid: string, userId?: number, currentUser?: any) {
     const document = await this.documentModel.findOne({
       where: { uuid } as WhereOptions<ProjectDocument>,
     });

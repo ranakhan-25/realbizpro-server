@@ -113,4 +113,11 @@ export class CreateProjectShareConfigurationDto {
   @IsOptional()
   @IsIn(['active', 'inactive'])
   status?: 'active' | 'inactive';
+    @ApiPropertyOptional({ example: 'user-uuid' })
+    @IsOptional()
+    @IsString()
+    createdBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
 }

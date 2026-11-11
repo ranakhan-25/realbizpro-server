@@ -11,6 +11,8 @@ import {
 import { BaseModel } from '../../../base.model';
 import { Building } from '../building/pr_building_model';
 import {  UnitPlot } from '../unit_plot/pr_unit_plot_model';
+import { SysOrganization } from "src/database/models/system/sys_organization.model";
+import { Project } from "src/database/models/projects/project/pr_project.model";
 
 export interface FloorAttributes {
   uuid?: string;
@@ -90,15 +92,45 @@ export class Floor
   @Column({ type: DataType.STRING, allowNull: true })
   declare addedById?: string;
 
-  @Column({ type: DataType.STRING, allowNull: true })
+  @Column({
+          field: 'created_by', type: DataType.STRING, allowNull: true })
   declare createdBy?: string;
 
-  @Column({ type: DataType.STRING, allowNull: true })
+  @Column({
+          field: 'updated_by', type: DataType.STRING, allowNull: true })
   declare updatedBy?: string;
 
-  @Column({ type: DataType.STRING, allowNull: true })
+  @Column({
+          field: 'deleted_by', type: DataType.STRING, allowNull: true })
   declare deletedBy?: string; 
  @HasMany(() => UnitPlot, { foreignKey: 'floorUuid', sourceKey: 'uuid' })
   declare unitPlots: UnitPlot[];
-
+    @ForeignKey(() => SysOrganization)
+    @Column({
+            type: DataType.BIGINT,
+            allowNull: true,
+            field: 'org_id',
+            defaultValue: null,
+          })
+    declare orgId?: number | null;
+    @BelongsTo(() => SysOrganization, {
+            foreignKey: 'orgId',
+            targetKey: 'id',
+            as: 'organization',
+          })
+    declare organization?: SysOrganization;
+    @ForeignKey(() => Project)
+    @Column({
+            type: DataType.UUID,
+            allowNull: true,
+            field: 'project_id',
+            defaultValue: null,
+          })
+    declare projectId?: string | null;
+    @BelongsTo(() => Project, {
+            foreignKey: 'projectId',
+            targetKey: 'uuid',
+            as: 'project',
+          })
+    declare project?: Project;
 }

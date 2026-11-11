@@ -12,6 +12,8 @@ import type { ProcurementPurchaseOrder } from '../models/procurement/purchase-or
 import type { ProcurementAssetPurchaseOrder } from '../models/procurement/purchase-order/pr_asset_purchase_order.model';
 import type { ProcurementGrn } from '../models/procurement/grn/pr_grn.model';
 import type { ProcurementAssetGrn } from '../models/procurement/grn/pr_asset_grn.model';
+import type { SysOrganization } from '../models/system/sys_organization.model';
+import type { Project } from '../models/projects/project/pr_project.model';
 
 export interface TaskAttributes {
   id: number;
@@ -34,6 +36,8 @@ export interface TaskAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
+  projectId?: string | null;
 
   // Relations
   procurementRfqs?: ProcurementRfq[];
@@ -44,6 +48,8 @@ export interface TaskAttributes {
   procurementAssetPurchaseOrders?: ProcurementAssetPurchaseOrder[];
   procurementGrns?: ProcurementGrn[];
   procurementAssetGrns?: ProcurementAssetGrn[];
+  organization?: SysOrganization;
+  project?: Project;
 }
 
 export interface TaskCreationAttributes {
@@ -62,6 +68,8 @@ export interface TaskCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
+  projectId?: string | null;
 }
 
 export type TaskUpdateAttributes = Partial<TaskCreationAttributes>;
@@ -76,4 +84,6 @@ export interface TaskWithRelations extends TaskAttributes {
   procurementAssetPurchaseOrders?: ProcurementAssetPurchaseOrder[];
   procurementGrns?: ProcurementGrn[];
   procurementAssetGrns?: ProcurementAssetGrn[];
+  organization?: SysOrganization;
+  project?: Project;
 }

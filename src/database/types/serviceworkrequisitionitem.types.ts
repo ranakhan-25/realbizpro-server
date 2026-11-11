@@ -2,6 +2,7 @@
 // Source: src\database\models\projects\service-work-requisition-item\pr_service_work_requisition_item.model.ts
 
 import type { ServiceWorkRequisition } from '../models/projects/service-work-requisition/pr_service_work_requisition.model';
+import type { SysOrganization } from '../models/system/sys_organization.model';
 
 export interface ServiceWorkRequisitionItemAttributes {
   id: number;
@@ -21,9 +22,11 @@ export interface ServiceWorkRequisitionItemAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
 
   // Relations
   requisition?: ServiceWorkRequisition;
+  organization?: SysOrganization;
 }
 
 export interface ServiceWorkRequisitionItemCreationAttributes {
@@ -39,6 +42,7 @@ export interface ServiceWorkRequisitionItemCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
 }
 
 export type ServiceWorkRequisitionItemUpdateAttributes = Partial<ServiceWorkRequisitionItemCreationAttributes>;
@@ -46,4 +50,5 @@ export type ServiceWorkRequisitionItemUpdateAttributes = Partial<ServiceWorkRequ
 // Helper type for including relations
 export interface ServiceWorkRequisitionItemWithRelations extends ServiceWorkRequisitionItemAttributes {
   requisition?: ServiceWorkRequisition;
+  organization?: SysOrganization;
 }

@@ -15,7 +15,11 @@ export class ProjectCostService {
     private readonly costModel: typeof ProjectCost,
   ) {}
 
-  async create(createDto: CreateProjectCostDto): Promise<ProjectCost> {
+  async create(
+    createDto: CreateProjectCostDto,
+    userId?: number,
+    currentUser?: any,
+  ): Promise<ProjectCost> {
     try {
       // Auto-generate Ref No if left blank
       let refNo = createDto.refNo;
@@ -31,6 +35,9 @@ export class ProjectCostService {
       }
 
       return await this.costModel.create({
+        createdBy: userId ? String(userId) : null,
+        orgId: currentUser?.orgId ?? null,
+        projectId: currentUser?.projectId ?? null,
         ...createDto,
         incurredAt: new Date(createDto.incurredAt), // ✅ Convert string to Date
         refNo,
@@ -43,7 +50,10 @@ export class ProjectCostService {
     }
   }
 
-  async findAll(query: QueryProjectCostDto) {
+  async findAll(
+    query: QueryProjectCostDto,
+    currentUser?: any,
+  ) {
     const { page = '1', limit = '10', search, ...filters } = query;
     
     const pageNum = parseInt(page, 10);
@@ -51,6 +61,18 @@ export class ProjectCostService {
     const offset = (pageNum - 1) * limitNum;
 
     const whereClause: any = {};
+    if ((query as any)?.orgId) {
+      whereClause.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      whereClause.projectId = (query as any).projectId;
+    }
+    if ((query as any)?.orgId) {
+      whereClause.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      whereClause.projectId = (query as any).projectId;
+    }
     Object.keys(filters).forEach((key) => {
       const value = filters[key];
       if (value !== undefined && value !== null && value !== '') {
@@ -84,7 +106,7 @@ export class ProjectCostService {
     };
   }
 
-  async findOne(uuid: string): Promise<ProjectCost> {
+  async findOne(uuid: string, currentUser?: any): Promise<ProjectCost> {
     const cost = await this.costModel.findOne({ where: { uuid } });
     if (!cost) {
       throw new NotFoundException(`Cost with UUID ${uuid} not found`);
@@ -92,7 +114,12 @@ export class ProjectCostService {
     return cost;
   }
 
-  async update(uuid: string, updateDto: UpdateProjectCostDto): Promise<ProjectCost> {
+  async update(
+    uuid: string,
+    updateDto: UpdateProjectCostDto,
+    userId?: number,
+    currentUser?: any,
+  ): Promise<ProjectCost> {
     const cost = await this.findOne(uuid);
     
     // ✅ Convert incurredAt string to Date if provided
@@ -104,18 +131,15 @@ export class ProjectCostService {
     return cost.update(updateData);
   }
 
-  async remove(uuid: string, deletedBy?: string): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const cost = await this.findOne(uuid);
     
-    if (deletedBy) {
-      await cost.update({ deletedBy });
-    }
-    
+    await cost.update({ deletedBy: userId ? String(userId) : null } as any);
     await cost.destroy(); // Soft delete
     return { message: 'Cost entry deleted successfully' };
   }
 
-  async restore(uuid: string): Promise<ProjectCost> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<ProjectCost> {
     const cost = await this.costModel.findOne({ 
       where: { uuid },
       paranoid: false 
@@ -130,11 +154,12 @@ export class ProjectCostService {
     }
 
     await cost.restore();
+    await cost.update({ deletedBy: null, updatedBy: userId ? String(userId) : null } as any);
     return cost;
   }
 
   // Helper endpoint for top Cards (Total Cost, Voucher Count, Attachments Count)
-  async getSummary(projectUuid: string) {
+  async getSummary(projectUuid: string, currentUser?: any) {
     const costs = await this.costModel.findAll({ where: { projectUuid } });
     
     let totalIncurredCost = 0;

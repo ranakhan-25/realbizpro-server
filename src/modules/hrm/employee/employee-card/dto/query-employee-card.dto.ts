@@ -9,8 +9,7 @@ import {
   IsOptional,
   IsUUID,
   Max,
-  Min,
-} from 'class-validator';
+  Min, IsString } from 'class-validator';
 
 export class QueryEmployeeCardDto {
   @ApiPropertyOptional({
@@ -43,4 +42,11 @@ export class QueryEmployeeCardDto {
   @Min(1)
   @Max(500)
   limit?: number = 12;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Project UUID or ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 }

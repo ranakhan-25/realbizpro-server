@@ -27,6 +27,8 @@ export class CustomerAccountService {
 
   async create(
     dto: CreateCustomerAccountDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<CustomerAccount> {
     const existing =
       await this.customerAccountModel.findOne({
@@ -42,17 +44,23 @@ export class CustomerAccountService {
     }
 
     const customerAccount =
-      await this.customerAccountModel.create({
+      await this.customerAccountModel.create(({
+        createdBy: userId ? String(userId) : null,
+        orgId: currentUser?.orgId ?? null,
+        projectId: currentUser?.projectId ?? null,
         ...dto,
         status:
           dto.status ??
           CustomerAccountStatus.ACTIVE,
-      });
+      }) as any);
 
     return this.findOne(customerAccount.uuid);
   }
 
-  async findAll(query: QueryCustomerAccountDto) {
+  async findAll(
+    query: QueryCustomerAccountDto,
+    currentUser?: any,
+  ) {
     const {
       page = 1,
       limit = 10,
@@ -71,6 +79,26 @@ export class CustomerAccountService {
         : (page - 1) * limit;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      where.projectId = (query as any).projectId;
+    }
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      where.projectId = (query as any).projectId;
+    }
 
     if (search) {
       where[Op.or] = [
@@ -160,6 +188,7 @@ export class CustomerAccountService {
 
   async findOne(
     uuid: string,
+    currentUser?: any,
   ): Promise<CustomerAccount> {
     const customerAccount =
       await this.customerAccountModel.findOne({
@@ -178,6 +207,8 @@ export class CustomerAccountService {
   async update(
     uuid: string,
     dto: UpdateCustomerAccountDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<CustomerAccount> {
     const customerAccount =
       await this.customerAccountModel.findOne({
@@ -214,9 +245,7 @@ export class CustomerAccountService {
     return this.findOne(uuid);
   }
 
-  async remove(
-    uuid: string,
-  ): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const customerAccount =
       await this.customerAccountModel.findOne({
         where: { uuid } as any,
@@ -229,9 +258,9 @@ export class CustomerAccountService {
     }
 
     // status → inactive + soft delete
-    await customerAccount.update({
+    await customerAccount.update(({
       status: CustomerAccountStatus.INACTIVE,
-    });
+    }) as any);
 
     await customerAccount.destroy();
 
@@ -240,9 +269,7 @@ export class CustomerAccountService {
     };
   }
 
-  async restore(
-    uuid: string,
-  ): Promise<CustomerAccount> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<CustomerAccount> {
     const customerAccount =
       await this.customerAccountModel.findOne({
         where: { uuid } as any,
@@ -263,9 +290,9 @@ export class CustomerAccountService {
 
     // status → active + restore
     await customerAccount.restore();
-    await customerAccount.update({
+    await customerAccount.update(({
       status: CustomerAccountStatus.ACTIVE,
-    });
+    }) as any);
 
     return this.findOne(uuid);
   }

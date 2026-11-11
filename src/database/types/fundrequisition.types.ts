@@ -4,6 +4,9 @@
 import { ApproveStatus } from '../models/projects/fund-requisition/pr_fund_requisition.model';
 import { PaymentStatus } from '../models/projects/fund-requisition/pr_fund_requisition.model';
 
+import type { SysOrganization } from '../models/system/sys_organization.model';
+import type { Project } from '../models/projects/project/pr_project.model';
+
 export interface FundRequisitionAttributes {
   id: number;
   uuid: string;
@@ -27,6 +30,11 @@ export interface FundRequisitionAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
+
+  // Relations
+  organization?: SysOrganization;
+  project?: Project;
 }
 
 export interface FundRequisitionCreationAttributes {
@@ -47,11 +55,13 @@ export interface FundRequisitionCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
 }
 
 export type FundRequisitionUpdateAttributes = Partial<FundRequisitionCreationAttributes>;
 
 // Helper type for including relations
 export interface FundRequisitionWithRelations extends FundRequisitionAttributes {
-  // No relations defined
+  organization?: SysOrganization;
+  project?: Project;
 }

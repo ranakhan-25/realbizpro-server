@@ -9,6 +9,7 @@ import {
 } from 'sequelize-typescript';
 import { BaseModel } from 'src/database/base.model';
 import { Project } from '../project/pr_project.model';
+import { SysOrganization } from "src/database/models/system/sys_organization.model";
 
 export enum LandInfrastructureKind {
   ROAD = 'road',
@@ -27,7 +28,8 @@ export enum LandInfrastructureKind {
 })
 export class LandInfrastructure extends BaseModel<LandInfrastructureAttributes, LandInfrastructureCreationAttributes> {
   @ForeignKey(() => Project)
-  @Column({ type: DataType.UUID, allowNull: false })
+  @Column({
+              field: 'project_id', type: DataType.UUID, allowNull: false })
   declare projectId: string;
 
   @BelongsTo(() => Project, {
@@ -52,12 +54,29 @@ export class LandInfrastructure extends BaseModel<LandInfrastructureAttributes, 
   @Column({ type: DataType.STRING(255), allowNull: true })
   declare details?: string;
 
-  @Column({ type: DataType.STRING, allowNull: true })
+  @Column({
+          field: 'created_by', type: DataType.STRING, allowNull: true })
   declare createdBy?: string;
 
-  @Column({ type: DataType.STRING, allowNull: true })
+  @Column({
+          field: 'updated_by', type: DataType.STRING, allowNull: true })
   declare updatedBy?: string;
 
-  @Column({ type: DataType.STRING, allowNull: true })
+  @Column({
+          field: 'deleted_by', type: DataType.STRING, allowNull: true })
   declare deletedBy?: string;
+    @ForeignKey(() => SysOrganization)
+    @Column({
+            type: DataType.BIGINT,
+            allowNull: true,
+            field: 'org_id',
+            defaultValue: null,
+          })
+    declare orgId?: number | null;
+    @BelongsTo(() => SysOrganization, {
+            foreignKey: 'orgId',
+            targetKey: 'id',
+            as: 'organization',
+          })
+    declare organization?: SysOrganization;
 }

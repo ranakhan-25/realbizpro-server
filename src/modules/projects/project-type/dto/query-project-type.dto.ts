@@ -9,4 +9,7 @@ export class QueryProjectTypeDto extends PaginateDto {
   @IsOptional()
   @IsString()
   declare search?: string;
+    @ApiPropertyOptional({ description: 'Filter by organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
 }

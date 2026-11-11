@@ -2,6 +2,7 @@
 // Source: src\database\models\hrm\employee\hrm_monthyear_model.ts
 
 import type { Attendance } from '../models/hrm/employee/hrm_attendance_model';
+import type { SysOrganization } from '../models/system/sys_organization.model';
 
 export interface MonthYearAttributes {
   id: number;
@@ -13,9 +14,14 @@ export interface MonthYearAttributes {
   year: number;
   startDate: string;
   endDate: string;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+  deletedBy?: string | null;
+  orgId?: number | null;
 
   // Relations
   attendances?: Attendance[];
+  organization?: SysOrganization;
 }
 
 export interface MonthYearCreationAttributes {
@@ -23,6 +29,10 @@ export interface MonthYearCreationAttributes {
   year: number;
   startDate: string;
   endDate: string;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+  deletedBy?: string | null;
+  orgId?: number | null;
 }
 
 export type MonthYearUpdateAttributes = Partial<MonthYearCreationAttributes>;
@@ -30,4 +40,5 @@ export type MonthYearUpdateAttributes = Partial<MonthYearCreationAttributes>;
 // Helper type for including relations
 export interface MonthYearWithRelations extends MonthYearAttributes {
   attendances?: Attendance[];
+  organization?: SysOrganization;
 }
