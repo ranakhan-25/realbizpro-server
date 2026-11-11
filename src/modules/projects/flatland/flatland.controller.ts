@@ -45,7 +45,7 @@ export class FlatLandController {
   findOne(
     @Param('uuid', ParseUUIDPipe) uuid: string, @CurrentUser() currentUser: any
   ) {
-    return this.flatLandService.findOne(uuid, currentUser);
+    return this.flatLandService.findOne(uuid, undefined, currentUser);
   }
 
   @Put(':uuid')
