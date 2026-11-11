@@ -36,7 +36,7 @@ export class FlatLandController {
   findAll(
     @Query() query: QueryFlatLandDto, @CurrentUser() currentUser: any
   ) {
-    return this.flatLandService.findAll(query, currentUser);
+    return this.flatLandService.findAll(query, undefined, currentUser);
   }
 
   @Get(':uuid')
@@ -45,7 +45,7 @@ export class FlatLandController {
   findOne(
     @Param('uuid', ParseUUIDPipe) uuid: string, @CurrentUser() currentUser: any
   ) {
-    return this.flatLandService.findOne(uuid, currentUser);
+    return this.flatLandService.findOne(uuid, undefined, currentUser);
   }
 
   @Put(':uuid')

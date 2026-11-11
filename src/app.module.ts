@@ -18,8 +18,10 @@ import { InventoryModule } from './modules/inventory/inventory.module';
 import { AppService } from './app.service';
 import { AuthLoggingInterceptor } from './common/interceptors/auth-logging.interceptor';
 import { ErrorTransformInterceptor } from './common/interceptors/error-transform.interceptor';
+import { ShareUserTenantInterceptor } from './common/interceptors/share-user-tenant.interceptor';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { CacheModule } from './common/services/cache.module';
+import { ShareUserTenantHooksService } from './database/share-user-tenant-hooks.service';
 
 import {
   getRealIP,
@@ -500,6 +502,7 @@ import { DiscountModule } from './modules/sales_management/discounts/discounts_f
   controllers: [AppController, HealthController],
   providers: [
     AppService,
+    ShareUserTenantHooksService,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
@@ -507,6 +510,10 @@ import { DiscountModule } from './modules/sales_management/discounts/discounts_f
     {
       provide: APP_INTERCEPTOR,
       useClass: AuthLoggingInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ShareUserTenantInterceptor,
     },
     {
       provide: APP_INTERCEPTOR,

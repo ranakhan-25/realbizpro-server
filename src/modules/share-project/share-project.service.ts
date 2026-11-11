@@ -63,6 +63,24 @@ export class ShareProjectService {
     return `${namePrefix}@${phoneSuffix}-${year}${month}${day}${hours}${mins}${secs}`;
   }
 
+  private async getShareUserIdentity(userId: number) {
+    const user = await this.shareUserModel.findByPk(userId, {
+      attributes: ['id', 'uuid', 'name', 'email', 'phone'],
+    });
+    const email = user?.email?.trim().toLowerCase() || null;
+    return { user, email };
+  }
+
+  private ownerProjectWhere(ownerId: number, email?: string | null) {
+    if (!email) return { ownerId };
+    return {
+      [Op.or]: [
+        { ownerId },
+        Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('creator_email')), email),
+      ],
+    };
+  }
+
   private async ensureCategory(categoryId: number) {
     const category = await this.categoryModel.findByPk(categoryId);
     if (!category) throw new BadRequestException('Project category does not exist');
@@ -71,7 +89,9 @@ export class ShareProjectService {
   private async ownProject(uuid: string, ownerId: number) {
     const project = await this.projectModel.findOne({ where: { uuid } });
     if (!project) throw new NotFoundException('Share Project not found');
-    if (project.ownerId !== ownerId) throw new ForbiddenException('You can only manage your own projects');
+    const { email } = await this.getShareUserIdentity(ownerId);
+    const matchesEmail = Boolean(email && project.creatorEmail?.trim().toLowerCase() === email);
+    if (project.ownerId !== ownerId && !matchesEmail) throw new ForbiddenException('You can only manage your own projects');
     return project;
   }
 
@@ -102,10 +122,15 @@ export class ShareProjectService {
 
   async create(ownerId: number, dto: CreateShareProjectDto) {
     await this.ensureCategory(dto.categoryId);
+    const { user, email } = await this.getShareUserIdentity(ownerId);
     const transaction = await this.sequelize.transaction();
     let project: ShareProject;
     try {
       project = await this.projectModel.create({
+        code: (dto as any).code || this.generateCode('SP', dto.name),
+        creatorName: (dto as any).creatorName || user?.name || null,
+        creatorEmail: ((dto as any).creatorEmail || email || '').trim().toLowerCase() || null,
+        creatorPhone: (dto as any).creatorPhone || user?.phone || null,
         ownerId,
         categoryId: dto.categoryId,
         name: dto.name,
@@ -159,8 +184,9 @@ export class ShareProjectService {
   }
 
   async findMine(ownerId: number, page = 1, limit = 10, status?: ShareProjectStatus) {
-    const where: any = { ownerId };
-    if (status) where.status = status;
+    const { email } = await this.getShareUserIdentity(ownerId);
+    const ownerWhere = this.ownerProjectWhere(ownerId, email);
+    const where: any = status ? { [Op.and]: [ownerWhere, { status }] } : ownerWhere;
     const { rows, count } = await this.projectModel.findAndCountAll({
       where, limit, offset: (page - 1) * limit, order: [['createdAt', 'DESC']], include: this.projectIncludes(),
     });
@@ -168,11 +194,24 @@ export class ShareProjectService {
   }
 
   async userDashboard(ownerId: number) {
+    const { email } = await this.getShareUserIdentity(ownerId);
     const projects = await this.projectModel.findAll({
-      where: { ownerId },
-      attributes: ['uuid', 'name', 'status', 'totalInvestmentAmount', 'totalShares', 'pricePerShare', 'updatedAt'],
+      where: this.ownerProjectWhere(ownerId, email),
+      attributes: [
+        'uuid',
+        'name',
+        'status',
+        'totalInvestmentAmount',
+        'totalShares',
+        'pricePerShare',
+        'startDate',
+        'endDate',
+        'createdAt',
+        'updatedAt',
+      ],
       order: [['updatedAt', 'DESC']],
     });
+
     const counts: Record<string, number> = {
       draft: 0,
       pending: 0,
@@ -181,22 +220,341 @@ export class ShareProjectService {
       published: 0,
       unpublished: 0,
     };
+
+    const projectValueOf = (p: { totalShares?: number; pricePerShare?: string | number; totalInvestmentAmount?: string | number }) => {
+      const shareCalc = Number(p.totalShares || 0) * Number(p.pricePerShare || 0);
+      return shareCalc > 0 ? shareCalc : Number(p.totalInvestmentAmount || 0);
+    };
+
     let totalShareValue = 0;
+    let totalShares = 0;
     for (const project of projects) {
       counts[project.status] = (counts[project.status] || 0) + 1;
-      totalShareValue += Number(project.totalShares || 0) * Number(project.pricePerShare || 0);
+      totalShareValue += projectValueOf(project);
+      totalShares += Number(project.totalShares || 0);
     }
+
+    const ownerProjectUuids = projects.map((p) => p.uuid);
+    const ownerProjectInvestments = ownerProjectUuids.length
+      ? await this.investmentModel.findAll({
+          where: { projectId: { [Op.in]: ownerProjectUuids } },
+          order: [['createdAt', 'DESC']],
+        })
+      : [];
+
+    const personalWhere: any = email
+      ? {
+          [Op.or]: [
+            { investorId: ownerId },
+            Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('investor_email')), email),
+          ],
+        }
+      : { investorId: ownerId };
+    const personalInvestments = await this.investmentModel.findAll({
+      where: personalWhere,
+      order: [['createdAt', 'DESC']],
+    });
+
+    // Lookup names for all referenced projects & investors cleanly without fragile includes
+    const allInvestmentsMap = new Map<string, ShareProjectInvestment>();
+    for (const inv of ownerProjectInvestments) allInvestmentsMap.set(inv.uuid, inv);
+    for (const inv of personalInvestments) {
+      if (!allInvestmentsMap.has(inv.uuid)) allInvestmentsMap.set(inv.uuid, inv);
+    }
+    const allInvestments = Array.from(allInvestmentsMap.values()).sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+
+    const projectByUuid = new Map<string, any>(projects.map((p) => [p.uuid, p]));
+    const extraProjectUuids = [
+      ...new Set(allInvestments.map((i) => i.projectId).filter((id) => id && !projectByUuid.has(id))),
+    ];
+    if (extraProjectUuids.length) {
+      const extraProjects = await this.projectModel.findAll({
+        where: { uuid: { [Op.in]: extraProjectUuids } },
+        attributes: ['uuid', 'name', 'status', 'totalInvestmentAmount', 'totalShares', 'pricePerShare', 'startDate', 'endDate', 'createdAt'],
+      });
+      for (const ep of extraProjects) projectByUuid.set(ep.uuid, ep);
+    }
+
+    const investorIds = [...new Set(allInvestments.map((i) => Number(i.investorId)).filter(Boolean))];
+    const investors = investorIds.length
+      ? await this.shareUserModel.findAll({
+          where: { id: { [Op.in]: investorIds } },
+          attributes: ['id', 'name', 'email'],
+        })
+      : [];
+    const investorById = new Map<number, ShareUser>(investors.map((u) => [Number(u.id), u]));
+
+    const hasOwnedProjects = projects.length > 0;
+    const primaryInvestments = hasOwnedProjects ? ownerProjectInvestments : personalInvestments;
+    const confirmedPrimary = primaryInvestments.filter((i) => i.status === ShareProjectInvestmentStatus.CONFIRMED);
+
+    // Sold shares & collection metrics
+    const soldSharesByProject = new Map<string, number>();
+    let soldShares = 0;
+    let totalCollected = 0;
+    for (const inv of confirmedPrimary) {
+      const qty = Number(inv.quantity || 0);
+      soldShares += qty;
+      totalCollected += Number(inv.totalAmount || inv.shareValue || 0);
+      soldSharesByProject.set(inv.projectId, (soldSharesByProject.get(inv.projectId) || 0) + qty);
+    }
+
+    let effectiveShareValue = totalShareValue;
+    let effectiveTotalProjects = projects.length;
+    if (!hasOwnedProjects && confirmedPrimary.length > 0) {
+      effectiveShareValue = confirmedPrimary.reduce((s, i) => s + Number(i.totalAmount || i.shareValue || 0), 0);
+      effectiveTotalProjects = new Set(confirmedPrimary.map((i) => i.projectId)).size;
+      const investedProjectIds = [...new Set(confirmedPrimary.map((i) => i.projectId))];
+      totalShares = investedProjectIds.reduce(
+        (s, pid) => s + Number(projectByUuid.get(pid)?.totalShares || 0),
+        0,
+      );
+    }
+    const remainingShares = Math.max(0, totalShares - soldShares);
+
+    // Trailing 12 months timeline ending in current month
+    const now = new Date();
+    const months: Array<{
+      year: number;
+      monthIndex: number;
+      endOfMonth: Date;
+      startOfMonth: Date;
+      shareValue: number;
+      collected: number;
+      monthlyCollected: number;
+      monthlyTarget: number;
+      projectCount: number;
+      pendingCount: number;
+      rejectedCount: number;
+    }> = [];
+
+    for (let offset = 11; offset >= 0; offset -= 1) {
+      const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+      const startOfMonth = new Date(d.getFullYear(), d.getMonth(), 1, 0, 0, 0, 0);
+      const endOfMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59, 999);
+      months.push({
+        year: d.getFullYear(),
+        monthIndex: d.getMonth(),
+        startOfMonth,
+        endOfMonth,
+        shareValue: 0,
+        collected: 0,
+        monthlyCollected: 0,
+        monthlyTarget: 0,
+        projectCount: 0,
+        pendingCount: 0,
+        rejectedCount: 0,
+      });
+    }
+
+    const durationMonthsForProject = (p: any) => {
+      if (p.startDate && p.endDate) {
+        const s = new Date(p.startDate);
+        const e = new Date(p.endDate);
+        const diff = (e.getFullYear() - s.getFullYear()) * 12 + (e.getMonth() - s.getMonth()) + 1;
+        if (Number.isFinite(diff) && diff >= 1) return Math.min(diff, 60);
+      }
+      return 12;
+    };
+
+    for (const m of months) {
+      let cumShareVal = 0;
+      let cumProjCount = 0;
+      let cumPending = 0;
+      let cumRejected = 0;
+      let monthTarget = 0;
+
+      if (hasOwnedProjects) {
+        for (const p of projects) {
+          const created = new Date(p.createdAt);
+          if (created <= m.endOfMonth) {
+            const pVal = projectValueOf(p);
+            cumShareVal += pVal;
+            cumProjCount += 1;
+            if (p.status === ShareProjectStatus.PENDING) cumPending += 1;
+            if (p.status === ShareProjectStatus.REJECTED) cumRejected += 1;
+            monthTarget += pVal / durationMonthsForProject(p);
+          }
+        }
+      } else {
+        const seenProj = new Set<string>();
+        for (const inv of confirmedPrimary) {
+          const created = new Date(inv.createdAt);
+          if (created <= m.endOfMonth) {
+            cumShareVal += Number(inv.totalAmount || inv.shareValue || 0);
+            seenProj.add(inv.projectId);
+          }
+        }
+        cumProjCount = seenProj.size;
+      }
+
+      let cumCollected = 0;
+      let mCollected = 0;
+      for (const inv of confirmedPrimary) {
+        const created = new Date(inv.createdAt);
+        const amt = Number(inv.totalAmount || inv.shareValue || 0);
+        if (created <= m.endOfMonth) cumCollected += amt;
+        if (created >= m.startOfMonth && created <= m.endOfMonth) mCollected += amt;
+      }
+
+      m.shareValue = Math.round(cumShareVal);
+      m.collected = Math.round(cumCollected);
+      m.monthlyCollected = Math.round(mCollected);
+      m.monthlyTarget = Math.round(monthTarget);
+      m.projectCount = cumProjCount;
+      m.pendingCount = cumPending;
+      m.rejectedCount = cumRejected;
+    }
+
+    const currMonth = months[months.length - 1];
+    const prevMonth = months[months.length - 2];
+    const pctDelta = (curr: number, prev: number) => {
+      if (prev > 0) return Number((((curr - prev) / prev) * 100).toFixed(1));
+      return curr > 0 ? 100 : 0;
+    };
+
+    // Allocation by project (top 4 + Others)
+    const allocMap = new Map<string, number>();
+    if (hasOwnedProjects) {
+      for (const p of projects) {
+        const v = projectValueOf(p);
+        if (v > 0) allocMap.set(p.name, (allocMap.get(p.name) || 0) + v);
+      }
+    } else {
+      for (const inv of confirmedPrimary) {
+        const pname = projectByUuid.get(inv.projectId)?.name || 'Project';
+        const v = Number(inv.totalAmount || inv.shareValue || 0);
+        if (v > 0) allocMap.set(pname, (allocMap.get(pname) || 0) + v);
+      }
+    }
+    const sortedAlloc = Array.from(allocMap.entries())
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+    const allocation = sortedAlloc.slice(0, 4);
+    if (sortedAlloc.length > 4) {
+      const othersValue = sortedAlloc.slice(4).reduce((s, x) => s + x.value, 0);
+      if (othersValue > 0) allocation.push({ name: 'Others', value: othersValue });
+    }
+
+    // Top projects by sell-through %
+    const topProjectPool = hasOwnedProjects
+      ? projects
+      : [...new Set(confirmedPrimary.map((i) => i.projectId))]
+          .map((pid) => projectByUuid.get(pid))
+          .filter(Boolean);
+    const topProjects = topProjectPool
+      .map((p: any) => {
+        const tot = Number(p.totalShares || 0);
+        const sold = soldSharesByProject.get(p.uuid) || 0;
+        const soldPercent = tot > 0 ? Math.min(100, Math.round((sold / tot) * 100)) : 0;
+        return {
+          uuid: p.uuid,
+          name: p.name,
+          soldShares: sold,
+          totalShares: tot,
+          soldPercent,
+          value: projectValueOf(p),
+        };
+      })
+      .sort((a, b) => b.soldPercent - a.soldPercent || b.value - a.value)
+      .slice(0, 4);
+
+    // Recent transactions
+    const recentTransactions = allInvestments.slice(0, 8).map((inv) => {
+      const investorUser = investorById.get(Number(inv.investorId));
+      const shareholderName =
+        inv.investorName?.trim() ||
+        investorUser?.name ||
+        inv.investorEmail ||
+        investorUser?.email ||
+        `Investor #${inv.investorId}`;
+      const projectName = projectByUuid.get(inv.projectId)?.name || 'Share Project';
+      const status =
+        inv.status === ShareProjectInvestmentStatus.CONFIRMED
+          ? 'paid'
+          : inv.status === ShareProjectInvestmentStatus.PREPARED
+            ? 'pending'
+            : 'overdue';
+      return {
+        uuid: inv.uuid,
+        code: inv.code || null,
+        shareholderName,
+        projectUuid: inv.projectId,
+        projectName,
+        quantity: Number(inv.quantity || 0),
+        amount: Number(inv.totalAmount || inv.shareValue || 0),
+        status,
+        rawStatus: inv.status,
+        createdAt: inv.createdAt,
+      };
+    });
+
+    // Leaderboard based on confirmed investment activity across user's projects / investments
+    const leaderMap = new Map<string, { name: string; pts: number; totalAmount: number; shares: number; count: number }>();
+    for (const inv of confirmedPrimary) {
+      const investorUser = investorById.get(Number(inv.investorId));
+      const key =
+        (inv.investorEmail || investorUser?.email || '').trim().toLowerCase() ||
+        `user:${inv.investorId}`;
+      const name =
+        inv.investorName?.trim() ||
+        investorUser?.name ||
+        inv.investorEmail ||
+        investorUser?.email ||
+        `Investor #${inv.investorId}`;
+      const amt = Number(inv.totalAmount || inv.shareValue || 0);
+      const qty = Number(inv.quantity || 0);
+      const pts = 100 + qty * 25 + Math.round(amt / 1000);
+      const prev = leaderMap.get(key) || { name, pts: 0, totalAmount: 0, shares: 0, count: 0 };
+      prev.pts += pts;
+      prev.totalAmount += amt;
+      prev.shares += qty;
+      prev.count += 1;
+      leaderMap.set(key, prev);
+    }
+    const leaderboard = Array.from(leaderMap.values())
+      .sort((a, b) => b.pts - a.pts || b.totalAmount - a.totalAmount)
+      .slice(0, 5);
+
     return {
       counts,
-      totalProjects: projects.length,
-      totalShareValue,
+      totalProjects: effectiveTotalProjects,
+      totalShareValue: effectiveShareValue,
+      totalCollected,
+      totalShares,
+      soldShares,
+      remainingShares,
+      growth: {
+        shareValueDeltaPct: pctDelta(currMonth.shareValue, prevMonth.shareValue),
+        projectDeltaPct: pctDelta(currMonth.projectCount, prevMonth.projectCount),
+        pendingDeltaPct: pctDelta(currMonth.pendingCount, prevMonth.pendingCount),
+        rejectedDeltaPct: pctDelta(currMonth.rejectedCount, prevMonth.rejectedCount),
+      },
+      monthlySeries: months.map((m) => ({
+        year: m.year,
+        monthIndex: m.monthIndex,
+        shareValue: m.shareValue,
+        collected: m.collected,
+        monthlyCollected: m.monthlyCollected,
+        monthlyTarget: m.monthlyTarget,
+        projectCount: m.projectCount,
+        pendingCount: m.pendingCount,
+        rejectedCount: m.rejectedCount,
+      })),
+      allocation,
+      topProjects,
+      recentTransactions,
+      leaderboard,
       recentProjects: projects.slice(0, 5),
     };
   }
 
   async userNotifications(ownerId: number) {
+    const { email } = await this.getShareUserIdentity(ownerId);
     const projects = await this.projectModel.findAll({
-      where: { ownerId },
+      where: this.ownerProjectWhere(ownerId, email),
       attributes: ['uuid', 'name', 'status', 'rejectionReason', 'updatedAt'],
       order: [['updatedAt', 'DESC']],
     });
@@ -223,10 +581,15 @@ export class ShareProjectService {
       throw new BadRequestException('Requested quantity exceeds available project shares');
     }
 
+    const { user, email } = await this.getShareUserIdentity(investorId);
     const sharePrice = Number(project.pricePerShare);
     const shareValue = sharePrice * quantity;
     const serviceFee = Math.round(shareValue * 0.01 * 100) / 100;
     const investment = await this.investmentModel.create({
+      code: this.generateInvestmentCode(user?.name || 'INV', user?.phone || ''),
+      investorName: user?.name || null,
+      investorEmail: email || null,
+      investorPhone: user?.phone || null,
       projectId: project.uuid,
       investorId,
       quantity,
@@ -240,8 +603,17 @@ export class ShareProjectService {
   }
 
   async userPortfolio(investorId: number) {
+    const { email } = await this.getShareUserIdentity(investorId);
+    const where: any = email
+      ? {
+          [Op.or]: [
+            { investorId },
+            Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('investor_email')), email),
+          ],
+        }
+      : { investorId };
     const investments = await this.investmentModel.findAll({
-      where: { investorId },
+      where,
       order: [['createdAt', 'DESC']],
     });
     const projectUuids = [...new Set(investments.map((row) => row.projectId))];
@@ -254,6 +626,7 @@ export class ShareProjectService {
       const project = projectByUuid.get(row.projectId);
       return {
         uuid: row.uuid,
+        code: row.code,
         projectUuid: row.projectId,
         projectName: project?.name || '',
         location: project?.location || '',
@@ -268,6 +641,40 @@ export class ShareProjectService {
       };
     });
     return { investments: rows, shares: rows, payments: [], profits: [], reports: [] };
+  }
+
+  /**
+   * Returns only the signed-in Share User's own project-owner and investor data.
+   * This deliberately does not read from RealBiz organization, Accounts or CRM tables.
+   */
+  async userWorkspace(userId: number) {
+    const [dashboard, ownerProjectResult, portfolio] = await Promise.all([
+      this.userDashboard(userId),
+      this.findMine(userId, 1, 100),
+      this.userPortfolio(userId),
+    ]);
+
+    const investments = portfolio.investments || [];
+    const totalInvestment = investments.reduce(
+      (total, investment: any) => total + Number(investment.totalAmount || 0),
+      0,
+    );
+    const totalShares = investments.reduce(
+      (total, investment: any) => total + Number(investment.quantity || 0),
+      0,
+    );
+
+    return {
+      dashboard,
+      ownerProjects: ownerProjectResult.data,
+      investments,
+      summary: {
+        ownerProjectCount: ownerProjectResult.meta.total,
+        investmentCount: investments.length,
+        totalInvestment,
+        totalShares,
+      },
+    };
   }
 
   async adminInvestments(page = 1, limit = 10, projectUuid?: string, trash = false) {
