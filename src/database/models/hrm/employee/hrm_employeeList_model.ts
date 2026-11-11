@@ -50,69 +50,6 @@ export enum MaritalStatus {
   timestamps: true,
   paranoid: true,
   underscored: false,
-  indexes: [
-    {
-      name: 'EmployeeList_employeeCode_idx',
-      fields: ['employeeCode'],
-      unique: true,
-    },
-    {
-      name: 'EmployeeList_name_idx',
-      fields: ['name'],
-    },
-    {
-      name: 'EmployeeList_email_idx',
-      fields: ['email'],
-    },
-    {
-      name: 'EmployeeList_phone_idx',
-      fields: ['phone'],
-    },
-    {
-      name: 'EmployeeList_nid_idx',
-      fields: ['nid'],
-    },
-    {
-      name: 'EmployeeList_departmentId_idx',
-      fields: ['departmentId'],
-    },
-    {
-      name: 'EmployeeList_designationId_idx',
-      fields: ['designationId'],
-    },
-    {
-      name: 'EmployeeList_unitId_idx',
-      fields: ['unitId'],
-    },
-    {
-      name: 'EmployeeList_sectionId_idx',
-      fields: ['sectionId'],
-    },
-    {
-      name: 'EmployeeList_salaryGradeId_idx',
-      fields: ['salaryGradeId'],
-    },
-    {
-      name: 'EmployeeList_shiftId_idx',
-      fields: ['shiftId'],
-    },
-    {
-      name: 'EmployeeList_employeeTypeId_idx',
-      fields: ['employeeTypeId'],
-    },
-    {
-      name: 'EmployeeList_underId_idx',
-      fields: ['underId'],
-    },
-    {
-      name: 'EmployeeList_status_idx',
-      fields: ['status'],
-    },
-    {
-      name: 'EmployeeList_deletedAt_idx',
-      fields: ['deleted_at'],
-    },
-  ],
 })
 export class EmployeeList
   extends BaseModel<
@@ -130,7 +67,6 @@ export class EmployeeList
   @Column({
     type: DataType.STRING,
     allowNull: false,
-    unique: true,
   })
   declare employeeCode: string;
 

@@ -3,7 +3,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
-import { Booking } from '../../../database/models/sales_management/sm_booking_details_model';
+import { BookingDetails as Booking } from '../../../database/models/sales_management/sm_booking_details_model';
 import { UpdateBookingDto } from './dto/update-booking_detail.dto';
 import { QueryBookingDto } from './dto/query-booking_detail.dto';
 
@@ -16,8 +16,8 @@ export class BookingService {
 
   async findAll(query: QueryBookingDto) {
     const { page = '1', limit = '10', search, ...filters } = query;
-    const pageNum = parseInt(page, 10);
-    const limitNum = parseInt(limit, 10);
+    const pageNum = Math.max(1, Number.parseInt(page, 10) || 1);
+    const limitNum = Math.min(100, Math.max(1, Number.parseInt(limit, 10) || 10));
     const offset = (pageNum - 1) * limitNum;
 
     const where: any = {};
@@ -30,7 +30,7 @@ export class BookingService {
     if (search) {
       where[Op.or] = [
         { bookingId: { [Op.iLike]: `%${search}%` } },
-        { customerName: { [Op.iLike]: `%${search}%` } },
+        { buyerName: { [Op.iLike]: `%${search}%` } },
       ];
     }
 
@@ -38,7 +38,7 @@ export class BookingService {
       where,
       limit: limitNum,
       offset,
-      order: [['created_at', 'DESC']],
+      order: [['createdAt', 'DESC']],
     });
 
     return {

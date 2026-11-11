@@ -28,23 +28,14 @@ export enum DesignationStatus {
   paranoid: true,
   underscored: false,
   indexes: [
-    {
-      name: 'Designation_name_idx',
-      fields: ['name'],
-    },
-    {
-      name: 'Designation_departmentId_idx',
-      fields: ['departmentId'],
-    },
+    { name: 'Designation_name_idx', fields: ['name'] },
+    { name: 'Designation_departmentId_idx', fields: ['departmentId'] },
     {
       name: 'Designation_departmentId_name_unique',
       unique: true,
       fields: ['departmentId', 'name'],
     },
-    {
-      name: 'Designation_deletedAt_idx',
-      fields: ['deleted_at'],
-    },
+    { name: 'Designation_deletedAt_idx', fields: ['deleted_at'] },
   ],
 })
 export class Designation

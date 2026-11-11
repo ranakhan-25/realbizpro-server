@@ -38,11 +38,11 @@ export interface BookingAttributes {
   city: string;
   country: string;
 
-  // Customer Info
-  customerName: string;
-  customerEmail: string;
-  customerPhone: string;
-  customerNid: string;
+  // Buyer Info
+  buyerName: string;
+  buyerEmail: string;
+  buyerPhone: string;
+  buyerNid: string;
 
   // Payment Info
   subtotal: number;
@@ -75,7 +75,7 @@ export interface BookingUpdateAttributes extends Partial<BookingAttributes> {}
   paranoid: true,
   underscored: true,
 })
-export class Booking
+export class BookingDetails
   extends BaseModel<BookingUpdateAttributes, BookingCreationAttributes>
   implements BookingAttributes
 {
@@ -140,17 +140,17 @@ export class Booking
   declare country: string;
 
   // Customer
-  @Column({ type: DataType.STRING, allowNull: false, field: 'customer_name' })
-  declare customerName: string;
+  @Column({ type: DataType.STRING, allowNull: false, field: 'buyer_name' })
+  declare buyerName: string;
 
-  @Column({ type: DataType.STRING, allowNull: true, field: 'customer_email' })
-  declare customerEmail: string;
+  @Column({ type: DataType.STRING, allowNull: true, field: 'buyer_email' })
+  declare buyerEmail: string;
 
-  @Column({ type: DataType.STRING, allowNull: true, field: 'customer_phone' })
-  declare customerPhone: string;
+  @Column({ type: DataType.STRING, allowNull: true, field: 'buyer_phone' })
+  declare buyerPhone: string;
 
-  @Column({ type: DataType.STRING, allowNull: true, field: 'customer_nid' })
-  declare customerNid: string;
+  @Column({ type: DataType.STRING, allowNull: true, field: 'buyer_nid' })
+  declare buyerNid: string;
 
   // Payment
   @Column({ type: DataType.DECIMAL(15, 2), allowNull: false, defaultValue: 0 })

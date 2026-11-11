@@ -72,7 +72,7 @@ export interface BookingUpdateAttributes extends Partial<BookingAttributes> {}
   paranoid: true,
   underscored: true,
 })
-export class Booking
+export class BookingCreate
   extends BaseModel<BookingUpdateAttributes, BookingCreationAttributes>
   implements BookingAttributes
 {
