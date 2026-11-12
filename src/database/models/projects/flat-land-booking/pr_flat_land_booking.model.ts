@@ -91,6 +91,9 @@ export class FlatLandBooking extends BaseModel<FlatLandBookingAttributes, FlatLa
   @Column({ type: DataType.STRING(100), allowNull: false, defaultValue: 'Pending' })
   declare status: string;
 
+  @Column({ type: DataType.JSONB, allowNull: false, defaultValue: {} })
+  declare details: Record<string, unknown>;
+
   @Column({
           field: 'created_by', type: DataType.STRING, allowNull: true })
   declare createdBy?: string;

@@ -78,6 +78,9 @@ export class ProjectSiteService {
           ],
         }
       : {};
+    if (query.projectId) {
+      (where as any).projectId = query.projectId;
+    }
 
     const { rows, count } = await this.siteModel.findAndCountAll({
       where: where as WhereOptions<Site>,

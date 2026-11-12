@@ -33,41 +33,30 @@ export class FlatLandBookingService {
 
   async create(dto: CreateFlatLandBookingDto, userId?: number, currentUser?: any) {
     const uuid = await this.sequelize.transaction(async (transaction) => {
-      let project = dto.projectId
-        ? await this.projectModel.findOne({
-            where: { uuid: dto.projectId } as WhereOptions<Project>,
-            transaction,
-          })
-        : await this.projectModel.findOne({ transaction });
-
+      if (!dto.projectId || !dto.flatLandId) {
+        throw new BadRequestException('Project and flat/land selection are required');
+      }
+      const project = await this.projectModel.findOne({
+        where: { uuid: dto.projectId } as WhereOptions<Project>,
+        transaction,
+      });
       if (!project) {
-        project = await this.projectModel.create(
-          {
-            code: 'PRJ-MAIN',
-            name: 'Main Real Estate Project',
-            status: 'ACTIVE',
-          } as any,
-          { transaction },
-        );
+        throw new NotFoundException(`Project "${dto.projectId}" not found`);
       }
 
-      let property = dto.flatLandId
-        ? await this.flatLandModel.findOne({
-            where: { uuid: dto.flatLandId } as WhereOptions<FlatLand>,
-            transaction,
-          })
-        : await this.flatLandModel.findOne({ transaction });
-
+      const property = await this.flatLandModel.findOne({
+        where: { uuid: dto.flatLandId } as WhereOptions<FlatLand>,
+        transaction,
+        lock: transaction.LOCK.UPDATE,
+      });
       if (!property) {
-        property = await this.flatLandModel.create(
-          {
-            projectId: project.uuid,
-            flatLandNo: 'UNIT-AUTO',
-            propertyType: 'flat',
-            status: FlatLandStatus.AVAILABLE,
-          } as any,
-          { transaction },
-        );
+        throw new NotFoundException(`Flat/land "${dto.flatLandId}" not found`);
+      }
+      if (property.projectId !== project.uuid) {
+        throw new BadRequestException('Selected flat/land does not belong to the selected project');
+      }
+      if (property.status !== FlatLandStatus.AVAILABLE) {
+        throw new ConflictException('Selected flat/land is not available for booking');
       }
 
       const duplicate = await this.bookingModel.findOne({
@@ -94,6 +83,7 @@ export class FlatLandBookingService {
           paid: dto.paid ?? 0,
           due: dto.due ?? Math.max(grandTotal - (dto.paid ?? 0), 0),
           status: dto.status ?? 'Pending',
+          details: dto.details ?? {},
           createdBy: userId === undefined ? undefined : String(userId),
         },
         { transaction },
@@ -136,7 +126,7 @@ export class FlatLandBookingService {
       where: where as WhereOptions<FlatLandBooking>,
       include: [
         { model: this.projectModel, as: 'project', attributes: ['uuid', 'code', 'name'], include: [{ association: 'sites', attributes: ['uuid', 'code', 'name'], required: false }] },
-        { model: this.flatLandModel, as: 'flatLand', attributes: ['uuid', 'flatLandNo', 'projectName'] },
+        { model: this.flatLandModel, as: 'flatLand', attributes: ['uuid', 'flatLandNo', 'projectId', 'projectName', 'propertyType', 'unit', 'size', 'bedroom', 'bathroom', 'drawing', 'dining', 'kitchen', 'balcony', 'parking', 'basement', 'facing', 'amenities', 'pricePerUnit', 'parkingCost', 'utilityCharge', 'status'] },
       ],
       limit,
       offset: (page - 1) * limit,
@@ -151,7 +141,7 @@ export class FlatLandBookingService {
   async dropdowns() {
     const [projects, properties, statuses, teams, salesPeople] = await Promise.all([
       this.projectModel.findAll({ attributes: ['uuid', 'code', 'name'], order: [['name', 'ASC']] }),
-      this.flatLandModel.findAll({ where: { status: FlatLandStatus.AVAILABLE }, attributes: ['uuid', 'flatLandNo', 'propertyType', 'projectId', 'projectName', 'siteName'], order: [['flatLandNo', 'ASC']] }),
+      this.flatLandModel.findAll({ where: { status: FlatLandStatus.AVAILABLE }, attributes: ['uuid', 'flatLandNo', 'propertyType', 'projectId', 'projectName', 'siteName', 'unit', 'size', 'bedroom', 'bathroom', 'drawing', 'dining', 'kitchen', 'balcony', 'parking', 'basement', 'facing', 'amenities', 'pricePerUnit', 'parkingCost', 'utilityCharge', 'status'], order: [['flatLandNo', 'ASC']] }),
       this.bookingModel.findAll({ attributes: ['status'], group: ['status'], order: [['status', 'ASC']] }),
       this.teamMembers.findAll({ attributes: ['uuid', 'name', 'email', 'projectId'], order: [['name', 'ASC']] }),
       this.users.findAll({ where: { isActive: true }, attributes: ['uuid', 'userCode', 'name'], order: [['name', 'ASC']] }),
@@ -204,7 +194,7 @@ export class FlatLandBookingService {
       where: where as WhereOptions<FlatLandBooking>,
       include: [
         { model: this.projectModel, as: 'project', attributes: ['uuid', 'code', 'name'], include: [{ association: 'sites', attributes: ['uuid', 'code', 'name'], required: false }] },
-        { model: this.flatLandModel, as: 'flatLand', attributes: ['uuid', 'flatLandNo', 'projectName'] },
+        { model: this.flatLandModel, as: 'flatLand', attributes: ['uuid', 'flatLandNo', 'projectId', 'projectName', 'propertyType', 'unit', 'size', 'bedroom', 'bathroom', 'drawing', 'dining', 'kitchen', 'balcony', 'parking', 'basement', 'facing', 'amenities', 'pricePerUnit', 'parkingCost', 'utilityCharge', 'status'] },
       ],
       limit,
       offset: (page - 1) * limit,
@@ -254,7 +244,7 @@ export class FlatLandBookingService {
       where: { uuid } as WhereOptions<FlatLandBooking>,
       include: [
         { model: this.projectModel, as: 'project', attributes: ['uuid', 'code', 'name'], include: [{ association: 'sites', attributes: ['uuid', 'code', 'name'], required: false }] },
-        { model: this.flatLandModel, as: 'flatLand', attributes: ['uuid', 'flatLandNo', 'projectName'] },
+        { model: this.flatLandModel, as: 'flatLand', attributes: ['uuid', 'flatLandNo', 'projectId', 'projectName', 'propertyType', 'unit', 'size', 'bedroom', 'bathroom', 'drawing', 'dining', 'kitchen', 'balcony', 'parking', 'basement', 'facing', 'amenities', 'pricePerUnit', 'parkingCost', 'utilityCharge', 'status'] },
       ],
     });
     if (!booking) {
