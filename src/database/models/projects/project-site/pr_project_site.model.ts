@@ -66,10 +66,9 @@ export class Site
 
   @ForeignKey(() => Project)
   @Column({
-              field: 'project_id',
-              type: DataType.UUID,
-              allowNull: false,
-            })
+    type: DataType.UUID,
+    allowNull: false,
+  })
   declare projectId: string;
 
   @BelongsTo(() => Project, {
