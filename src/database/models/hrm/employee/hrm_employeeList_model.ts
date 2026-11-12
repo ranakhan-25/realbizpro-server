@@ -52,7 +52,6 @@ export enum MaritalStatus {
   underscored: true,
   timestamps: true,
   paranoid: true,
-  underscored: false,
   indexes: [
     {
       name: 'EmployeeList_employeeCode_idx',

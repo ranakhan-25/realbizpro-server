@@ -246,6 +246,9 @@ import { CommissionModule } from './modules/sales_management/booking/details/com
 import { DocumentsModule } from './modules/sales_management/booking/details/documents/documents.module';
 import { AgreementsModule } from './modules/sales_management/agreementview/agreementview.module';
 import { CencellationviewModule } from './modules/sales_management/cencellationview/cencellationview.module';
+import { PayInstallemntModule } from './modules/sales_management/pay_installemnt/pay_installemnt.module';
+import { CommissionFormModule } from './modules/sales_management/commmission/commission_form/commission_form.module';
+import { ApprovalModule as BookingApprovalModule } from './modules/sales_management/approvals/approvals.module';
 
 
 @Module({
@@ -320,7 +323,7 @@ import { CencellationviewModule } from './modules/sales_management/cencellationv
     UsersModule,
     MenuModule,
     ModuleUserModule,
-    ApprovalsModule,
+    BookingApprovalModule,
     NotificationModule,
     EmailModule,
     MaterialRequisitionModule,
@@ -518,6 +521,8 @@ import { CencellationviewModule } from './modules/sales_management/cencellationv
     DocumentsModule,
     AgreementsModule,
     CencellationviewModule,
+    PayInstallemntModule,
+    CommissionFormModule,
 
   ],
   controllers: [AppController, HealthController],

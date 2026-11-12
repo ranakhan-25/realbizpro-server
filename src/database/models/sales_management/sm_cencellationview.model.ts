@@ -36,6 +36,13 @@ export enum CancellationStatus {
   timestamps: true,
   paranoid: true,
   underscored: true,
+  indexes: [
+    {
+      name: 'cancellations_cancellation_code',
+      unique: true,
+      fields: ['cancellation_code'],
+    },
+  ],
 })
 export class Cancellation extends Model<Cancellation> {
   @PrimaryKey
@@ -43,7 +50,6 @@ export class Cancellation extends Model<Cancellation> {
   @Column({ type: DataType.UUID })
   declare id: string;
 
-  @Index({ unique: true })
   @Column({
     type: DataType.STRING(20),
     allowNull: false,

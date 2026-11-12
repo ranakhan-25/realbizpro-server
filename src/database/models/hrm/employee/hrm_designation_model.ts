@@ -29,19 +29,11 @@ export enum DesignationStatus {
   timestamps: true,
   paranoid: true,
   indexes: [
-<<<<<<< HEAD
     { name: 'Designation_name_idx', fields: ['name'] },
-    { name: 'Designation_departmentId_idx', fields: ['departmentId'] },
-=======
-    {
-      name: 'Designation_name_idx',
-      fields: ['name'],
-    },
     {
       name: 'Designation_departmentId_idx',
       fields: ['department_id'],
     },
->>>>>>> d405268836876758f11f087297f97e00b7c1a623
     {
       name: 'Designation_departmentId_name_unique',
       unique: true,

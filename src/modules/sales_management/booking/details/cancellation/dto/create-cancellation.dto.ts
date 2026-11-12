@@ -1,37 +1,85 @@
 /* eslint-disable prettier/prettier */
-import { IsString, IsNumber, IsOptional, IsISO8601, Min } from 'class-validator';
-import { Type } from 'class-transformer';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsBoolean, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
 export class CreateCancellationDto {
-  @IsString() cancellationId: string;
-  @IsString() @IsOptional() status?: string;
+  // ✅ bookingId ফিল্ডটি এখানে যোগ করা হলো, যাতে whitelistValidation এরর না দেয়
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  bookingId?: string;
 
-  @IsISO8601({ strict: true }) cancellationDate: string;
-  @IsString() @IsOptional() processedBy?: string;
-  @IsString() reason: string;
-  @IsString() @IsOptional() notes?: string;
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  cancellationId?: string;
 
-  // Financials
-  @IsNumber() @Min(0) @Type(() => Number) totalPaid: number;
-  @IsNumber() @Min(0) @Type(() => Number) cancellationFee: number;
-  @IsNumber() @Min(0) @Type(() => Number) refundAmount: number;
-  @IsString() @IsOptional() refundMethod?: string;
-  @IsString() @IsOptional() refundTxnId?: string;
-  @IsISO8601({ strict: true }) @IsOptional() refundDate?: string;
-  @IsString() @IsOptional() refundStatus?: string;
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  reason?: string;
 
-  // Property Snapshot
-  @IsString() propertyName: string;
-  @IsString() @IsOptional() propertyCode?: string;
-  @IsString() @IsOptional() propertyType?: string;
-  @IsString() @IsOptional() propertyArea?: string;
-  @IsString() @IsOptional() propertyImage?: string;
-  @IsString() @IsOptional() propertyLocation?: string;
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  cancellationDate?: string;
 
-  // Buyer Snapshot
-  @IsString() buyerName: string;
-  @IsString() @IsOptional() buyerEmail?: string;
-  @IsString() @IsOptional() buyerPhone?: string;
-  @IsString() @IsOptional() buyerAvatar?: string;
-  @IsString() @IsOptional() buyerNid?: string;
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  refundDate?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  refundAmount?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  penaltyFee?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  cancellationFee?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  totalPaid?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  notes?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  isAcknowledged?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  status?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  processedBy?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  propertyName?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  buyerName?: string;
 }

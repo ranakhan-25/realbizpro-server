@@ -1,24 +1,81 @@
 /* eslint-disable prettier/prettier */
-import { IsString, IsOptional, IsBoolean, IsISO8601 } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateAgreementDto {
-  @IsISO8601({ strict: true })
+  @ApiPropertyOptional()
   @IsOptional()
+  @IsString()
+  agreementCode?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  buyer?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  buyerAvatar?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  buyerEmail?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  buyerPhone?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  property?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  propertyCode?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  propertyType?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  price?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  advance?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  date?: string;
+
+  @ApiPropertyOptional({ type: String, format: 'date' })
+  @IsOptional()
+  @IsString()
   agreementDate?: string;
 
-  @IsBoolean()
+  @ApiPropertyOptional()
   @IsOptional()
-  signedByBuyer?: boolean;
-
-  @IsBoolean()
-  @IsOptional()
-  signedBySeller?: boolean;
-
   @IsString()
-  @IsOptional()
-  documentUrl?: string;
+  status?: string;
 
-  @IsString()
+  @ApiPropertyOptional()
   @IsOptional()
+  @IsString()
+  image?: string;
+
+  // ✅ notes ফিল্ডটি যোগ করা হলো
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
   notes?: string;
 }

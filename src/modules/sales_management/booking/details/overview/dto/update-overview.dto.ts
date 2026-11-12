@@ -1,8 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { PartialType } from '@nestjs/mapped-types';
+import { PartialType } from '@nestjs/swagger';
 import { CreateOverviewDto } from './create-overview.dto';
-import { IsString, IsOptional } from 'class-validator';
 
-export class UpdateOverviewDto extends PartialType(CreateOverviewDto) {
-  @IsString() @IsOptional() updatedBy?: string;
-}
+export class UpdateOverviewDto extends PartialType(CreateOverviewDto) {}

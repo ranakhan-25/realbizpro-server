@@ -1,5 +1,4 @@
 /* eslint-disable prettier/prettier */
-
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
@@ -13,6 +12,22 @@ export class BookingService {
     @InjectModel(Booking)
     private readonly bookingModel: typeof Booking,
   ) {}
+
+  // ✅ নতুন যোগ করা create মেথড (অটোমেটিক কোড জেনারেট করে)
+  async create(dto: any): Promise<Booking> {
+    // ইউনিক বুকিং কোড তৈরি
+    const generatedCode = `BK-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    
+    try {
+      return await this.bookingModel.create({
+        ...dto,
+        bookingCode: generatedCode, // এখানে কোডটি সেট করা হলো
+      });
+    } catch (error: any) {
+      console.error("❌ Booking Create Error:", error);
+      throw new BadRequestException(error?.message || 'Failed to create booking.');
+    }
+  }
 
   async findAll(query: QueryBookingDto) {
     const { page = '1', limit = '10', search, ...filters } = query;
@@ -64,7 +79,7 @@ export class BookingService {
     try {
       await booking.update(updateData);
       return this.findOne(uuid);
-    } catch (error) {
+    } catch (error: any) {
       console.error("❌ Booking Update Error:", error);
       throw new BadRequestException(error?.message || 'Failed to update booking.');
     }

@@ -34,6 +34,8 @@ export class BookingReferenceService {
 
     if (mainBooking) return mainBooking.uuid;
 
-    throw new NotFoundException(`Booking ${identifier} not found`);
+    throw new NotFoundException(
+      `Booking reference "${identifier}" was not found. Use the exact booking UUID, bookingId, or bookingCode returned by the booking create/list API.`,
+    );
   }
 }

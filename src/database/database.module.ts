@@ -74,10 +74,12 @@ import { BookingRegistration } from './models/sales_management/sm_booking_regist
 import { BookingTransfer } from './models/sales_management/sm_booking_transfer.model';
 import { BookingInstallment } from './models/sales_management/sm_booking_installment.model';
 import { PayCommission } from './models/sales_management/sm_pay_commission.model';
-import { BookingCreate as Booking } from './models/sales_management/sm_booking_create_model';
+import { BookingCreate as Booking, BookingCreate } from './models/sales_management/sm_booking_create_model';
 import { MainBooking } from './models/sales_management/sm_main_booking.model';
+import { InstallmentPlan, Installment } from './models/sales_management/sm_pay_installsment_model';
+import { Commission } from './models/sales_management/sm_commission_form_model';
+import { BookingDetails } from './models/sales_management/sm_booking_details_model';
 
-@Global()
 @Module({
   imports: [
     SequelizeModule.forRootAsync({
@@ -157,8 +159,11 @@ import { MainBooking } from './models/sales_management/sm_main_booking.model';
       PayCommission,
       Booking,
       MainBooking,
-      
-      
+      InstallmentPlan,
+      Commission,
+      BookingDetails,
+      BookingCreate,
+       
     ]),
   ],
   providers: [

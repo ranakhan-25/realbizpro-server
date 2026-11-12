@@ -25,9 +25,6 @@ export enum DepartmentStatus {
   underscored: true,
   timestamps: true,
   paranoid: true,
-<<<<<<< HEAD
-  underscored: false,
-=======
   indexes: [
     {
       name: 'Department_name_idx',
@@ -42,7 +39,6 @@ export enum DepartmentStatus {
       fields: ['deleted_at'],
     },
   ],
->>>>>>> d405268836876758f11f087297f97e00b7c1a623
 })
 export class Department
   extends BaseModel<

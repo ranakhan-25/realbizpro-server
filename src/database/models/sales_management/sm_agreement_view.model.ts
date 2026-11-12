@@ -8,7 +8,6 @@ import {
   CreatedAt,
   UpdatedAt,
   DeletedAt,
-  Index,
 } from 'sequelize-typescript';
 
 export enum AgreementStatus {
@@ -29,6 +28,13 @@ export enum PropertyType {
   timestamps: true,
   paranoid: true, // enables soft-delete (deletedAt)
   underscored: true,
+  indexes: [
+    {
+      name: 'agreements_agreement_code',
+      unique: true,
+      fields: ['agreement_code'],
+    },
+  ],
 })
 export class Agreement extends Model<Agreement> {
   @PrimaryKey
@@ -36,7 +42,6 @@ export class Agreement extends Model<Agreement> {
   @Column({ type: DataType.UUID })
   declare id: string;
 
-  @Index({ unique: true })
   @Column({
     type: DataType.STRING(20),
     allowNull: false,
