@@ -131,12 +131,30 @@ export class ShareUserTenantHooksService implements OnModuleInit {
 
       if (!hasOrgId && !hasCreatedBy) continue;
 
-      const buildScope = (ctx: { orgId: number; email: string }) =>
-        hasOrgId ? { orgId: ctx.orgId } : { createdBy: ctx.email };
+      const userVal = (c: any) => (stringCreatedBy ? c.email : c.shareUserId);
+
+      const buildScope = (ctx: { orgId: number; email: string; shareUserId: number }) => {
+        if (hasCreatedBy) {
+          return { createdBy: userVal(ctx) };
+        }
+        if (hasOrgId && ctx.orgId) {
+          return { orgId: ctx.orgId };
+        }
+        return {};
+      };
+
       const orgField = rawAttrs.orgId?.field || 'orgId';
       const createdByField = rawAttrs.createdBy?.field || 'createdBy';
-      const buildMappedScope = (ctx: { orgId: number; email: string }) =>
-        hasOrgId ? { [orgField]: ctx.orgId } : { [createdByField]: ctx.email };
+
+      const buildMappedScope = (ctx: { orgId: number; email: string; shareUserId: number }) => {
+        if (hasCreatedBy) {
+          return { [createdByField]: userVal(ctx) };
+        }
+        if (hasOrgId && ctx.orgId) {
+          return { [orgField]: ctx.orgId };
+        }
+        return {};
+      };
 
       model.addHook('beforeFind', 'shareUserTenantFind', (options: any) => {
         const ctx = getShareUserTenant();
@@ -153,16 +171,16 @@ export class ShareUserTenantHooksService implements OnModuleInit {
       model.addHook('beforeCreate', 'shareUserTenantCreate', (instance: any) => {
         const ctx = getShareUserTenant();
         if (!ctx) return;
-        if (hasOrgId) instance.setDataValue('orgId', ctx.orgId);
-        if (stringCreatedBy) instance.setDataValue('createdBy', ctx.email);
+        if (hasOrgId && ctx.orgId) instance.setDataValue('orgId', ctx.orgId);
+        if (hasCreatedBy) instance.setDataValue('createdBy', userVal(ctx));
       });
 
       model.addHook('beforeBulkCreate', 'shareUserTenantBulkCreate', (instances: any[]) => {
         const ctx = getShareUserTenant();
         if (!ctx || !Array.isArray(instances)) return;
         for (const instance of instances) {
-          if (hasOrgId) instance.setDataValue('orgId', ctx.orgId);
-          if (stringCreatedBy) instance.setDataValue('createdBy', ctx.email);
+          if (hasOrgId && ctx.orgId) instance.setDataValue('orgId', ctx.orgId);
+          if (hasCreatedBy) instance.setDataValue('createdBy', userVal(ctx));
         }
       });
 

@@ -18,14 +18,13 @@ export class ShareUserTenantInterceptor implements NestInterceptor {
 
     if (
       user?.authType === 'share-user' &&
-      user?.orgId &&
       user?.email
     ) {
       const store = {
         authType: 'share-user' as const,
         shareUserId: Number(user.shareUserId ?? user.id),
         email: String(user.email).trim().toLowerCase(),
-        orgId: Number(user.orgId),
+        orgId: user.orgId ? Number(user.orgId) : 0,
       };
 
       return new Observable((subscriber) => {

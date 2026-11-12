@@ -156,4 +156,31 @@ export class ShareUserService {
     await user.update({ status: blocked ? ShareUserStatus.BLOCKED : ShareUserStatus.ACTIVE, refreshTokenHash: blocked ? null : user.refreshTokenHash });
     return this.safeUser(user);
   }
+
+  async adminCreateUser(dto: RegisterShareUserDto) {
+    const existing = await this.userModel.findOne({ where: { [Op.or]: [{ email: dto.email }, ...(dto.phone ? [{ phone: dto.phone }] : [])] } });
+    if (existing) throw new ConflictException('A Share User with this email or phone already exists');
+    const passwordHash = await argon2.hash(dto.password);
+    const user = await this.userModel.create({
+      name: dto.name,
+      email: dto.email,
+      phone: dto.phone,
+      passwordHash,
+      role: ShareUserRole.OWNER,
+      status: ShareUserStatus.ACTIVE,
+      emailVerified: true,
+    } as any);
+    return { message: 'Share User created successfully.', user: this.safeUser(user) };
+  }
+
+  async adminUpdateUser(uuid: string, data: { name?: string; phone?: string; password?: string }) {
+    const user = await this.userModel.findOne({ where: { uuid } });
+    if (!user) throw new NotFoundException('Share User not found');
+    const updates: Record<string, unknown> = {};
+    if (data.name) updates.name = data.name;
+    if (data.phone !== undefined) updates.phone = data.phone || null;
+    if (data.password) updates.passwordHash = await argon2.hash(data.password);
+    await user.update(updates);
+    return this.safeUser(user);
+  }
 }
