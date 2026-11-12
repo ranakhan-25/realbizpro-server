@@ -4,6 +4,7 @@ import {
   IsDateString,
   IsNotEmpty,
   IsNumber,
+  IsObject,
   IsOptional,
   IsString,
   IsUUID,
@@ -13,13 +14,13 @@ import {
 
 export class CreateFlatLandBookingDto {
   @ApiPropertyOptional({ format: 'uuid' })
-  @IsOptional()
   @IsUUID()
+  @IsNotEmpty()
   projectId?: string;
 
   @ApiPropertyOptional({ format: 'uuid' })
-  @IsOptional()
   @IsUUID()
+  @IsNotEmpty()
   flatLandId?: string;
 
   @ApiProperty({ example: 'Booking-2902887' })
@@ -116,6 +117,11 @@ export class CreateFlatLandBookingDto {
   @IsOptional()
   @IsString()
   status?: string;
+
+  @ApiPropertyOptional({ type: 'object', additionalProperties: true })
+  @IsOptional()
+  @IsObject()
+  details?: Record<string, unknown>;
     @ApiPropertyOptional({ example: 'user-uuid' })
     @IsOptional()
     @IsString()

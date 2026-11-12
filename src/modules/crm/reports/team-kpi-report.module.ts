@@ -12,5 +12,6 @@ import { TeamKpiReportService } from './team-kpi-report.service';
   imports: [SequelizeModule.forFeature([CrmEmployeeKpi, LeadActivity, LeadTeam, LeadTeamMember, SysUser])],
   controllers: [TeamKpiReportController],
   providers: [TeamKpiReportService],
+  exports: [TeamKpiReportService],
 })
 export class TeamKpiReportModule {}

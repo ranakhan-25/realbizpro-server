@@ -63,6 +63,28 @@ export class Task
   })
   declare taskName: string;
 
+  @ForeignKey(() => Task)
+  @Column({
+    field: 'parent_task_id',
+    type: DataType.UUID,
+    allowNull: true,
+  })
+  declare parentTaskId?: string | null;
+
+  @BelongsTo(() => Task, {
+    foreignKey: 'parentTaskId',
+    targetKey: 'uuid',
+    as: 'parentTask',
+  })
+  declare parentTask?: Task | null;
+
+  @HasMany(() => Task, {
+    foreignKey: 'parentTaskId',
+    sourceKey: 'uuid',
+    as: 'subtasks',
+  })
+  declare subtasks?: Task[];
+
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
