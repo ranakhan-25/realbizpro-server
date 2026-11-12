@@ -29,10 +29,7 @@ export enum DesignationStatus {
   timestamps: true,
   paranoid: true,
   indexes: [
-    {
-      name: 'Designation_name_idx',
-      fields: ['name'],
-    },
+    { name: 'Designation_name_idx', fields: ['name'] },
     {
       name: 'Designation_departmentId_idx',
       fields: ['department_id'],
@@ -42,10 +39,7 @@ export enum DesignationStatus {
       unique: true,
       fields: ['department_id', 'name'],
     },
-    {
-      name: 'Designation_deletedAt_idx',
-      fields: ['deleted_at'],
-    },
+    { name: 'Designation_deletedAt_idx', fields: ['deleted_at'] },
   ],
 })
 export class Designation

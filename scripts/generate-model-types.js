@@ -759,8 +759,21 @@ export interface ${className}WithRelations extends ${className}Attributes {${
     const imports = [];
 
     Array.from(relatedModels).forEach((model) => {
-      const modelFilePath =
-        this.modelLocations.get(model);
+      let importedModelName = model;
+      let modelFilePath = this.modelLocations.get(model);
+
+      // Resolve relation aliases such as `MainBooking as Booking`.
+      if (!modelFilePath) {
+        const relationSource = this.project.getSourceFile(originalFilePath);
+        const aliasedImport = relationSource?.getImportDeclarations()
+          .flatMap((imp) => imp.getNamedImports())
+          .find((named) => named.getAliasNode()?.getText() === model);
+
+        if (aliasedImport) {
+          importedModelName = aliasedImport.getName();
+          modelFilePath = this.modelLocations.get(importedModelName);
+        }
+      }
 
       if (modelFilePath) {
         console.log(
@@ -781,8 +794,11 @@ export interface ${className}WithRelations extends ${className}Attributes {${
           relativePath = '../' + relativePath;
         }
 
+        const importName = importedModelName === model
+          ? importedModelName
+          : `${importedModelName} as ${model}`;
         imports.push(
-          `import type { ${model} } from '${relativePath}';`,
+          `import type { ${importName} } from '${relativePath}';`,
         );
         console.log(
           `✅ Generated import: import type { ${model} } from '${relativePath}';`,

@@ -132,7 +132,6 @@ export class EmployeeList
   @Column({
     type: DataType.STRING,
     allowNull: false,
-    unique: true,
   })
   declare employeeCode: string;
 

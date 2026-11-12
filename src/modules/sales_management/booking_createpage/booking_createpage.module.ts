@@ -2,7 +2,7 @@
 
 import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { Booking } from '../../../database/models/sales_management/sm_booking_create_model';
+import { BookingCreate as Booking } from '../../../database/models/sales_management/sm_booking_create_model';
 import { BookingService } from './booking_createpage.service';
 import { BookingController } from './booking_createpage.controller';
 

@@ -25,19 +25,19 @@ export class UpdateBookingDto {
 
   @IsString()
   @IsOptional()
-  customerName?: string;
+  buyerName?: string;
 
   @IsString()
   @IsOptional()
-  customerPhone?: string;
+  buyerPhone?: string;
 
   @IsEmail()
   @IsOptional()
-  customerEmail?: string;
+  buyerEmail?: string;
 
   @IsString()
   @IsOptional()
-  customerNid?: string;
+  buyerNid?: string;
 
   @IsString()
   @IsOptional()
