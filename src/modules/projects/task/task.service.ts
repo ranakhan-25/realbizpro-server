@@ -31,11 +31,15 @@ export class TaskService {
     userId?: number,
     currentUser?: any,
   ): Promise<Task> {
+    const projectId = dto.projectId ?? currentUser?.projectId ?? null;
+    if (dto.parentTaskId) {
+      await this.validateParentTask(dto.parentTaskId, projectId);
+    }
     const task =
       await this.taskModel.create({
         createdBy: userId ? String(userId) : null,
         orgId: currentUser?.orgId ?? null,
-        projectId: currentUser?.projectId ?? null,
+        projectId,
         ...dto,
         progress: dto.progress ?? 0,
         status:
@@ -210,9 +214,32 @@ export class TaskService {
       );
     }
 
+    const parentTaskId = dto.parentTaskId !== undefined ? dto.parentTaskId : task.parentTaskId;
+    if (parentTaskId) {
+      await this.validateParentTask(parentTaskId, dto.projectId ?? task.projectId, uuid);
+    }
+
     await task.update(dto as any);
 
     return this.findOne(uuid);
+  }
+
+  private async validateParentTask(parentTaskId: string, projectId?: string | null, taskUuid?: string) {
+    const visited = new Set<string>(taskUuid ? [taskUuid] : []);
+    let currentParentId: string | null | undefined = parentTaskId;
+    while (currentParentId) {
+      if (visited.has(currentParentId)) {
+        throw new BadRequestException('Parent task selection would create a task cycle');
+      }
+      visited.add(currentParentId);
+      const parent = await this.taskModel.findOne({
+        where: { uuid: currentParentId, projectId: projectId ?? null } as any,
+      });
+      if (!parent) {
+        throw new BadRequestException('Parent task must exist in the same project');
+      }
+      currentParentId = parent.parentTaskId;
+    }
   }
 
   // =========================

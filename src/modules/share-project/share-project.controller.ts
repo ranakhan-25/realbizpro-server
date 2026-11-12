@@ -163,6 +163,14 @@ export class ShareProjectController {
   }
   @ApiBearerAuth()
   @UseGuards(ShareUserAuthGuard)
+  @Get('user/workspace')
+  userWorkspace(@Req() req: any) {
+    return this.service.userWorkspace(
+      req.user.id,
+    );
+  }
+  @ApiBearerAuth()
+  @UseGuards(ShareUserAuthGuard)
   @Get('user/notifications')
   userNotifications(@Req() req: any) {
     return this.service.userNotifications(

@@ -18,8 +18,10 @@ import { InventoryModule } from './modules/inventory/inventory.module';
 import { AppService } from './app.service';
 import { AuthLoggingInterceptor } from './common/interceptors/auth-logging.interceptor';
 import { ErrorTransformInterceptor } from './common/interceptors/error-transform.interceptor';
+import { ShareUserTenantInterceptor } from './common/interceptors/share-user-tenant.interceptor';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { CacheModule } from './common/services/cache.module';
+import { ShareUserTenantHooksService } from './database/share-user-tenant-hooks.service';
 
 import {
   getRealIP,
@@ -221,11 +223,15 @@ import { ExpenseReportsModule } from './modules/accounts/reports/expense_reports
 import { ChatsOfGroupeModule } from './modules/accounts/configuration/chats_of_groupe/chats_of_groupe.module';
 import { ChatsOfAccountsModule } from './modules/accounts/configuration/chats_of_accounts/chats_of_accounts.module';
 import { LeaveApplicationModule } from './modules/hrm/leaveapplication/leave-application.module';
+import { PaySlipModule } from './modules/hrm/pay-slip/pay-slip.module';
+import { LiveHrmReportsModule } from './modules/hrm/reports/live-hrm-reports.module';
+import { HrmKpiModule } from './modules/hrm/kpi/hrm-kpi.module';
 import { ExpenseListModule } from './modules/accounts/vouchers/expense_list/expense_list.module';
 import { ReceivedVouchersModule } from './modules/accounts/vouchers/received-vouchers/received-vouchers.module';
 import { PaymentVouchersModule } from './modules/accounts/vouchers/payment-vouchers/payment-vouchers.module';
 import { JournalVoucherModule } from './modules/accounts/vouchers/journal_vouchers/journal_vouchers.module';
 import { ContraVoucherModule } from './modules/accounts/vouchers/contra_vouchers/contra_vouchers.module';
+import { LiveReportsModule } from './modules/accounts/reports/live-reports/live-reports.module';
 import { BankReconciliationStatementModule } from './modules/accounts/bank-reconciliation/bank-reconciliation_statement/bank-reconciliation_statement.module';
 import { ListOfChequeRangeModule } from './modules/accounts/bank-reconciliation/list_of_cheque_range/list_of_cheque_range.module';
 import { ListOfChequeModule } from './modules/accounts/bank-reconciliation/list_of_cheque/list_of_cheque.module';
@@ -249,7 +255,6 @@ import { CencellationviewModule } from './modules/sales_management/cencellationv
 import { PayInstallemntModule } from './modules/sales_management/pay_installemnt/pay_installemnt.module';
 import { CommissionFormModule } from './modules/sales_management/commmission/commission_form/commission_form.module';
 import { ApprovalModule as BookingApprovalModule } from './modules/sales_management/approvals/approvals.module';
-
 
 @Module({
   imports: [
@@ -497,11 +502,15 @@ import { ApprovalModule as BookingApprovalModule } from './modules/sales_managem
     ChatsOfGroupeModule,
     ChatsOfAccountsModule,
     LeaveApplicationModule,
+    PaySlipModule,
+    LiveHrmReportsModule,
+    HrmKpiModule,
     ExpenseListModule,
     ReceivedVouchersModule,
     PaymentVouchersModule,
     JournalVoucherModule,
     ContraVoucherModule,
+    LiveReportsModule,
     BankReconciliationStatementModule,
     ListOfChequeRangeModule,
     ListOfChequeModule,
@@ -528,6 +537,7 @@ import { ApprovalModule as BookingApprovalModule } from './modules/sales_managem
   controllers: [AppController, HealthController],
   providers: [
     AppService,
+    ShareUserTenantHooksService,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
@@ -535,6 +545,10 @@ import { ApprovalModule as BookingApprovalModule } from './modules/sales_managem
     {
       provide: APP_INTERCEPTOR,
       useClass: AuthLoggingInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ShareUserTenantInterceptor,
     },
     {
       provide: APP_INTERCEPTOR,

@@ -28,6 +28,7 @@ export interface FlatLandBookingAttributes {
   due: number;
   attachment?: string | null;
   status: string;
+  details: Record<string, unknown>;
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
@@ -57,6 +58,7 @@ export interface FlatLandBookingCreationAttributes {
   due?: number; // Has default value
   attachment?: string | null;
   status?: string; // Has default value
+  details?: Record<string, unknown>; // Has default value
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;

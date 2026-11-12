@@ -48,6 +48,7 @@ export class Unit
   @Column({
     type: DataType.STRING,
     allowNull: true,
+    field: 'added_by_id',
   })
   declare addedById?: string;
 
