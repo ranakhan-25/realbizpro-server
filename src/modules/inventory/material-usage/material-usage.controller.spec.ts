@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { MaterialUsageController } from './material-usage.controller';
 import { MaterialUsageService } from './material-usage.service';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from '@/common/guards/permissions.guard';
 
 describe('MaterialUsageController', () => {
   let controller: MaterialUsageController;
@@ -21,7 +23,12 @@ describe('MaterialUsageController', () => {
           useValue: mockService,
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(PermissionsGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     controller = module.get<MaterialUsageController>(MaterialUsageController);
   });

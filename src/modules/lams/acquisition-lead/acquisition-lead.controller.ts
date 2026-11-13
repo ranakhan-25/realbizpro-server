@@ -15,22 +15,26 @@ import { UpdateAcquisitionLeadDto } from './dto/update-acquisition-lead.dto';
 import { AdvanceStageDto, RejectLeadDto } from './dto/advance-stage.dto';
 import { ApiTags, ApiOperation, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from '@/common/guards/permissions.guard';
+import { Permissions } from '@/common/decorators/permissions.decorator';
 import { CurrentUser } from '@/common/decorators/auth.decorators';
 
 @ApiTags('LAMS - Acquisition Leads')
 @ApiBearerAuth()
 @Controller('lams/acquisition-leads')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class AcquisitionLeadController {
   constructor(private readonly service: AcquisitionLeadService) {}
 
   @Post()
+  @Permissions('lams_acquisition_leads.create')
   @ApiOperation({ summary: 'Create a new acquisition lead' })
   async create(@Body() createDto: CreateAcquisitionLeadDto, @CurrentUser() user: any) {
     return this.service.create(createDto, user);
   }
 
   @Get()
+  @Permissions('lams_acquisition_leads.read')
   @ApiOperation({ summary: 'Get all acquisition leads with filters' })
   async findAll(
     @CurrentUser() user: any,
@@ -55,6 +59,7 @@ export class AcquisitionLeadController {
   }
 
   @Get(':uuid')
+  @Permissions('lams_acquisition_leads.read')
   @ApiOperation({ summary: 'Get an acquisition lead by UUID' })
   @ApiParam({ name: 'uuid', description: 'UUID of the acquisition lead' })
   async findOne(@Param('uuid') uuid: string, @CurrentUser() user: any) {
@@ -63,6 +68,7 @@ export class AcquisitionLeadController {
   }
 
   @Put(':uuid')
+  @Permissions('lams_acquisition_leads.update')
   @ApiOperation({ summary: 'Update an acquisition lead by UUID' })
   @ApiParam({ name: 'uuid', description: 'UUID of the acquisition lead' })
   async update(
@@ -74,6 +80,7 @@ export class AcquisitionLeadController {
   }
 
   @Delete(':uuid')
+  @Permissions('lams_acquisition_leads.delete')
   @ApiOperation({ summary: 'Delete an acquisition lead by UUID' })
   @ApiParam({ name: 'uuid', description: 'UUID of the acquisition lead' })
   async remove(@Param('uuid') uuid: string, @CurrentUser() user: any) {
@@ -81,6 +88,7 @@ export class AcquisitionLeadController {
   }
 
   @Post(':uuid/advance-stage')
+  @Permissions('lams_acquisition_leads.update')
   @ApiOperation({ summary: 'Advance acquisition lead workflow stage with audit remarks' })
   @ApiParam({ name: 'uuid', description: 'UUID of the lead' })
   async advanceStage(
@@ -92,6 +100,7 @@ export class AcquisitionLeadController {
   }
 
   @Post(':uuid/qualify')
+  @Permissions('lams_acquisition_leads.update')
   @ApiOperation({ summary: 'Qualify acquisition lead for technical and legal evaluation' })
   @ApiParam({ name: 'uuid', description: 'UUID of the lead' })
   async qualify(@Param('uuid') uuid: string, @CurrentUser() user: any) {
@@ -99,6 +108,7 @@ export class AcquisitionLeadController {
   }
 
   @Post(':uuid/reject')
+  @Permissions('lams_acquisition_leads.update')
   @ApiOperation({ summary: 'Reject acquisition lead with mandatory rejection reason' })
   @ApiParam({ name: 'uuid', description: 'UUID of the lead' })
   async reject(
@@ -110,6 +120,7 @@ export class AcquisitionLeadController {
   }
 
   @Get(':uuid/stage-logs')
+  @Permissions('lams_acquisition_leads.read')
   @ApiOperation({ summary: 'Get full audit trail of stage transitions for a lead' })
   @ApiParam({ name: 'uuid', description: 'UUID of the lead' })
   async getStageLogs(@Param('uuid') uuid: string, @CurrentUser() user: any) {

@@ -14,22 +14,26 @@ import { CreateNegotiationProcessDto } from './dto/create-negotiation-process.dt
 import { UpdateNegotiationProcessDto } from './dto/update-negotiation-process.dto';
 import { ApiTags, ApiOperation, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from '@/common/guards/permissions.guard';
+import { Permissions } from '@/common/decorators/permissions.decorator';
 import { CurrentUser } from '@/common/decorators/auth.decorators';
 
 @ApiTags('LAMS - Negotiation Processes')
 @ApiBearerAuth()
 @Controller('lams/negotiation-processes')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class NegotiationProcessController {
   constructor(private readonly service: NegotiationProcessService) {}
 
   @Post()
+  @Permissions('lams_negotiation_process.create')
   @ApiOperation({ summary: 'Record a new negotiation meeting round' })
   async create(@Body() createDto: CreateNegotiationProcessDto, @CurrentUser() user: any) {
     return this.service.create(createDto, user);
   }
 
   @Get()
+  @Permissions('lams_negotiation_process.read')
   @ApiOperation({ summary: 'Get all negotiation rounds with filters' })
   async findAll(
     @CurrentUser() user: any,
@@ -50,6 +54,7 @@ export class NegotiationProcessController {
   }
 
   @Get(':uuid')
+  @Permissions('lams_negotiation_process.read')
   @ApiOperation({ summary: 'Get a negotiation process by UUID' })
   @ApiParam({ name: 'uuid', description: 'UUID of the negotiation process' })
   async findOne(@Param('uuid') uuid: string, @CurrentUser() user: any) {
@@ -58,6 +63,7 @@ export class NegotiationProcessController {
   }
 
   @Put(':uuid')
+  @Permissions('lams_negotiation_process.update')
   @ApiOperation({ summary: 'Update a negotiation process by UUID' })
   @ApiParam({ name: 'uuid', description: 'UUID of the negotiation process' })
   async update(
@@ -69,6 +75,7 @@ export class NegotiationProcessController {
   }
 
   @Delete(':uuid')
+  @Permissions('lams_negotiation_process.delete')
   @ApiOperation({ summary: 'Delete a negotiation process by UUID' })
   @ApiParam({ name: 'uuid', description: 'UUID of the negotiation process' })
   async remove(@Param('uuid') uuid: string, @CurrentUser() user: any) {

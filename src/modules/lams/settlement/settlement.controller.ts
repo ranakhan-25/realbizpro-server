@@ -15,22 +15,26 @@ import { CreateSettlementDto } from './dto/create-settlement.dto';
 import { UpdateSettlementDto } from './dto/update-settlement.dto';
 import { CreateSettlementPaymentDto } from './dto/create-settlement-payment.dto';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from '@/common/guards/permissions.guard';
+import { Permissions } from '@/common/decorators/permissions.decorator';
 import { CurrentUser } from '@/common/decorators/auth.decorators';
 
 @ApiTags('LAMS - Final Settlements & Agreements')
 @ApiBearerAuth()
 @Controller('lams/settlements')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class SettlementController {
   constructor(private readonly service: SettlementService) {}
 
   @Post()
+  @Permissions('lams_settlements.create')
   @ApiOperation({ summary: 'Create a new settlement record' })
   async create(@Body() createDto: CreateSettlementDto, @CurrentUser() user: any) {
     return this.service.create(createDto, user);
   }
 
   @Get()
+  @Permissions('lams_settlements.read')
   @ApiOperation({ summary: 'Get all settlement records' })
   async findAll(
     @CurrentUser() user: any,
@@ -42,6 +46,7 @@ export class SettlementController {
   }
 
   @Get(':uuid')
+  @Permissions('lams_settlements.read')
   @ApiOperation({ summary: 'Get a settlement record by UUID' })
   @ApiParam({ name: 'uuid', description: 'UUID of the settlement record' })
   async findOne(@Param('uuid') uuid: string, @CurrentUser() user: any) {
@@ -50,6 +55,7 @@ export class SettlementController {
   }
 
   @Put(':uuid')
+  @Permissions('lams_settlements.update')
   @ApiOperation({ summary: 'Update a settlement record by UUID' })
   @ApiParam({ name: 'uuid', description: 'UUID of the settlement record' })
   async update(
@@ -61,6 +67,7 @@ export class SettlementController {
   }
 
   @Delete(':uuid')
+  @Permissions('lams_settlements.delete')
   @ApiOperation({ summary: 'Delete a settlement record by UUID' })
   @ApiParam({ name: 'uuid', description: 'UUID of the settlement record' })
   async remove(@Param('uuid') uuid: string, @CurrentUser() user: any) {
@@ -68,6 +75,7 @@ export class SettlementController {
   }
 
   @Post(':uuid/payments')
+  @Permissions('lams_settlements.update')
   @ApiOperation({ summary: 'Record an installment payment against a settlement' })
   @ApiParam({ name: 'uuid', description: 'UUID of the settlement record' })
   async recordPayment(
@@ -79,6 +87,7 @@ export class SettlementController {
   }
 
   @Get(':uuid/payments')
+  @Permissions('lams_settlements.read')
   @ApiOperation({ summary: 'Get list of recorded installment payments for a settlement' })
   @ApiParam({ name: 'uuid', description: 'UUID of the settlement record' })
   async getPayments(@Param('uuid') uuid: string, @CurrentUser() user: any) {
