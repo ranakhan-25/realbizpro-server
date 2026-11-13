@@ -103,10 +103,12 @@ export function setupGlobalConfig(
               const constraintValues = Object.values(err.constraints);
               for (const c of constraintValues) {
                 // Ensure field name is clearly stated for end-user visibility
-                if (c.toLowerCase().includes(err.property.toLowerCase())) {
+                if (err.property && c.toLowerCase().includes(err.property.toLowerCase())) {
                   list.push(c);
-                } else {
+                } else if (field) {
                   list.push(`${field}: ${c}`);
+                } else {
+                  list.push(c);
                 }
               }
             }

@@ -31,55 +31,55 @@ export class InvMovement extends BaseModel<InvMovementAttributes, InvMovementCre
 
   @Index({ name: 'idx_inv_movement_no' })
   @Column({ type: DataType.STRING(50), allowNull: false })
-  movement_no: string;
+  declare movement_no: string;
 
   @Index({ name: 'idx_inv_movement_type' })
   @Column({ type: DataType.STRING(50), allowNull: false })
-  movement_type: string; // opening, issue, return, transfer, adjustment, consumption
+  declare movement_type: string; // opening, issue, return, transfer, adjustment, consumption
 
   @Index({ name: 'idx_inv_movement_date' })
   @Column({ type: DataType.DATEONLY, allowNull: false, defaultValue: DataType.NOW })
-  movement_date: Date;
+  declare movement_date: Date;
 
   @ForeignKey(() => InvItem)
   @Index({ name: 'idx_inv_movement_item_id' })
   @Column({ type: DataType.UUID, allowNull: false })
-  item_id: string;
+  declare item_id: string;
 
   @ForeignKey(() => InvWarehouse)
   @Index({ name: 'idx_inv_movement_warehouse_id' })
   @Column({ type: DataType.BIGINT, allowNull: false })
-  warehouse_id: number;
+  declare warehouse_id: number;
 
   @Column({ type: DataType.BIGINT, allowNull: true })
-  to_warehouse_id?: number;
+  declare to_warehouse_id?: number;
 
   @Column({ type: DataType.DECIMAL(15, 4), allowNull: false, defaultValue: 0 })
-  quantity: number;
+  declare quantity: number;
 
   @Column({ type: DataType.DECIMAL(15, 2), allowNull: false, defaultValue: 0 })
-  unit_rate: number;
+  declare unit_rate: number;
 
   @Column({ type: DataType.DECIMAL(15, 2), allowNull: false, defaultValue: 0 })
-  total_amount: number;
+  declare total_amount: number;
 
   @Column({ type: DataType.STRING(50), allowNull: true })
-  reference_type?: string;
+  declare reference_type?: string;
 
   @Column({ type: DataType.STRING(100), allowNull: true })
-  reference_id?: string;
+  declare reference_id?: string;
 
   @Column({ type: DataType.STRING(150), allowNull: true })
-  issued_to?: string;
+  declare issued_to?: string;
 
   @Column({ type: DataType.TEXT, allowNull: true })
-  reason?: string;
+  declare reason?: string;
 
   @Column({ type: DataType.TEXT, allowNull: true })
-  notes?: string;
+  declare notes?: string;
 
   @Column({ type: DataType.STRING(500), allowNull: true })
-  photo_url?: string;
+  declare photo_url?: string;
 
   @Column({ type: DataType.STRING, allowNull: true, field: 'created_by' })
   declare createdBy?: string;

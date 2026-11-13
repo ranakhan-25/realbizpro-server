@@ -20,38 +20,38 @@ export class LamsSettlementPayment extends BaseModel<LamsSettlementPaymentAttrib
 
   @Index({ name: 'idx_settlement_payment_settlement_id' })
   @Column({ type: DataType.UUID, allowNull: false })
-  settlement_id: string;
+  declare settlement_id: string;
 
   @Index({ name: 'idx_settlement_payment_lead_id' })
   @Column({ type: DataType.UUID, allowNull: false })
-  lead_id: string;
+  declare lead_id: string;
 
   @Column({ type: DataType.STRING(50), allowNull: false })
-  payment_no: string;
+  declare payment_no: string;
 
   @Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 1 })
-  installment_no: number;
+  declare installment_no: number;
 
   @Column({ type: DataType.DECIMAL(15, 2), allowNull: false, defaultValue: 0 })
-  amount: number;
+  declare amount: number;
 
   @Column({ type: DataType.DATEONLY, allowNull: false, defaultValue: DataType.NOW })
-  payment_date: Date;
+  declare payment_date: Date;
 
   @Column({ type: DataType.STRING(50), allowNull: false, defaultValue: 'bank_transfer' })
-  payment_method: string;
+  declare payment_method: string;
 
   @Column({ type: DataType.STRING(100), allowNull: true })
-  reference_no?: string;
+  declare reference_no?: string;
 
   @Column({ type: DataType.STRING(50), allowNull: false, defaultValue: 'completed' })
-  status: string;
+  declare status: string;
 
   @Column({ type: DataType.TEXT, allowNull: true })
-  remarks?: string;
+  declare remarks?: string;
 
   @Column({ type: DataType.STRING(500), allowNull: true })
-  receipt_url?: string;
+  declare receipt_url?: string;
 
   @Column({ type: DataType.STRING, allowNull: true, field: 'created_by' })
   declare createdBy?: string;

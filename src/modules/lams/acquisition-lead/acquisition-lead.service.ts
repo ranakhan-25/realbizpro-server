@@ -154,7 +154,7 @@ export class AcquisitionLeadService {
     const orgId = user?.orgId || user?.orgUuid || user?.org_id;
     const lead = await this.findOne(uuid, orgId);
 
-    const fromStage = lead.lead_status;
+    const fromStage = lead.lead_status || 'Draft';
     const toStage = dto.to_stage;
 
     await this.stageLogModel.create({
@@ -162,7 +162,7 @@ export class AcquisitionLeadService {
       lead_id: lead.id,
       from_stage: fromStage,
       to_stage: toStage,
-      remarks: dto.remarks,
+      remarks: dto.remarks || 'Stage transitioned',
       transitioned_by: user?.name || user?.username || dto.transitioned_by || 'System',
       created_by: user?.id,
     } as any);

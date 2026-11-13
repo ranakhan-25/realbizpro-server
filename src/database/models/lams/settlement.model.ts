@@ -15,37 +15,37 @@ export class LamsSettlement extends BaseModel<LamsSettlementAttributes, LamsSett
 
   @Index({ name: 'idx_settlement_lead_id' })
   @Column({ type: DataType.UUID, allowNull: false })
-  lead_id: string;
+  declare lead_id: string;
 
   @Column({ type: DataType.UUID, allowNull: true })
-  owner_id?: string;
+  declare owner_id?: string;
 
   @Column({ type: DataType.DECIMAL(15, 2), allowNull: false, defaultValue: 0 })
-  agreed_amount: number;
+  declare agreed_amount: number;
 
   @Column({ type: DataType.DECIMAL(15, 2), allowNull: false, defaultValue: 0 })
-  advance_amount: number;
+  declare advance_amount: number;
 
   @Column({ type: DataType.DECIMAL(15, 2), allowNull: false, defaultValue: 0 })
-  paid_amount: number;
+  declare paid_amount: number;
 
   @Column({ type: DataType.DECIMAL(15, 2), allowNull: false, defaultValue: 0 })
-  due_amount: number;
+  declare due_amount: number;
 
   @Column({ type: DataType.STRING(50), allowNull: false, defaultValue: 'bank_transfer' })
-  payment_mode: string;
+  declare payment_mode: string;
 
   @Column({ type: DataType.DATEONLY, allowNull: true })
-  scheduled_at?: Date;
+  declare scheduled_at?: Date;
 
   @Column({ type: DataType.STRING(50), allowNull: false, defaultValue: 'pending' })
-  status: string;
+  declare status: string;
 
   @Column({ type: DataType.JSONB, allowNull: true })
-  payment_schedule?: any;
+  declare payment_schedule?: any;
 
   @Column({ type: DataType.TEXT, allowNull: true })
-  notes?: string;
+  declare notes?: string;
 
   @Column({ type: DataType.STRING, allowNull: true, field: 'created_by' })
   declare createdBy?: string;

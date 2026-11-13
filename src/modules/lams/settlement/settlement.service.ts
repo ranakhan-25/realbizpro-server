@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
+import { Op } from 'sequelize';
 import { LamsSettlement } from '../../../database/models/lams/settlement.model';
 import { LamsSettlementPayment } from '../../../database/models/lams/settlement-payment.model';
 import { CreateSettlementDto } from './dto/create-settlement.dto';
@@ -48,7 +49,8 @@ export class SettlementService {
   }
 
   async findOne(uuid: string, orgId?: string): Promise<LamsSettlement> {
-    const where: any = { uuid };
+    const isNum = !isNaN(Number(uuid)) && !String(uuid).includes('-');
+    const where: any = isNum ? { [Op.or]: [{ uuid }, { id: Number(uuid) }] } : { uuid };
     if (orgId) where.org_id = orgId;
     const record = await this.settlementModel.findOne({ where });
     if (!record) throw new NotFoundException('Settlement record not found');
@@ -84,10 +86,14 @@ export class SettlementService {
     });
     const paymentNo = `PAY-${new Date().getFullYear()}-${String(paymentCount + 1).padStart(4, '0')}`;
 
+    const sOrgId = settlement.org_id || (settlement as any).getDataValue?.('org_id') || (settlement as any).dataValues?.org_id || orgId;
+    const sUuid = settlement.uuid || (settlement as any).getDataValue?.('uuid') || (settlement as any).dataValues?.uuid || settlementUuid;
+    const sLeadId = settlement.lead_id || (settlement as any).getDataValue?.('lead_id') || (settlement as any).dataValues?.lead_id;
+
     const payment = await this.paymentModel.create({
-      org_id: settlement.org_id,
-      settlement_id: settlement.uuid,
-      lead_id: settlement.lead_id,
+      org_id: sOrgId,
+      settlement_id: sUuid,
+      lead_id: sLeadId,
       payment_no: paymentNo,
       installment_no: dto.installment_no || paymentCount + 1,
       amount: dto.amount,

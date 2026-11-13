@@ -1,21 +1,34 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsNotEmpty, IsOptional, IsBoolean } from 'class-validator';
 
 export class CreateWarehouseDto {
   @ApiProperty({ description: 'Warehouse unique code (e.g. WH-01, CEN-WH)' })
+  @IsString()
+  @IsNotEmpty()
   code: string;
 
   @ApiProperty({ description: 'Warehouse display name' })
+  @IsString()
+  @IsNotEmpty()
   name: string;
 
-  @ApiProperty({ required: false, description: 'Physical address / site location' })
+  @ApiPropertyOptional({ description: 'Physical address / site location' })
+  @IsString()
+  @IsOptional()
   location?: string;
 
-  @ApiProperty({ default: 'central', description: 'Warehouse type (central, site, transit)' })
+  @ApiPropertyOptional({ default: 'central', description: 'Warehouse type (central, site, transit)' })
+  @IsString()
+  @IsOptional()
   type?: string;
 
-  @ApiProperty({ default: true, description: 'Is warehouse active' })
+  @ApiPropertyOptional({ default: true, description: 'Is warehouse active' })
+  @IsBoolean()
+  @IsOptional()
   is_active?: boolean;
 
-  @ApiProperty({ required: false, description: 'Organization ID' })
-  org_id?: string;
+  @ApiProperty({ description: 'Organization ID', example: 'org-001' })
+  @IsString()
+  @IsNotEmpty()
+  org_id: string;
 }

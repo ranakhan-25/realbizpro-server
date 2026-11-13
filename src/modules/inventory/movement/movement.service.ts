@@ -111,13 +111,17 @@ export class MovementService {
         { transaction },
       );
     } else {
-      const newQty = Number(balance.current_qty) + deltaQty;
-      const newAvailable = Number(balance.available_qty) + deltaQty;
+      const curr = Number(balance.current_qty ?? (balance as any).getDataValue?.('current_qty') ?? 0);
+      const avail = Number(balance.available_qty ?? (balance as any).getDataValue?.('available_qty') ?? 0);
+      const validCurr = isNaN(curr) ? 0 : curr;
+      const validAvail = isNaN(avail) ? 0 : avail;
+      const newQty = validCurr + deltaQty;
+      const newAvailable = validAvail + deltaQty;
       await balance.update(
         {
           current_qty: newQty,
           available_qty: newAvailable,
-          avg_cost: rate ? rate : balance.avg_cost,
+          avg_cost: rate ? rate : (balance.avg_cost || (balance as any).getDataValue?.('avg_cost') || 0),
           last_movement_at: new Date(),
         },
         { transaction },

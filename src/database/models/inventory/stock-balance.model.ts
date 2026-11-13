@@ -42,27 +42,27 @@ export class InvStockBalance extends BaseModel<InvStockBalanceAttributes, InvSto
   @ForeignKey(() => InvWarehouse)
   @Index({ name: 'idx_stock_balance_warehouse_id' })
   @Column({ type: DataType.BIGINT, allowNull: false })
-  warehouse_id: number;
+  declare warehouse_id: number;
 
   @ForeignKey(() => InvItem)
   @Index({ name: 'idx_stock_balance_item_id' })
   @Column({ type: DataType.UUID, allowNull: false })
-  item_id: string;
+  declare item_id: string;
 
   @Column({ type: DataType.DECIMAL(15, 4), allowNull: false, defaultValue: 0 })
-  current_qty: number;
+  declare current_qty: number;
 
   @Column({ type: DataType.DECIMAL(15, 4), allowNull: false, defaultValue: 0 })
-  reserved_qty: number;
+  declare reserved_qty: number;
 
   @Column({ type: DataType.DECIMAL(15, 4), allowNull: false, defaultValue: 0 })
-  available_qty: number;
+  declare available_qty: number;
 
   @Column({ type: DataType.DECIMAL(15, 2), allowNull: false, defaultValue: 0 })
-  avg_cost: number;
+  declare avg_cost: number;
 
   @Column({ type: DataType.DATE, allowNull: true })
-  last_movement_at?: Date;
+  declare last_movement_at?: Date;
 
   @Column({ type: DataType.STRING, allowNull: true, field: 'created_by' })
   declare createdBy?: string;
