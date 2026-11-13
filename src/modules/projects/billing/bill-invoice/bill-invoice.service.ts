@@ -41,9 +41,9 @@ export class BillInvoiceService {
     // 1. Verify relations
     if (dto.customerId) {
       const customer =
-        await this.customerModel.findByPk(
-          dto.customerId,
-        );
+        await this.customerModel.findOne({
+          where: { uuid: dto.customerId } as any,
+        });
       if (!customer)
         throw new BadRequestException(
           'Customer not found',
@@ -51,9 +51,9 @@ export class BillInvoiceService {
     }
     if (dto.projectId) {
       const project =
-        await this.projectModel.findByPk(
-          dto.projectId,
-        );
+        await this.projectModel.findOne({
+          where: { uuid: dto.projectId } as any,
+        });
       if (!project)
         throw new BadRequestException(
           'Project not found',
@@ -61,9 +61,9 @@ export class BillInvoiceService {
     }
     if (dto.projectTypeId) {
       const type =
-        await this.projectTypeModel.findByPk(
-          dto.projectTypeId,
-        );
+        await this.projectTypeModel.findOne({
+          where: { uuid: dto.projectTypeId } as any,
+        });
       if (!type)
         throw new BadRequestException(
           'Project Type not found',
@@ -73,7 +73,11 @@ export class BillInvoiceService {
     // 2. Create Invoice
     const { items, ...invoiceData } = dto;
     const invoice =
-      await this.invoiceModel.create(invoiceData);
+      await this.invoiceModel.create({
+        ...invoiceData,
+        createdBy: (currentUser?.email || (userId ? String(userId) : (invoiceData as any).createdBy || 'system')) as any,
+        updatedBy: (currentUser?.email || (userId ? String(userId) : (invoiceData as any).updatedBy || 'system')) as any,
+      });
 
     // 3. Bulk create items
     if (items && items.length > 0) {
@@ -99,7 +103,15 @@ export class BillInvoiceService {
         ? Number(query.skip)
         : (page - 1) * limit;
 
+    const userConditions = currentUser ? [
+      { createdBy: currentUser.email },
+      { createdBy: String(currentUser.id) },
+    ] : [];
+
     const where: any = {};
+    if (userConditions.length > 0) {
+      where[Op.or] = userConditions;
+    }
     const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
     if (effectiveOrgId) {
       where.orgId = effectiveOrgId;

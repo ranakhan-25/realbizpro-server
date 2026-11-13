@@ -45,7 +45,7 @@ export class SupplierAccountsService {
 
     const supplierAccount =
       await this.supplierAccountsModel.create(({
-        createdBy: userId ? String(userId) : null,
+        createdBy: currentUser?.email || (userId ? String(userId) : null),
         orgId: currentUser?.orgId ?? null,
         projectId: currentUser?.projectId ?? null,
         ...supplierData,
@@ -82,6 +82,9 @@ export class SupplierAccountsService {
         : (page - 1) * limit;
 
     const where: any = {};
+    if (currentUser?.email) {
+      where.createdBy = currentUser.email;
+    }
     const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
     if (effectiveOrgId) {
       where.orgId = effectiveOrgId;
@@ -186,9 +189,13 @@ export class SupplierAccountsService {
     uuid: string,
     currentUser?: any,
   ): Promise<SupplierAccounts> {
+    const where: any = { uuid };
+    if (currentUser?.email) {
+      where.createdBy = currentUser.email;
+    }
     const supplierAccount =
       await this.supplierAccountsModel.findOne({
-        where: { uuid } as any,
+        where: where as any,
       });
 
     if (!supplierAccount) {
@@ -206,9 +213,13 @@ export class SupplierAccountsService {
     userId?: number,
     currentUser?: any,
   ): Promise<SupplierAccounts> {
+    const where: any = { uuid };
+    if (currentUser?.email) {
+      where.createdBy = currentUser.email;
+    }
     const supplierAccount =
       await this.supplierAccountsModel.findOne({
-        where: { uuid } as any,
+        where: where as any,
       });
 
     if (!supplierAccount) {
@@ -249,9 +260,13 @@ export class SupplierAccountsService {
   }
 
   async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
+    const where: any = { uuid };
+    if (currentUser?.email) {
+      where.createdBy = currentUser.email;
+    }
     const supplierAccount =
       await this.supplierAccountsModel.findOne({
-        where: { uuid } as any,
+        where: where as any,
       });
 
     if (!supplierAccount) {

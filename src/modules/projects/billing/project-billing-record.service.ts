@@ -49,13 +49,14 @@ export class ProjectBillingRecordService {
           amount: dto.amount ?? 0,
           status: dto.status ?? 'active',
           details: dto.details ?? {},
-          createdBy: userId === undefined ? undefined : String(userId),
+          createdBy: currentUser?.email || (userId === undefined ? undefined : String(userId)),
+          updatedBy: currentUser?.email || (userId === undefined ? undefined : String(userId)),
         },
         { transaction },
       );
       return record.uuid;
     });
-    return this.findOne(resource, uuid);
+    return this.findOne(resource, uuid, currentUser);
   }
 
   async findAll(
@@ -66,14 +67,23 @@ export class ProjectBillingRecordService {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const search = query.search?.trim();
-    const where: WhereOptions<ProjectBillingRecord> = {
+    const userConditions = currentUser ? [
+      { createdBy: currentUser.email },
+      { createdBy: String(currentUser.id) },
+    ] : [];
+    const where: any = {
       resource,
+      ...(userConditions.length > 0 ? { [Op.or]: userConditions } : {}),
       ...(search
         ? {
-            [Op.or]: [
-              { code: { [Op.iLike]: `%${search}%` } },
-              { title: { [Op.iLike]: `%${search}%` } },
-              { description: { [Op.iLike]: `%${search}%` } },
+            [Op.and]: [
+              {
+                [Op.or]: [
+                  { code: { [Op.iLike]: `%${search}%` } },
+                  { title: { [Op.iLike]: `%${search}%` } },
+                  { description: { [Op.iLike]: `%${search}%` } },
+                ],
+              },
             ],
           }
         : {}),
@@ -133,12 +143,12 @@ export class ProjectBillingRecordService {
           ...(recordDate !== undefined
             ? { recordDate: recordDate ? new Date(recordDate) : null }
             : {}),
-          updatedBy: userId === undefined ? undefined : String(userId),
+          updatedBy: currentUser?.email || (userId === undefined ? undefined : String(userId)),
         },
         { transaction },
       );
     });
-    return this.findOne(resource, uuid);
+    return this.findOne(resource, uuid, currentUser);
   }
 
   async remove(resourceName: string, uuid: string, userId?: number, currentUser?: any) {
@@ -148,6 +158,9 @@ export class ProjectBillingRecordService {
     });
     if (!record) {
       throw new NotFoundException(`Billing record "${uuid}" not found`);
+    }
+    if (currentUser?.email || userId) {
+      await record.update({ deletedBy: currentUser?.email || String(userId) });
     }
     await record.destroy();
     return { message: `Billing record "${uuid}" deleted successfully` };

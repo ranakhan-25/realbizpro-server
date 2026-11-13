@@ -36,7 +36,7 @@ export class ProjectShareConfigurationService {
       const configuration = await this.configurationModel.create(
         {
           ...dto,
-          createdBy: userId === undefined ? undefined : String(userId),
+          createdBy: currentUser?.email || (userId === undefined ? undefined : String(userId)),
         },
         { transaction },
       );
@@ -52,7 +52,7 @@ export class ProjectShareConfigurationService {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const search = query.search?.trim();
-    const where: WhereOptions<ProjectShareConfiguration> = search
+    const where: any = search
       ? {
           [Op.or]: [
             { titleName: { [Op.iLike]: `%${search}%` } },
@@ -61,6 +61,9 @@ export class ProjectShareConfigurationService {
           ],
         }
       : {};
+    if (currentUser?.email) {
+      where.createdBy = currentUser.email;
+    }
     const { rows, count } = await this.configurationModel.findAndCountAll({
       where: where as WhereOptions<ProjectShareConfiguration>,
       include: [{ model: this.projectModel, as: 'project', attributes: ['uuid', 'code', 'name'] }],
@@ -75,8 +78,12 @@ export class ProjectShareConfigurationService {
   }
 
   async findOne(uuid: string, currentUser?: any) {
+    const where: any = { uuid };
+    if (currentUser?.email) {
+      where.createdBy = currentUser.email;
+    }
     const configuration = await this.configurationModel.findOne({
-      where: { uuid } as WhereOptions<ProjectShareConfiguration>,
+      where: where as WhereOptions<ProjectShareConfiguration>,
       include: [{ model: this.projectModel, as: 'project', attributes: ['uuid', 'code', 'name'] }],
     });
     if (!configuration) {
@@ -92,8 +99,12 @@ export class ProjectShareConfigurationService {
     currentUser?: any,
   ) {
     await this.sequelize.transaction(async (transaction) => {
+      const where: any = { uuid };
+      if (currentUser?.email) {
+        where.createdBy = currentUser.email;
+      }
       const configuration = await this.configurationModel.findOne({
-        where: { uuid } as WhereOptions<ProjectShareConfiguration>,
+        where: where as WhereOptions<ProjectShareConfiguration>,
         transaction,
       });
       if (!configuration) {
@@ -120,8 +131,12 @@ export class ProjectShareConfigurationService {
   }
 
   async remove(uuid: string, userId?: number, currentUser?: any) {
+    const where: any = { uuid };
+    if (currentUser?.email) {
+      where.createdBy = currentUser.email;
+    }
     const configuration = await this.configurationModel.findOne({
-      where: { uuid } as WhereOptions<ProjectShareConfiguration>,
+      where: where as WhereOptions<ProjectShareConfiguration>,
     });
     if (!configuration) {
       throw new NotFoundException(`Share configuration "${uuid}" not found`);

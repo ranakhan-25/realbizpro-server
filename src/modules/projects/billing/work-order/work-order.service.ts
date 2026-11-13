@@ -266,6 +266,8 @@ export class WorkOrderService {
     payload.date = this.validateDate(
       payload.date,
     );
+    payload.createdBy = currentUser?.email || (userId ? String(userId) : 'system');
+    payload.updatedBy = currentUser?.email || (userId ? String(userId) : 'system');
 
     const order =
       await this.model.create(payload);
@@ -287,7 +289,15 @@ export class WorkOrderService {
       100,
     );
 
-    const where: WhereOptions<WorkOrderAttributes> = {};
+    const userConditions = currentUser ? [
+      { createdBy: currentUser.email },
+      { createdBy: String(currentUser.id) },
+    ] : [];
+
+    const where: any = {};
+    if (userConditions.length > 0) {
+      where[Op.or] = userConditions;
+    }
     if ((query as any)?.orgId) {
       where.orgId = (query as any).orgId;
     }
@@ -416,6 +426,7 @@ export class WorkOrderService {
       );
     }
 
+    payload.updatedBy = currentUser?.email || (userId ? String(userId) : 'system');
     await row.update(payload);
 
     return this.findOne(uuid);
@@ -432,6 +443,9 @@ export class WorkOrderService {
       );
     }
 
+    if (currentUser?.email || userId) {
+      await row.update({ deletedBy: currentUser?.email || String(userId) });
+    }
     await row.destroy();
 
     return {

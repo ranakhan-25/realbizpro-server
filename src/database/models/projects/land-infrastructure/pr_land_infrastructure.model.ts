@@ -28,8 +28,7 @@ export enum LandInfrastructureKind {
 })
 export class LandInfrastructure extends BaseModel<LandInfrastructureAttributes, LandInfrastructureCreationAttributes> {
   @ForeignKey(() => Project)
-  @Column({
-              field: 'project_id', type: DataType.UUID, allowNull: false })
+  @Column({ type: DataType.UUID, allowNull: false })
   declare projectId: string;
 
   @BelongsTo(() => Project, {
