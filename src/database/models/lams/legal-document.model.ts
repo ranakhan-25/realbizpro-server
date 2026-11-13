@@ -49,11 +49,12 @@ export class LegalDocument extends BaseModel<LegalDocumentAttributes, LegalDocum
   @Column({ type: DataType.INTEGER, allowNull: true })
   deleted_by?: number;
 
+  @Index({ name: 'idx_legal_document_org_id' })
   @Column({
     type: DataType.STRING,
-    allowNull: true,
+    allowNull: false,
   })
-  declare org_id?: string;
+  declare org_id: string;
 
   @BelongsTo(() => AcquisitionLead, { foreignKey: 'lead_id', as: 'acquisition_lead' })
   declare acquisition_lead?: AcquisitionLead;

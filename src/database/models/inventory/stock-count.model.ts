@@ -25,8 +25,9 @@ export class InvStockCount extends BaseModel<InvStockCountAttributes, InvStockCo
   @Column({ type: DataType.JSONB, allowNull: true })
   lines_json?: any;
 
-  @Column({ type: DataType.STRING, allowNull: true })
-  declare org_id?: string;
+  @Index({ name: 'idx_stock_count_org_id' })
+  @Column({ type: DataType.STRING, allowNull: false })
+  declare org_id: string;
 
   @Column({ type: DataType.STRING, allowNull: true, field: 'created_by' })
   declare createdBy?: string;

@@ -36,6 +36,20 @@ export class AcquisitionLead extends BaseModel<
   })
   declare id: any;
 
+  @Index({ name: 'idx_acquisition_lead_org_id' })
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
+  declare org_id: string;
+
+  @Index({ name: 'idx_lead_code' })
+  @Column({
+    type: DataType.STRING(50),
+    allowNull: true,
+  })
+  lead_code?: string;
+
   @Index({ name: 'idx_lead_title' })
   @Column({
     type: DataType.STRING,
@@ -54,12 +68,95 @@ export class AcquisitionLead extends BaseModel<
   @Column({ type: DataType.DECIMAL(10, 2) })
   land_area: number;
 
+  @Column({
+    type: DataType.DECIMAL(12, 4),
+    allowNull: true,
+    defaultValue: 0,
+  })
+  area_katha?: number;
+
+  @Column({
+    type: DataType.DECIMAL(15, 2),
+    allowNull: true,
+    defaultValue: 0,
+  })
+  area_sqft?: number;
+
+  @Column({
+    type: DataType.TEXT,
+    allowNull: true,
+  })
+  location?: string;
+
+  @Column({
+    type: DataType.STRING(150),
+    allowNull: true,
+  })
+  mouza?: string;
+
+  @Column({
+    type: DataType.STRING(100),
+    allowNull: true,
+  })
+  khatian_no?: string;
+
+  @Column({
+    type: DataType.STRING(100),
+    allowNull: true,
+  })
+  dag_no?: string;
+
+  @Column({
+    type: DataType.DECIMAL(15, 2),
+    allowNull: true,
+    defaultValue: 0,
+  })
+  asking_price?: number;
+
+  @Column({
+    type: DataType.STRING(100),
+    allowNull: true,
+    defaultValue: 'Direct Owner',
+  })
+  source?: string;
+
+  @Column({
+    type: DataType.STRING(20),
+    allowNull: true,
+    defaultValue: 'Medium',
+  })
+  priority?: string;
+
   @Index({ name: 'idx_lead_status' })
   @Column({
     type: DataType.STRING,
     defaultValue: 'New',
   })
   lead_status: string;
+
+  @Column({
+    type: DataType.STRING(100),
+    allowNull: true,
+  })
+  assigned_to?: string;
+
+  @Column({
+    type: DataType.TEXT,
+    allowNull: true,
+  })
+  notes?: string;
+
+  @Column({
+    type: DataType.JSONB,
+    allowNull: true,
+  })
+  co_owners_json?: any;
+
+  @Column({
+    type: DataType.STRING(500),
+    allowNull: true,
+  })
+  map_url?: string;
 
   @Index({ name: 'idx_created_by' })
   @Column({
@@ -79,12 +176,6 @@ export class AcquisitionLead extends BaseModel<
     allowNull: true,
   })
   deleted_by?: number;
-
-  @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
-  declare org_id?: string;
 
   @HasMany(() => LandOwner, { foreignKey: 'lead_id', as: 'land_owners' })
   declare land_owners?: LandOwner[];

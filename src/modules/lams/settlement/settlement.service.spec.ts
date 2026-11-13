@@ -30,6 +30,10 @@ describe('SettlementService', () => {
           provide: getModelToken(LamsSettlement),
           useValue: mockModel,
         },
+        {
+          provide: getModelToken(require('../../../database/models/lams/settlement-payment.model').LamsSettlementPayment),
+          useValue: mockModel,
+        },
       ],
     }).compile();
 
@@ -42,6 +46,7 @@ describe('SettlementService', () => {
 
   it('should create settlement record', async () => {
     const res = await service.create({
+      org_id: 'org-001',
       lead_id: 'lead-01',
       agreed_amount: 15000000,
       advance_amount: 3000000,

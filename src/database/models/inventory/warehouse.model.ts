@@ -26,8 +26,9 @@ export class InvWarehouse extends BaseModel<InvWarehouseAttributes, InvWarehouse
   @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: true })
   is_active: boolean;
 
-  @Column({ type: DataType.STRING, allowNull: true })
-  declare org_id?: string;
+  @Index({ name: 'idx_warehouse_org_id' })
+  @Column({ type: DataType.STRING, allowNull: false })
+  declare org_id: string;
 
   @Column({ type: DataType.STRING, allowNull: true, field: 'created_by' })
   declare createdBy?: string;

@@ -3,6 +3,8 @@ import { ReportsController } from './reports.controller';
 import { ReportsService } from './reports.service';
 import { getModelToken } from '@nestjs/sequelize';
 import { InvItem } from 'src/database/models/inventory/inv_item.model';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from '@/common/guards/permissions.guard';
 
 describe('ReportsController', () => {
   let controller: ReportsController;
@@ -23,7 +25,12 @@ describe('ReportsController', () => {
         { provide: ReportsService, useValue: mockReportService },
         { provide: getModelToken(InvItem), useValue: mockInvItemModel },
       ],
-    }).compile();
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(PermissionsGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     controller = module.get<ReportsController>(ReportsController);
   });

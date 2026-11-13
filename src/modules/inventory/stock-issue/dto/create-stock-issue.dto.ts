@@ -1,36 +1,59 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsNotEmpty, IsOptional, IsNumber, IsUUID, IsDateString } from 'class-validator';
 
 export class CreateStockIssueDto {
-  @ApiProperty({ required: false, description: 'Generated issue voucher code' })
+  @ApiProperty({ description: 'Organization ID', example: 'org-001' })
+  @IsString()
+  @IsNotEmpty()
+  org_id: string;
+
+  @ApiPropertyOptional({ description: 'Generated issue voucher code' })
+  @IsString()
+  @IsOptional()
   issue_code?: string;
 
-  @ApiProperty({ required: false, description: 'Source Warehouse ID' })
-  warehouse_id?: number;
+  @ApiProperty({ description: 'Source Warehouse ID' })
+  @IsNumber()
+  @IsNotEmpty()
+  warehouse_id: number;
 
   @ApiProperty({ description: 'Inventory Item UUID' })
+  @IsUUID()
+  @IsNotEmpty()
   item_id: string;
 
   @ApiProperty({ default: 0, description: 'Quantity issued' })
+  @IsNumber()
+  @IsNotEmpty()
   quantity: number;
 
-  @ApiProperty({ required: false, description: 'Issued to person / contractor / project site' })
+  @ApiPropertyOptional({ description: 'Issued to person / contractor / project site' })
+  @IsString()
+  @IsOptional()
   issued_to?: string;
 
-  @ApiProperty({ required: false, description: 'Reference type (project, work_order, maintenance)' })
+  @ApiPropertyOptional({ description: 'Reference type (project, work_order, maintenance)' })
+  @IsString()
+  @IsOptional()
   ref_type?: string;
 
-  @ApiProperty({ required: false, description: 'Reference ID or code' })
+  @ApiPropertyOptional({ description: 'Reference ID or code' })
+  @IsString()
+  @IsOptional()
   ref_id?: string;
 
-  @ApiProperty({ required: false, description: 'Transaction photo / challan URL' })
+  @ApiPropertyOptional({ description: 'Transaction photo / challan URL' })
+  @IsString()
+  @IsOptional()
   photo_url?: string;
 
-  @ApiProperty({ required: false, description: 'Date of issue (YYYY-MM-DD)' })
+  @ApiPropertyOptional({ description: 'Date of issue (YYYY-MM-DD)' })
+  @IsDateString()
+  @IsOptional()
   date?: Date;
 
-  @ApiProperty({ required: false, description: 'Notes or issue remarks' })
+  @ApiPropertyOptional({ description: 'Notes or issue remarks' })
+  @IsString()
+  @IsOptional()
   notes?: string;
-
-  @ApiProperty({ required: false, description: 'Organization ID' })
-  org_id?: string;
 }

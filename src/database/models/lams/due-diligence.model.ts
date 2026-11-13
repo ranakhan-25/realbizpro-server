@@ -28,8 +28,9 @@ export class LamsDueDiligence extends BaseModel<LamsDueDiligenceAttributes, Lams
   @Column({ type: DataType.JSONB, allowNull: true, defaultValue: [] })
   checklist_json?: any;
 
-  @Column({ type: DataType.STRING, allowNull: true })
-  declare org_id?: string;
+  @Index({ name: 'idx_due_diligence_org_id' })
+  @Column({ type: DataType.STRING, allowNull: false })
+  declare org_id: string;
 
   @Column({ type: DataType.STRING, allowNull: true, field: 'created_by' })
   declare createdBy?: string;

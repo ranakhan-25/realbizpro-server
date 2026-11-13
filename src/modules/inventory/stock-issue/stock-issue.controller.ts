@@ -9,7 +9,7 @@ import { Permissions } from '@/common/decorators/permissions.decorator';
 
 @ApiTags('Inventory - Stock Issues & Dispatches')
 @ApiBearerAuth()
-@Controller('inventory/stock-issues')
+@Controller(['inventory/stock-issues', 'inventory/issues'])
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class StockIssueController {
   constructor(private readonly service: StockIssueService) {}

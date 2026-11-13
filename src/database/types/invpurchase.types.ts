@@ -23,7 +23,7 @@ export interface InvPurchaseAttributes {
   supplier_id: string;
   project_type_id?: string | null;
   project_id?: string | null;
-  org_id?: string | null;
+  org_id: string;
   boq_title_id?: string | null;
   task_id?: string | null;
   site_id?: string | null;
@@ -50,7 +50,7 @@ export interface InvPurchaseCreationAttributes {
   supplier_id: string;
   project_type_id?: string | null;
   project_id?: string | null;
-  org_id?: string | null;
+  org_id: string;
   boq_title_id?: string | null;
   task_id?: string | null;
   site_id?: string | null;

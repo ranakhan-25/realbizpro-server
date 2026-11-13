@@ -1,13 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ReportsService } from './reports.service';
 import { getModelToken } from '@nestjs/sequelize';
+import { Sequelize } from 'sequelize-typescript';
+import { ReportsService } from './reports.service';
 import { InvItem } from 'src/database/models/inventory/inv_item.model';
 
 describe('ReportsService', () => {
   let service: ReportsService;
 
   const mockInvItemModel = {
-    // mock methods used in ReportsService if any
     findAll: jest.fn().mockResolvedValue([]),
   };
 
@@ -18,6 +18,10 @@ describe('ReportsService', () => {
         {
           provide: getModelToken(InvItem),
           useValue: mockInvItemModel,
+        },
+        {
+          provide: Sequelize,
+          useValue: { query: jest.fn().mockResolvedValue([[]]) },
         },
       ],
     }).compile();

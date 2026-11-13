@@ -1,39 +1,63 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsNotEmpty, IsOptional, IsNumber, IsUUID, IsDateString } from 'class-validator';
 
 export class CreateSettlementDto {
+  @ApiProperty({ description: 'Organization ID', example: 'org-001' })
+  @IsString()
+  @IsNotEmpty()
+  org_id: string;
+
   @ApiProperty({ description: 'Acquisition Lead UUID' })
+  @IsUUID()
+  @IsNotEmpty()
   lead_id: string;
 
-  @ApiProperty({ required: false, description: 'Landowner UUID' })
+  @ApiPropertyOptional({ description: 'Landowner UUID' })
+  @IsUUID()
+  @IsOptional()
   owner_id?: string;
 
-  @ApiProperty({ default: 0, description: 'Total agreed settlement amount' })
-  agreed_amount: number;
+  @ApiPropertyOptional({ default: 0, description: 'Total agreed settlement amount' })
+  @IsNumber()
+  @IsOptional()
+  agreed_amount?: number;
 
-  @ApiProperty({ default: 0, description: 'Advance amount disbursed' })
-  advance_amount: number;
+  @ApiPropertyOptional({ default: 0, description: 'Advance amount disbursed' })
+  @IsNumber()
+  @IsOptional()
+  advance_amount?: number;
 
-  @ApiProperty({ default: 0, description: 'Total paid to date' })
-  paid_amount: number;
+  @ApiPropertyOptional({ default: 0, description: 'Total paid to date' })
+  @IsNumber()
+  @IsOptional()
+  paid_amount?: number;
 
-  @ApiProperty({ default: 0, description: 'Outstanding due balance' })
-  due_amount: number;
+  @ApiPropertyOptional({ default: 0, description: 'Outstanding due balance' })
+  @IsNumber()
+  @IsOptional()
+  due_amount?: number;
 
-  @ApiProperty({ default: 'bank_transfer', description: 'Mode of settlement payment' })
-  payment_mode: string;
+  @ApiPropertyOptional({ default: 'bank_transfer', description: 'Mode of settlement payment' })
+  @IsString()
+  @IsOptional()
+  payment_mode?: string;
 
-  @ApiProperty({ required: false, description: 'Scheduled date of execution / settlement' })
+  @ApiPropertyOptional({ description: 'Scheduled date of execution or settlement' })
+  @IsDateString()
+  @IsOptional()
   scheduled_at?: Date;
 
-  @ApiProperty({ default: 'pending', description: 'Settlement status' })
-  status: string;
+  @ApiPropertyOptional({ default: 'pending', description: 'Settlement status' })
+  @IsString()
+  @IsOptional()
+  status?: string;
 
-  @ApiProperty({ required: false, description: 'Dynamic installment schedule breakdown JSON' })
+  @ApiPropertyOptional({ description: 'Dynamic installment schedule breakdown JSON' })
+  @IsOptional()
   payment_schedule?: any;
 
-  @ApiProperty({ required: false, description: 'Execution notes or deed remarks' })
+  @ApiPropertyOptional({ description: 'Execution notes or deed remarks' })
+  @IsString()
+  @IsOptional()
   notes?: string;
-
-  @ApiProperty({ required: false, description: 'Organization ID' })
-  org_id?: string;
 }
