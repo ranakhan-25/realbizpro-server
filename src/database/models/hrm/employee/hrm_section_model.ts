@@ -19,10 +19,10 @@ export enum SectionStatus {
 }
 
 @Table({
-  tableName: 'section',
+  tableName: 'hrm_section',
+  underscored: true,
   timestamps: true,
   paranoid: true,
-  underscored: false,
   indexes: [
     {
       name: 'Section_name_idx',

@@ -20,9 +20,9 @@ export enum UnitStatus {
 
 @Table({
   tableName: 'hrm_unit',
+  underscored: true,
   timestamps: true,
   paranoid: true,
-  underscored: false,
   indexes: [
     { name: 'HrmUnit_name_idx', fields: ['name'] },
     {

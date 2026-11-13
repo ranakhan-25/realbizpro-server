@@ -23,18 +23,18 @@ export enum IncrementStatus {
 }
 
 @Table({
-  tableName: 'increment',
+  tableName: 'hrm_increment',
+  underscored: true,
   timestamps: true,
   paranoid: true,
-  underscored: false,
   indexes: [
     {
       name: 'Increment_employeeId_idx',
-      fields: ['employeeId'],
+      fields: ['employee_id'],
     },
     {
       name: 'Increment_designationId_idx',
-      fields: ['designationId'],
+      fields: ['designation_id'],
     },
     {
       name: 'Increment_date_idx',

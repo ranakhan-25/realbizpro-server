@@ -3,7 +3,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
-import { Booking, BookingStatus } from '../../../database/models/sales_management/sm_booking_create_model';
+import { BookingCreate as Booking, BookingStatus } from '../../../database/models/sales_management/sm_booking_create_model';
 import { CreateBookingDto } from './dto/create-booking_createpage.dto';
 import { UpdateBookingDto } from './dto/update-booking_createpage.dto';
 import { QueryBookingDto } from './dto/query-booking_createpage.dto';

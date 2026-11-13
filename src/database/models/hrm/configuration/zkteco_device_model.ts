@@ -24,10 +24,10 @@ export enum ZkTecoDeviceStatus {
 }
 
 @Table({
-  tableName: 'zkteco_device',
+  tableName: 'hrm_zkteco_device',
+  underscored: true,
   timestamps: true,
   paranoid: true,
-  underscored: false,
   indexes: [
     {
       name: 'ZkTecoDevice_name_idx',

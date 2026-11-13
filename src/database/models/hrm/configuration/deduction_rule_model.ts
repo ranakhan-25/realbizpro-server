@@ -18,10 +18,10 @@ export enum DeductionRuleType {
 }
 
 @Table({
-  tableName: 'deduction_rule',
+  tableName: 'hrm_deduction_rule',
+  underscored: true,
   timestamps: true,
   paranoid: true,
-  underscored: false,
   indexes: [
     {
       name: 'DeductionRule_type_idx',

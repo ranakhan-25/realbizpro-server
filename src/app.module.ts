@@ -116,7 +116,7 @@ import { ProjectShareAssignmentModule } from './modules/projects/project-share-a
 import { CategoryModule } from './modules/projects/billing/category/category.module';
 import { SubCategoryModule } from './modules/projects/billing/sub-category/sub-category.module';
 import { FlatLandBookingModule } from './modules/projects/flat-land-booking/flat-land-booking.module';
-import { CommissionModule } from './modules/hrm/employee/employee list/commission/commission.module';
+import { CommissionModule as EmployeeCommissionModule } from './modules/hrm/employee/employee list/commission/commission.module';
 import { AllowanceModule } from './modules/hrm/employee/employee list/allowance/allowance.module';
 import { EmployeeListModule } from './modules/hrm/employee/employee list/employee-list/employee-list.module';
 import { EmployeeSalaryModule } from './modules/hrm/employee/employee list/employee-salary/employee-salary.module';
@@ -223,11 +223,15 @@ import { ExpenseReportsModule } from './modules/accounts/reports/expense_reports
 import { ChatsOfGroupeModule } from './modules/accounts/configuration/chats_of_groupe/chats_of_groupe.module';
 import { ChatsOfAccountsModule } from './modules/accounts/configuration/chats_of_accounts/chats_of_accounts.module';
 import { LeaveApplicationModule } from './modules/hrm/leaveapplication/leave-application.module';
+import { PaySlipModule } from './modules/hrm/pay-slip/pay-slip.module';
+import { LiveHrmReportsModule } from './modules/hrm/reports/live-hrm-reports.module';
+import { HrmKpiModule } from './modules/hrm/kpi/hrm-kpi.module';
 import { ExpenseListModule } from './modules/accounts/vouchers/expense_list/expense_list.module';
 import { ReceivedVouchersModule } from './modules/accounts/vouchers/received-vouchers/received-vouchers.module';
 import { PaymentVouchersModule } from './modules/accounts/vouchers/payment-vouchers/payment-vouchers.module';
 import { JournalVoucherModule } from './modules/accounts/vouchers/journal_vouchers/journal_vouchers.module';
 import { ContraVoucherModule } from './modules/accounts/vouchers/contra_vouchers/contra_vouchers.module';
+import { LiveReportsModule } from './modules/accounts/reports/live-reports/live-reports.module';
 import { BankReconciliationStatementModule } from './modules/accounts/bank-reconciliation/bank-reconciliation_statement/bank-reconciliation_statement.module';
 import { ListOfChequeRangeModule } from './modules/accounts/bank-reconciliation/list_of_cheque_range/list_of_cheque_range.module';
 import { ListOfChequeModule } from './modules/accounts/bank-reconciliation/list_of_cheque/list_of_cheque.module';
@@ -236,7 +240,21 @@ import { BookingCreatepageModule } from './modules/sales_management/booking_crea
 import { HoldModalModule } from './modules/sales_management/inventory/hold_modal/hold_modal.module';
 import { PricingFormModule } from './modules/sales_management/inventory/pricing_form/pricing_form.module';
 import { DiscountModule } from './modules/sales_management/discounts/discounts_form/discounts_form.module';
-
+import { PaymodalModule } from './modules/sales_management/commission/paymodal/paymodal.module';
+import { OverviewModule } from './modules/sales_management/booking/details/overview/overview.module';
+import { InstallmentsModule } from './modules/sales_management/booking/details/installments/installments.module';
+import { AgreementModule } from './modules/sales_management/booking/details/agreement/agreement.module';
+import { CancellationModule } from './modules/sales_management/booking/details/cancellation/cancellation.module';
+import { RegistrationModule } from './modules/sales_management/booking/details/registration/registration.module';
+import { HandoverModule } from './modules/sales_management/booking/details/handover/handover.module';
+import { TransferModule } from './modules/sales_management/booking/details/transfer/transfer.module';
+import { CommissionModule } from './modules/sales_management/booking/details/commission/commission.module';
+import { DocumentsModule } from './modules/sales_management/booking/details/documents/documents.module';
+import { AgreementsModule } from './modules/sales_management/agreementview/agreementview.module';
+import { CencellationviewModule } from './modules/sales_management/cencellationview/cencellationview.module';
+import { PayInstallemntModule } from './modules/sales_management/pay_installemnt/pay_installemnt.module';
+import { CommissionFormModule } from './modules/sales_management/commmission/commission_form/commission_form.module';
+import { ApprovalModule as BookingApprovalModule } from './modules/sales_management/approvals/approvals.module';
 
 @Module({
   imports: [
@@ -310,7 +328,7 @@ import { DiscountModule } from './modules/sales_management/discounts/discounts_f
     UsersModule,
     MenuModule,
     ModuleUserModule,
-    ApprovalsModule,
+    BookingApprovalModule,
     NotificationModule,
     EmailModule,
     MaterialRequisitionModule,
@@ -390,7 +408,7 @@ import { DiscountModule } from './modules/sales_management/discounts/discounts_f
     BonusGenerateModule,
     SectionModule,
     UnitModule,
-    CommissionModule,
+    EmployeeCommissionModule,
     AllowanceModule,
     EmployeeListModule,
     EmployeeSalaryModule,
@@ -484,11 +502,15 @@ import { DiscountModule } from './modules/sales_management/discounts/discounts_f
     ChatsOfGroupeModule,
     ChatsOfAccountsModule,
     LeaveApplicationModule,
+    PaySlipModule,
+    LiveHrmReportsModule,
+    HrmKpiModule,
     ExpenseListModule,
     ReceivedVouchersModule,
     PaymentVouchersModule,
     JournalVoucherModule,
     ContraVoucherModule,
+    LiveReportsModule,
     BankReconciliationStatementModule,
     ListOfChequeRangeModule,
     ListOfChequeModule,
@@ -497,6 +519,19 @@ import { DiscountModule } from './modules/sales_management/discounts/discounts_f
     HoldModalModule,
     PricingFormModule,
     DiscountModule,
+    PaymodalModule,
+    OverviewModule,
+    InstallmentsModule,
+    AgreementModule,
+    CancellationModule,
+    RegistrationModule,
+    HandoverModule,
+    TransferModule,
+    DocumentsModule,
+    AgreementsModule,
+    CencellationviewModule,
+    PayInstallemntModule,
+    CommissionFormModule,
 
   ],
   controllers: [AppController, HealthController],

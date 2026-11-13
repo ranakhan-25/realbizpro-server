@@ -19,10 +19,10 @@ export enum LeaveTypeStatus {
 }
 
 @Table({
-  tableName: 'leave_type',
+  tableName: 'hrm_leave_type',
+  underscored: true,
   timestamps: true,
   paranoid: true,
-  underscored: false,
   indexes: [
     {
       name: 'LeaveType_name_idx',

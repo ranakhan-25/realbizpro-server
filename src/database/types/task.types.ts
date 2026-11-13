@@ -4,6 +4,7 @@
 import { TaskPriority } from '../models/projects/task/pr_task.model';
 import { TaskStatus } from '../models/projects/task/pr_task.model';
 
+import type { Task } from '../models/projects/task/pr_task.model';
 import type { ProcurementRfq } from '../models/procurement/rfq/pr_rfq.model';
 import type { ProcurementAssetRfq } from '../models/procurement/rfq/pr_asset_rfq.model';
 import type { ProcurementMaterialRequisition } from '../models/procurement/requisition/pr_material_requisition.model';
@@ -23,6 +24,7 @@ export interface TaskAttributes {
   deletedAt?: Date;
   uid?: string | null;
   taskName: string;
+  parentTaskId?: string | null;
   progress: number;
   priority: TaskPriority;
   startDate?: Date | null;
@@ -40,6 +42,8 @@ export interface TaskAttributes {
   projectId?: string | null;
 
   // Relations
+  parentTask?: Task | null;
+  subtasks?: Task[];
   procurementRfqs?: ProcurementRfq[];
   procurementAssetRfqs?: ProcurementAssetRfq[];
   procurementMaterialRequisitions?: ProcurementMaterialRequisition[];
@@ -55,6 +59,7 @@ export interface TaskAttributes {
 export interface TaskCreationAttributes {
   uid?: string | null;
   taskName: string;
+  parentTaskId?: string | null;
   progress?: number; // Has default value
   priority?: TaskPriority; // Has default value
   startDate?: Date | null;
@@ -76,6 +81,8 @@ export type TaskUpdateAttributes = Partial<TaskCreationAttributes>;
 
 // Helper type for including relations
 export interface TaskWithRelations extends TaskAttributes {
+  parentTask?: Task | null;
+  subtasks?: Task[];
   procurementRfqs?: ProcurementRfq[];
   procurementAssetRfqs?: ProcurementAssetRfq[];
   procurementMaterialRequisitions?: ProcurementMaterialRequisition[];

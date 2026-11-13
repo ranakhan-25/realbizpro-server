@@ -16,7 +16,7 @@ export class FlatLandReportController {
   constructor(private readonly bookingService: FlatLandBookingService) {}
 
   @Get('sales')
-  @Permissions('sales_projects_flat_land_report')
+  @Permissions('list_projects_flat_land_booking')
   @ApiOperation({ summary: 'List flat/land sales report rows' })
   sales(
     @Query() query: QueryFlatLandBookingDto, @CurrentUser() currentUser: any
@@ -25,7 +25,7 @@ export class FlatLandReportController {
   }
 
   @Get('collection')
-  @Permissions('collection_projects_flat_land_report')
+  @Permissions('list_projects_flat_land_booking')
   @ApiOperation({ summary: 'List flat/land collection report rows' })
   collection(
     @Query() query: QueryFlatLandBookingDto, @CurrentUser() currentUser: any
@@ -34,7 +34,7 @@ export class FlatLandReportController {
   }
 
   @Get('aging')
-  @Permissions('aging_projects_flat_land_report')
+  @Permissions('list_projects_flat_land_booking')
   @ApiOperation({ summary: 'List outstanding flat/land bookings' })
   aging(
     @Query() query: QueryFlatLandBookingDto, @CurrentUser() currentUser: any
@@ -43,7 +43,7 @@ export class FlatLandReportController {
   }
 
   @Get('installments')
-  @Permissions('installments_projects_flat_land_report')
+  @Permissions('list_projects_flat_land_booking')
   @ApiOperation({ summary: 'List flat/land installment balances' })
   installments(
     @Query() query: QueryFlatLandBookingDto, @CurrentUser() currentUser: any
@@ -52,7 +52,7 @@ export class FlatLandReportController {
   }
 
   @Get('plot-distribution')
-  @Permissions('plot_distribution_projects_flat_land_report')
+  @Permissions('list_projects_flat_land_booking')
   @ApiOperation({ summary: 'List land plot distribution' })
   plotDistribution(
     @Query() query: QueryFlatLandBookingDto, @CurrentUser() currentUser: any

@@ -64,8 +64,22 @@ import { ShareProjectDocument } from './models/share-project/share-project-docum
 import { ShareProjectSubmission } from './models/share-project/share-project-submission.model';
 import { ShareProjectReview } from './models/share-project/share-project-review.model';
 import { ShareProjectStatusHistory } from './models/share-project/share-project-status-history.model';
+import { BookingAgreement } from './models/sales_management/sm_booking_agreement.model';
+import { BookingCancellation } from './models/sales_management/sm_booking_cancellation.model';
+import { BookingCommission } from './models/sales_management/sm_booking_commission.model';
+import { BookingDocument } from './models/sales_management/sm_booking_document.model';
+import { BookingHandover } from './models/sales_management/sm_booking_handover.model';
+import { BookingOverview } from './models/sales_management/sm_booking_overview.model';
+import { BookingRegistration } from './models/sales_management/sm_booking_registration.model';
+import { BookingTransfer } from './models/sales_management/sm_booking_transfer.model';
+import { BookingInstallment } from './models/sales_management/sm_booking_installment.model';
+import { PayCommission } from './models/sales_management/sm_pay_commission.model';
+import { BookingCreate as Booking, BookingCreate } from './models/sales_management/sm_booking_create_model';
+import { MainBooking } from './models/sales_management/sm_main_booking.model';
+import { InstallmentPlan, Installment } from './models/sales_management/sm_pay_installsment_model';
+import { Commission } from './models/sales_management/sm_commission_form_model';
+import { BookingDetails } from './models/sales_management/sm_booking_details_model';
 
-@Global()
 @Module({
   imports: [
     SequelizeModule.forRootAsync({
@@ -132,7 +146,24 @@ import { ShareProjectStatusHistory } from './models/share-project/share-project-
       ShareProjectDocument,
       ShareProjectSubmission,
       ShareProjectReview,
-      ShareProjectStatusHistory,
+      ShareProjectStatusHistory, 
+      BookingAgreement,
+      BookingCancellation,
+      BookingCommission,
+      BookingDocument,
+      BookingHandover,
+      BookingOverview,
+      BookingRegistration,
+      BookingTransfer,
+      BookingInstallment,
+      PayCommission,
+      Booking,
+      MainBooking,
+      InstallmentPlan,
+      Commission,
+      BookingDetails,
+      BookingCreate,
+       
     ]),
   ],
   providers: [

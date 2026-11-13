@@ -12,20 +12,20 @@ import type {
   CommissionAttributes,
   CommissionCreationAttributes,
   CommissionUpdateAttributes,
-} from 'src/database/types/commission.types';
+} from 'src/database/types/hrm_commission.types';
 import { EmployeeList } from './hrm_employeeList_model';
 import { SysOrganization } from "src/database/models/system/sys_organization.model";
 import { Project } from "src/database/models/projects/project/pr_project.model";
 
 @Table({
-  tableName: 'commission',
+  tableName: 'hrm_commission',
+  underscored: true,
   timestamps: true,
   paranoid: true,
-  underscored: false,
   indexes: [
     {
       name: 'Commission_employeeId_idx',
-      fields: ['employeeId'],
+      fields: ['employee_id'],
     },
     {
       name: 'Commission_deletedAt_idx',

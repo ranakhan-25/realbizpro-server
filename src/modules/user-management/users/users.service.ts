@@ -1767,16 +1767,33 @@ export class UsersService {
         return true;
       }
 
-      // Single query to check if user has all required permissions
+      // Unified query: check direct user permissions, assigned role permissions, AND feature overrides from User Wizard
       const query = `
         SELECT COUNT(DISTINCT p.key) as matched_count
         FROM sys_permissions p
-        INNER JOIN sys_user_permissions up 
-          ON p.id = up.permission_id
-        WHERE up.user_id = :userId
+        LEFT JOIN sys_user_permissions up 
+          ON p.id = up.permission_id AND up.user_id = :userId AND up.deleted_at IS NULL
+        LEFT JOIN sys_user_feature_overrides ufo 
+          ON p.feature_id = ufo.feature_id AND ufo.user_id = :userId AND ufo.deleted_at IS NULL AND ufo.is_granted = true
+        LEFT JOIN sys_user_roles ur 
+          ON ur.user_id = :userId AND ur.deleted_at IS NULL
+        LEFT JOIN sys_role_permissions rp 
+          ON rp.role_id = ur.role_id AND rp.permission_id = p.id AND rp.deleted_at IS NULL
+        WHERE p.deleted_at IS NULL
           AND p.key IN (:permissionKeys)
-          AND up.deleted_at IS NULL
-          AND p.deleted_at IS NULL
+          AND (
+            up.permission_id IS NOT NULL
+            OR rp.id IS NOT NULL
+            OR (
+              ufo.id IS NOT NULL AND (
+                (p.action::text = 'read' AND ufo.can_view = true) OR
+                (p.action::text = 'create' AND ufo.can_create = true) OR
+                (p.action::text = 'update' AND ufo.can_edit = true) OR
+                (p.action::text = 'delete' AND ufo.can_delete = true) OR
+                (p.action::text = 'list' AND ufo.can_view = true)
+              )
+            )
+          )
       `;
       const results = await this.sequelize.query<{
         matched_count: string;

@@ -16,10 +16,10 @@ export enum HolidayStatus {
 }
 
 @Table({
-  tableName: 'holiday',
+  tableName: 'hrm_holiday',
+  underscored: true,
   timestamps: true,
   paranoid: true,
-  underscored: false,
   indexes: [
     {
       name: 'Holiday_reason_idx',

@@ -12,6 +12,9 @@ export class BookingController {
 
   @Get()
   findAll(@Query() query: QueryBookingDto) {
+    if (query.uuid) {
+      return this.bookingService.findOne(query.uuid);
+    }
     return this.bookingService.findAll(query);
   }
 

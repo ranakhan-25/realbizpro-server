@@ -20,10 +20,10 @@ export enum BonusStatus {
 }
 
 @Table({
-  tableName: 'bonus',
+  tableName: 'hrm_bonus',
+  underscored: true,
   timestamps: true,
   paranoid: true,
-  underscored: false,
   indexes: [
     {
       name: 'Bonus_name_idx',
@@ -31,7 +31,7 @@ export enum BonusStatus {
     },
     {
       name: 'Bonus_festivalDate_idx',
-      fields: ['festivalDate'],
+      fields: ['festival_date'],
     },
     {
       name: 'Bonus_deletedAt_idx',

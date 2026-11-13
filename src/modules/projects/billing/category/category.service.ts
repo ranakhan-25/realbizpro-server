@@ -72,21 +72,11 @@ export class CategoryService {
     if (effectiveOrgId) {
       where.orgId = effectiveOrgId;
     }
-    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
-    if (effectiveProjectId) {
-      where.projectId = effectiveProjectId;
-    }
     if ((query as any)?.orgId) {
       where.orgId = (query as any).orgId;
     }
-    if ((query as any)?.projectId) {
-      where.projectId = (query as any).projectId;
-    }
     if ((query as any)?.orgId) {
       where.orgId = (query as any).orgId;
-    }
-    if ((query as any)?.projectId) {
-      where.projectId = (query as any).projectId;
     }
 
     if (query.type) {

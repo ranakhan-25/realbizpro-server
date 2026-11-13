@@ -1,10 +1,5 @@
 /* eslint-disable prettier/prettier */
-
-import {
-  Column,
-  DataType,
-  Table,
-} from 'sequelize-typescript';
+import { Column, DataType, Table } from 'sequelize-typescript';
 import { BaseModel } from '../../base.model';
 
 export enum BookingStatus {
@@ -17,48 +12,36 @@ export enum BookingStatus {
 export interface BookingAttributes {
   uuid?: string;
   bookingId: string;
+  bookingCode?: string; // ✅ নতুন যোগ করা হলো
   status: BookingStatus;
-
-  // Property Info
   propertyName: string;
-  propertyCategory: string;
-  propertySize: string;
-  propertyFacing: string;
-  propertyPlotNo: string;
-
-  // Schedule Info
-  visitDate: Date;
-  startTime: string;
-  endTime: string;
-  duration: string;
-
-  // Location Info
-  area: string;
-  address: string;
-  city: string;
-  country: string;
-
-  // Customer Info
-  customerName: string;
-  customerEmail: string;
-  customerPhone: string;
-  customerNid: string;
-
-  // Payment Info
+  propertyCategory?: string;
+  propertySize?: string;
+  propertyFacing?: string;
+  propertyPlotNo?: string;
+  visitDate?: Date;
+  startTime?: string;
+  endTime?: string;
+  duration?: string;
+  area?: string;
+  address?: string;
+  city?: string;
+  country?: string;
+  buyerName: string;
+  buyerEmail?: string;
+  buyerPhone?: string;
+  buyerNid?: string;
   subtotal: number;
   tax: number;
   discount: number;
   totalAmount: number;
   paidAmount: number;
-  paymentStatus: string;
-  paymentMethod: string;
+  paymentStatus?: string;
+  paymentMethod?: string;
   transactionId?: string;
-
-  // Other Info
   notes?: string;
   agentName?: string;
   agentEmail?: string;
-
   addedBy?: string;
   addedById?: string;
   createdBy?: string;
@@ -75,7 +58,7 @@ export interface BookingUpdateAttributes extends Partial<BookingAttributes> {}
   paranoid: true,
   underscored: true,
 })
-export class Booking
+export class BookingDetails
   extends BaseModel<BookingUpdateAttributes, BookingCreationAttributes>
   implements BookingAttributes
 {
@@ -90,6 +73,10 @@ export class Booking
   @Column({ type: DataType.STRING, allowNull: false, unique: true, field: 'booking_id' })
   declare bookingId: string;
 
+  // ✅ নতুন কলাম: bookingCode
+  @Column({ type: DataType.STRING, allowNull: false, unique: true, field: 'booking_code' })
+  declare bookingCode: string;
+
   @Column({
     type: DataType.ENUM(...Object.values(BookingStatus)),
     allowNull: false,
@@ -97,62 +84,57 @@ export class Booking
   })
   declare status: BookingStatus;
 
-  // Property
   @Column({ type: DataType.STRING, allowNull: false, field: 'property_name' })
   declare propertyName: string;
 
   @Column({ type: DataType.STRING, allowNull: true, field: 'property_category' })
-  declare propertyCategory: string;
+  declare propertyCategory?: string;
 
   @Column({ type: DataType.STRING, allowNull: true, field: 'property_size' })
-  declare propertySize: string;
+  declare propertySize?: string;
 
   @Column({ type: DataType.STRING, allowNull: true, field: 'property_facing' })
-  declare propertyFacing: string;
+  declare propertyFacing?: string;
 
   @Column({ type: DataType.STRING, allowNull: true, field: 'property_plot_no' })
-  declare propertyPlotNo: string;
+  declare propertyPlotNo?: string;
 
-  // Schedule
   @Column({ type: DataType.DATEONLY, allowNull: true, field: 'visit_date' })
-  declare visitDate: Date;
+  declare visitDate?: Date;
 
   @Column({ type: DataType.STRING, allowNull: true, field: 'start_time' })
-  declare startTime: string;
+  declare startTime?: string;
 
   @Column({ type: DataType.STRING, allowNull: true, field: 'end_time' })
-  declare endTime: string;
+  declare endTime?: string;
 
   @Column({ type: DataType.STRING, allowNull: true })
-  declare duration: string;
+  declare duration?: string;
 
-  // Location
   @Column({ type: DataType.STRING, allowNull: true })
-  declare area: string;
+  declare area?: string;
 
   @Column({ type: DataType.TEXT, allowNull: true })
-  declare address: string;
+  declare address?: string;
 
   @Column({ type: DataType.STRING, allowNull: true })
-  declare city: string;
+  declare city?: string;
 
   @Column({ type: DataType.STRING, allowNull: true })
-  declare country: string;
+  declare country?: string;
 
-  // Customer
-  @Column({ type: DataType.STRING, allowNull: false, field: 'customer_name' })
-  declare customerName: string;
+  @Column({ type: DataType.STRING, allowNull: false, field: 'buyer_name' })
+  declare buyerName: string;
 
-  @Column({ type: DataType.STRING, allowNull: true, field: 'customer_email' })
-  declare customerEmail: string;
+  @Column({ type: DataType.STRING, allowNull: true, field: 'buyer_email' })
+  declare buyerEmail?: string;
 
-  @Column({ type: DataType.STRING, allowNull: true, field: 'customer_phone' })
-  declare customerPhone: string;
+  @Column({ type: DataType.STRING, allowNull: true, field: 'buyer_phone' })
+  declare buyerPhone?: string;
 
-  @Column({ type: DataType.STRING, allowNull: true, field: 'customer_nid' })
-  declare customerNid: string;
+  @Column({ type: DataType.STRING, allowNull: true, field: 'buyer_nid' })
+  declare buyerNid?: string;
 
-  // Payment
   @Column({ type: DataType.DECIMAL(15, 2), allowNull: false, defaultValue: 0 })
   declare subtotal: number;
 
@@ -169,15 +151,14 @@ export class Booking
   declare paidAmount: number;
 
   @Column({ type: DataType.STRING, allowNull: true, field: 'payment_status' })
-  declare paymentStatus: string;
+  declare paymentStatus?: string;
 
   @Column({ type: DataType.STRING, allowNull: true, field: 'payment_method' })
-  declare paymentMethod: string;
+  declare paymentMethod?: string;
 
   @Column({ type: DataType.STRING, allowNull: true, field: 'transaction_id' })
   declare transactionId?: string;
 
-  // Other
   @Column({ type: DataType.TEXT, allowNull: true })
   declare notes?: string;
 
