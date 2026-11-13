@@ -22,7 +22,7 @@ export interface InvSupplierAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  org_id?: string | null;
+  org_id: string;
 
   // Relations
   purchases?: InvPurchase[];
@@ -42,7 +42,7 @@ export interface InvSupplierCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  org_id?: string | null;
+  org_id: string;
 }
 
 export type InvSupplierUpdateAttributes = Partial<InvSupplierCreationAttributes>;

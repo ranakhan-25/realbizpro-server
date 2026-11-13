@@ -2,27 +2,57 @@ import { IsString, IsNotEmpty, IsOptional, IsNumber, IsUUID, IsDateString } from
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateNegotiationProcessDto {
+  @ApiProperty({ description: 'Mandatory tenant organization identifier', example: 'org-001' })
+  @IsString()
+  @IsNotEmpty()
+  org_id: string;
+
   @ApiProperty({ description: 'UUID of the associated acquisition lead', example: '123e4567-e89b-12d3-a456-426614174000' })
   @IsUUID()
   @IsNotEmpty()
   lead_id: string;
 
-  @ApiPropertyOptional({ description: 'Date of negotiation', example: '2026-10-07' })
+  @ApiPropertyOptional({ description: 'Round number of negotiation meeting', example: 1 })
+  @IsNumber()
+  @IsOptional()
+  round_no?: number;
+
+  @ApiPropertyOptional({ description: 'Date of negotiation meeting', example: '2026-10-07' })
   @IsDateString()
   @IsOptional()
   negotiation_date?: string;
 
-  @ApiPropertyOptional({ description: 'Price offered', example: 1500000 })
+  @ApiPropertyOptional({ description: 'Company offered price in BDT', example: 45000000 })
   @IsNumber()
   @IsOptional()
   offered_price?: number;
 
-  @ApiPropertyOptional({ description: 'Price agreed upon', example: 1600000 })
+  @ApiPropertyOptional({ description: 'Landowner counter offer price in BDT', example: 52000000 })
+  @IsNumber()
+  @IsOptional()
+  counter_amount?: number;
+
+  @ApiPropertyOptional({ description: 'Variance or price gap between offers', example: 7000000 })
+  @IsNumber()
+  @IsOptional()
+  gap_amount?: number;
+
+  @ApiPropertyOptional({ description: 'Price agreed upon in BDT', example: 48000000 })
   @IsNumber()
   @IsOptional()
   agreed_price?: number;
 
-  @ApiPropertyOptional({ description: 'Current status of negotiation', example: 'In Progress' })
+  @ApiPropertyOptional({ description: 'Final settled amount in BDT', example: 48000000 })
+  @IsNumber()
+  @IsOptional()
+  final_amount?: number;
+
+  @ApiPropertyOptional({ description: 'Officer or negotiator leading the meeting', example: 'Tanvir Hossain' })
+  @IsString()
+  @IsOptional()
+  negotiator?: string;
+
+  @ApiPropertyOptional({ description: 'Current status of negotiation', example: 'Pending' })
   @IsString()
   @IsOptional()
   negotiation_status?: string;
@@ -32,13 +62,8 @@ export class CreateNegotiationProcessDto {
   @IsOptional()
   next_meeting_date?: string;
 
-  @ApiPropertyOptional({ description: 'Notes from the meeting', example: 'Discussed pricing and terms.' })
+  @ApiPropertyOptional({ description: 'Notes and minutes from the meeting', example: 'Owner agreed to reduce gap by 20 Lac.' })
   @IsString()
   @IsOptional()
   meeting_notes?: string;
-
-  @ApiPropertyOptional({ description: 'Optional project identifier', example: 'PRJ-1001' })
-  @IsString()
-  @IsOptional()
-  org_id?: string;
 }

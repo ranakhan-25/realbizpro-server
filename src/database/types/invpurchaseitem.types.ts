@@ -18,7 +18,7 @@ export interface InvPurchaseItemAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  org_id?: string | null;
+  org_id: string;
 
   // Relations
   purchase?: InvPurchase;
@@ -34,7 +34,7 @@ export interface InvPurchaseItemCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  org_id?: string | null;
+  org_id: string;
 }
 
 export type InvPurchaseItemUpdateAttributes = Partial<InvPurchaseItemCreationAttributes>;

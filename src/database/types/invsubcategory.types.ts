@@ -19,7 +19,7 @@ export interface InvSubCategoryAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  org_id?: string | null;
+  org_id: string;
 
   // Relations
   category?: InvCategory;
@@ -36,7 +36,7 @@ export interface InvSubCategoryCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  org_id?: string | null;
+  org_id: string;
 }
 
 export type InvSubCategoryUpdateAttributes = Partial<InvSubCategoryCreationAttributes>;

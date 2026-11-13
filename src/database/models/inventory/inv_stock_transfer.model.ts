@@ -1,4 +1,4 @@
-import { Column, DataType, Table, PrimaryKey, Default, ForeignKey, BelongsTo } from 'sequelize-typescript';
+import { Column, DataType, Table, PrimaryKey, Default, ForeignKey, BelongsTo, Index } from 'sequelize-typescript';
 import { BaseModel } from '../../base.model';
 import { InvItem } from './inv_item.model';
 
@@ -55,9 +55,10 @@ export class InvStockTransfer extends BaseModel<InvStockTransferAttributes, InvS
   @Column({ type: DataType.STRING, allowNull: true, field: 'deleted_by' })
   declare deletedBy?: string;
 
+  @Index({ name: 'idx_inv_stock_transfer_org_id' })
   @Column({
     type: DataType.STRING,
-    allowNull: true,
+    allowNull: false,
   })
-  declare org_id?: string;
+  declare org_id: string;
 }

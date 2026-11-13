@@ -59,9 +59,10 @@ export class InvSupplier extends BaseModel<InvSupplierAttributes, InvSupplierCre
   @Column({ type: DataType.STRING, allowNull: true, field: 'deleted_by' })
   declare deletedBy?: string;
 
+  @Index({ name: 'idx_inv_supplier_org_id' })
   @Column({
     type: DataType.STRING,
-    allowNull: true,
+    allowNull: false,
   })
-  declare org_id?: string;
+  declare org_id: string;
 }

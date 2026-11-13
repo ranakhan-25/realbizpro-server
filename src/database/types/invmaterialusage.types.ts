@@ -13,7 +13,7 @@ export interface InvMaterialUsageAttributes {
   note?: string | null;
   company_id?: number | null;
   project_id?: number | null;
-  org_id?: string | null;
+  org_id: string;
   site_id?: number | null;
   task_id?: number | null;
   worker_id?: number | null;
@@ -30,7 +30,7 @@ export interface InvMaterialUsageCreationAttributes {
   note?: string | null;
   company_id?: number | null;
   project_id?: number | null;
-  org_id?: string | null;
+  org_id: string;
   site_id?: number | null;
   task_id?: number | null;
   worker_id?: number | null;

@@ -12,6 +12,7 @@ import { ReportsModule } from './reports/reports.module';
 import { WarehouseModule } from './warehouse/warehouse.module';
 import { StockCountModule } from './stock-count/stock-count.module';
 import { StockIssueModule } from './stock-issue/stock-issue.module';
+import { MovementModule } from './movement/movement.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { StockIssueModule } from './stock-issue/stock-issue.module';
     WarehouseModule,
     StockCountModule,
     StockIssueModule,
+    MovementModule,
   ],
 })
 export class InventoryModule {}

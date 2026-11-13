@@ -9,7 +9,7 @@ import { Permissions } from '@/common/decorators/permissions.decorator';
 
 @ApiTags('Inventory - Physical Stock Counts')
 @ApiBearerAuth()
-@Controller('inventory/stock-counts')
+@Controller(['inventory/stock-counts', 'inventory/counts'])
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class StockCountController {
   constructor(private readonly service: StockCountService) {}

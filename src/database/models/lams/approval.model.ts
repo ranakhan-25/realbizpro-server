@@ -31,8 +31,9 @@ export class LamsApproval extends BaseModel<LamsApprovalAttributes, LamsApproval
   @Column({ type: DataType.STRING(50), allowNull: false, defaultValue: 'preliminary' })
   stage: string;
 
-  @Column({ type: DataType.STRING, allowNull: true })
-  declare org_id?: string;
+  @Index({ name: 'idx_approval_org_id' })
+  @Column({ type: DataType.STRING, allowNull: false })
+  declare org_id: string;
 
   @Column({ type: DataType.STRING, allowNull: true, field: 'created_by' })
   declare createdBy?: string;

@@ -40,8 +40,9 @@ export class LamsValuation extends BaseModel<LamsValuationAttributes, LamsValuat
   @Column({ type: DataType.TEXT, allowNull: true })
   notes?: string;
 
-  @Column({ type: DataType.STRING, allowNull: true })
-  declare org_id?: string;
+  @Index({ name: 'idx_valuation_org_id' })
+  @Column({ type: DataType.STRING, allowNull: false })
+  declare org_id: string;
 
   @Column({ type: DataType.STRING, allowNull: true, field: 'created_by' })
   declare createdBy?: string;

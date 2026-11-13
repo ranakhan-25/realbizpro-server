@@ -40,8 +40,9 @@ export class LamsLegalVerification extends BaseModel<LamsLegalVerificationAttrib
   @Column({ type: DataType.JSONB, allowNull: true, defaultValue: [] })
   findings_json?: any;
 
-  @Column({ type: DataType.STRING, allowNull: true })
-  declare org_id?: string;
+  @Index({ name: 'idx_legal_verification_org_id' })
+  @Column({ type: DataType.STRING, allowNull: false })
+  declare org_id: string;
 
   @Column({ type: DataType.STRING, allowNull: true, field: 'created_by' })
   declare createdBy?: string;

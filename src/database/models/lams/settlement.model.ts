@@ -9,6 +9,10 @@ import type { LamsSettlementAttributes, LamsSettlementCreationAttributes } from 
   paranoid: true,
 })
 export class LamsSettlement extends BaseModel<LamsSettlementAttributes, LamsSettlementCreationAttributes> {
+  @Index({ name: 'idx_settlement_org_id' })
+  @Column({ type: DataType.STRING, allowNull: false })
+  declare org_id: string;
+
   @Index({ name: 'idx_settlement_lead_id' })
   @Column({ type: DataType.UUID, allowNull: false })
   lead_id: string;
@@ -42,9 +46,6 @@ export class LamsSettlement extends BaseModel<LamsSettlementAttributes, LamsSett
 
   @Column({ type: DataType.TEXT, allowNull: true })
   notes?: string;
-
-  @Column({ type: DataType.STRING, allowNull: true })
-  declare org_id?: string;
 
   @Column({ type: DataType.STRING, allowNull: true, field: 'created_by' })
   declare createdBy?: string;
