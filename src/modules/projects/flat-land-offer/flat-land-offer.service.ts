@@ -87,7 +87,13 @@ export class FlatLandOfferService {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const search = query.search?.trim();
-    const where: WhereOptions<FlatLandOffer> = {
+    const userConditions = currentUser ? [
+      { createdBy: currentUser.email },
+      { createdBy: String(currentUser.id) },
+    ] : [];
+
+    const where: any = {
+      ...(userConditions.length > 0 ? { [Op.or]: userConditions } : {}),
       ...(query.projectId ? { projectId: query.projectId } : {}),
       ...(query.salesBy ? { salesBy: { [Op.iLike]: `%${query.salesBy.trim()}%` } } : {}),
       ...(query.dateFrom || query.dateTo ? { offerDate: { ...(query.dateFrom ? { [Op.gte]: query.dateFrom } : {}), ...(query.dateTo ? { [Op.lte]: query.dateTo } : {}) } } : {}),
@@ -96,7 +102,7 @@ export class FlatLandOfferService {
             { customerName: { [Op.iLike]: `%${search}%` } },
             { salesBy: { [Op.iLike]: `%${search}%` } },
           ] } : {}),
-    } as WhereOptions<FlatLandOffer>;
+    };
     if (query.teamId) {
       const teamMember = await this.teamMembers.findOne({ where: { uuid: query.teamId } as WhereOptions<ProjectTeamMember>, attributes: ['projectId'] });
       if (!teamMember) return { data: [], meta: { total: 0, page, limit, totalPages: 0 } };

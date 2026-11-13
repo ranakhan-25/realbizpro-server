@@ -137,9 +137,10 @@ export class ProjectShareAssignmentService {
                 dto.penaltyAmount ?? 0,
               points: dto.points ?? 0,
               createdBy:
-                userId !== undefined
+                currentUser?.email ||
+                (userId !== undefined
                   ? String(userId)
-                  : undefined,
+                  : undefined),
             },
             { transaction },
           );
@@ -159,8 +160,10 @@ export class ProjectShareAssignmentService {
     const limit = query.limit ?? 10;
     const search = query.search?.trim();
 
-    const where: WhereOptions<ProjectShareAssignment> =
-      {};
+    const where: any = {};
+    if (currentUser?.email) {
+      where.createdBy = currentUser.email;
+    }
     if ((query as any)?.orgId) {
       where.orgId = (query as any).orgId;
     }
@@ -240,11 +243,13 @@ export class ProjectShareAssignmentService {
   }
 
   async findOne(uuid: string, currentUser?: any) {
+    const where: any = { uuid };
+    if (currentUser?.email) {
+      where.createdBy = currentUser.email;
+    }
     const assignment =
       await this.assignmentModel.findOne({
-        where: {
-          uuid,
-        } as WhereOptions<ProjectShareAssignment>,
+        where: where as WhereOptions<ProjectShareAssignment>,
         include: [
           {
             model: this.projectModel,
@@ -294,11 +299,13 @@ export class ProjectShareAssignmentService {
   ) {
     await this.sequelize.transaction(
       async (transaction) => {
+        const where: any = { uuid };
+        if (currentUser?.email) {
+          where.createdBy = currentUser.email;
+        }
         const assignment =
           await this.assignmentModel.findOne({
-            where: {
-              uuid,
-            } as WhereOptions<ProjectShareAssignment>,
+            where: where as WhereOptions<ProjectShareAssignment>,
             transaction,
           });
         if (!assignment) {
@@ -397,11 +404,13 @@ export class ProjectShareAssignmentService {
   }
 
   async remove(uuid: string, userId?: number, currentUser?: any) {
+    const where: any = { uuid };
+    if (currentUser?.email) {
+      where.createdBy = currentUser.email;
+    }
     const assignment =
       await this.assignmentModel.findOne({
-        where: {
-          uuid,
-        } as WhereOptions<ProjectShareAssignment>,
+        where: where as WhereOptions<ProjectShareAssignment>,
       });
     if (!assignment) {
       throw new NotFoundException(

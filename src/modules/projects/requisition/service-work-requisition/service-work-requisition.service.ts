@@ -85,9 +85,9 @@ export class ServiceWorkRequisitionService {
           subtotalAmount:    dto.subtotalAmount    ?? 0,
           grandTotalPayable: dto.grandTotalPayable ?? 0,
           supportingAttachment: dto.supportingAttachment,
-          addedById:  dto.addedById,
-          createdBy:  dto.createdBy,
-          updatedBy:  dto.updatedBy,
+          addedById:  (currentUser?.id ? String(currentUser.id) : (dto.addedById ? String(dto.addedById) : null)) as any,
+          createdBy:  (currentUser?.email || (userId ? String(userId) : dto.createdBy || 'system')) as any,
+          updatedBy:  (currentUser?.email || (userId ? String(userId) : dto.updatedBy || 'system')) as any,
           status:     dto.status,
         },
         { transaction },
@@ -138,7 +138,15 @@ export class ServiceWorkRequisitionService {
 
     const calculatedSkip = skip ?? (page - 1) * limit;
 
-    const where: WhereOptions<ServiceWorkRequisitionAttributes> = {};
+    const userConditions = currentUser ? [
+      { createdBy: currentUser.email },
+      { createdBy: String(currentUser.id) },
+    ] : [];
+
+    const where: any = {};
+    if (userConditions.length > 0) {
+      where[Op.or] = userConditions;
+    }
     if ((query as any)?.orgId) {
       where.orgId = (query as any).orgId;
     }

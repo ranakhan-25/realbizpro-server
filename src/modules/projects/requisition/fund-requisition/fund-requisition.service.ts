@@ -59,9 +59,9 @@ export class FundRequisitionService {
           dto.paymentStatus ??
           PaymentStatus.PAYMENT_LEFT,
 
-        addedById: dto.addedById,
-        createdBy: dto.createdBy,
-        updatedBy: dto.updatedBy,
+        addedById: (currentUser?.id ? String(currentUser.id) : (userId ? String(userId) : dto.addedById)) as any,
+        createdBy: (currentUser?.email || (userId ? String(userId) : dto.createdBy || 'system')) as any,
+        updatedBy: (currentUser?.email || (userId ? String(userId) : dto.updatedBy || 'system')) as any,
       }) as any);
 
     return await this.findOne(
@@ -98,8 +98,15 @@ export class FundRequisitionService {
     const calculatedSkip =
       skip ?? (page - 1) * limit;
 
-    const where: WhereOptions<FundRequisitionAttributes> =
-      {};
+    const userConditions = currentUser ? [
+      { createdBy: currentUser.email },
+      { createdBy: String(currentUser.id) },
+    ] : [];
+
+    const where: any = {};
+    if (userConditions.length > 0) {
+      where[Op.or] = userConditions;
+    }
     if ((query as any)?.orgId) {
       where.orgId = (query as any).orgId;
     }

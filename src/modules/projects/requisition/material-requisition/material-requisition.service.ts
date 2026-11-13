@@ -40,11 +40,11 @@ export class MaterialRequisitionService {
         const { items, ...requisitionData } = dto;
         const requisition =
           await this.requisitionModel.create(
-            {
-              ...requisitionData,
-              createdBy: (userId ? String(userId) : null) as any,
-              addedById: userId ? String(userId) : null as any,
-            },
+              {
+                ...requisitionData,
+                createdBy: (currentUser?.email || (userId ? String(userId) : null)) as any,
+                addedById: (userId ? String(userId) : null) as any,
+              },
             { transaction },
           );
 
@@ -73,30 +73,25 @@ export class MaterialRequisitionService {
   ) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
-    const where: any =
-      query.search
+    const userConditions = currentUser ? [
+      { createdBy: currentUser.email },
+      { createdBy: String(currentUser.id) },
+    ] : [];
+
+    const where: any = {
+      ...(userConditions.length > 0 ? { [Op.or]: userConditions } : {}),
+      ...(query.orgId ? { orgId: query.orgId } : {}),
+      ...(query.projectId ? { projectId: query.projectId } : {}),
+      ...(query.search
         ? {
             [Op.or]: [
-              {
-                code: {
-                  [Op.iLike]: `%${query.search}%`,
-                },
-              },
-              {
-                titleNameOfWork: {
-                  [Op.iLike]: `%${query.search}%`,
-                },
-              },
-              {
-                ref: {
-                  [Op.iLike]: `%${query.search}%`,
-                },
-              },
+              { code: { [Op.iLike]: `%${query.search}%` } },
+              { titleNameOfWork: { [Op.iLike]: `%${query.search}%` } },
+              { ref: { [Op.iLike]: `%${query.search}%` } },
             ],
           }
-        : {};
-    if (query.orgId) where.orgId = query.orgId;
-    if (query.projectId) where.projectId = query.projectId;
+        : {}),
+    };
 
     const { rows, count } =
       await this.requisitionModel.findAndCountAll(

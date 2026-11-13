@@ -54,7 +54,13 @@ export class LandInfrastructureService {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const search = query.search?.trim();
-    const where: WhereOptions<LandInfrastructure> = {
+    const userConditions = currentUser ? [
+      { createdBy: currentUser.email },
+      { createdBy: String(currentUser.id) },
+    ] : [];
+
+    const where: any = {
+      ...(userConditions.length > 0 ? { [Op.or]: userConditions } : {}),
       ...(kind ? { kind } : {}),
       ...(search
         ? {

@@ -57,8 +57,8 @@ export class ContractorService {
           : null,
         under: dto.under,
         addedById: dto.addedById,
-        createdBy: dto.createdBy ?? dto.addedById,
-        orgId: dto.orgId,
+        createdBy: currentUser?.email || dto.createdBy || dto.addedById || String(userId || ''),
+        orgId: dto.orgId ?? currentUser?.orgId ?? null,
         status:
           dto.status ?? ContractorStatus.ACTIVE,
       }) as any);
@@ -88,6 +88,9 @@ export class ContractorService {
         : (page - 1) * limit;
 
     const where: any = {};
+    if (currentUser?.email) {
+      where.createdBy = currentUser.email;
+    }
     const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
     if (effectiveOrgId) {
       where.orgId = effectiveOrgId;
@@ -187,9 +190,13 @@ export class ContractorService {
     uuid: string,
     currentUser?: any,
   ): Promise<Contractor> {
+    const where: any = { uuid };
+    if (currentUser?.email) {
+      where.createdBy = currentUser.email;
+    }
     const contractor =
       await this.contractorModel.findOne({
-        where: { uuid } as any,
+        where: where as any,
       });
 
     if (!contractor) {
@@ -207,9 +214,13 @@ export class ContractorService {
     userId?: number,
     currentUser?: any,
   ): Promise<Contractor> {
+    const where: any = { uuid };
+    if (currentUser?.email) {
+      where.createdBy = currentUser.email;
+    }
     const contractor =
       await this.contractorModel.findOne({
-        where: { uuid } as any,
+        where: where as any,
       });
 
     if (!contractor) {
@@ -250,9 +261,13 @@ export class ContractorService {
   }
 
   async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
+    const where: any = { uuid };
+    if (currentUser?.email) {
+      where.createdBy = currentUser.email;
+    }
     const contractor =
       await this.contractorModel.findOne({
-        where: { uuid } as any,
+        where: where as any,
       });
 
     if (!contractor) {
