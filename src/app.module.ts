@@ -226,6 +226,7 @@ import { ContraVoucherModule } from './modules/accounts/vouchers/contra_vouchers
 import { BankReconciliationStatementModule } from './modules/accounts/bank-reconciliation/bank-reconciliation_statement/bank-reconciliation_statement.module';
 import { ListOfChequeRangeModule } from './modules/accounts/bank-reconciliation/list_of_cheque_range/list_of_cheque_range.module';
 import { ListOfChequeModule } from './modules/accounts/bank-reconciliation/list_of_cheque/list_of_cheque.module';
+import { CustomerServiceModule } from './modules/customer-service/customer-service.module';
 
 
 @Module({
@@ -479,6 +480,7 @@ import { ListOfChequeModule } from './modules/accounts/bank-reconciliation/list_
     BankReconciliationStatementModule,
     ListOfChequeRangeModule,
     ListOfChequeModule,
+    CustomerServiceModule,
   ],
   controllers: [AppController, HealthController],
   providers: [

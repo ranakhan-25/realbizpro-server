@@ -23,7 +23,7 @@ import { Project } from '../project/pr_project.model';
 })
 export class FlatLandBooking extends BaseModel<FlatLandBookingAttributes, FlatLandBookingCreationAttributes> {
   @ForeignKey(() => Project)
-  @Column({ type: DataType.UUID, allowNull: false })
+  @Column({ type: DataType.UUID, allowNull: false, field: 'project_id' })
   declare projectId: string;
 
   @BelongsTo(() => Project, {
