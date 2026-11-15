@@ -51,9 +51,10 @@ export class EmployeeKpiService {
         { workType3: { [Op.iLike]: `%${search}%` } },
       ];
     }
+    const withDeleted = query.withDeleted === true || String(query.withDeleted) === 'true';
     const { rows, count } = await this.kpis.findAndCountAll({
       where,
-      paranoid: !query.withDeleted,
+      paranoid: !withDeleted,
       include: this.includes(),
       order: [['createdAt', 'DESC']],
       limit,
