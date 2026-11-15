@@ -26,7 +26,7 @@ export class FlatLandOfferService {
     private readonly sequelize: Sequelize,
   ) {}
 
-  async create(dto: CreateFlatLandOfferDto, userId?: number) {
+  async create(dto: CreateFlatLandOfferDto, userId?: number, currentUser?: any) {
     const uuid = await this.sequelize.transaction(async (transaction) => {
       let project = dto.projectId
         ? await this.projectModel.findOne({
@@ -80,11 +80,20 @@ export class FlatLandOfferService {
     return this.findOne(uuid);
   }
 
-  async findAll(query: QueryFlatLandOfferDto) {
+  async findAll(
+    query: QueryFlatLandOfferDto,
+    currentUser?: any,
+  ) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const search = query.search?.trim();
-    const where: WhereOptions<FlatLandOffer> = {
+    const userConditions = currentUser ? [
+      { createdBy: currentUser.email },
+      { createdBy: String(currentUser.id) },
+    ] : [];
+
+    const where: any = {
+      ...(userConditions.length > 0 ? { [Op.or]: userConditions } : {}),
       ...(query.projectId ? { projectId: query.projectId } : {}),
       ...(query.salesBy ? { salesBy: { [Op.iLike]: `%${query.salesBy.trim()}%` } } : {}),
       ...(query.dateFrom || query.dateTo ? { offerDate: { ...(query.dateFrom ? { [Op.gte]: query.dateFrom } : {}), ...(query.dateTo ? { [Op.lte]: query.dateTo } : {}) } } : {}),
@@ -93,7 +102,7 @@ export class FlatLandOfferService {
             { customerName: { [Op.iLike]: `%${search}%` } },
             { salesBy: { [Op.iLike]: `%${search}%` } },
           ] } : {}),
-    } as WhereOptions<FlatLandOffer>;
+    };
     if (query.teamId) {
       const teamMember = await this.teamMembers.findOne({ where: { uuid: query.teamId } as WhereOptions<ProjectTeamMember>, attributes: ['projectId'] });
       if (!teamMember) return { data: [], meta: { total: 0, page, limit, totalPages: 0 } };
@@ -126,7 +135,7 @@ export class FlatLandOfferService {
     return { projects, properties, teams, salesPeople, statuses: statuses.map(row => ({ value: row.approvalStatus ?? '', name: row.approvalStatus ?? 'Not set' })) };
   }
 
-  async findOne(uuid: string) {
+  async findOne(uuid: string, currentUser?: any) {
     const offer = await this.offerModel.findOne({
       where: { uuid } as WhereOptions<FlatLandOffer>,
       include: [
@@ -140,7 +149,7 @@ export class FlatLandOfferService {
     return offer;
   }
 
-  async update(uuid: string, dto: UpdateFlatLandOfferDto, userId?: number) {
+  async update(uuid: string, dto: UpdateFlatLandOfferDto, userId?: number, currentUser?: any) {
     await this.sequelize.transaction(async (transaction) => {
       const offer = await this.offerModel.findOne({
         where: { uuid } as WhereOptions<FlatLandOffer>,
@@ -182,7 +191,7 @@ export class FlatLandOfferService {
     return this.findOne(uuid);
   }
 
-  async remove(uuid: string) {
+  async remove(uuid: string, userId?: number, currentUser?: any) {
     const offer = await this.offerModel.findOne({
       where: { uuid } as WhereOptions<FlatLandOffer>,
     });
@@ -193,7 +202,7 @@ export class FlatLandOfferService {
     return { message: `Flat/Land offer "${uuid}" deleted successfully` };
   }
 
-  async restore(uuid: string) {
+  async restore(uuid: string, userId?: number, currentUser?: any) {
     const offer = await this.offerModel.findOne({ where: { uuid } as WhereOptions<FlatLandOffer>, paranoid: false });
     if (!offer) throw new NotFoundException(`Flat/Land offer "${uuid}" not found`);
     if (!offer.deletedAt) throw new BadRequestException(`Flat/Land offer "${uuid}" is not deleted`);

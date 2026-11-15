@@ -28,4 +28,13 @@ export class CreateAssetRfqDto {
   @ApiPropertyOptional() @IsOptional() @IsString() attachment?: string;
   @ApiPropertyOptional() @IsOptional() @Type(() => Number) @IsNumber() added_by_id?: number;
   @ApiProperty({ type: [CreateAssetRfqItemDto] }) @IsArray() @ArrayMinSize(1) @ValidateNested({ each: true }) @Type(() => CreateAssetRfqItemDto) items: CreateAssetRfqItemDto[];
+
+  @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+  @IsOptional()
+  orgId?: number;
+
+  @ApiPropertyOptional({ description: 'Project UUID or ID' })
+  @IsOptional()
+  projectId?: string;
+
 }

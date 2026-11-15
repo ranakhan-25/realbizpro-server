@@ -128,4 +128,11 @@ export class CreateBillInvoiceDto {
   @ValidateNested({ each: true })
   @Type(() => InvoiceItemDto)
   items?: InvoiceItemDto[];
+    @ApiPropertyOptional({ example: 'user-uuid' })
+    @IsOptional()
+    @IsString()
+    createdBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
 }

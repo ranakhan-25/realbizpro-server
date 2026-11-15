@@ -29,6 +29,8 @@ export class ServiceWorkRequisitionItemService {
 
   async create(
     dto: CreateServiceWorkRequisitionItemDto,
+    userId?: number,
+    currentUser?: any,
   ) {
     const serviceWorkRequisitionItem =
       await this.serviceWorkRequisitionItemModel.create(
@@ -72,6 +74,7 @@ export class ServiceWorkRequisitionItemService {
 
   async findAll(
     query: QueryServiceWorkRequisitionItemDto,
+    currentUser?: any,
   ) {
     const {
       page = 1,
@@ -92,8 +95,11 @@ export class ServiceWorkRequisitionItemService {
     const calculatedSkip =
       skip ?? (page - 1) * limit;
 
-    const where: WhereOptions<ServiceWorkRequisitionItemAttributes> =
+    const where: any =
       {};
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
 
     // =========================
     // SEARCH
@@ -221,7 +227,7 @@ export class ServiceWorkRequisitionItemService {
   // FIND ONE
   // =========================
 
-  async findOne(uuid: string) {
+  async findOne(uuid: string, currentUser?: any) {
     const where = {
       uuid,
     } as WhereOptions<ServiceWorkRequisitionItemAttributes>;
@@ -251,6 +257,8 @@ export class ServiceWorkRequisitionItemService {
   async update(
     uuid: string,
     dto: UpdateServiceWorkRequisitionItemDto,
+    userId?: number,
+    currentUser?: any,
   ) {
     const where = {
       uuid,
@@ -277,7 +285,7 @@ export class ServiceWorkRequisitionItemService {
       );
     }
 
-    await serviceWorkRequisitionItem.update({
+    await serviceWorkRequisitionItem.update(({
       ...(dto.serviceWorkRequisitionId !==
         undefined && {
         serviceWorkRequisitionId:
@@ -325,7 +333,7 @@ export class ServiceWorkRequisitionItemService {
       ...(dto.deletedBy !== undefined && {
         deletedBy: dto.deletedBy,
       }),
-    });
+    }) as any);
 
     return await this.findOne(uuid);
   }
@@ -334,7 +342,7 @@ export class ServiceWorkRequisitionItemService {
   // DELETE
   // =========================
 
-  async remove(uuid: string) {
+  async remove(uuid: string, userId?: number, currentUser?: any) {
     const where = {
       uuid,
     } as WhereOptions<ServiceWorkRequisitionItemAttributes>;
@@ -364,7 +372,7 @@ export class ServiceWorkRequisitionItemService {
   // RESTORE
   // =========================
 
-  async restore(uuid: string) {
+  async restore(uuid: string, userId?: number, currentUser?: any) {
     const where = {
       uuid,
     } as WhereOptions<ServiceWorkRequisitionItemAttributes>;

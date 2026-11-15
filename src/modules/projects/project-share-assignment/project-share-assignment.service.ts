@@ -41,7 +41,12 @@ export class ProjectShareAssignmentService {
   async create(
     dto: CreateProjectShareAssignmentDto,
     userId?: number,
+    currentUser?: any,
   ) {
+    if (!dto.projectId) {
+      throw new BadRequestException('Project is required');
+    }
+
     const uuid = await this.sequelize.transaction(
       async (transaction) => {
         // Project check
@@ -112,6 +117,9 @@ export class ProjectShareAssignmentService {
           await this.assignmentModel.create(
             {
               ...rest,
+              // Use the UUID from the verified project record so the required
+              // foreign key cannot be omitted by a partially populated DTO.
+              projectId: project.uuid,
               ...(assignedAt
                 ? {
                     assignedAt: new Date(
@@ -129,9 +137,10 @@ export class ProjectShareAssignmentService {
                 dto.penaltyAmount ?? 0,
               points: dto.points ?? 0,
               createdBy:
-                userId !== undefined
+                currentUser?.email ||
+                (userId !== undefined
                   ? String(userId)
-                  : undefined,
+                  : undefined),
             },
             { transaction },
           );
@@ -145,13 +154,22 @@ export class ProjectShareAssignmentService {
 
   async findAll(
     query: QueryProjectShareAssignmentDto,
+    currentUser?: any,
   ) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const search = query.search?.trim();
 
-    const where: WhereOptions<ProjectShareAssignment> =
-      {};
+    const where: any = {};
+    if (currentUser?.email) {
+      where.createdBy = currentUser.email;
+    }
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      where.projectId = (query as any).projectId;
+    }
 
     if (query.projectId)
       where.projectId = query.projectId;
@@ -224,12 +242,14 @@ export class ProjectShareAssignmentService {
     };
   }
 
-  async findOne(uuid: string) {
+  async findOne(uuid: string, currentUser?: any) {
+    const where: any = { uuid };
+    if (currentUser?.email) {
+      where.createdBy = currentUser.email;
+    }
     const assignment =
       await this.assignmentModel.findOne({
-        where: {
-          uuid,
-        } as WhereOptions<ProjectShareAssignment>,
+        where: where as WhereOptions<ProjectShareAssignment>,
         include: [
           {
             model: this.projectModel,
@@ -275,14 +295,17 @@ export class ProjectShareAssignmentService {
     uuid: string,
     dto: UpdateProjectShareAssignmentDto,
     userId?: number,
+    currentUser?: any,
   ) {
     await this.sequelize.transaction(
       async (transaction) => {
+        const where: any = { uuid };
+        if (currentUser?.email) {
+          where.createdBy = currentUser.email;
+        }
         const assignment =
           await this.assignmentModel.findOne({
-            where: {
-              uuid,
-            } as WhereOptions<ProjectShareAssignment>,
+            where: where as WhereOptions<ProjectShareAssignment>,
             transaction,
           });
         if (!assignment) {
@@ -380,12 +403,14 @@ export class ProjectShareAssignmentService {
     return this.findOne(uuid);
   }
 
-  async remove(uuid: string) {
+  async remove(uuid: string, userId?: number, currentUser?: any) {
+    const where: any = { uuid };
+    if (currentUser?.email) {
+      where.createdBy = currentUser.email;
+    }
     const assignment =
       await this.assignmentModel.findOne({
-        where: {
-          uuid,
-        } as WhereOptions<ProjectShareAssignment>,
+        where: where as WhereOptions<ProjectShareAssignment>,
       });
     if (!assignment) {
       throw new NotFoundException(
@@ -398,7 +423,7 @@ export class ProjectShareAssignmentService {
     };
   }
 
-  async restore(uuid: string) {
+  async restore(uuid: string, userId?: number, currentUser?: any) {
     const assignment = await this.assignmentModel.findOne({ where: { uuid } as WhereOptions<ProjectShareAssignment>, paranoid: false });
     if (!assignment) throw new NotFoundException(`Share assignment "${uuid}" not found`);
     if (!assignment.deletedAt) throw new BadRequestException(`Share assignment "${uuid}" is not deleted`);
@@ -408,7 +433,8 @@ export class ProjectShareAssignmentService {
 
   async findReport(
     kind:
-      'collection' | 'penalty' | 'holders-point',
+      'all' | 'collection' | 'penalty' | 'holders-point',
+    currentUser?: any,
   ) {
     const criteria: WhereOptions<ProjectShareAssignment> =
       kind === 'collection'

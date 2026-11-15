@@ -3,7 +3,7 @@
 import { IsOptional, IsString, IsInt, Min, IsBoolean, IsEnum } from 'class-validator';
 import { Type } from 'class-transformer';
 import { BoqComparisonStatus } from 'src/database/models/projects/boqcomparison/boq-comparison.model';
-
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class QueryBoqComparisonDto {
   @IsOptional()
@@ -52,4 +52,11 @@ export class QueryBoqComparisonDto {
   @Type(() => Boolean)
   @IsBoolean()
   withDeleted?: boolean = false;
+    @ApiPropertyOptional({ description: 'Filter by organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Filter by project ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 }

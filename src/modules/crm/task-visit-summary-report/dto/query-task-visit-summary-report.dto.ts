@@ -1,5 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsDateString, IsInt, IsOptional } from 'class-validator';
 
 export class QueryTaskVisitSummaryReportDto {
   @ApiPropertyOptional({ description: 'Include activities on or after this date', example: '2026-09-28' })
@@ -11,4 +12,10 @@ export class QueryTaskVisitSummaryReportDto {
   @IsOptional()
   @IsDateString()
   declare dateTo?: string;
+
+  @ApiPropertyOptional({ description: 'Filter by organization ID' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  declare orgId?: number;
 }

@@ -10,4 +10,10 @@ export class QueryUserActivityReportDto {
   @ApiPropertyOptional({ description: 'Filter by visit status database ID' }) @IsOptional() @Type(() => Number) @IsInt() @Min(1) declare visitStatusId?: number;
   @ApiPropertyOptional({ default: 1 }) @IsOptional() @Type(() => Number) @IsInt() @Min(1) declare page?: number;
   @ApiPropertyOptional({ default: 25, maximum: 100 }) @IsOptional() @Type(() => Number) @IsInt() @Min(1) declare limit?: number;
+
+  @ApiPropertyOptional({ description: 'Filter by organization ID' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  declare orgId?: number;
 }

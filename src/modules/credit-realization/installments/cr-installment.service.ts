@@ -82,7 +82,7 @@ export class CrInstallmentService {
     const payment = await this.paymentModel.create({
       ...dto,
       installment_plan_id: plan.id,
-      projectId: plan.projectId,
+      org_id: plan.org_id,
     } as any);
 
     // Update plan balances

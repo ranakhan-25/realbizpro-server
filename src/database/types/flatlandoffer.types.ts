@@ -1,8 +1,9 @@
 // Auto-generated types for FlatLandOffer
-// Source: src/database/models/projects/flat-land-offer/pr_flat_land_offer.model.ts
+// Source: src\database\models\projects\flat-land-offer\pr_flat_land_offer.model.ts
 
 import type { Project } from '../models/projects/project/pr_project.model';
 import type { FlatLand } from '../models/projects/flatland/pr_flatland.model';
+import type { SysOrganization } from '../models/system/sys_organization.model';
 
 export interface FlatLandOfferAttributes {
   id: number;
@@ -29,10 +30,12 @@ export interface FlatLandOfferAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
 
   // Relations
   project?: Project;
   flatLand?: FlatLand;
+  organization?: SysOrganization;
 }
 
 export interface FlatLandOfferCreationAttributes {
@@ -55,6 +58,7 @@ export interface FlatLandOfferCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
 }
 
 export type FlatLandOfferUpdateAttributes = Partial<FlatLandOfferCreationAttributes>;
@@ -63,4 +67,5 @@ export type FlatLandOfferUpdateAttributes = Partial<FlatLandOfferCreationAttribu
 export interface FlatLandOfferWithRelations extends FlatLandOfferAttributes {
   project?: Project;
   flatLand?: FlatLand;
+  organization?: SysOrganization;
 }

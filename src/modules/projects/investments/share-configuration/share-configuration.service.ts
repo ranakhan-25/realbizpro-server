@@ -41,6 +41,8 @@ export class ShareConfigurationService {
 
   async create(
     dto: CreateShareConfigurationDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<ShareConfiguration> {
     // -------------------------------------------------------
     // Check Project UUID
@@ -99,7 +101,7 @@ export class ShareConfigurationService {
     // -------------------------------------------------------
 
     const shareConfiguration =
-      await this.shareConfigurationModel.create({
+      await this.shareConfigurationModel.create(({
         projectId: dto.projectId,
         investorId: dto.investorId,
 
@@ -115,11 +117,13 @@ export class ShareConfigurationService {
           dto.isProfitDistribute ?? false,
 
         addedById: dto.addedById,
+        createdBy: dto.createdBy ?? dto.addedById,
+        orgId: dto.orgId,
 
         status:
           dto.status ??
           ShareConfigurationStatus.ACTIVE,
-      });
+      }) as any);
 
     return this.findOne(shareConfiguration.uuid);
   }
@@ -130,6 +134,7 @@ export class ShareConfigurationService {
 
   async findAll(
     query: QueryShareConfigurationDto,
+    currentUser?: any,
   ) {
     const {
       page = 1,
@@ -150,6 +155,26 @@ export class ShareConfigurationService {
         : (page - 1) * limit;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      where.projectId = (query as any).projectId;
+    }
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      where.projectId = (query as any).projectId;
+    }
 
     // -------------------------------------------------------
     // Search
@@ -288,6 +313,7 @@ export class ShareConfigurationService {
 
   async findOne(
     uuid: string,
+    currentUser?: any,
   ): Promise<ShareConfiguration> {
     const shareConfiguration =
       await this.shareConfigurationModel.findOne({
@@ -323,6 +349,8 @@ export class ShareConfigurationService {
   async update(
     uuid: string,
     dto: UpdateShareConfigurationDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<ShareConfiguration> {
     const shareConfiguration =
       await this.shareConfigurationModel.findOne({
@@ -420,9 +448,9 @@ export class ShareConfigurationService {
     // Update
     // -------------------------------------------------------
 
-    await shareConfiguration.update({
+    await shareConfiguration.update(({
       ...dto,
-    });
+    }) as any);
 
     return this.findOne(uuid);
   }
@@ -431,9 +459,7 @@ export class ShareConfigurationService {
   // DELETE
   // =========================================================
 
-  async remove(
-    uuid: string,
-  ): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const shareConfiguration =
       await this.shareConfigurationModel.findOne({
         where: {
@@ -448,9 +474,9 @@ export class ShareConfigurationService {
     }
 
     // Status → inactive
-    await shareConfiguration.update({
+    await shareConfiguration.update(({
       status: ShareConfigurationStatus.INACTIVE,
-    });
+    }) as any);
 
     // Soft delete
     await shareConfiguration.destroy();
@@ -464,9 +490,7 @@ export class ShareConfigurationService {
   // RESTORE
   // =========================================================
 
-  async restore(
-    uuid: string,
-  ): Promise<ShareConfiguration> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<ShareConfiguration> {
     const shareConfiguration =
       await this.shareConfigurationModel.findOne({
         where: {
@@ -492,9 +516,9 @@ export class ShareConfigurationService {
     await shareConfiguration.restore();
 
     // Status → active
-    await shareConfiguration.update({
+    await shareConfiguration.update(({
       status: ShareConfigurationStatus.ACTIVE,
-    });
+    }) as any);
 
     return this.findOne(uuid);
   }

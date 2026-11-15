@@ -1,3 +1,4 @@
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsOptional, IsString, IsNumber, IsDateString, Min } from 'class-validator';
 
@@ -48,4 +49,8 @@ export class GetPaymentVouchersQueryDto {
   @IsOptional()
   @IsDateString({}, { message: 'endDate must be a valid ISO 8601 date string' })
   endDate?: string;
+  @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+  @IsOptional()
+  orgId?: number;
+
 }

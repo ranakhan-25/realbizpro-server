@@ -65,6 +65,13 @@ export class CreateInvestorNomineeDto {
   @Min(0)
   @Max(100)
   percentage: number;
+    @ApiPropertyOptional({ example: 'user-uuid' })
+    @IsOptional()
+    @IsString()
+    createdBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
 }
 
 export class CreateInvestorDto {
@@ -190,4 +197,13 @@ export class CreateInvestorDto {
   @ValidateNested({ each: true })
   @Type(() => CreateInvestorNomineeDto)
   nominees?: CreateInvestorNomineeDto[];
+
+  @ApiPropertyOptional({ example: 'user-uuid' })
+  @IsOptional()
+  @IsString()
+  createdBy?: string;
+
+  @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+  @IsOptional()
+  orgId?: number;
 }

@@ -14,6 +14,7 @@ import {
   AgreementType,
   AgreementStatus,
 } from 'src/database/models/projects/project_aggrement/pr_project_aggrement_model';
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class CreateProjectAgreementDto {
   @IsUUID()
@@ -62,4 +63,15 @@ export class CreateProjectAgreementDto {
   @IsString()
   @IsOptional()
   addedById?: string;
+    @ApiPropertyOptional({ example: 'user-uuid' })
+    @IsOptional()
+    @IsString()
+    createdBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Project UUID or ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 }

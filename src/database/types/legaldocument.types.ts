@@ -1,5 +1,5 @@
 // Auto-generated types for LegalDocument
-// Source: src/database/models/lams/legal-document.model.ts
+// Source: src\database\models\lams\legal-document.model.ts
 
 import type { AcquisitionLead } from '../models/lams/acquisition-lead.model';
 
@@ -19,7 +19,7 @@ export interface LegalDocumentAttributes {
   created_by?: number | null;
   added_by?: number | null;
   deleted_by?: number | null;
-  projectId?: string | null;
+  org_id: string;
 
   // Relations
   acquisition_lead?: AcquisitionLead;
@@ -36,7 +36,7 @@ export interface LegalDocumentCreationAttributes {
   created_by?: number | null;
   added_by?: number | null;
   deleted_by?: number | null;
-  projectId?: string | null;
+  org_id: string;
 }
 
 export type LegalDocumentUpdateAttributes = Partial<LegalDocumentCreationAttributes>;

@@ -29,11 +29,12 @@ export class InvMaterialUsage extends BaseModel<InvMaterialUsageAttributes, InvM
   @Column({ type: DataType.BIGINT, allowNull: true })
   project_id?: number;
 
+  @Index({ name: 'idx_inv_material_usage_org_id' })
   @Column({
     type: DataType.STRING,
-    allowNull: true,
+    allowNull: false,
   })
-  declare projectId?: string;
+  declare org_id: string;
 
   @Column({ type: DataType.BIGINT, allowNull: true })
   site_id?: number;

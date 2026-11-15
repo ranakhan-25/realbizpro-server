@@ -21,31 +21,38 @@ export class EmployeeKpiCallReportService {
     @InjectModel(SysUser) private readonly users: typeof SysUser,
   ) {}
 
-  async dropdowns() {
-    const users = await this.users.findAll({ where: { isActive: true }, attributes: ['uuid', 'userCode', 'name'], order: [['name', 'ASC']] });
+  async dropdowns(currentUser?: any) {
+    const where: any = { isActive: true };
+    if (currentUser?.orgId) where.orgId = currentUser.orgId;
+    const users = await this.users.findAll({ where, attributes: ['uuid', 'userCode', 'name'], order: [['name', 'ASC']] });
     return { users };
   }
 
-  async report(query: QueryEmployeeKpiCallReportDto) {
+  async report(query: QueryEmployeeKpiCallReportDto, currentUser?: any) {
     const periodFrom = query.dateFrom ? new Date(`${query.dateFrom}T00:00:00.000Z`) : undefined;
     const periodTo = query.dateTo ? new Date(`${query.dateTo}T23:59:59.999Z`) : undefined;
     const kpis = await this.kpis.findAll({
-      where: { status: 'ACTIVE', ...(query.userId ? { userId: query.userId } : {}) },
+      where: { type: 'INDIVIDUAL', status: 'ACTIVE', ...(currentUser?.orgId ? { orgId: currentUser.orgId } : {}), ...(query.userId ? { userId: query.userId } : {}) },
       include: [{ association: 'user', required: false, attributes: ['uuid', 'userCode', 'name'] }, { association: 'team', required: false, attributes: ['id', 'name'] }],
       order: [['fromDate', 'ASC'], ['id', 'ASC']],
     });
     const filteredKpis = kpis.filter(kpi => this.overlaps(kpi.fromDate, kpi.toDate, query.dateFrom, query.dateTo));
     const actorIds = filteredKpis.flatMap(kpi => [kpi.userId]).filter((value): value is string => !!value);
     const activityWhere: any = { activityType: { [Op.in]: [...CALL_TYPES, ...TASK_TYPES] } };
+    if (currentUser?.orgId) activityWhere.orgId = currentUser.orgId;
     if (periodFrom || periodTo) activityWhere.activityDate = { ...(periodFrom ? { [Op.gte]: periodFrom } : {}), ...(periodTo ? { [Op.lte]: periodTo } : {}) };
     const activities = await this.activities.findAll({ where: activityWhere, attributes: ['id', 'activityType', 'activityDate', 'conductedBy', 'createdBy'] });
     const userKeys = [...new Set(activities.flatMap(item => [item.conductedBy, item.createdBy]).filter(Boolean))] as string[];
-    const matchedUsers = userKeys.length ? await this.users.findAll({ where: { [Op.or]: [{ uuid: { [Op.in]: userKeys } }, { userCode: { [Op.in]: userKeys } }, { name: { [Op.in]: userKeys } }] }, attributes: ['uuid', 'userCode', 'name'] }) : [];
+    const isUuid = (val: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
+    const uuidKeys = userKeys.filter(isUuid);
+    const userOrCond: any[] = [{ userCode: { [Op.in]: userKeys } }, { name: { [Op.in]: userKeys } }];
+    if (uuidKeys.length) userOrCond.unshift({ uuid: { [Op.in]: uuidKeys } });
+    const matchedUsers = userKeys.length ? await this.users.findAll({ where: { [Op.or]: userOrCond, ...(currentUser?.orgId ? { orgId: currentUser.orgId } : {}) }, attributes: ['uuid', 'userCode', 'name'] }) : [];
     const allUsers = [...matchedUsers, ...kpis.map(kpi => kpi.user).filter((value): value is SysUser => !!value)];
     const keyMap = new Map<string, string>();
     for (const user of allUsers) { keyMap.set(user.uuid, user.uuid); if (user.userCode) keyMap.set(user.userCode, user.uuid); keyMap.set(user.name, user.uuid); }
     const teamIds = [...new Set(filteredKpis.map(kpi => kpi.teamId).filter((value): value is number => value != null))];
-    const teamMembers = teamIds.length ? await this.teamMembers.findAll({ where: { teamId: { [Op.in]: teamIds }, isActive: true }, attributes: ['teamId', 'userId'] }) : [];
+    const teamMembers = teamIds.length ? await this.teamMembers.findAll({ where: { teamId: { [Op.in]: teamIds }, isActive: true, ...(currentUser?.orgId ? { orgId: currentUser.orgId } : {}) }, attributes: ['teamId', 'userId'] }) : [];
     const membersByTeam = new Map<number, string[]>();
     for (const member of teamMembers) membersByTeam.set(member.teamId, [...(membersByTeam.get(member.teamId) ?? []), member.userId]);
     const countFor = (kpi: CrmEmployeeKpi, types: string[]) => activities.filter(activity => types.includes(activity.activityType.toLowerCase()) && this.belongsTo(kpi, activity, keyMap, membersByTeam)).length;

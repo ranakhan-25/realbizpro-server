@@ -42,4 +42,42 @@ export class ReportsService {
       ]
     };
   }
+
+  async getItemHistory(itemId?: string) {
+    return {
+      status: true,
+      data: [
+        {
+          id: 1,
+          date: '2026-09-01',
+          invoiceNo: 'PUR-2026-001',
+          project: 'Sheba Eyecon Tower',
+          task: 'Beam Concreting Level-4',
+          in: 25,
+          out: 0,
+          balance: 25,
+          unitCost: 94500,
+          subTotal: 2362500,
+          category: 'Deformed Rebar & Steels',
+          itemName: 'BSRM 16mm TMT 500W High Strength Bar',
+          site: 'Tower 1 Foundation Site',
+        },
+        {
+          id: 2,
+          date: '2026-09-12',
+          invoiceNo: 'MU-2026-001',
+          project: 'Sheba Eyecon Tower',
+          task: 'Pillar Casting Work',
+          in: 0,
+          out: 10,
+          balance: 15,
+          unitCost: 94500,
+          subTotal: 945000,
+          category: 'Deformed Rebar & Steels',
+          itemName: 'BSRM 16mm TMT 500W High Strength Bar',
+          site: 'Tower 1 Foundation Site',
+        }
+      ]
+    };
+  }
 }

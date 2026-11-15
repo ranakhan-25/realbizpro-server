@@ -10,4 +10,13 @@ export class QueryProcurementAssetCategoryDto {
   @ApiPropertyOptional({ enum: ['createdAt', 'updatedAt', 'type', 'code', 'name'] }) @IsOptional() @IsIn(['createdAt', 'updatedAt', 'type', 'code', 'name']) sortBy = 'createdAt';
   @ApiPropertyOptional({ enum: ['ASC', 'DESC'], default: 'DESC' }) @IsOptional() @IsIn(['ASC', 'DESC']) sortOrder: 'ASC' | 'DESC' = 'DESC';
   @ApiPropertyOptional({ default: false }) @IsOptional() @Transform(({ value }) => value === 'true' || value === true) @IsBoolean() withDeleted = false;
+
+  @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+  @IsOptional()
+  orgId?: number;
+
+  @ApiPropertyOptional({ description: 'Project UUID or ID' })
+  @IsOptional()
+  projectId?: string;
+
 }

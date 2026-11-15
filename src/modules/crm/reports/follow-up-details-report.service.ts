@@ -20,7 +20,7 @@ export class FollowUpDetailsReportService {
     @InjectModel(SysUser) private readonly users: typeof SysUser,
   ) {}
 
-  async dropdowns() {
+  async dropdowns(currentUser?: any) {
     const [users, leads, leadStages, communicationStatuses] = await Promise.all([
       this.users.findAll({ where: { isActive: true }, attributes: ['uuid', 'name', 'userCode'], order: [['name', 'ASC']] }),
       this.leads.findAll({ where: { status: { [Op.ne]: 'deleted' } }, attributes: ['uuid', 'leadCode', 'clientName', 'phone'], order: [['clientName', 'ASC']] }),
@@ -30,7 +30,7 @@ export class FollowUpDetailsReportService {
     return { users, leads, leadStages, communicationStatuses };
   }
 
-  async list(query: QueryFollowUpDetailsReportDto) {
+  async list(query: QueryFollowUpDetailsReportDto, currentUser?: any) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const where: any = { activityType: { [Op.in]: ['followup', 'follow_up', 'follow-up', 'call'] } };
@@ -69,7 +69,7 @@ export class FollowUpDetailsReportService {
         attributes: ['id', 'uuid', 'leadCode', 'clientName', 'phone', 'assignedTo', 'projectId', 'leadStageId'],
         include: [
           { association: 'stage', required: false, attributes: ['id', 'uuid', 'name'] },
-          { association: 'propertyInterests', required: false, separate: true, include: [{ association: 'project', required: false, attributes: ['uuid', 'code', 'name'] }] },
+          { association: 'propertyInterests', required: false, separate: true, attributes: ['id', 'uuid', 'leadId', 'projectId', 'projectName', 'plotFlatNo'] },
         ],
       }],
       limit, offset: (page - 1) * limit,
@@ -92,7 +92,7 @@ export class FollowUpDetailsReportService {
           stage: lead?.stage?.name ?? null,
           name: lead?.clientName ?? null,
           leadId: lead?.uuid ?? null,
-          project: interest?.project?.name ?? interest?.project?.code ?? interest?.projectName ?? null,
+          project: interest?.projectName ?? interest?.projectId ?? lead?.projectId ?? null,
           projectId: interest?.projectId ?? lead?.projectId ?? null,
           flatLand: interest?.plotFlatNo ?? null,
           phone: lead?.phone ?? null,

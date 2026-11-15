@@ -4,8 +4,7 @@ import {
   Column,
   DataType,
   Table,
-  HasMany,
-} from 'sequelize-typescript';
+  HasMany, ForeignKey, BelongsTo } from 'sequelize-typescript';
 
 import { BaseModel } from 'src/database/base.model';
 import {
@@ -13,9 +12,11 @@ import {
   MonthYearCreationAttributes,
 } from 'src/database/types/monthyear.types';
 import { Attendance } from './hrm_attendance_model';
+import { SysOrganization } from "src/database/models/system/sys_organization.model";
 
 @Table({
-  tableName: 'month_year',
+  tableName: 'hrm_month_year',
+  underscored: true,
   timestamps: true,
   paranoid: true,
   indexes: [
@@ -26,11 +27,11 @@ import { Attendance } from './hrm_attendance_model';
     },
     {
       name: 'MonthYear_startDate_idx',
-      fields: ['startDate'],
+      fields: ['start_date'],
     },
     {
       name: 'MonthYear_endDate_idx',
-      fields: ['endDate'],
+      fields: ['end_date'],
     },
   ],
 })
@@ -68,4 +69,36 @@ export class MonthYear extends BaseModel<
     as: 'attendances',
   })
   declare attendances?: Attendance[];
+    @Column({
+            type: DataType.STRING,
+            allowNull: true,
+            field: 'created_by',
+          })
+    declare createdBy?: string;
+    @Column({
+            type: DataType.STRING,
+            allowNull: true,
+            field: 'updated_by',
+          })
+    declare updatedBy?: string;
+    @Column({
+            type: DataType.STRING,
+            allowNull: true,
+            field: 'deleted_by',
+          })
+    declare deletedBy?: string;
+    @ForeignKey(() => SysOrganization)
+    @Column({
+            type: DataType.BIGINT,
+            allowNull: true,
+            field: 'org_id',
+            defaultValue: null,
+          })
+    declare orgId?: number | null;
+    @BelongsTo(() => SysOrganization, {
+            foreignKey: 'orgId',
+            targetKey: 'id',
+            as: 'organization',
+          })
+    declare organization?: SysOrganization;
 }

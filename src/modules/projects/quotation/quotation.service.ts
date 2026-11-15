@@ -22,7 +22,8 @@ export class QuotationService {
 
   async create(
     dto: CreateQuotationDto,
-    userId?: string,
+    userId?: number,
+    currentUser?: any,
   ): Promise<Quotation> {
     const existing = await this.quotationModel.findOne({
       where: { code: dto.code } as WhereOptions<Quotation>,
@@ -38,8 +39,8 @@ export class QuotationService {
         {
           ...dto,
           date: new Date(dto.date),
-          createdBy: userId,
-          addedById: userId,
+          createdBy: userId ? String(userId) : null as any,
+          addedById: userId ? String(userId) : null as any,
         },
         { transaction },
       );
@@ -49,10 +50,19 @@ export class QuotationService {
     return this.findOne(uuid);
   }
 
-  async findAll(query: QueryQuotationDto) {
+  async findAll(
+    query: QueryQuotationDto,
+    currentUser?: any,
+  ) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const where: WhereOptions<Quotation> = {};
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      where.projectId = (query as any).projectId;
+    }
 
     if (query.search?.trim()) {
       const search = `%${query.search.trim()}%`;
@@ -105,7 +115,7 @@ export class QuotationService {
     };
   }
 
-  async findOne(uuid: string): Promise<Quotation> {
+  async findOne(uuid: string, currentUser?: any): Promise<Quotation> {
     const quotation = await this.quotationModel.findOne({
       where: { uuid } as WhereOptions<Quotation>,
     });
@@ -120,7 +130,8 @@ export class QuotationService {
   async update(
     uuid: string,
     dto: UpdateQuotationDto,
-    userId?: string,
+    userId?: number,
+    currentUser?: any,
   ): Promise<Quotation> {
     await this.sequelize.transaction(async (transaction) => {
       const quotation = await this.quotationModel.findOne({
@@ -153,7 +164,7 @@ export class QuotationService {
         {
           ...quotationFields,
           ...(date !== undefined ? { date: new Date(date) } : {}),
-          updatedBy: userId,
+          updatedBy: userId ? String(userId) : null as any,
         },
         { transaction },
       );
@@ -162,7 +173,7 @@ export class QuotationService {
     return this.findOne(uuid);
   }
 
-  async remove(uuid: string, userId?: string) {
+  async remove(uuid: string, userId?: number, currentUser?: any) {
     await this.sequelize.transaction(async (transaction) => {
       const quotation = await this.quotationModel.findOne({
         where: { uuid } as WhereOptions<Quotation>,
@@ -175,7 +186,7 @@ export class QuotationService {
       }
 
       await quotation.update(
-        { deletedBy: userId },
+        { deletedBy: userId ? String(userId) : null } as any,
         { transaction },
       );
       await quotation.destroy({ transaction });
@@ -184,7 +195,7 @@ export class QuotationService {
     return { message: 'Quotation soft deleted successfully' };
   }
 
-  async restore(uuid: string): Promise<Quotation> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<Quotation> {
     await this.sequelize.transaction(async (transaction) => {
       const quotation = await this.quotationModel.findOne({
         where: { uuid } as WhereOptions<Quotation>,
@@ -201,6 +212,10 @@ export class QuotationService {
       }
 
       await quotation.restore({ transaction });
+      await quotation.update(
+        { deletedBy: null, updatedBy: userId ? String(userId) : null } as any,
+        { transaction },
+      );
     });
 
     return this.findOne(uuid);

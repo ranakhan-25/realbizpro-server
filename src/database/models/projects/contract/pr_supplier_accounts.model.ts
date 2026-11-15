@@ -3,8 +3,7 @@ import {
   Column,
   DataType,
   HasMany,
-  Table,
-} from 'sequelize-typescript';
+  Table, ForeignKey, BelongsTo } from 'sequelize-typescript';
 import { BaseModel } from 'src/database/base.model';
 import type {
   SupplierAccountsAttributes,
@@ -23,6 +22,7 @@ import { ProcurementAssetPurchaseBill } from '../../procurement/purchase-bill/pr
 import { ProcurementAssetGrn } from '../../procurement/grn/pr_asset_grn.model';
 import { ProcurementHireOrder } from '../../procurement/equipment-hire/pr_hire_order.model';
 import { ProcurementHireBill } from '../../procurement/equipment-hire/pr_hire_bill.model';
+import { SysOrganization } from "src/database/models/system/sys_organization.model";
 
 export enum SupplierAccountsStatus {
   ACTIVE = 'active',
@@ -126,21 +126,24 @@ export class SupplierAccounts
   declare addedById?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'created_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare createdBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'updated_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare updatedBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'deleted_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare deletedBy?: string;
 
   @Column({
@@ -164,4 +167,18 @@ export class SupplierAccounts
   @HasMany(() => ProcurementAssetPurchaseBill, { foreignKey: 'supplier_id', sourceKey: 'uuid', as: 'procurementAssetPurchaseBills' }) declare procurementAssetPurchaseBills?: ProcurementAssetPurchaseBill[];
   @HasMany(() => ProcurementHireOrder, { foreignKey: 'vendor_id', sourceKey: 'uuid', as: 'equipmentHireOrders' }) declare equipmentHireOrders?: ProcurementHireOrder[];
   @HasMany(() => ProcurementHireBill, { foreignKey: 'vendor_id', sourceKey: 'uuid', as: 'equipmentHireBills' }) declare equipmentHireBills?: ProcurementHireBill[];
+    @ForeignKey(() => SysOrganization)
+    @Column({
+            type: DataType.BIGINT,
+            allowNull: true,
+            field: 'org_id',
+            defaultValue: null,
+          })
+    declare orgId?: number | null;
+    @BelongsTo(() => SysOrganization, {
+            foreignKey: 'orgId',
+            targetKey: 'id',
+            as: 'organization',
+          })
+    declare organization?: SysOrganization;
 }

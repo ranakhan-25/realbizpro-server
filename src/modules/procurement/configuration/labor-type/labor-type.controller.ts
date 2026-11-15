@@ -1,13 +1,8 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Query,
-} from '@nestjs/common';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { CurrentUser, CurrentUserId } from 'src/common/decorators/auth.decorators';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -22,6 +17,7 @@ import { ProcurementLaborTypeService } from './labor-type.service';
 
 @ApiTags('Procurement | Labor Types')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('procurement/labor-types')
 export class ProcurementLaborTypeController {
   constructor(
@@ -60,6 +56,7 @@ export class ProcurementLaborTypeController {
   }
   @Patch(':uuid')
   @ApiOperation({ summary: 'Update labor type' })
+  @Permissions('update_procurement_labor_type')
   update(
     @Param('uuid') uuid: string,
     @Body() dto: UpdateLaborTypeDto,

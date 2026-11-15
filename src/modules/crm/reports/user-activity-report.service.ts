@@ -30,7 +30,7 @@ export class UserActivityReportService {
     @InjectModel(SysUser) private readonly users: typeof SysUser,
   ) {}
 
-  async dropdowns() {
+  async dropdowns(currentUser?: any) {
     const [users, leadStages, visitStatuses, communicationStatuses] = await Promise.all([
       this.users.findAll({ where: { isActive: true }, attributes: ['uuid', 'name', 'userCode'], order: [['name', 'ASC']] }),
       this.stages.findAll({ where: { isActive: true }, attributes: ['id', 'uuid', 'name'], order: [['sortOrder', 'ASC'], ['name', 'ASC']] }),
@@ -40,7 +40,7 @@ export class UserActivityReportService {
     return { users, leadStages, visitStatuses, communicationStatuses };
   }
 
-  async report(query: QueryUserActivityReportDto) {
+  async report(query: QueryUserActivityReportDto, currentUser?: any) {
     const leadWhere: any = {};
     if (query.userId) leadWhere.assignedTo = query.userId;
     if (query.leadStageId) leadWhere.leadStageId = query.leadStageId;

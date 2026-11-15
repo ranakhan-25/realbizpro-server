@@ -26,6 +26,8 @@ export class DepartmentService {
 
   async create(
     dto: CreateDepartmentDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<Department> {
     const existing =
       await this.departmentModel.findOne({
@@ -45,12 +47,15 @@ export class DepartmentService {
         ...dto,
         status:
           dto.status ?? DepartmentStatus.ACTIVE,
-      });
+        createdBy: userId ? String(userId) : (dto as any).createdBy ?? (dto as any).addedById ?? null,
+        orgId: (dto as any).orgId ?? currentUser?.orgId ?? null,
+        projectId: (dto as any).projectId ?? currentUser?.projectId ?? null,
+      } as any);
 
     return this.findOne(department.uuid);
   }
 
-  async findAll(query: QueryDepartmentDto) {
+  async findAll(query: QueryDepartmentDto, currentUser?: any) {
     const {
       page = 1,
       limit = 10,
@@ -69,6 +74,14 @@ export class DepartmentService {
         : (page - 1) * limit;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
 
     if (search) {
       where[Op.or] = [
@@ -96,7 +109,7 @@ export class DepartmentService {
         offset,
         order: [[sortBy, sortOrder]],
         paranoid: !withDeleted,
-      });
+      } as any);
 
     const totalPages =
       Math.ceil(count / limit) || 1;
@@ -130,6 +143,7 @@ export class DepartmentService {
 
   async findOne(
     uuid: string,
+    currentUser?: any,
   ): Promise<Department> {
     const department =
       await this.departmentModel.findOne({
@@ -148,6 +162,8 @@ export class DepartmentService {
   async update(
     uuid: string,
     dto: UpdateDepartmentDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<Department> {
     const department =
       await this.departmentModel.findOne({
@@ -180,13 +196,18 @@ export class DepartmentService {
 
     await department.update({
       ...dto,
-    });
+      updatedBy: userId ? String(userId) : department.updatedBy ?? null,
+      ...((dto as any).orgId !== undefined ? { orgId: (dto as any).orgId } : {}),
+      ...((dto as any).projectId !== undefined ? { projectId: (dto as any).projectId } : {}),
+    } as any);
 
     return this.findOne(uuid);
   }
 
   async remove(
     uuid: string,
+    userId?: number,
+    currentUser?: any,
   ): Promise<{ message: string }> {
     const department =
       await this.departmentModel.findOne({
@@ -202,7 +223,8 @@ export class DepartmentService {
     // status → inactive + soft delete
     await department.update({
       status: DepartmentStatus.INACTIVE,
-    });
+      deletedBy: userId ? String(userId) : null,
+    } as any);
 
     await department.destroy();
 
@@ -213,6 +235,8 @@ export class DepartmentService {
 
   async restore(
     uuid: string,
+    userId?: number,
+    currentUser?: any,
   ): Promise<Department> {
     const department =
       await this.departmentModel.findOne({
@@ -236,7 +260,9 @@ export class DepartmentService {
     await department.restore();
     await department.update({
       status: DepartmentStatus.ACTIVE,
-    });
+      deletedBy: null,
+      updatedBy: userId ? String(userId) : null,
+    } as any);
 
     return this.findOne(uuid);
   }

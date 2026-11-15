@@ -8,6 +8,7 @@ import { SysUserRole } from '@/database/models/system/sys_user_role.model';
 import { SysModules } from '@/database/models/system/sys_module.model';
 import { SysFeatures } from '@/database/models/system/sys_features.model';
 import { SysOrgEntitlement } from '@/database/models/system/sys_org_entitlement.model';
+import { SysUserFeatureOverride } from '@/database/models/system/sys_user_feature_override.model';
 import { OrganizationsController } from './organizations.controller';
 import { OrganizationsService } from './organizations.service';
 
@@ -22,6 +23,7 @@ import { OrganizationsService } from './organizations.service';
       SysModules,
       SysFeatures,
       SysOrgEntitlement,
+      SysUserFeatureOverride,
     ]),
   ],
   controllers: [OrganizationsController],

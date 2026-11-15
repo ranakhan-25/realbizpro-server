@@ -18,7 +18,7 @@ export class DealNegotiationReportService {
     @InjectModel(SysUser) private readonly users: typeof SysUser,
   ) {}
 
-  async dropdowns() {
+  async dropdowns(currentUser?: any) {
     const [projects, flatLands, leads, users] = await Promise.all([
       this.projects.findAll({ attributes: ['uuid', 'code', 'name'], order: [['name', 'ASC']] }),
       this.flatLands.findAll({ attributes: ['uuid', 'projectId', 'flatLandNo', 'projectName'], order: [['flatLandNo', 'ASC']] }),
@@ -35,7 +35,7 @@ export class DealNegotiationReportService {
     };
   }
 
-  async report(query: QueryDealNegotiationReportDto) {
+  async report(query: QueryDealNegotiationReportDto, currentUser?: any) {
     const page = query.page ?? 1;
     const limit = Math.min(query.limit ?? 10, 100);
     const [rows, projects, flatLands, leads, users] = await Promise.all([

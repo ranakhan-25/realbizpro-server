@@ -1,12 +1,5 @@
-import { 
-  IsString, 
-  IsOptional, 
-  IsNumber,
-  IsBoolean,
-  IsUUID,
-  Min,
-  ValidateIf // ✅ যোগ করুন
-} from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsOptional, IsNumber, IsBoolean, IsUUID, Min, ValidateIf } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateChartOfAccountDto {
@@ -42,4 +35,18 @@ export class CreateChartOfAccountDto {
   @IsString()
   @IsOptional()
   addedById?: string;
+  @ApiPropertyOptional({ example: 'user-uuid' })
+  @IsOptional()
+  @IsString()
+  createdBy?: string;
+
+  @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+  @IsOptional()
+  orgId?: number;
+
+  @ApiPropertyOptional({ description: 'Project UUID or ID' })
+  @IsOptional()
+  @IsString()
+  projectId?: string;
+
 }

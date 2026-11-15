@@ -35,9 +35,12 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
               mail.user && mail.password
                 ? {
                     user: mail.user,
-                    pass: mail.password,
+                    pass: mail.password ? String(mail.password).replace(/\s+/g, '') : undefined,
                   }
                 : undefined,
+            tls: {
+              rejectUnauthorized: false,
+            },
           },
 
           defaults: {

@@ -58,4 +58,23 @@ export class QueryEmployeeHierarchyDto {
   @IsOptional()
   @IsUUID('all')
   sectionId?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Project UUID or ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
+
+    @ApiPropertyOptional({ description: 'Page number', example: 1 })
+    @IsOptional()
+    page?: number;
+
+    @ApiPropertyOptional({ description: 'Items per page', example: 100 })
+    @IsOptional()
+    limit?: number;
+
+    @ApiPropertyOptional({ description: 'Include soft-deleted records', example: false })
+    @IsOptional()
+    withDeleted?: boolean;
 }

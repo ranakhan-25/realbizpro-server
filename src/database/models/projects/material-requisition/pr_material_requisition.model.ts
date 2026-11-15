@@ -20,6 +20,7 @@ import type {
   MaterialRequisitionCreationAttributes,
   MaterialRequisitionUpdateAttributes,
 } from 'src/database/types/materialrequisition.types';
+import { SysOrganization } from "src/database/models/system/sys_organization.model";
 
 export enum MaterialRequisitionStatus {
   PENDING = 'pending',
@@ -202,21 +203,24 @@ export class MaterialRequisition
 
   // --- Audit Fields ---
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'created_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare createdBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'updated_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare updatedBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'deleted_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare deletedBy?: string;
 
   // relation: ek MaterialRequisition er onek Item (1 : N)
@@ -232,4 +236,18 @@ export class MaterialRequisition
 
   @HasMany(() => ProcurementAssetRfq, { foreignKey: 'requisition_id', sourceKey: 'uuid', as: 'procurementAssetRfqs' })
   declare procurementAssetRfqs?: ProcurementAssetRfq[];
+    @ForeignKey(() => SysOrganization)
+    @Column({
+            type: DataType.BIGINT,
+            allowNull: true,
+            field: 'org_id',
+            defaultValue: null,
+          })
+    declare orgId?: number | null;
+    @BelongsTo(() => SysOrganization, {
+            foreignKey: 'orgId',
+            targetKey: 'id',
+            as: 'organization',
+          })
+    declare organization?: SysOrganization;
 }

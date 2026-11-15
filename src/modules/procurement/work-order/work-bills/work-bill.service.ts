@@ -57,6 +57,8 @@ export class WorkBillService {
     const page = Math.max(Number(query.page) || 1, 1);
     const limit = Math.min(Math.max(Number(query.limit) || 10, 1), 100);
     const where: any = {};
+    if ((query as any)?.orgId) where.orgId = (query as any).orgId;
+    if ((query as any)?.projectId) where.projectId = (query as any).projectId;
     if (query.bill_no) where.bill_no = { [Op.iLike]: `%${query.bill_no}%` };
     if (query.status) where.status = query.status;
     if (onlyDeleted) where.deleted_at = { [Op.ne]: null };

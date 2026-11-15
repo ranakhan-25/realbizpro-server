@@ -1,19 +1,33 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { QueryCallLogReportDto } from './dto/query-call-log-report.dto';
 import { CallLogReportService } from './call-log-report.service';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { CurrentUser } from 'src/common/decorators/auth.decorators';
 
 @ApiTags('CRM | Reports | Call Log Report')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('crm/reports/call-log')
 export class CallLogReportController {
   constructor(private readonly service: CallLogReportService) {}
 
   @Get('dropdowns')
-  @ApiOperation({ summary: 'Get active users for the call log report user filter' })
-  dropdowns() { return this.service.dropdowns(); }
+  @Permissions('list_crm_call_log_report')
+  @ApiOperation({ summary: 'Get dropdown options for report filters' })
+  dropdowns(@CurrentUser() currentUser: any) {
+    return this.service.dropdowns(currentUser);
+  }
 
   @Get()
-  @ApiOperation({ summary: 'Get call log summary by user with incoming, outgoing and duration totals' })
-  report(@Query() query: QueryCallLogReportDto) { return this.service.report(query); }
+  @Permissions('list_crm_call_log_report')
+  @ApiOperation({ summary: 'Generate report data' })
+  report(
+    @Query() query: QueryCallLogReportDto,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.service.report(query, currentUser);
+  }
 }

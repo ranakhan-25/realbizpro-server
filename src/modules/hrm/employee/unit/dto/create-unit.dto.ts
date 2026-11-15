@@ -45,4 +45,11 @@ export class CreateUnitDto {
   @IsOptional()
   @IsEnum(UnitStatus)
   status?: UnitStatus;
+    @ApiPropertyOptional({ example: 'user-uuid' })
+    @IsOptional()
+    @IsString()
+    createdBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
 }

@@ -241,7 +241,7 @@ export default registerAs<DatabaseConfig>(
       },
 
       sync: {
-        enabled: true,
+        enabled: false,
         force: false,
         alter: true,
         logSql: false,

@@ -45,11 +45,12 @@ export class FollowUp extends BaseModel<FollowUpAttributes, FollowUpCreationAttr
   @Column({ type: DataType.INTEGER, allowNull: true })
   deleted_by?: number;
 
+  @Index({ name: 'idx_follow_up_org_id' })
   @Column({
     type: DataType.STRING,
-    allowNull: true,
+    allowNull: false,
   })
-  declare projectId?: string;
+  declare org_id: string;
 
   @BelongsTo(() => AcquisitionLead, { foreignKey: 'lead_id', as: 'acquisition_lead' })
   declare acquisition_lead?: AcquisitionLead;

@@ -1,5 +1,8 @@
 // Auto-generated types for Details
-// Source: src/database/models/projects/details/pr_details.model.ts
+// Source: src\database\models\projects\details\pr_details.model.ts
+
+import type { SysOrganization } from '../models/system/sys_organization.model';
+import type { Project } from '../models/projects/project/pr_project.model';
 
 export interface DetailsAttributes {
   id: number;
@@ -23,6 +26,12 @@ export interface DetailsAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
+  projectId?: string | null;
+
+  // Relations
+  organization?: SysOrganization;
+  project?: Project;
 }
 
 export interface DetailsCreationAttributes {
@@ -42,11 +51,14 @@ export interface DetailsCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
+  projectId?: string | null;
 }
 
 export type DetailsUpdateAttributes = Partial<DetailsCreationAttributes>;
 
 // Helper type for including relations
 export interface DetailsWithRelations extends DetailsAttributes {
-  // No relations defined
+  organization?: SysOrganization;
+  project?: Project;
 }

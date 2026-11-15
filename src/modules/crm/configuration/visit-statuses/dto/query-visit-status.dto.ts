@@ -15,6 +15,10 @@ export class QueryVisitStatusDto {
   @IsOptional() @IsString()
   declare search?: string;
 
+  @ApiPropertyOptional({ description: 'Filter by organization ID' })
+  @IsOptional() @Type(() => Number) @IsInt()
+  declare orgId?: number;
+
   @ApiPropertyOptional({ type: Boolean, default: false })
   @IsOptional() @Transform(({ value }) => value === true || value === 'true') @IsBoolean()
   declare withDeleted?: boolean;

@@ -2,8 +2,7 @@ import {
   Column,
   DataType,
   HasMany,
-  Table,
-} from 'sequelize-typescript';
+  Table, ForeignKey, BelongsTo } from 'sequelize-typescript';
 import { BaseModel } from 'src/database/base.model';
 import type {
   ShiftAttributes,
@@ -12,6 +11,7 @@ import type {
 } from 'src/database/types/shift.types';
 import { ShiftSchedule } from './hrm_shift_schedule_model';
 import { Attendance } from './hrm_attendance_model';
+import { SysOrganization } from "src/database/models/system/sys_organization.model";
 
 export enum ShiftStatus {
   ACTIVE = 'active',
@@ -19,10 +19,10 @@ export enum ShiftStatus {
 }
 
 @Table({
-  tableName: 'shift',
+  tableName: 'hrm_shift',
+  underscored: true,
   timestamps: true,
   paranoid: true,
-  underscored: false,
   indexes: [
     {
       name: 'Shift_name_idx',
@@ -55,21 +55,24 @@ export class Shift
   declare addedById?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          type: DataType.STRING,
+          allowNull: true,
+          field: 'created_by',
+        })
   declare createdBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          type: DataType.STRING,
+          allowNull: true,
+          field: 'updated_by',
+        })
   declare updatedBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          type: DataType.STRING,
+          allowNull: true,
+          field: 'deleted_by',
+        })
   declare deletedBy?: string;
 
   @Column({
@@ -95,4 +98,18 @@ export class Shift
     as: 'attendances',
   })
   declare attendances?: Attendance[];
+    @ForeignKey(() => SysOrganization)
+    @Column({
+            type: DataType.BIGINT,
+            allowNull: true,
+            field: 'org_id',
+            defaultValue: null,
+          })
+    declare orgId?: number | null;
+    @BelongsTo(() => SysOrganization, {
+            foreignKey: 'orgId',
+            targetKey: 'id',
+            as: 'organization',
+          })
+    declare organization?: SysOrganization;
 }

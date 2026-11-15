@@ -1,9 +1,9 @@
+/* eslint-disable prettier/prettier */
 import {
   Column,
   DataType,
   HasMany,
-  Table,
-} from 'sequelize-typescript';
+  Table, ForeignKey, BelongsTo } from 'sequelize-typescript';
 import { BaseModel } from 'src/database/base.model';
 import type {
   DepartmentAttributes,
@@ -13,6 +13,7 @@ import type {
 import { Designation } from './hrm_designation_model';
 import { EmployeeList } from './hrm_employeeList_model';
 import { Attendance } from './hrm_attendance_model';
+import { SysOrganization } from "src/database/models/system/sys_organization.model";
 
 export enum DepartmentStatus {
   ACTIVE = 'active',
@@ -20,10 +21,10 @@ export enum DepartmentStatus {
 }
 
 @Table({
-  tableName: 'department',
+  tableName: 'hrm_department',
+  underscored: true,
   timestamps: true,
   paranoid: true,
-  underscored: false,
   indexes: [
     {
       name: 'Department_name_idx',
@@ -31,7 +32,7 @@ export enum DepartmentStatus {
     },
     {
       name: 'Department_departmentHeadId_idx',
-      fields: ['departmentHeadId'],
+      fields: ['department_head_id'],
     },
     {
       name: 'Department_deletedAt_idx',
@@ -56,12 +57,14 @@ export class Department
   @Column({
     type: DataType.STRING,
     allowNull: true,
+    field: 'department_head_id',
   })
   declare departmentHeadId?: string;
 
   @Column({
     type: DataType.STRING,
     allowNull: true,
+    field: 'added_by_id',
   })
   declare addedById?: string;
 
@@ -112,4 +115,18 @@ export class Department
     as: 'attendances',
   })
   declare attendances?: Attendance[];
+    @ForeignKey(() => SysOrganization)
+    @Column({
+            type: DataType.BIGINT,
+            allowNull: true,
+            field: 'org_id',
+            defaultValue: null,
+          })
+    declare orgId?: number | null;
+    @BelongsTo(() => SysOrganization, {
+            foreignKey: 'orgId',
+            targetKey: 'id',
+            as: 'organization',
+          })
+    declare organization?: SysOrganization;
 }

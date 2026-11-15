@@ -17,6 +17,7 @@ import {
 } from 'src/database/types/investornominee.types';
 
 import { Investor } from './investor.model';
+import { SysOrganization } from "src/database/models/system/sys_organization.model";
 
 @Table({
   tableName: 'investor_nominees',
@@ -73,4 +74,36 @@ export class InvestorNominee
     allowNull: false,
   })
   declare percentage: number;
+    @Column({
+            type: DataType.STRING,
+            allowNull: true,
+            field: 'created_by',
+          })
+    declare createdBy?: string;
+    @Column({
+            type: DataType.STRING,
+            allowNull: true,
+            field: 'updated_by',
+          })
+    declare updatedBy?: string;
+    @Column({
+            type: DataType.STRING,
+            allowNull: true,
+            field: 'deleted_by',
+          })
+    declare deletedBy?: string;
+    @ForeignKey(() => SysOrganization)
+    @Column({
+            type: DataType.BIGINT,
+            allowNull: true,
+            field: 'org_id',
+            defaultValue: null,
+          })
+    declare orgId?: number | null;
+    @BelongsTo(() => SysOrganization, {
+            foreignKey: 'orgId',
+            targetKey: 'id',
+            as: 'organization',
+          })
+    declare organization?: SysOrganization;
 }

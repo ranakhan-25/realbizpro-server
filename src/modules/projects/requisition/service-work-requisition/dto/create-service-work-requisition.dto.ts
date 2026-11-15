@@ -9,6 +9,7 @@ import {
 import { Type } from 'class-transformer';
 
 import { ServiceWorkRequisitionStatus } from 'src/database/models/projects/service-work-requisition/pr_service_work_requisition.model';
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class CreateServiceWorkRequisitionDto {
   @IsDateString()
@@ -72,4 +73,11 @@ export class CreateServiceWorkRequisitionDto {
   @IsEnum(ServiceWorkRequisitionStatus)
   @IsOptional()
   status?: ServiceWorkRequisitionStatus;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Project UUID or ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 }

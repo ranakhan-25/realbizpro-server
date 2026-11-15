@@ -1,48 +1,97 @@
 /* eslint-disable prettier/prettier */
 
-import { Controller, Get, Post, Body, Patch, Put, Param, Delete, Query, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Put, Param, Delete, Query, ParseUUIDPipe, UseGuards } from '@nestjs/common';
 import { BankReconciliationService } from './bank-reconciliation_statement.service';
 import { CreateBankReconciliationDto } from './dto/create-bank-reconciliation_statement.dto';
 import { UpdateBankReconciliationDto } from './dto/update-bank-reconciliation_statement.dto';
 import { QueryBankReconciliationDto } from './dto/query-bank-reconciliation_statement.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { CurrentUser, CurrentUserId } from 'src/common/decorators/auth.decorators';
+
 @ApiTags("Accounts | bank-reconciliations | bank-reconciliations-statement")
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('bank-reconciliations')
 export class BankReconciliationController {
   constructor(private readonly reconciliationService: BankReconciliationService) {}
 
   @Post()
-  create(@Body() dto: CreateBankReconciliationDto) {
-    return this.reconciliationService.create(dto);
+  @Permissions('create_bank_reconciliation')
+  @ApiOperation({ summary: 'Create bank reconciliation' })
+  create(
+    @Body() dto: CreateBankReconciliationDto,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.reconciliationService.create(dto, userId, currentUser);
   }
 
   @Get()
-  findAll(@Query() query: QueryBankReconciliationDto) {
-    return this.reconciliationService.findAll(query);
+  @Permissions('list_bank_reconciliation')
+  @ApiOperation({ summary: 'List bank reconciliations' })
+  findAll(
+    @Query() query: QueryBankReconciliationDto,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.reconciliationService.findAll(query, currentUser);
   }
 
   @Get(':uuid')
-  findOne(@Param('uuid', ParseUUIDPipe) uuid: string) {
-    return this.reconciliationService.findOne(uuid);
+  @Permissions('read_bank_reconciliation')
+  @ApiOperation({ summary: 'Get bank reconciliation by UUID' })
+  findOne(
+    @Param('uuid', ParseUUIDPipe) uuid: string,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.reconciliationService.findOne(uuid, currentUser);
   }
 
   @Patch(':uuid')
-  updateWithPatch(@Param('uuid', ParseUUIDPipe) uuid: string, @Body() dto: UpdateBankReconciliationDto) {
-    return this.reconciliationService.update(uuid, dto);
+  @Permissions('update_bank_reconciliation')
+  @ApiOperation({ summary: 'Update bank reconciliation (PATCH)' })
+  updateWithPatch(
+    @Param('uuid', ParseUUIDPipe) uuid: string,
+    @Body() dto: UpdateBankReconciliationDto,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.reconciliationService.update(uuid, dto, userId, currentUser);
   }
 
   @Put(':uuid')
-  updateWithPut(@Param('uuid', ParseUUIDPipe) uuid: string, @Body() dto: UpdateBankReconciliationDto) {
-    return this.reconciliationService.update(uuid, dto);
+  @Permissions('update_bank_reconciliation')
+  @ApiOperation({ summary: 'Update bank reconciliation (PUT)' })
+  updateWithPut(
+    @Param('uuid', ParseUUIDPipe) uuid: string,
+    @Body() dto: UpdateBankReconciliationDto,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.reconciliationService.update(uuid, dto, userId, currentUser);
   }
 
   @Delete(':uuid')
-  remove(@Param('uuid', ParseUUIDPipe) uuid: string) {
-    return this.reconciliationService.remove(uuid);
+  @Permissions('delete_bank_reconciliation')
+  @ApiOperation({ summary: 'Delete bank reconciliation' })
+  remove(
+    @Param('uuid', ParseUUIDPipe) uuid: string,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.reconciliationService.remove(uuid, userId, currentUser);
   }
 
   @Patch(':uuid/restore')
-  restore(@Param('uuid', ParseUUIDPipe) uuid: string) {
-    return this.reconciliationService.restore(uuid);
+  @Permissions('update_bank_reconciliation')
+  @ApiOperation({ summary: 'Restore bank reconciliation' })
+  restore(
+    @Param('uuid', ParseUUIDPipe) uuid: string,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.reconciliationService.restore(uuid, userId, currentUser);
   }
 }

@@ -38,6 +38,8 @@ export class HolidayService {
 
   async create(
     dto: CreateHolidayDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<Holiday> {
     this.ensureDateRange(
       dto.fromDate,
@@ -47,16 +49,18 @@ export class HolidayService {
     const record = await this.holidayModel.create(
       {
         ...dto,
-        createdBy: dto.addedById,
+        createdBy: userId ? String(userId) : (dto as any).createdBy ?? (dto as any).addedById ?? null,
+        orgId: (dto as any).orgId ?? currentUser?.orgId ?? null,
+        projectId: (dto as any).projectId ?? currentUser?.projectId ?? null,
         status:
           dto.status ?? HolidayStatus.ACTIVE,
-      },
+      } as any,
     );
 
     return this.findOne(record.uuid);
   }
 
-  async findAll(query: QueryHolidayDto) {
+  async findAll(query: QueryHolidayDto, currentUser?: any) {
     const {
       page = 1,
       limit = 10,
@@ -76,6 +80,14 @@ export class HolidayService {
         : (page - 1) * limit;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
 
     if (search) {
       where[Op.or] = [
@@ -139,7 +151,7 @@ export class HolidayService {
     };
   }
 
-  async findOne(uuid: string): Promise<Holiday> {
+  async findOne(uuid: string, currentUser?: any): Promise<Holiday> {
     const record =
       await this.holidayModel.findOne({
         where: { uuid } as any,
@@ -154,10 +166,7 @@ export class HolidayService {
     return record;
   }
 
-  async update(
-    uuid: string,
-    dto: UpdateHolidayDto,
-  ): Promise<Holiday> {
+  async update(uuid: string, dto: UpdateHolidayDto, userId?: number, currentUser?: any): Promise<Holiday> {
     const record =
       await this.holidayModel.findOne({
         where: { uuid } as any,
@@ -178,14 +187,12 @@ export class HolidayService {
       ...dto,
       updatedBy:
         dto.addedById ?? record.updatedBy,
-    });
+    } as any);
 
     return this.findOne(uuid);
   }
 
-  async remove(
-    uuid: string,
-  ): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const record =
       await this.holidayModel.findOne({
         where: { uuid } as any,
@@ -200,7 +207,8 @@ export class HolidayService {
     // status → inactive + soft delete
     await record.update({
       status: HolidayStatus.INACTIVE,
-    });
+      deletedBy: userId ? String(userId) : null,
+    } as any);
 
     await record.destroy();
 
@@ -209,7 +217,7 @@ export class HolidayService {
     };
   }
 
-  async restore(uuid: string): Promise<Holiday> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<Holiday> {
     const record =
       await this.holidayModel.findOne({
         where: { uuid } as any,
@@ -232,7 +240,9 @@ export class HolidayService {
     await record.restore();
     await record.update({
       status: HolidayStatus.ACTIVE,
-    });
+      deletedBy: null,
+      updatedBy: userId ? String(userId) : null,
+    } as any);
 
     return this.findOne(uuid);
   }

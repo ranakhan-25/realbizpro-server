@@ -16,25 +16,32 @@ export class TeamService {
     @InjectModel(SysUser) private readonly users: typeof SysUser,
   ) {}
 
-  async create(dto: CreateTeamDto) {
+  async create(dto: CreateTeamDto, userId?: number, currentUser?: any) {
     return this.teams.sequelize!.transaction(async transaction => {
       await this.ensureActiveUsers([dto.leaderUuid, ...dto.memberUuids]);
       const team = await this.teams.create({
-        name: dto.name.trim(), leaderId: dto.leaderUuid,
-        createdBy: dto.createdBy, isActive: true,
+        name: dto.name.trim(),
+        leaderId: dto.leaderUuid,
+        createdBy: userId ? String(userId) : dto.createdBy ?? null,
+        updatedBy: null,
+        deletedBy: null,
+        orgId: dto.orgId ?? currentUser?.orgId ?? null,
+        isActive: true,
       } as any, { transaction });
-      await this.replaceMembers(team.id, dto.memberUuids, dto.createdBy, transaction);
+      await this.replaceMembers(team.id, dto.memberUuids, userId ? String(userId) : dto.createdBy, transaction);
       return this.findOne(team.uuid, transaction);
     });
   }
 
-  async findAll(query: QueryTeamDto) {
+  async findAll(query: QueryTeamDto, currentUser?: any) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const where: any = {};
     const search = query.search?.trim();
     if (search) where.name = { [Op.iLike]: `%${search}%` };
     if (query.leaderUuid) where.leaderId = query.leaderUuid;
+    const effectiveOrgId = query.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) where.orgId = effectiveOrgId;
     const { rows, count } = await this.teams.findAndCountAll({
       where, limit, offset: (page - 1) * limit, paranoid: !query.withDeleted,
       include: [{ association: 'members', required: false }],
@@ -46,50 +53,64 @@ export class TeamService {
     };
   }
 
-  async findOne(uuid: string, transaction?: Transaction) {
-    const team = await this.teams.findOne({ where: { uuid }, transaction,
+  async findOne(uuid: string, transaction?: Transaction, currentUser?: any) {
+    const where: any = { uuid };
+    if (currentUser?.orgId) where.orgId = currentUser.orgId;
+    const team = await this.teams.findOne({ where, transaction,
       include: [{ association: 'members', required: false }],
     });
     if (!team) throw new NotFoundException(`Team ${uuid} not found`);
     return (await this.toPublicTeams([team]))[0];
   }
 
-  async update(uuid: string, dto: UpdateTeamDto) {
+  async update(uuid: string, dto: UpdateTeamDto, userId?: number, currentUser?: any) {
     return this.teams.sequelize!.transaction(async transaction => {
       const team = await this.getActive(uuid, transaction);
       if (dto.leaderUuid || dto.memberUuids) await this.ensureActiveUsers([...(dto.leaderUuid ? [dto.leaderUuid] : []), ...(dto.memberUuids ?? [])]);
       const { leaderUuid, memberUuids, ...fields } = dto;
-      await team.update({ ...fields, ...(dto.name ? { name: dto.name.trim() } : {}), ...(leaderUuid ? { leaderId: leaderUuid } : {}) } as any, { transaction });
-      if (memberUuids) await this.replaceMembers(team.id, memberUuids, dto.createdBy ?? team.createdBy, transaction);
+      await team.update({
+        ...fields,
+        ...(dto.name ? { name: dto.name.trim() } : {}),
+        ...(leaderUuid ? { leaderId: leaderUuid } : {}),
+        updatedBy: userId ? String(userId) : team.updatedBy ?? null,
+        ...(dto.orgId !== undefined ? { orgId: dto.orgId } : {}),
+      } as any, { transaction });
+      if (memberUuids) await this.replaceMembers(team.id, memberUuids, userId ? String(userId) : (dto.createdBy ?? team.createdBy), transaction);
       return this.findOne(uuid, transaction);
     });
   }
 
-  async remove(uuid: string) {
+  async remove(uuid: string, userId?: number, currentUser?: any) {
     const team = await this.getActive(uuid);
+    await team.update({ deletedBy: userId ? String(userId) : null } as any);
     await team.destroy({ force: false });
     return { message: `Team ${uuid} deleted successfully` };
   }
 
-  async restore(uuid: string) {
+  async restore(uuid: string, userId?: number, currentUser?: any) {
     const team = await this.teams.findOne({ where: { uuid }, paranoid: false });
     if (!team) throw new NotFoundException(`Team ${uuid} not found`);
     if (!team.deletedAt) throw new BadRequestException(`Team ${uuid} is not deleted`);
     await team.restore();
+    await team.update({ deletedBy: null, updatedBy: userId ? String(userId) : team.updatedBy ?? null } as any);
     return this.findOne(uuid);
   }
 
-  async dropdown() {
+  async dropdown(currentUser?: any) {
+    const where: any = { isActive: true };
+    if (currentUser?.orgId) where.orgId = currentUser.orgId;
     const teams = await this.teams.findAll({
-      where: { isActive: true }, attributes: ['uuid', 'name', 'leaderId'],
+      where, attributes: ['uuid', 'name', 'leaderId'],
       include: [{ association: 'members', attributes: ['uuid', 'userId'], required: false }],
       order: [['name', 'ASC']],
     });
     return this.toPublicTeams(teams);
   }
 
-  async userDropdown() {
-    return this.users.findAll({ where: { isActive: true }, attributes: ['uuid', 'name'], order: [['name', 'ASC']] });
+  async userDropdown(currentUser?: any) {
+    const where: any = { isActive: true };
+    if (currentUser?.orgId) where.orgId = currentUser.orgId;
+    return this.users.findAll({ where, attributes: ['uuid', 'name'], order: [['name', 'ASC']] });
   }
 
   private async getActive(uuid: string, transaction?: Transaction) {
@@ -118,7 +139,19 @@ export class TeamService {
         : null;
       data.leader = users.get(data.leaderUuid) ?? null;
       delete data.leaderId;
-      data.addedBy = users.get(data.createdBy ?? '') ?? (data.createdBy ? { uuid: null, name: data.createdBy } : null);
+      data.created_at = data.created_at ?? data.createdAt;
+      data.updated_at = data.updated_at ?? data.updatedAt;
+      data.deleted_at = data.deleted_at ?? data.deletedAt ?? null;
+      delete data.createdAt;
+      delete data.updatedAt;
+      delete data.deletedAt;
+      data.created_by = data.createdBy ?? data.created_by ?? null;
+      data.updated_by = data.updatedBy ?? data.updated_by ?? null;
+      data.deleted_by = data.deletedBy ?? data.deleted_by ?? null;
+      delete data.addedBy;
+      delete data.createdBy;
+      delete data.updatedBy;
+      delete data.deletedBy;
       if (Array.isArray(data.members)) {
         data.members = data.members.map((member: Record<string, any>) => {
           delete member.id;

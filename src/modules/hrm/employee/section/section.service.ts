@@ -26,6 +26,8 @@ export class SectionService {
 
   async create(
     dto: CreateSectionDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<Section> {
     // name column unique, tai soft-deleted gulo-o check kori
     const existing =
@@ -45,15 +47,17 @@ export class SectionService {
     const section =
       await this.sectionModel.create({
         ...dto,
-        createdBy: dto.addedById,
+        createdBy: userId ? String(userId) : (dto as any).createdBy ?? (dto as any).addedById ?? null,
+        orgId: (dto as any).orgId ?? currentUser?.orgId ?? null,
+        projectId: (dto as any).projectId ?? currentUser?.projectId ?? null,
         status:
           dto.status ?? SectionStatus.ACTIVE,
-      });
+      } as any);
 
     return this.findOne(section.uuid);
   }
 
-  async findAll(query: QuerySectionDto) {
+  async findAll(query: QuerySectionDto, currentUser?: any) {
     const {
       page = 1,
       limit = 10,
@@ -71,6 +75,14 @@ export class SectionService {
         : (page - 1) * limit;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
 
     if (search) {
       where.name = { [Op.like]: `%${search}%` };
@@ -119,7 +131,7 @@ export class SectionService {
     };
   }
 
-  async findOne(uuid: string): Promise<Section> {
+  async findOne(uuid: string, currentUser?: any): Promise<Section> {
     const section =
       await this.sectionModel.findOne({
         where: { uuid } as any,
@@ -134,10 +146,7 @@ export class SectionService {
     return section;
   }
 
-  async update(
-    uuid: string,
-    dto: UpdateSectionDto,
-  ): Promise<Section> {
+  async update(uuid: string, dto: UpdateSectionDto, userId?: number, currentUser?: any): Promise<Section> {
     const section =
       await this.sectionModel.findOne({
         where: { uuid } as any,
@@ -172,14 +181,12 @@ export class SectionService {
       ...dto,
       updatedBy:
         dto.addedById ?? section.updatedBy,
-    });
+    } as any);
 
     return this.findOne(uuid);
   }
 
-  async remove(
-    uuid: string,
-  ): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const section =
       await this.sectionModel.findOne({
         where: { uuid } as any,
@@ -194,7 +201,8 @@ export class SectionService {
     // status → inactive + soft delete
     await section.update({
       status: SectionStatus.INACTIVE,
-    });
+      deletedBy: userId ? String(userId) : null,
+    } as any);
 
     await section.destroy();
 
@@ -203,7 +211,7 @@ export class SectionService {
     };
   }
 
-  async restore(uuid: string): Promise<Section> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<Section> {
     const section =
       await this.sectionModel.findOne({
         where: { uuid } as any,
@@ -226,7 +234,9 @@ export class SectionService {
     await section.restore();
     await section.update({
       status: SectionStatus.ACTIVE,
-    });
+      deletedBy: null,
+      updatedBy: userId ? String(userId) : null,
+    } as any);
 
     return this.findOne(uuid);
   }

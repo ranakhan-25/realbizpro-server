@@ -1,3 +1,4 @@
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsBoolean, IsDateString, IsOptional, IsString, IsUUID, Min, IsNumber } from 'class-validator';
 import { Transform } from 'class-transformer';
@@ -12,4 +13,13 @@ export class QueryWorkOrderMeasurementDto {
   @IsOptional() @IsDateString() date_to?: string;
   @IsOptional() @Type(() => Number) @IsNumber() @Min(1) page?: number;
   @IsOptional() @Type(() => Number) @IsNumber() @Min(1) limit?: number;
+
+  @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+  @IsOptional()
+  orgId?: number;
+
+  @ApiPropertyOptional({ description: 'Project UUID or ID' })
+  @IsOptional()
+  projectId?: string;
+
 }

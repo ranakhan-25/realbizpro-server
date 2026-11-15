@@ -1,5 +1,5 @@
 // Auto-generated types for InvMaterialUsageItem
-// Source: src/database/models/inventory/inv_material_usage_item.model.ts
+// Source: src\database\models\inventory\inv_material_usage_item.model.ts
 
 import type { InvMaterialUsage } from '../models/inventory/inv_material_usage.model';
 import type { InvItem } from '../models/inventory/inv_item.model';
@@ -16,7 +16,7 @@ export interface InvMaterialUsageItemAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id: string;
 
   // Relations
   usage: InvMaterialUsage;
@@ -30,7 +30,7 @@ export interface InvMaterialUsageItemCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id: string;
 }
 
 export type InvMaterialUsageItemUpdateAttributes = Partial<InvMaterialUsageItemCreationAttributes>;

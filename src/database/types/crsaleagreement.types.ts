@@ -1,5 +1,5 @@
 // Auto-generated types for CrSaleAgreement
-// Source: src/database/models/credit-realization/cr_sale_agreement.model.ts
+// Source: src\database\models\credit-realization\cr_sale_agreement.model.ts
 
 import type { CrInstallmentPlan } from '../models/credit-realization/cr_installment_plan.model';
 import type { CrPlotDistribution } from '../models/credit-realization/cr_plot_distribution.model';
@@ -27,7 +27,7 @@ export interface CrSaleAgreementAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id?: string | null;
 
   // Relations
   installment_plans: CrInstallmentPlan[];
@@ -52,7 +52,7 @@ export interface CrSaleAgreementCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id?: string | null;
 }
 
 export type CrSaleAgreementUpdateAttributes = Partial<CrSaleAgreementCreationAttributes>;

@@ -1,3 +1,4 @@
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsDateString, IsEnum, IsInt, IsOptional, IsString, IsUUID, Max, Min } from 'class-validator';
 import { ProcurementAssetPurchaseOrderApprovalLayer, ProcurementAssetPurchaseOrderStatus } from 'src/database/models/procurement/purchase-order/pr_asset_purchase_order.model';
@@ -15,4 +16,13 @@ export class QueryAssetPurchaseOrderDto {
   @IsOptional() @Type(() => Number) @IsInt() added_by_id?: number;
   @IsOptional() @IsEnum(ProcurementAssetPurchaseOrderApprovalLayer) approval_layer?: ProcurementAssetPurchaseOrderApprovalLayer;
   @IsOptional() @IsEnum(ProcurementAssetPurchaseOrderStatus) status?: ProcurementAssetPurchaseOrderStatus;
+
+  @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+  @IsOptional()
+  orgId?: number;
+
+  @ApiPropertyOptional({ description: 'Project UUID or ID' })
+  @IsOptional()
+  projectId?: string;
+
 }

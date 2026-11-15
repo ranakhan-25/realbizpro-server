@@ -1,5 +1,5 @@
 // Auto-generated types for CrInstallmentPayment
-// Source: src/database/models/credit-realization/cr_installment_payment.model.ts
+// Source: src\database\models\credit-realization\cr_installment_payment.model.ts
 
 import type { CrInstallmentPlan } from '../models/credit-realization/cr_installment_plan.model';
 
@@ -25,7 +25,7 @@ export interface CrInstallmentPaymentAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id?: string | null;
 
   // Relations
   installment_plan: CrInstallmentPlan;
@@ -48,7 +48,7 @@ export interface CrInstallmentPaymentCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id?: string | null;
 }
 
 export type CrInstallmentPaymentUpdateAttributes = Partial<CrInstallmentPaymentCreationAttributes>;

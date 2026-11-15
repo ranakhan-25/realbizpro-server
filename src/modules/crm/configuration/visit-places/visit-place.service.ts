@@ -7,7 +7,7 @@ import { CreateVisitPlaceDto } from './dto/create-visit-place.dto';
 import { QueryVisitPlaceDto } from './dto/query-visit-place.dto';
 import { UpdateVisitPlaceDto } from './dto/update-visit-place.dto';
 
-const PUBLIC_COLUMNS = ['uuid', 'name', 'address', 'contactPerson', 'contactNumber', 'createdBy', 'createdAt', 'updatedAt', 'deletedAt'];
+const PUBLIC_COLUMNS = ['uuid', 'name', 'address', 'contactPerson', 'contactNumber', 'orgId', 'createdBy', 'updatedBy', 'deletedBy', 'createdAt', 'updatedAt', 'deletedAt'];
 
 @Injectable()
 export class VisitPlaceService {
@@ -16,22 +16,28 @@ export class VisitPlaceService {
     @InjectModel(LeadActivity) private readonly activities: typeof LeadActivity,
   ) {}
 
-  async create(dto: CreateVisitPlaceDto, createdBy?: string) {
+  async create(dto: CreateVisitPlaceDto, userId?: number, currentUser?: any) {
     const name = dto.name.trim();
-    await this.assertUniqueName(name);
+    const orgId = dto.orgId ?? currentUser?.orgId ?? null;
+    await this.assertUniqueName(name, undefined, orgId);
     const row = await this.places.create({
-      name, createdBy,
+      name,
+      createdBy: userId ? String(userId) : null,
+      orgId,
       ...(dto.address !== undefined ? { address: dto.address.trim() || null } : {}),
       ...(dto.contactPerson !== undefined ? { contactPerson: dto.contactPerson.trim() || null } : {}),
       ...(dto.contactNumber !== undefined ? { contactNumber: dto.contactNumber.trim() || null } : {}),
     } as any);
-    return this.findOne(row.uuid);
+    return this.findOne(row.uuid, currentUser);
   }
 
-  async findAll(query: QueryVisitPlaceDto) {
+  async findAll(query: QueryVisitPlaceDto, currentUser?: any) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const where: any = {};
+    if (currentUser?.orgId) {
+      where.orgId = currentUser.orgId;
+    }
     const search = query.search?.trim();
     if (search) where[Op.or] = [
       { name: { [Op.iLike]: `%${search}%` } },
@@ -47,9 +53,13 @@ export class VisitPlaceService {
     };
   }
 
-  async findOne(uuid: string) {
+  async findOne(uuid: string, currentUser?: any) {
+    const where: any = { uuid };
+    if (currentUser?.orgId) {
+      where.orgId = currentUser.orgId;
+    }
     const row = await this.places.findOne({
-      where: { uuid }, attributes: PUBLIC_COLUMNS,
+      where, attributes: PUBLIC_COLUMNS,
       include: [{ association: 'activities', attributes: ['uuid'], required: false }],
     });
     if (!row) throw new NotFoundException(`Visit place ${uuid} not found`);
@@ -58,46 +68,68 @@ export class VisitPlaceService {
     return result;
   }
 
-  async update(uuid: string, dto: UpdateVisitPlaceDto, updatedBy?: string) {
-    const row = await this.places.findOne({ where: { uuid } });
+  async update(uuid: string, dto: UpdateVisitPlaceDto, userId?: number, currentUser?: any) {
+    const where: any = { uuid };
+    if (currentUser?.orgId) {
+      where.orgId = currentUser.orgId;
+    }
+    const row = await this.places.findOne({ where });
     if (!row) throw new NotFoundException(`Visit place ${uuid} not found`);
     const changes: Record<string, any> = {};
+    const orgId = dto.orgId ?? row.orgId ?? currentUser?.orgId ?? null;
     if (dto.name !== undefined) {
       changes.name = dto.name.trim();
-      await this.assertUniqueName(changes.name, uuid);
+      await this.assertUniqueName(changes.name, uuid, orgId);
     }
     if (dto.address !== undefined) changes.address = dto.address.trim() || null;
     if (dto.contactPerson !== undefined) changes.contactPerson = dto.contactPerson.trim() || null;
     if (dto.contactNumber !== undefined) changes.contactNumber = dto.contactNumber.trim() || null;
-    if (updatedBy) changes.updatedBy = updatedBy;
+    if (userId) changes.updatedBy = String(userId);
+    if (dto.orgId !== undefined) changes.orgId = dto.orgId;
     await row.update(changes);
-    return this.findOne(uuid);
+    return this.findOne(uuid, currentUser);
   }
 
-  async remove(uuid: string, deletedBy?: string) {
-    const row = await this.places.findOne({ where: { uuid } });
+  async remove(uuid: string, userId?: number, currentUser?: any) {
+    const where: any = { uuid };
+    if (currentUser?.orgId) {
+      where.orgId = currentUser.orgId;
+    }
+    const row = await this.places.findOne({ where });
     if (!row) throw new NotFoundException(`Visit place ${uuid} not found`);
-    if (deletedBy) await row.update({ deletedBy });
+    if (userId) await row.update({ deletedBy: String(userId) });
     await row.destroy({ force: false });
     return { message: `Visit place ${uuid} deleted successfully` };
   }
 
-  async restore(uuid: string) {
-    const row = await this.places.findOne({ where: { uuid }, paranoid: false });
+  async restore(uuid: string, userId?: number, currentUser?: any) {
+    const where: any = { uuid };
+    if (currentUser?.orgId) {
+      where.orgId = currentUser.orgId;
+    }
+    const row = await this.places.findOne({ where, paranoid: false });
     if (!row) throw new NotFoundException(`Visit place ${uuid} not found`);
     if (!row.deletedAt) throw new BadRequestException(`Visit place ${uuid} is not deleted`);
+    if (userId) await row.update({ updatedBy: String(userId) });
     await row.restore();
-    return this.findOne(uuid);
+    return this.findOne(uuid, currentUser);
   }
 
-  async dropdown() {
-    const rows = await this.places.findAll({ attributes: ['uuid', 'name'], order: [['name', 'ASC']] });
+  async dropdown(currentUser?: any) {
+    const where: any = {};
+    if (currentUser?.orgId) {
+      where.orgId = currentUser.orgId;
+    }
+    const rows = await this.places.findAll({ where, attributes: ['uuid', 'name'], order: [['name', 'ASC']] });
     return rows.map(row => this.toPublic(row));
   }
 
-  private async assertUniqueName(name: string, excludeUuid?: string) {
+  private async assertUniqueName(name: string, excludeUuid?: string, orgId?: number | null) {
+    const where: any = { name: { [Op.iLike]: name } };
+    if (excludeUuid) where.uuid = { [Op.ne]: excludeUuid };
+    if (orgId) where.orgId = orgId;
     const existing = await this.places.findOne({
-      where: { name: { [Op.iLike]: name }, ...(excludeUuid ? { uuid: { [Op.ne]: excludeUuid } } : {}) } as any,
+      where,
       paranoid: false, attributes: ['uuid'],
     });
     if (existing) throw new ConflictException(`Visit place '${name}' already exists`);
@@ -108,13 +140,17 @@ export class VisitPlaceService {
     return {
       uuid: data.uuid,
       name: data.name,
+      orgId: data.org_id ?? data.orgId ?? null,
+      org_id: data.org_id ?? data.orgId ?? null,
       ...(data.address !== undefined ? { address: data.address } : {}),
       ...(data.contactPerson !== undefined ? { contactPerson: data.contactPerson } : {}),
       ...(data.contactNumber !== undefined ? { contactNumber: data.contactNumber } : {}),
-      createdBy: data.createdBy ?? null,
-      ...(data.createdAt !== undefined ? { createdAt: data.createdAt } : {}),
-      ...(data.updatedAt !== undefined ? { updatedAt: data.updatedAt } : {}),
-      ...(data.deletedAt !== undefined ? { deletedAt: data.deletedAt } : {}),
+      created_by: data.created_by ?? data.createdBy ?? null,
+      updated_by: data.updated_by ?? data.updatedBy ?? null,
+      deleted_by: data.deleted_by ?? data.deletedBy ?? null,
+      created_at: data.created_at ?? data.createdAt,
+      updated_at: data.updated_at ?? data.updatedAt,
+      ...(data.deleted_at || data.deletedAt ? { deleted_at: data.deleted_at ?? data.deletedAt } : {}),
     };
   }
 }

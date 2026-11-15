@@ -1,6 +1,14 @@
+import { SysOrganization } from 'src/database/models/system/sys_organization.model';
+import { Project } from 'src/database/models/projects/project/pr_project.model';
 import {
-  Table, Column, Model, DataType, ForeignKey,
-  BelongsTo, PrimaryKey, AutoIncrement
+  Table,
+  Column,
+  Model,
+  DataType,
+  ForeignKey,
+  BelongsTo,
+  PrimaryKey,
+  AutoIncrement
 } from 'sequelize-typescript';
 import { Voucher } from './acc_voucher.model';
 
@@ -57,4 +65,37 @@ export class VoucherEntry extends Model<VoucherEntry> {
     onDelete: 'CASCADE',
   })
   declare voucher: Voucher;
+
+  @Column({ type: DataType.STRING, allowNull: true, field: 'created_by' })
+  declare createdBy?: string;
+
+  @Column({ type: DataType.STRING, allowNull: true, field: 'updated_by' })
+  declare updatedBy?: string;
+
+  @Column({ type: DataType.STRING, allowNull: true, field: 'deleted_by' })
+  declare deletedBy?: string;
+
+  @ForeignKey(() => SysOrganization)
+  @Column({
+    type: DataType.BIGINT,
+    allowNull: true,
+    field: 'org_id',
+    defaultValue: null,
+  })
+  declare orgId?: number | null;
+
+  @BelongsTo(() => SysOrganization, {
+    foreignKey: 'orgId',
+    targetKey: 'id',
+    as: 'organization',
+  })
+  declare organization?: SysOrganization;
+
+  @BelongsTo(() => Project, {
+    foreignKey: 'projectId',
+    targetKey: 'uuid',
+    as: 'project',
+  })
+  declare project?: Project;
+
 }

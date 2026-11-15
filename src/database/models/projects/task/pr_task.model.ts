@@ -4,8 +4,7 @@ import {
   Column,
   DataType,
   HasMany,
-  Table,
-} from 'sequelize-typescript';
+  Table, ForeignKey, BelongsTo } from 'sequelize-typescript';
 
 import { BaseModel } from '../../../base.model';
 
@@ -22,6 +21,8 @@ import { ProcurementPurchaseOrder } from '../../procurement/purchase-order/pr_pu
 import { ProcurementAssetPurchaseOrder } from '../../procurement/purchase-order/pr_asset_purchase_order.model';
 import { ProcurementGrn } from '../../procurement/grn/pr_grn.model';
 import { ProcurementAssetGrn } from '../../procurement/grn/pr_asset_grn.model';
+import { SysOrganization } from "src/database/models/system/sys_organization.model";
+import { Project } from "src/database/models/projects/project/pr_project.model";
 
 export enum TaskStatus {
   IN_PROGRESS = 'In Progress',
@@ -61,6 +62,28 @@ export class Task
     allowNull: false,
   })
   declare taskName: string;
+
+  @ForeignKey(() => Task)
+  @Column({
+    field: 'parent_task_id',
+    type: DataType.UUID,
+    allowNull: true,
+  })
+  declare parentTaskId?: string | null;
+
+  @BelongsTo(() => Task, {
+    foreignKey: 'parentTaskId',
+    targetKey: 'uuid',
+    as: 'parentTask',
+  })
+  declare parentTask?: Task | null;
+
+  @HasMany(() => Task, {
+    foreignKey: 'parentTaskId',
+    sourceKey: 'uuid',
+    as: 'subtasks',
+  })
+  declare subtasks?: Task[];
 
   @Column({
     type: DataType.INTEGER,
@@ -132,21 +155,24 @@ export class Task
   declare addedById?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'created_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare createdBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'updated_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare updatedBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'deleted_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare deletedBy?: string;
 
   @HasMany(() => ProcurementRfq, { foreignKey: 'task_id', sourceKey: 'uuid', as: 'procurementRfqs' }) declare procurementRfqs?: ProcurementRfq[];
@@ -157,4 +183,32 @@ export class Task
   @HasMany(() => ProcurementAssetPurchaseOrder, { foreignKey: 'task_id', sourceKey: 'uuid', as: 'procurementAssetPurchaseOrders' }) declare procurementAssetPurchaseOrders?: ProcurementAssetPurchaseOrder[];
   @HasMany(() => ProcurementGrn, { foreignKey: 'task_id', sourceKey: 'uuid', as: 'procurementGrns' }) declare procurementGrns?: ProcurementGrn[];
   @HasMany(() => ProcurementAssetGrn, { foreignKey: 'task_id', sourceKey: 'uuid', as: 'procurementAssetGrns' }) declare procurementAssetGrns?: ProcurementAssetGrn[];
+    @ForeignKey(() => SysOrganization)
+    @Column({
+            type: DataType.BIGINT,
+            allowNull: true,
+            field: 'org_id',
+            defaultValue: null,
+          })
+    declare orgId?: number | null;
+    @BelongsTo(() => SysOrganization, {
+            foreignKey: 'orgId',
+            targetKey: 'id',
+            as: 'organization',
+          })
+    declare organization?: SysOrganization;
+    @ForeignKey(() => Project)
+    @Column({
+            type: DataType.UUID,
+            allowNull: true,
+            field: 'project_id',
+            defaultValue: null,
+          })
+    declare projectId?: string | null;
+    @BelongsTo(() => Project, {
+            foreignKey: 'projectId',
+            targetKey: 'uuid',
+            as: 'project',
+          })
+    declare project?: Project;
 }

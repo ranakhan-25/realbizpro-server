@@ -1,9 +1,10 @@
 // Auto-generated types for Task
-// Source: src/database/models/projects/task/pr_task.model.ts
+// Source: src\database\models\projects\task\pr_task.model.ts
 
 import { TaskPriority } from '../models/projects/task/pr_task.model';
 import { TaskStatus } from '../models/projects/task/pr_task.model';
 
+import type { Task } from '../models/projects/task/pr_task.model';
 import type { ProcurementRfq } from '../models/procurement/rfq/pr_rfq.model';
 import type { ProcurementAssetRfq } from '../models/procurement/rfq/pr_asset_rfq.model';
 import type { ProcurementMaterialRequisition } from '../models/procurement/requisition/pr_material_requisition.model';
@@ -12,6 +13,8 @@ import type { ProcurementPurchaseOrder } from '../models/procurement/purchase-or
 import type { ProcurementAssetPurchaseOrder } from '../models/procurement/purchase-order/pr_asset_purchase_order.model';
 import type { ProcurementGrn } from '../models/procurement/grn/pr_grn.model';
 import type { ProcurementAssetGrn } from '../models/procurement/grn/pr_asset_grn.model';
+import type { SysOrganization } from '../models/system/sys_organization.model';
+import type { Project } from '../models/projects/project/pr_project.model';
 
 export interface TaskAttributes {
   id: number;
@@ -21,6 +24,7 @@ export interface TaskAttributes {
   deletedAt?: Date;
   uid?: string | null;
   taskName: string;
+  parentTaskId?: string | null;
   progress: number;
   priority: TaskPriority;
   startDate?: Date | null;
@@ -34,8 +38,12 @@ export interface TaskAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
+  projectId?: string | null;
 
   // Relations
+  parentTask?: Task | null;
+  subtasks?: Task[];
   procurementRfqs?: ProcurementRfq[];
   procurementAssetRfqs?: ProcurementAssetRfq[];
   procurementMaterialRequisitions?: ProcurementMaterialRequisition[];
@@ -44,11 +52,14 @@ export interface TaskAttributes {
   procurementAssetPurchaseOrders?: ProcurementAssetPurchaseOrder[];
   procurementGrns?: ProcurementGrn[];
   procurementAssetGrns?: ProcurementAssetGrn[];
+  organization?: SysOrganization;
+  project?: Project;
 }
 
 export interface TaskCreationAttributes {
   uid?: string | null;
   taskName: string;
+  parentTaskId?: string | null;
   progress?: number; // Has default value
   priority?: TaskPriority; // Has default value
   startDate?: Date | null;
@@ -62,12 +73,16 @@ export interface TaskCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
+  projectId?: string | null;
 }
 
 export type TaskUpdateAttributes = Partial<TaskCreationAttributes>;
 
 // Helper type for including relations
 export interface TaskWithRelations extends TaskAttributes {
+  parentTask?: Task | null;
+  subtasks?: Task[];
   procurementRfqs?: ProcurementRfq[];
   procurementAssetRfqs?: ProcurementAssetRfq[];
   procurementMaterialRequisitions?: ProcurementMaterialRequisition[];
@@ -76,4 +91,6 @@ export interface TaskWithRelations extends TaskAttributes {
   procurementAssetPurchaseOrders?: ProcurementAssetPurchaseOrder[];
   procurementGrns?: ProcurementGrn[];
   procurementAssetGrns?: ProcurementAssetGrn[];
+  organization?: SysOrganization;
+  project?: Project;
 }

@@ -1,10 +1,12 @@
 // Auto-generated types for BonusGenerate
-// Source: src/database/models/hrm/employee/hrm_bonus_generate_model.ts
+// Source: src\database\models\hrm\employee\hrm_bonus_generate_model.ts
 
 import { BonusGenerateStatus } from '../models/hrm/employee/hrm_bonus_generate_model';
 
 import type { Bonus } from '../models/hrm/employee/hrm_bonus_model';
 import type { EmployeeList } from '../models/hrm/employee/hrm_employeeList_model';
+import type { SysOrganization } from '../models/system/sys_organization.model';
+import type { Project } from '../models/projects/project/pr_project.model';
 
 export interface BonusGenerateAttributes {
   id: number;
@@ -20,10 +22,14 @@ export interface BonusGenerateAttributes {
   updatedBy?: string | null;
   deletedBy?: string | null;
   status: BonusGenerateStatus;
+  orgId?: number | null;
+  projectId?: string | null;
 
   // Relations
   bonus?: Bonus;
   employee?: EmployeeList;
+  organization?: SysOrganization;
+  project?: Project;
 }
 
 export interface BonusGenerateCreationAttributes {
@@ -35,6 +41,8 @@ export interface BonusGenerateCreationAttributes {
   updatedBy?: string | null;
   deletedBy?: string | null;
   status?: BonusGenerateStatus; // Has default value
+  orgId?: number | null;
+  projectId?: string | null;
 }
 
 export type BonusGenerateUpdateAttributes = Partial<BonusGenerateCreationAttributes>;
@@ -43,4 +51,6 @@ export type BonusGenerateUpdateAttributes = Partial<BonusGenerateCreationAttribu
 export interface BonusGenerateWithRelations extends BonusGenerateAttributes {
   bonus?: Bonus;
   employee?: EmployeeList;
+  organization?: SysOrganization;
+  project?: Project;
 }

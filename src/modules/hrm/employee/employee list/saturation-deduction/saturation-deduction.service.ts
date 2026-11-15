@@ -43,6 +43,8 @@ export class SaturationDeductionService {
 
   async create(
     dto: CreateSaturationDeductionDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<SaturationDeduction> {
     await this.ensureEmployeeExists(
       dto.employeeId,
@@ -51,14 +53,17 @@ export class SaturationDeductionService {
     const record =
       await this.saturationDeductionModel.create({
         ...dto,
-        createdBy: dto.addedById,
-      });
+        createdBy: userId ? String(userId) : (dto as any).createdBy ?? (dto as any).addedById ?? null,
+        orgId: (dto as any).orgId ?? currentUser?.orgId ?? null,
+        projectId: (dto as any).projectId ?? currentUser?.projectId ?? null,
+      } as any);
 
     return this.findOne(record.uuid);
   }
 
   async findAll(
     query: QuerySaturationDeductionDto,
+    currentUser?: any,
   ) {
     const {
       page = 1,
@@ -78,6 +83,14 @@ export class SaturationDeductionService {
         : (page - 1) * limit;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
 
     if (employeeId) {
       where.employeeId = employeeId;
@@ -132,9 +145,7 @@ export class SaturationDeductionService {
     };
   }
 
-  async findOne(
-    uuid: string,
-  ): Promise<SaturationDeduction> {
+  async findOne(uuid: string, currentUser?: any): Promise<SaturationDeduction> {
     const record =
       await this.saturationDeductionModel.findOne(
         {
@@ -151,10 +162,7 @@ export class SaturationDeductionService {
     return record;
   }
 
-  async update(
-    uuid: string,
-    dto: UpdateSaturationDeductionDto,
-  ): Promise<SaturationDeduction> {
+  async update(uuid: string, dto: UpdateSaturationDeductionDto, userId?: number, currentUser?: any): Promise<SaturationDeduction> {
     const record =
       await this.saturationDeductionModel.findOne(
         {
@@ -181,14 +189,12 @@ export class SaturationDeductionService {
       ...dto,
       updatedBy:
         dto.addedById ?? record.updatedBy,
-    });
+    } as any);
 
     return this.findOne(uuid);
   }
 
-  async remove(
-    uuid: string,
-  ): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const record =
       await this.saturationDeductionModel.findOne(
         {
@@ -203,6 +209,7 @@ export class SaturationDeductionService {
     }
 
     // soft delete
+    await record.update({ deletedBy: userId ? String(userId) : null } as any);
     await record.destroy();
 
     return {
@@ -210,9 +217,7 @@ export class SaturationDeductionService {
     };
   }
 
-  async restore(
-    uuid: string,
-  ): Promise<SaturationDeduction> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<SaturationDeduction> {
     const record =
       await this.saturationDeductionModel.findOne(
         {
@@ -234,6 +239,7 @@ export class SaturationDeductionService {
     }
 
     await record.restore();
+    await record.update({ deletedBy: null, updatedBy: userId ? String(userId) : null } as any);
 
     return this.findOne(uuid);
   }

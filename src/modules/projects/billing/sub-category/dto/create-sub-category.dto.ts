@@ -8,6 +8,7 @@ import {
   MaxLength,
 } from 'class-validator';
 import { SubCategoryType } from 'src/database/models/projects/billing/pr_sub_category.model';
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class CreateSubCategoryDto {
   @IsEnum(SubCategoryType)
@@ -42,4 +43,7 @@ export class CreateSubCategoryDto {
   @IsString()
   @IsOptional()
   updatedBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
 }

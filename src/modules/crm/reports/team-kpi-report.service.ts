@@ -21,25 +21,28 @@ export class TeamKpiReportService {
     @InjectModel(SysUser) private readonly users: typeof SysUser,
   ) {}
 
-  async dropdowns() {
-    const teams = await this.teams.findAll({ where: { isActive: true }, attributes: ['id', 'uuid', 'name'], order: [['name', 'ASC']] });
+  async dropdowns(currentUser?: any) {
+    const where: any = { isActive: true };
+    if (currentUser?.orgId) where.orgId = currentUser.orgId;
+    const teams = await this.teams.findAll({ where, attributes: ['id', 'uuid', 'name'], order: [['name', 'ASC']] });
     return { teams };
   }
 
-  async report(query: QueryTeamKpiReportDto) {
+  async report(query: QueryTeamKpiReportDto, currentUser?: any) {
     const fromDate = query.dateFrom ? new Date(`${query.dateFrom}T00:00:00.000Z`) : undefined;
     const toDate = query.dateTo ? new Date(`${query.dateTo}T23:59:59.999Z`) : undefined;
     const kpis = await this.kpis.findAll({
-      where: { type: 'TEAM', status: 'ACTIVE', ...(query.teamId ? { teamId: Number(query.teamId) } : {}) },
+      where: { type: 'TEAM', status: 'ACTIVE', ...(currentUser?.orgId ? { orgId: currentUser.orgId } : {}), ...(query.teamId ? { teamId: Number(query.teamId) } : {}) },
       include: [{ association: 'team', required: true, attributes: ['id', 'uuid', 'name'] }],
       order: [['fromDate', 'ASC'], ['id', 'ASC']],
     });
     const filteredKpis = kpis.filter(kpi => this.overlaps(kpi.fromDate, kpi.toDate, query.dateFrom, query.dateTo));
     const teamIds = [...new Set(filteredKpis.map(kpi => kpi.teamId).filter((value): value is number => value != null))];
-    const members = teamIds.length ? await this.teamMembers.findAll({ where: { teamId: { [Op.in]: teamIds }, isActive: true }, attributes: ['teamId', 'userId'] }) : [];
+    const members = teamIds.length ? await this.teamMembers.findAll({ where: { teamId: { [Op.in]: teamIds }, isActive: true, ...(currentUser?.orgId ? { orgId: currentUser.orgId } : {}) }, attributes: ['teamId', 'userId'] }) : [];
     const membersByTeam = new Map<number, Set<string>>();
     for (const member of members) membersByTeam.set(member.teamId, new Set([...(membersByTeam.get(member.teamId) ?? []), member.userId]));
     const activityWhere: any = { activityType: { [Op.in]: [...CALL_TYPES, ...TASK_TYPES] } };
+    if (currentUser?.orgId) activityWhere.orgId = currentUser.orgId;
     if (fromDate || toDate) activityWhere.activityDate = { ...(fromDate ? { [Op.gte]: fromDate } : {}), ...(toDate ? { [Op.lte]: toDate } : {}) };
     const activities = await this.activities.findAll({ where: activityWhere, attributes: ['id', 'activityType', 'activityDate', 'conductedBy', 'createdBy'] });
     const actorValues = [...new Set(activities.flatMap(activity => [activity.conductedBy, activity.createdBy]).filter(Boolean))] as string[];
@@ -48,7 +51,7 @@ export class TeamKpiReportService {
       ...(uuidValues.length ? [{ uuid: { [Op.in]: uuidValues } }] : []),
       { userCode: { [Op.in]: actorValues } },
       { name: { [Op.in]: actorValues } },
-    ] }, attributes: ['uuid', 'userCode', 'name'] }) : [];
+    ], ...(currentUser?.orgId ? { orgId: currentUser.orgId } : {}) }, attributes: ['uuid', 'userCode', 'name'] }) : [];
     const userKey = new Map<string, string>();
     for (const user of activityUsers) { userKey.set(user.uuid, user.uuid); if (user.userCode) userKey.set(user.userCode, user.uuid); userKey.set(user.name, user.uuid); }
     const data = filteredKpis.map((kpi, index) => {

@@ -1,5 +1,5 @@
 // Auto-generated types for InvItem
-// Source: src/database/models/inventory/inv_item.model.ts
+// Source: src\database\models\inventory\inv_item.model.ts
 
 import type { InvCategory } from '../models/inventory/inv_category.model';
 import type { InvSubCategory } from '../models/inventory/inv_sub_category.model';
@@ -27,7 +27,7 @@ export interface InvItemAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id: string;
 
   // Relations
   category: InvCategory;
@@ -52,7 +52,7 @@ export interface InvItemCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id: string;
 }
 
 export type InvItemUpdateAttributes = Partial<InvItemCreationAttributes>;

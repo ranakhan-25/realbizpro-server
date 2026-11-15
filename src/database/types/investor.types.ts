@@ -1,10 +1,11 @@
 // Auto-generated types for Investor
-// Source: src/database/models/projects/investor/investor.model.ts
+// Source: src\database\models\projects\investor\investor.model.ts
 
 import { InvestorGroupTier } from '../models/projects/investor/investor.model';
 import { InvestorStatus } from '../models/projects/investor/investor.model';
 
 import type { InvestorNominee } from '../models/projects/investor/investor_nominee.model';
+import type { SysOrganization } from '../models/system/sys_organization.model';
 
 export interface InvestorAttributes {
   id: number;
@@ -26,9 +27,11 @@ export interface InvestorAttributes {
   updatedBy?: string | null;
   deletedBy?: string | null;
   status: InvestorStatus;
+  orgId?: number | null;
 
   // Relations
   nominees?: InvestorNominee[];
+  organization?: SysOrganization;
 }
 
 export interface InvestorCreationAttributes {
@@ -46,6 +49,7 @@ export interface InvestorCreationAttributes {
   updatedBy?: string | null;
   deletedBy?: string | null;
   status?: InvestorStatus; // Has default value
+  orgId?: number | null;
 }
 
 export type InvestorUpdateAttributes = Partial<InvestorCreationAttributes>;
@@ -53,4 +57,5 @@ export type InvestorUpdateAttributes = Partial<InvestorCreationAttributes>;
 // Helper type for including relations
 export interface InvestorWithRelations extends InvestorAttributes {
   nominees?: InvestorNominee[];
+  organization?: SysOrganization;
 }

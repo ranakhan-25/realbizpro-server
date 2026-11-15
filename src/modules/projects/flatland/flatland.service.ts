@@ -43,7 +43,7 @@ export class FlatLandService {
     return { projects, sites, roads, blocks, statuses: Object.values(FlatLandStatus).map(value => ({ value, name: value })) };
   }
 
-  async create(dto: CreateFlatLandDto, userId?: number) {
+  async create(dto: CreateFlatLandDto, userId?: number, currentUser?: any) {
     const uuid = await this.sequelize.transaction(async (transaction) => {
       let project = dto.projectId
         ? await this.projectModel.findOne({
@@ -79,7 +79,7 @@ export class FlatLandService {
     return this.findOne(uuid);
   }
 
-  async findAll(query: QueryFlatLandDto, propertyType?: 'flat' | 'land') {
+  async findAll(query: QueryFlatLandDto, propertyType?: 'flat' | 'land', currentUser?: any) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const search = query.search?.trim();
@@ -129,10 +129,7 @@ export class FlatLandService {
     };
   }
 
-  async findOne(
-    uuid: string,
-    propertyType?: 'flat' | 'land',
-  ): Promise<FlatLand> {
+  async findOne(uuid: string, propertyType?: 'flat' | 'land', currentUser?: any): Promise<FlatLand> {
     const flatLand = await this.flatLandModel.findOne({
       where: { uuid, ...(propertyType ? { propertyType } : {}) } as WhereOptions<FlatLand>,
       include: [
@@ -152,12 +149,7 @@ export class FlatLandService {
     return flatLand;
   }
 
-  async update(
-    uuid: string,
-    dto: UpdateFlatLandDto,
-    userId?: number,
-    propertyType?: 'flat' | 'land',
-  ) {
+  async update(uuid: string, dto: UpdateFlatLandDto, propertyType?: 'flat' | 'land', userId?: number, currentUser?: any) {
     await this.sequelize.transaction(async (transaction) => {
       const flatLand = await this.flatLandModel.findOne({
         where: { uuid, ...(propertyType ? { propertyType } : {}) } as WhereOptions<FlatLand>,
@@ -190,7 +182,7 @@ export class FlatLandService {
     return this.findOne(uuid, propertyType);
   }
 
-  async remove(uuid: string, propertyType?: 'flat' | 'land') {
+  async remove(uuid: string, propertyType?: 'flat' | 'land', userId?: number, currentUser?: any) {
     const flatLand = await this.flatLandModel.findOne({
       where: { uuid, ...(propertyType ? { propertyType } : {}) } as WhereOptions<FlatLand>,
     });
@@ -201,7 +193,7 @@ export class FlatLandService {
     return { message: `Flat/Land "${uuid}" deleted successfully` };
   }
 
-  async restore(uuid: string, propertyType?: 'flat' | 'land') {
+  async restore(uuid: string, propertyType?: 'flat' | 'land', userId?: number, currentUser?: any) {
     const flatLand = await this.flatLandModel.findOne({
       where: { uuid, ...(propertyType ? { propertyType } : {}) } as WhereOptions<FlatLand>,
       paranoid: false,

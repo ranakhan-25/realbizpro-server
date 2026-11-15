@@ -1,7 +1,8 @@
 // Auto-generated types for MaterialRequisitionItem
-// Source: src/database/models/projects/material-requisition-item/pr_material_requisition_item.model.ts
+// Source: src\database\models\projects\material-requisition-item\pr_material_requisition_item.model.ts
 
 import type { MaterialRequisition } from '../models/projects/material-requisition/pr_material_requisition.model';
+import type { SysOrganization } from '../models/system/sys_organization.model';
 
 export interface MaterialRequisitionItemAttributes {
   id: number;
@@ -22,9 +23,11 @@ export interface MaterialRequisitionItemAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
 
   // Relations
   materialRequisition?: MaterialRequisition;
+  organization?: SysOrganization;
 }
 
 export interface MaterialRequisitionItemCreationAttributes {
@@ -41,6 +44,7 @@ export interface MaterialRequisitionItemCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
 }
 
 export type MaterialRequisitionItemUpdateAttributes = Partial<MaterialRequisitionItemCreationAttributes>;
@@ -48,4 +52,5 @@ export type MaterialRequisitionItemUpdateAttributes = Partial<MaterialRequisitio
 // Helper type for including relations
 export interface MaterialRequisitionItemWithRelations extends MaterialRequisitionItemAttributes {
   materialRequisition?: MaterialRequisition;
+  organization?: SysOrganization;
 }

@@ -123,7 +123,18 @@ export class PlansService {
       }
     }
 
-    await plan.update(dto as any);
+    const cleanDto: any = {};
+    for (const [key, value] of Object.entries(dto)) {
+      if (value === undefined) continue;
+      if (typeof value === 'number' && isNaN(value)) continue;
+      if (value === null && (key === 'monthlyPrice' || key === 'yearlyPrice')) {
+        cleanDto[key] = 0;
+        continue;
+      }
+      cleanDto[key] = value;
+    }
+
+    await plan.update(cleanDto);
     return this.toResponseDto(plan);
   }
 

@@ -25,8 +25,11 @@ export class TaskVisitSummaryReportService {
     @InjectModel(SysUser) private readonly users: typeof SysUser,
   ) {}
 
-  async getSummary(query: QueryTaskVisitSummaryReportDto) {
+  async getSummary(query: QueryTaskVisitSummaryReportDto, currentUser?: any) {
     const where: any = { activityType: { [Op.in]: ['visit', 'task_visit'] } };
+    if (currentUser?.orgId) {
+      where.orgId = currentUser.orgId;
+    }
     if (query.dateFrom || query.dateTo) {
       where.activityDate = {};
       if (query.dateFrom) where.activityDate[Op.gte] = new Date(`${query.dateFrom}T00:00:00.000Z`);
@@ -98,6 +101,6 @@ export class TaskVisitSummaryReportService {
     else if (['schedule', 'scheduled'].includes(status)) row.schedule++;
     else if (['cancel', 'canceled', 'cancelled'].includes(status)) row.canceled++;
     else if (['newschedule', 'newscheduled'].includes(status)) row.newSchedule++;
-    else if (['reschedule', 'rescheduled'].includes(status)) row.rescheduled++;
+    else if (['rescheduled', 'reschedule'].includes(status)) row.rescheduled++;
   }
 }

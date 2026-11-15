@@ -49,6 +49,8 @@ export class ShiftService {
 
   async create(
     dto: CreateShiftDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<Shift> {
     const { schedules, ...rest } = dto;
 
@@ -101,7 +103,7 @@ export class ShiftService {
     }
   }
 
-  async findAll(query: QueryShiftDto) {
+  async findAll(query: QueryShiftDto, currentUser?: any) {
     const {
       page = 1,
       limit = 10,
@@ -119,6 +121,14 @@ export class ShiftService {
         : (page - 1) * limit;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
 
     if (search) {
       where.name = { [Op.iLike]: `%${search}%` };
@@ -178,7 +188,7 @@ export class ShiftService {
     };
   }
 
-  async findOne(uuid: string): Promise<Shift> {
+  async findOne(uuid: string, currentUser?: any): Promise<Shift> {
     const shift = await this.shiftModel.findOne({
       where: { uuid } as any,
       // relation: single shift er schedule
@@ -200,10 +210,7 @@ export class ShiftService {
     return shift;
   }
 
-  async update(
-    uuid: string,
-    dto: UpdateShiftDto,
-  ): Promise<Shift> {
+  async update(uuid: string, dto: UpdateShiftDto, userId?: number, currentUser?: any): Promise<Shift> {
     const shift = await this.shiftModel.findOne({
       where: { uuid } as any,
     });
@@ -273,9 +280,7 @@ export class ShiftService {
     }
   }
 
-  async remove(
-    uuid: string,
-  ): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const shift = await this.shiftModel.findOne({
       where: { uuid } as any,
     });
@@ -294,6 +299,7 @@ export class ShiftService {
       await shift.update(
         {
           status: ShiftStatus.INACTIVE,
+      deletedBy: userId ? String(userId) : null,
         },
         { transaction },
       );
@@ -317,7 +323,7 @@ export class ShiftService {
     };
   }
 
-  async restore(uuid: string): Promise<Shift> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<Shift> {
     const shift = await this.shiftModel.findOne({
       where: { uuid } as any,
       paranoid: false,
@@ -344,6 +350,8 @@ export class ShiftService {
       await shift.update(
         {
           status: ShiftStatus.ACTIVE,
+      deletedBy: null,
+      updatedBy: userId ? String(userId) : null,
         },
         { transaction },
       );

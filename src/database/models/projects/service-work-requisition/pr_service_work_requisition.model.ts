@@ -22,6 +22,7 @@ import { Site } from '../project-site/pr_project_site.model';
 import { BillingCategory } from '../billing/pr_category.model';
 import { BillingSubCategory } from '../billing/pr_sub_category.model';
 import { ProcurementWorkOrder } from '../../procurement/work-order/pr_procurement_work_order.model';
+import { SysOrganization } from "src/database/models/system/sys_organization.model";
 
 export enum ServiceWorkRequisitionStatus {
   ACTIVE = 'active',
@@ -189,21 +190,24 @@ export class ServiceWorkRequisition
   declare addedById?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'created_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare createdBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'updated_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare updatedBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'deleted_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare deletedBy?: string;
 
   // =========================
@@ -221,4 +225,26 @@ export class ServiceWorkRequisition
       ServiceWorkRequisitionStatus.PENDING,
   })
   declare status: ServiceWorkRequisitionStatus;
+    @ForeignKey(() => SysOrganization)
+    @Column({
+            type: DataType.BIGINT,
+            allowNull: true,
+            field: 'org_id',
+            defaultValue: null,
+          })
+    declare orgId?: number | null;
+    @BelongsTo(() => SysOrganization, {
+            foreignKey: 'orgId',
+            targetKey: 'id',
+            as: 'organization',
+          })
+    declare organization?: SysOrganization;
+    @ForeignKey(() => Project)
+    @Column({
+            type: DataType.UUID,
+            allowNull: true,
+            field: 'project_id',
+            defaultValue: null,
+          })
+    declare projectId?: string | null;
 }

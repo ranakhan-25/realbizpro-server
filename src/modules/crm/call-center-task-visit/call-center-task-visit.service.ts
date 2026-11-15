@@ -20,20 +20,27 @@ export class CallCenterTaskVisitService {
     @InjectModel(SysUser) private readonly users: typeof SysUser,
   ) {}
 
-  async dropdowns() {
+  async dropdowns(currentUser?: any) {
+    const whereActive: any = { isActive: true };
+    if (currentUser?.orgId) {
+      whereActive.orgId = currentUser.orgId;
+    }
     const [users, places, statuses, salesPossibilities] = await Promise.all([
       this.users.findAll({ where: { isActive: true }, attributes: ['uuid', 'userCode', 'name'], order: [['name', 'ASC']] }),
-      this.places.findAll({ attributes: ['id', 'uuid', 'name', 'address'], order: [['name', 'ASC']] }),
+      this.places.findAll({ where: whereActive, attributes: ['id', 'uuid', 'name', 'address'], order: [['name', 'ASC']] }),
       this.statuses.findAll({ attributes: ['id', 'uuid', 'name', 'color'], order: [['name', 'ASC']] }),
       this.stages.findAll({ where: { isActive: true }, attributes: ['id', 'uuid', 'name', 'color', 'sortOrder'], order: [['sortOrder', 'ASC'], ['name', 'ASC']] }),
     ]);
     return { users: users.map(user => ({ uuid: user.uuid, userCode: user.userCode ?? null, name: user.name })), statuses, places, taskTypes: activityTypes, salesPossibilities: salesPossibilities.map(stage => ({ id: stage.id, uuid: stage.uuid, name: stage.name, color: stage.color ?? null })) };
   }
 
-  async list(query: QueryTaskVisitDto) {
+  async list(query: QueryTaskVisitDto, currentUser?: any) {
     const page = query.page ?? 1;
     const limit = Math.min(query.limit ?? 10, 100);
     const where: any = { activityType: { [Op.in]: activityTypes.map(item => item.value) } };
+    if (currentUser?.orgId) {
+      where.orgId = currentUser.orgId;
+    }
     if (query.dateFrom || query.dateTo) {
       where.activityDate = {};
       if (query.dateFrom) where.activityDate[Op.gte] = new Date(`${query.dateFrom}T00:00:00.000`);
@@ -99,8 +106,13 @@ export class CallCenterTaskVisitService {
           action: { activityUuid: activity.uuid, leadUuid: lead?.uuid ?? null, canViewLead: !!lead?.uuid },
           lead: lead ? { uuid: lead.uuid, leadCode: lead.leadCode, name: lead.clientName, phone: lead.phone } : null,
           feedback: activity.feedback ?? null,
-          createdAt: activity.createdAt,
-          updatedAt: activity.updatedAt,
+          orgId: activity.orgId ?? null,
+          org_id: activity.orgId ?? null,
+          created_by: activity.createdBy ?? null,
+          updated_by: activity.updatedBy ?? null,
+          deleted_by: activity.deletedBy ?? null,
+          created_at: activity.createdAt,
+          updated_at: activity.updatedAt,
         };
       }),
       meta: { page, limit, total: count, totalPages: Math.ceil(count / limit) },

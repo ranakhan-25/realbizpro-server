@@ -1,11 +1,6 @@
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { 
-  IsOptional, 
-  IsString, 
-  IsNumber, 
-  IsDateString, 
-  Min 
-} from 'class-validator';
+import { IsOptional, IsString, IsNumber, IsDateString, Min } from 'class-validator';
 
 export class GetVouchersQueryDto {
   // ================= Pagination =================
@@ -62,4 +57,8 @@ export class GetVouchersQueryDto {
   @IsOptional()
   @IsString()
   status?: string; // Draft, Pending, Approved, etc.
+  @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+  @IsOptional()
+  orgId?: number;
+
 }

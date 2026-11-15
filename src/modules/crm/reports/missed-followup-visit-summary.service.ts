@@ -22,7 +22,7 @@ export class MissedFollowupVisitSummaryService {
     @InjectModel(SysUser) private readonly users: typeof SysUser,
   ) {}
 
-  async dropdowns() {
+  async dropdowns(currentUser?: any) {
     const [teams, users] = await Promise.all([
       this.teams.findAll({ where: { isActive: true }, attributes: ['id', 'uuid', 'name', 'leaderId'], order: [['name', 'ASC']] }),
       this.users.findAll({ where: { isActive: true }, attributes: ['uuid', 'userCode', 'name'], order: [['name', 'ASC']] }),
@@ -30,7 +30,7 @@ export class MissedFollowupVisitSummaryService {
     return { teams, users };
   }
 
-  async report(query: QueryMissedFollowupVisitSummaryDto) {
+  async report(query: QueryMissedFollowupVisitSummaryDto, currentUser?: any) {
     const date = query.date ?? new Date().toISOString().slice(0, 10);
     const endOfDate = new Date(`${date}T23:59:59.999Z`);
     const [teams, members, users, leads, activities] = await Promise.all([

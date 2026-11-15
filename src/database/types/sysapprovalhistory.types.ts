@@ -1,5 +1,5 @@
 // Auto-generated types for SysApprovalHistory
-// Source: src/database/models/deligation/sys_approval_history.model.ts
+// Source: src\database\models\deligation\sys_approval_history.model.ts
 
 import type { SysApprovalRequest } from '../models/deligation/sys_approval_requests.model';
 import type { SysUser } from '../models/system/sys_user.model';

@@ -42,18 +42,39 @@ export class LeadService {
     @InjectModel(Project) private readonly projects: typeof Project,
   ) {}
 
-  async create(dto: CreateLeadDto) {
+  async create(dto: CreateLeadDto, userId?: number, currentUser?: any) {
     const leadCode = dto.leadCode?.trim() || await this.nextCode();
     const { projectName, offerUuid, ...leadData } = dto;
-    const offer = offerUuid ? await this.getActiveOffer(offerUuid) : undefined;
-    const row = await this.leads.create({ ...leadData, ...(offer ? { offerId: offer.id } : {}), leadCode, leadDate: dto.leadDate ?? new Date().toISOString().slice(0, 10) } as any);
-    if (projectName) await LeadPropertyInterest.create({ leadId: row.id, projectName, projectId: row.projectId } as any);
-    return this.findOne(row.uuid);
+    const offer = offerUuid ? await this.getActiveOffer(offerUuid, currentUser) : undefined;
+    const orgId = dto.orgId ?? currentUser?.orgId ?? null;
+    const actor = userId ? String(userId) : null;
+    const row = await this.leads.create({
+      ...leadData,
+      ...(offer ? { offerId: offer.id } : {}),
+      leadCode,
+      leadDate: dto.leadDate ?? new Date().toISOString().slice(0, 10),
+      orgId,
+      createdBy: actor,
+    } as any);
+    if (projectName) {
+      await LeadPropertyInterest.create({
+        leadId: row.id,
+        projectName,
+        projectId: row.projectId,
+        orgId,
+        createdBy: actor,
+      } as any);
+    }
+    return this.findOne(row.uuid, currentUser);
   }
 
-  async findAll(query: QueryLeadDto) {
-    const page = query.page ?? 1; const limit = query.limit ?? 10;
+  async findAll(query: QueryLeadDto, currentUser?: any) {
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 10;
     const where: any = {};
+    if (currentUser?.orgId) {
+      where.orgId = currentUser.orgId;
+    }
     const text = query.search?.trim();
     if (text) where[Op.or] = [
       { clientName: { [Op.iLike]: `%${text}%` } }, { phone: { [Op.iLike]: `%${text}%` } },
@@ -82,30 +103,44 @@ export class LeadService {
     const { rows, count } = await this.leads.findAndCountAll({ where, include, limit, offset: (page - 1) * limit, order: [['createdAt', 'DESC']], distinct: true, paranoid: !query.withDeleted });
     const users = await this.userMap(rows.flatMap(row => [row.assignedTo, row.creditOfficerId]));
     return {
-      data: rows.map(row => ({
-        ...row.toJSON(),
-        assignedUser: users.get(row.assignedTo ?? '') ?? null,
-        creditOfficer: users.get(row.creditOfficerId ?? '') ?? null,
-      })),
+      data: rows.map(row => {
+        const item = this.toPublic(row);
+        return {
+          ...item,
+          assignedUser: users.get(row.assignedTo ?? '') ?? null,
+          creditOfficer: users.get(row.creditOfficerId ?? '') ?? null,
+        };
+      }),
       meta: { page, limit, total: count, totalPages: Math.ceil(count / limit) || 1 },
     };
   }
 
-  async findOne(uuid: string) {
-    const row = await this.leads.findOne({ where: { uuid }, include: ['category', 'stage', 'source', 'campaign', 'profession', 'offer', 'area', 'priceRange', 'activities', 'attachments', 'callAssignments', 'propertyInterests', 'requirements', 'transferLogs'] });
+  async findOne(uuid: string, currentUser?: any) {
+    const where: any = { uuid };
+    if (currentUser?.orgId) {
+      where.orgId = currentUser.orgId;
+    }
+    const row = await this.leads.findOne({
+      where,
+      include: ['category', 'stage', 'source', 'campaign', 'profession', 'offer', 'area', 'priceRange', 'activities', 'attachments', 'callAssignments', 'propertyInterests', 'requirements', 'transferLogs'],
+    });
     if (!row) throw new NotFoundException(`Lead ${uuid} not found`);
     const users = await this.userMap([row.assignedTo, row.creditOfficerId]);
+    const item = this.toPublic(row);
     return {
-      ...row.toJSON(),
+      ...item,
       assignedUser: users.get(row.assignedTo ?? '') ?? null,
       creditOfficer: users.get(row.creditOfficerId ?? '') ?? null,
     };
   }
 
-  async transferLeadList(query: QueryTransferLeadListDto) {
+  async transferLeadList(query: QueryTransferLeadListDto, currentUser?: any) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const where: any = {};
+    if (currentUser?.orgId) {
+      where.orgId = currentUser.orgId;
+    }
     if (query.fromUserId) where.transferredFrom = query.fromUserId;
     if (query.toUserId) where.transferredTo = query.toUserId;
     if (query.dateFrom || query.dateTo) {
@@ -118,7 +153,6 @@ export class LeadService {
     const leadInclude: any = {
       association: 'lead',
       required: !!search,
-      // Transfer history must retain lead identity after its source lead is soft-deleted.
       paranoid: false,
       include: [{ association: 'activities', required: false, separate: true, limit: 1, order: [['activityDate', 'DESC']] }],
     };
@@ -162,7 +196,7 @@ export class LeadService {
     };
   }
 
-  async transferLeadListDropdown() {
+  async transferLeadListDropdown(currentUser?: any) {
     const users = await this.users.findAll({
       where: { isActive: true },
       attributes: ['uuid', 'name'],
@@ -172,8 +206,13 @@ export class LeadService {
     return { fromUsers: options, toUsers: options };
   }
 
-  async transferLeadListDetails(uuid: string) {
-    const record = await this.transferLogs.findOne({ where: { uuid },
+  async transferLeadListDetails(uuid: string, currentUser?: any) {
+    const where: any = { uuid };
+    if (currentUser?.orgId) {
+      where.orgId = currentUser.orgId;
+    }
+    const record = await this.transferLogs.findOne({
+      where,
       include: [
         { association: 'lead', paranoid: false, include: [{ association: 'activities', required: false, separate: true, order: [['activityDate', 'DESC']] }] },
       ],
@@ -187,10 +226,13 @@ export class LeadService {
     };
   }
 
-  async findJunk(query: QueryJunkLeadDto) {
+  async findJunk(query: QueryJunkLeadDto, currentUser?: any) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const where: any = { status: 'junk' };
+    if (currentUser?.orgId) {
+      where.orgId = currentUser.orgId;
+    }
     if (query.leadCategoryId) where.leadCategoryId = query.leadCategoryId;
     if (query.userId) where.assignedTo = query.userId;
     if (query.dateFrom || query.dateTo) {
@@ -234,66 +276,100 @@ export class LeadService {
     };
   }
 
-  async markJunk(dto: JunkLeadActionDto) {
-    const ids = await this.resolveLeadIds(dto.ids, dto.uuids);
+  async markJunk(dto: JunkLeadActionDto, userId?: number, currentUser?: any) {
+    const ids = await this.resolveLeadIds(dto.ids, dto.uuids, undefined, currentUser);
     if (!ids.length) throw new BadRequestException('ids or uuids are required');
+    const actor = userId ? String(userId) : null;
+    const where: any = { id: { [Op.in]: ids }, status: { [Op.ne]: 'junk' } };
+    if (currentUser?.orgId) where.orgId = currentUser.orgId;
     const [updated] = await this.leads.update(
-      { status: 'junk', ...(dto.note ? { notes: dto.note } : {}) },
-      { where: { id: { [Op.in]: ids }, status: { [Op.ne]: 'junk' } } },
+      { status: 'junk', ...(dto.note ? { notes: dto.note } : {}), ...(actor ? { updatedBy: actor } : {}) },
+      { where },
     );
     return { markedAsJunk: updated };
   }
 
-  async restoreJunk(uuid: string) {
-    const lead = await this.leads.findOne({ where: { uuid, status: 'junk' } });
+  async restoreJunk(uuid: string, userId?: number, currentUser?: any) {
+    const where: any = { uuid, status: 'junk' };
+    if (currentUser?.orgId) where.orgId = currentUser.orgId;
+    const lead = await this.leads.findOne({ where });
     if (!lead) throw new NotFoundException(`Junk lead ${uuid} not found`);
-    await lead.update({ status: 'active' });
-    return this.findOne(uuid);
+    const actor = userId ? String(userId) : null;
+    await lead.update({ status: 'active', ...(actor ? { updatedBy: actor } : {}) });
+    return this.findOne(uuid, currentUser);
   }
 
-  async bulkRestoreJunk(ids?: number[], uuids?: string[]) {
-    const leadIds = await this.resolveLeadIds(ids, uuids);
+  async bulkRestoreJunk(ids?: number[], uuids?: string[], userId?: number, currentUser?: any) {
+    const leadIds = await this.resolveLeadIds(ids, uuids, undefined, currentUser);
     if (!leadIds.length) throw new BadRequestException('ids or uuids are required');
-    const [restored] = await this.leads.update({ status: 'active' }, { where: { id: { [Op.in]: leadIds }, status: 'junk' } });
+    const where: any = { id: { [Op.in]: leadIds }, status: 'junk' };
+    if (currentUser?.orgId) where.orgId = currentUser.orgId;
+    const actor = userId ? String(userId) : null;
+    const [restored] = await this.leads.update({ status: 'active', ...(actor ? { updatedBy: actor } : {}) }, { where });
     return { restored };
   }
 
-  async deleteJunk(uuid: string) {
-    const lead = await this.leads.findOne({ where: { uuid, status: 'junk' } });
+  async deleteJunk(uuid: string, userId?: number, currentUser?: any) {
+    const where: any = { uuid, status: 'junk' };
+    if (currentUser?.orgId) where.orgId = currentUser.orgId;
+    const lead = await this.leads.findOne({ where });
     if (!lead) throw new NotFoundException(`Junk lead ${uuid} not found`);
+    if (userId) await lead.update({ deletedBy: String(userId) });
     await lead.destroy();
     return { message: `Junk lead ${uuid} deleted successfully` };
   }
 
-  async bulkDeleteJunk(ids?: number[], uuids?: string[]) {
-    const leadIds = await this.resolveLeadIds(ids, uuids);
+  async bulkDeleteJunk(ids?: number[], uuids?: string[], userId?: number, currentUser?: any) {
+    const leadIds = await this.resolveLeadIds(ids, uuids, undefined, currentUser);
     if (!leadIds.length) throw new BadRequestException('ids or uuids are required');
-    const deleted = await this.leads.destroy({ where: { id: { [Op.in]: leadIds }, status: 'junk' } });
+    const where: any = { id: { [Op.in]: leadIds }, status: 'junk' };
+    if (currentUser?.orgId) where.orgId = currentUser.orgId;
+    if (userId) await this.leads.update({ deletedBy: String(userId) }, { where });
+    const deleted = await this.leads.destroy({ where });
     return { deleted };
   }
 
-  async update(uuid: string, dto: UpdateLeadDto) {
-    const row = await this.getActive(uuid);
+  async update(uuid: string, dto: UpdateLeadDto, userId?: number, currentUser?: any) {
+    const row = await this.getActive(uuid, currentUser);
     const { offerUuid, projectName, ...leadChanges } = dto;
     const changes: Record<string, any> = { ...leadChanges };
-    if (offerUuid !== undefined) changes.offerId = offerUuid ? (await this.getActiveOffer(offerUuid)).id : null;
+    if (offerUuid !== undefined) changes.offerId = offerUuid ? (await this.getActiveOffer(offerUuid, currentUser)).id : null;
+    if (userId) changes.updatedBy = String(userId);
+    if (dto.orgId !== undefined) changes.orgId = dto.orgId;
     await row.update(changes);
     if (projectName !== undefined) {
       const current = await LeadPropertyInterest.findOne({ where: { leadId: row.id }, order: [['createdAt', 'DESC']] });
       if (projectName.trim()) {
-        if (current) await current.update({ projectName, projectId: dto.projectId ?? row.projectId });
-        else await LeadPropertyInterest.create({ leadId: row.id, projectName, projectId: dto.projectId ?? row.projectId } as any);
+        if (current) await current.update({ projectName, projectId: dto.projectId ?? row.projectId, ...(userId ? { updatedBy: String(userId) } : {}) });
+        else await LeadPropertyInterest.create({ leadId: row.id, projectName, projectId: dto.projectId ?? row.projectId, orgId: row.orgId, createdBy: userId ? String(userId) : null } as any);
       } else if (current) await current.destroy();
     }
-    return this.findOne(uuid);
+    return this.findOne(uuid, currentUser);
   }
-  async remove(uuid: string) { const row = await this.getActive(uuid); await row.destroy(); return { message: `Lead ${uuid} deleted successfully` }; }
-  async restore(uuid: string) { const row = await this.leads.findOne({ where: { uuid }, paranoid: false }); if (!row) throw new NotFoundException(`Lead ${uuid} not found`); if (!row.deletedAt) throw new BadRequestException('Lead is not deleted'); await row.restore(); return this.findOne(uuid); }
 
-  async dropdown(entity: string) {
-    const active = { isActive: true } as any;
+  async remove(uuid: string, userId?: number, currentUser?: any) {
+    const row = await this.getActive(uuid, currentUser);
+    if (userId) await row.update({ deletedBy: String(userId) });
+    await row.destroy();
+    return { message: `Lead ${uuid} deleted successfully` };
+  }
+
+  async restore(uuid: string, userId?: number, currentUser?: any) {
+    const where: any = { uuid };
+    if (currentUser?.orgId) where.orgId = currentUser.orgId;
+    const row = await this.leads.findOne({ where, paranoid: false });
+    if (!row) throw new NotFoundException(`Lead ${uuid} not found`);
+    if (!row.deletedAt) throw new BadRequestException('Lead is not deleted');
+    await row.restore();
+    await row.update({ deletedBy: null, ...(userId ? { updatedBy: String(userId) } : {}) });
+    return this.findOne(uuid, currentUser);
+  }
+
+  async dropdown(entity: string, currentUser?: any) {
+    const active: any = { isActive: true };
+    if (currentUser?.orgId) active.orgId = currentUser.orgId;
     switch (entity.toLowerCase()) {
-      case 'stage': case 'stages': return this.stages.findAll({ where: active, attributes: ['id', 'uuid', 'name'], order: [['name', 'ASC']] });
+      case 'stage': case 'stages': return this.stages.findAll({ where: { isActive: true }, attributes: ['id', 'uuid', 'name'], order: [['name', 'ASC']] });
       case 'category': case 'categories': return this.categories.findAll({ where: active, attributes: ['id', 'name', 'code'], order: [['name', 'ASC']] });
       case 'source': case 'sources': return this.sources.findAll({ where: active, attributes: ['id', 'name', 'code'], order: [['name', 'ASC']] });
       case 'campaign': case 'campaigns': return this.campaigns.findAll({ attributes: ['id', 'name', 'channel'], order: [['name', 'ASC']] });
@@ -319,6 +395,159 @@ export class LeadService {
     }
   }
 
+  async callAssign(dto: any, userId?: number, currentUser?: any) {
+    const ids: number[] = await this.resolveLeadIds(dto.leadIds, dto.leadUuids, dto.leadId ? [dto.leadId] : undefined, currentUser);
+    if (!ids.length) throw new BadRequestException('leadIds or leadUuids are required');
+    const leads = await this.leads.findAll({ where: { id: { [Op.in]: ids } } });
+    if (leads.length !== ids.length) throw new NotFoundException('One or more leads were not found');
+    const date = dto.date ? new Date(dto.date) : new Date();
+    const actor = userId ? String(userId) : null;
+    return this.callAssignments.sequelize!.transaction(async transaction => {
+      const result = [];
+      for (const lead of leads) {
+        const assignedTo = dto.assignedTo ?? lead.assignedTo;
+        if (!assignedTo) throw new BadRequestException(`Lead ${lead.uuid} has no assigned user; assignedTo is required`);
+        result.push(await this.callAssignments.create({
+          leadId: lead.id,
+          assignedFrom: dto.assignedFrom ?? lead.assignedTo ?? assignedTo,
+          assignedTo,
+          assignmentDate: date,
+          dueDate: dto.dueDate,
+          instruction: dto.note,
+          assignedUserType: dto.assignUserType ?? 'Officer/SR',
+          status: 'pending',
+          projectId: lead.projectId,
+          orgId: lead.orgId ?? currentUser?.orgId ?? null,
+          createdBy: actor,
+        } as any, { transaction }));
+        if (dto.assignedTo) await lead.update({ assignedTo, updatedBy: actor }, { transaction });
+      }
+      return result;
+    });
+  }
+
+  async transfer(dto: any, userId?: number, currentUser?: any) {
+    const ids: number[] = await this.resolveLeadIds(dto.leadIds, dto.leadUuids, undefined, currentUser);
+    if (!ids.length || !Array.isArray(dto.assignments) || !dto.assignments.length) throw new BadRequestException('leadIds/leadUuids and assignments are required');
+    const leads = await this.leads.findAll({ where: { id: { [Op.in]: ids } } });
+    if (leads.length !== ids.length) throw new NotFoundException('One or more leads were not found');
+    const assignments = dto.assignments as Array<{ userId: string; quantity?: number }>;
+    let cursor = 0;
+    const actor = userId ? String(userId) : null;
+    return this.leads.sequelize!.transaction(async transaction => {
+      const logs = [];
+      for (const assignment of assignments) {
+        const quantity = dto.manualSet ? Number(assignment.quantity ?? 0) : Math.ceil(leads.length / assignments.length);
+        for (let n = 0; n < quantity && cursor < leads.length; n++, cursor++) {
+          const lead = leads[cursor];
+          logs.push(await this.transferLogs.create({
+            leadId: lead.id,
+            transferredFrom: lead.assignedTo ?? dto.transferredFrom ?? assignment.userId,
+            transferredTo: assignment.userId,
+            transferReason: dto.note,
+            transferDate: dto.date ? new Date(dto.date) : new Date(),
+            transferType: dto.assignType ?? 'Officer/SR',
+            followup: !!dto.followup,
+            manualSet: !!dto.manualSet,
+            assignedQuantity: quantity,
+            projectId: lead.projectId,
+            orgId: lead.orgId ?? currentUser?.orgId ?? null,
+            createdBy: actor,
+          } as any, { transaction }));
+          await lead.update({ assignedTo: assignment.userId, updatedBy: actor }, { transaction });
+        }
+      }
+      if (cursor < leads.length) throw new BadRequestException('Assignment quantities do not cover all selected leads');
+      return logs;
+    });
+  }
+
+  async bulkDelete(ids: number[], uuids?: string[], userId?: number, currentUser?: any) {
+    const leadIds = await this.resolveLeadIds(ids, uuids, undefined, currentUser);
+    if (!leadIds.length) throw new BadRequestException('ids or uuids are required');
+    const where: any = { id: { [Op.in]: leadIds } };
+    if (currentUser?.orgId) where.orgId = currentUser.orgId;
+    if (userId) await this.leads.update({ deletedBy: String(userId) }, { where });
+    const count = await this.leads.destroy({ where });
+    return { deleted: count };
+  }
+
+  async bulkImport(rows: CreateLeadDto[], userId?: number, currentUser?: any) {
+    if (!Array.isArray(rows) || !rows.length) throw new BadRequestException('rows are required');
+    const orgId = currentUser?.orgId ?? null;
+    const actor = userId ? String(userId) : null;
+    return this.leads.sequelize!.transaction(async transaction => {
+      const data = [];
+      for (const input of rows) {
+        const { projectName, ...leadData } = input;
+        const row = await this.leads.create({
+          ...leadData,
+          leadCode: input.leadCode || await this.nextCode(),
+          leadDate: input.leadDate ?? new Date().toISOString().slice(0, 10),
+          orgId: input.orgId ?? orgId,
+          createdBy: actor,
+        } as any, { transaction });
+        if (projectName) {
+          await LeadPropertyInterest.create({
+            leadId: row.id,
+            projectName,
+            projectId: row.projectId,
+            orgId: input.orgId ?? orgId,
+            createdBy: actor,
+          } as any, { transaction });
+        }
+        data.push(row);
+      }
+      return { imported: data.length, data };
+    });
+  }
+
+  async addActivity(uuid: string, dto: any, userId?: number, currentUser?: any) {
+    const lead = await this.getActive(uuid, currentUser);
+    const actor = userId ? String(userId) : null;
+    const row = await this.activities.create({
+      ...dto,
+      leadId: lead.id,
+      activityDate: dto.activityDate ?? new Date(),
+      projectId: lead.projectId,
+      orgId: lead.orgId ?? currentUser?.orgId ?? null,
+      createdBy: actor,
+    } as any);
+    return row;
+  }
+
+  private async resolveLeadIds(ids?: Array<number | string>, uuids?: string[], fallback?: Array<number | string>, currentUser?: any) {
+    const numericIds = [...(ids ?? []), ...(fallback ?? [])].map(Number).filter(Number.isInteger);
+    const leadUuids = (uuids ?? []).filter(Boolean);
+    if (!leadUuids.length) return [...new Set(numericIds)];
+    const where: any = { uuid: { [Op.in]: leadUuids } };
+    if (currentUser?.orgId) where.orgId = currentUser.orgId;
+    const matches = await this.leads.findAll({ where, attributes: ['id', 'uuid'] });
+    if (matches.length !== new Set(leadUuids).size) throw new NotFoundException('One or more leads were not found');
+    return [...new Set([...numericIds, ...matches.map((lead) => Number(lead.id))])];
+  }
+
+  private async getActive(uuid: string, currentUser?: any) {
+    const where: any = { uuid };
+    if (currentUser?.orgId) where.orgId = currentUser.orgId;
+    const row = await this.leads.findOne({ where });
+    if (!row) throw new NotFoundException(`Lead ${uuid} not found`);
+    return row;
+  }
+
+  private async getActiveOffer(uuid: string, currentUser?: any) {
+    const where: any = { uuid, status: 'active' };
+    if (currentUser?.orgId) where.orgId = currentUser.orgId;
+    const offer = await this.offers.findOne({ where });
+    if (!offer) throw new BadRequestException(`Active offer ${uuid} not found`);
+    return offer;
+  }
+
+  private async nextCode() {
+    const row = await this.leads.findOne({ attributes: ['id'], order: [['id', 'DESC']], paranoid: false });
+    return `L${new Date().toISOString().slice(2, 10).replace(/-/g, '')}-${String(Number(row?.id ?? 0) + 1).padStart(5, '0')}`;
+  }
+
   private async userMap(ids: Array<string | null | undefined>) {
     const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     const uuids = [...new Set(ids.filter((id): id is string => typeof id === 'string' && uuidPattern.test(id)))];
@@ -327,72 +556,22 @@ export class LeadService {
     return new Map(users.map(user => [user.uuid, { uuid: user.uuid, name: user.name }]));
   }
 
-  async callAssign(dto: any) {
-    const ids: number[] = await this.resolveLeadIds(dto.leadIds, dto.leadUuids, dto.leadId ? [dto.leadId] : undefined);
-    if (!ids.length) throw new BadRequestException('leadIds or leadUuids are required');
-    const leads = await this.leads.findAll({ where: { id: { [Op.in]: ids } } });
-    if (leads.length !== ids.length) throw new NotFoundException('One or more leads were not found');
-    const date = dto.date ? new Date(dto.date) : new Date();
-    return this.callAssignments.sequelize!.transaction(async transaction => {
-      const result = [];
-      for (const lead of leads) {
-        const assignedTo = dto.assignedTo ?? lead.assignedTo;
-        if (!assignedTo) throw new BadRequestException(`Lead ${lead.uuid} has no assigned user; assignedTo is required`);
-        result.push(await this.callAssignments.create({ leadId: lead.id, assignedFrom: dto.assignedFrom ?? lead.assignedTo ?? assignedTo, assignedTo, assignmentDate: date, dueDate: dto.dueDate, instruction: dto.note, assignedUserType: dto.assignUserType ?? 'Officer/SR', status: 'pending', projectId: lead.projectId }, { transaction }));
-        if (dto.assignedTo) await lead.update({ assignedTo }, { transaction });
-      }
-      return result;
-    });
+  private toPublic(row: Lead) {
+    const item = row.toJSON() as any;
+    item.created_at = item.created_at ?? item.createdAt;
+    item.updated_at = item.updated_at ?? item.updatedAt;
+    item.deleted_at = item.deleted_at ?? item.deletedAt ?? null;
+    delete item.createdAt;
+    delete item.updatedAt;
+    delete item.deletedAt;
+    item.orgId = item.org_id ?? item.orgId ?? null;
+    item.org_id = item.org_id ?? item.orgId ?? null;
+    item.created_by = item.created_by ?? item.createdBy ?? null;
+    item.updated_by = item.updated_by ?? item.updatedBy ?? null;
+    item.deleted_by = item.deleted_by ?? item.deletedBy ?? null;
+    delete item.createdBy;
+    delete item.updatedBy;
+    delete item.deletedBy;
+    return item;
   }
-
-  async transfer(dto: any) {
-    const ids: number[] = await this.resolveLeadIds(dto.leadIds, dto.leadUuids);
-    if (!ids.length || !Array.isArray(dto.assignments) || !dto.assignments.length) throw new BadRequestException('leadIds/leadUuids and assignments are required');
-    const leads = await this.leads.findAll({ where: { id: { [Op.in]: ids } } });
-    if (leads.length !== ids.length) throw new NotFoundException('One or more leads were not found');
-    const assignments = dto.assignments as Array<{ userId: string; quantity?: number }>;
-    let cursor = 0;
-    return this.leads.sequelize!.transaction(async transaction => {
-      const logs = [];
-      for (const assignment of assignments) {
-        const quantity = dto.manualSet ? Number(assignment.quantity ?? 0) : Math.ceil(leads.length / assignments.length);
-        for (let n = 0; n < quantity && cursor < leads.length; n++, cursor++) {
-          const lead = leads[cursor];
-          logs.push(await this.transferLogs.create({ leadId: lead.id, transferredFrom: lead.assignedTo ?? dto.transferredFrom ?? assignment.userId, transferredTo: assignment.userId, transferReason: dto.note, transferDate: dto.date ? new Date(dto.date) : new Date(), transferType: dto.assignType ?? 'Officer/SR', followup: !!dto.followup, manualSet: !!dto.manualSet, assignedQuantity: quantity, projectId: lead.projectId }, { transaction }));
-          await lead.update({ assignedTo: assignment.userId }, { transaction });
-        }
-      }
-      if (cursor < leads.length) throw new BadRequestException('Assignment quantities do not cover all selected leads');
-      return logs;
-    });
-  }
-
-  async bulkDelete(ids: number[], uuids?: string[]) { const leadIds = await this.resolveLeadIds(ids, uuids); if (!leadIds.length) throw new BadRequestException('ids or uuids are required'); const count = await this.leads.destroy({ where: { id: { [Op.in]: leadIds } } }); return { deleted: count }; }
-  async bulkImport(rows: CreateLeadDto[]) {
-    if (!Array.isArray(rows) || !rows.length) throw new BadRequestException('rows are required');
-    return this.leads.sequelize!.transaction(async transaction => {
-      const data = [];
-      for (const input of rows) {
-        const { projectName, ...leadData } = input;
-        const row = await this.leads.create({ ...leadData, leadCode: input.leadCode || await this.nextCode(), leadDate: input.leadDate ?? new Date().toISOString().slice(0, 10) } as any, { transaction });
-        if (projectName) await LeadPropertyInterest.create({ leadId: row.id, projectName, projectId: row.projectId } as any, { transaction });
-        data.push(row);
-      }
-      return { imported: data.length, data };
-    });
-  }
-  async addActivity(uuid: string, dto: any) { const lead = await this.getActive(uuid); const row = await this.activities.create({ ...dto, leadId: lead.id, activityDate: dto.activityDate ?? new Date(), projectId: lead.projectId }); return row; }
-
-  private async resolveLeadIds(ids?: Array<number | string>, uuids?: string[], fallback?: Array<number | string>) {
-    const numericIds = [...(ids ?? []), ...(fallback ?? [])].map(Number).filter(Number.isInteger);
-    const leadUuids = (uuids ?? []).filter(Boolean);
-    if (!leadUuids.length) return [...new Set(numericIds)];
-    const matches = await this.leads.findAll({ where: { uuid: { [Op.in]: leadUuids } }, attributes: ['id', 'uuid'] });
-    if (matches.length !== new Set(leadUuids).size) throw new NotFoundException('One or more leads were not found');
-    return [...new Set([...numericIds, ...matches.map((lead) => Number(lead.id))])];
-  }
-
-  private async getActive(uuid: string) { const row = await this.leads.findOne({ where: { uuid } }); if (!row) throw new NotFoundException(`Lead ${uuid} not found`); return row; }
-  private async getActiveOffer(uuid: string) { const offer = await this.offers.findOne({ where: { uuid, status: 'active' } }); if (!offer) throw new BadRequestException(`Active offer ${uuid} not found`); return offer; }
-  private async nextCode() { const row = await this.leads.findOne({ attributes: ['id'], order: [['id', 'DESC']], paranoid: false }); return `L${new Date().toISOString().slice(2, 10).replace(/-/g, '')}-${String(Number(row?.id ?? 0) + 1).padStart(5, '0')}`; }
 }

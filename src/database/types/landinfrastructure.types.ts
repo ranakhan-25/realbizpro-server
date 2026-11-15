@@ -1,9 +1,10 @@
 // Auto-generated types for LandInfrastructure
-// Source: src/database/models/projects/land-infrastructure/pr_land_infrastructure.model.ts
+// Source: src\database\models\projects\land-infrastructure\pr_land_infrastructure.model.ts
 
 import { LandInfrastructureKind } from '../models/projects/land-infrastructure/pr_land_infrastructure.model';
 
 import type { Project } from '../models/projects/project/pr_project.model';
+import type { SysOrganization } from '../models/system/sys_organization.model';
 
 export interface LandInfrastructureAttributes {
   id: number;
@@ -19,9 +20,11 @@ export interface LandInfrastructureAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
 
   // Relations
   project?: Project;
+  organization?: SysOrganization;
 }
 
 export interface LandInfrastructureCreationAttributes {
@@ -33,6 +36,7 @@ export interface LandInfrastructureCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
 }
 
 export type LandInfrastructureUpdateAttributes = Partial<LandInfrastructureCreationAttributes>;
@@ -40,4 +44,5 @@ export type LandInfrastructureUpdateAttributes = Partial<LandInfrastructureCreat
 // Helper type for including relations
 export interface LandInfrastructureWithRelations extends LandInfrastructureAttributes {
   project?: Project;
+  organization?: SysOrganization;
 }

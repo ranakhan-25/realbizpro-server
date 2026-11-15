@@ -15,7 +15,11 @@ export class ProjectPartyService {
     private readonly partyModel: typeof ProjectParty,
   ) {}
 
-  async create(dto: CreateProjectPartyDto): Promise<ProjectParty> {
+  async create(
+    dto: CreateProjectPartyDto,
+    userId?: number,
+    currentUser?: any,
+  ): Promise<ProjectParty> {
     try {
       return await this.partyModel.create(dto as any);
     } catch (error) {
@@ -26,7 +30,10 @@ export class ProjectPartyService {
     }
   }
 
-  async findAll(query: QueryProjectPartyDto) {
+  async findAll(
+    query: QueryProjectPartyDto,
+    currentUser?: any,
+  ) {
     const { 
       page = '1', 
       limit = '10', 
@@ -41,6 +48,26 @@ export class ProjectPartyService {
     const offset = (pageNum - 1) * limitNum;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      where.projectId = (query as any).projectId;
+    }
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      where.projectId = (query as any).projectId;
+    }
     Object.keys(filters).forEach((k) => {
       if (filters[k] !== undefined && filters[k] !== null && filters[k] !== '') {
         where[k] = filters[k];
@@ -74,33 +101,39 @@ export class ProjectPartyService {
     };
   }
 
-  async findOne(uuid: string): Promise<ProjectParty> {
+  async findOne(uuid: string, currentUser?: any): Promise<ProjectParty> {
     const party = await this.partyModel.findOne({ where: { uuid } });
     if (!party) throw new NotFoundException(`ProjectParty ${uuid} not found`);
     return party;
   }
 
-  async update(uuid: string, dto: UpdateProjectPartyDto): Promise<ProjectParty> {
+  async update(
+    uuid: string,
+    dto: UpdateProjectPartyDto,
+    userId?: number,
+    currentUser?: any,
+  ): Promise<ProjectParty> {
     const party = await this.findOne(uuid);
     return party.update(dto as any);
   }
 
-  async remove(uuid: string): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const party = await this.findOne(uuid);
     await party.destroy();
     return { message: 'ProjectParty deleted successfully' };
   }
 
-  async restore(uuid: string): Promise<ProjectParty> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<ProjectParty> {
     const party = await this.partyModel.findOne({ where: { uuid }, paranoid: false });
     if (!party) throw new NotFoundException(`ProjectParty ${uuid} not found`);
     if (!party.deletedAt) throw new BadRequestException('ProjectParty is not deleted');
     await party.restore();
+    await party.update({ deletedBy: null, updatedBy: userId ? String(userId) : null } as any);
     return this.findOne(uuid);
   }
 
   // Summary endpoint for top cards
-  async getSummary(projectUuid: string) {
+  async getSummary(projectUuid: string, currentUser?: any) {
     const parties = await this.partyModel.findAll({ where: { projectUuid } });
     
     const totalParties = parties.length;

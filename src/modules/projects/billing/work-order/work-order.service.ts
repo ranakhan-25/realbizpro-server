@@ -227,7 +227,11 @@ export class WorkOrderService {
     return payload;
   }
 
-  async create(body: AnyPayload) {
+  async create(
+    body: AnyPayload,
+    userId?: number,
+    currentUser?: any,
+  ) {
     if (
       !body ||
       typeof body !== 'object' ||
@@ -262,6 +266,8 @@ export class WorkOrderService {
     payload.date = this.validateDate(
       payload.date,
     );
+    payload.createdBy = currentUser?.email || (userId ? String(userId) : 'system');
+    payload.updatedBy = currentUser?.email || (userId ? String(userId) : 'system');
 
     const order =
       await this.model.create(payload);
@@ -269,7 +275,10 @@ export class WorkOrderService {
     return this.findOne(order.uuid);
   }
 
-  async findAll(query: AnyPayload) {
+  async findAll(
+    query: AnyPayload,
+    currentUser?: any,
+  ) {
     const page = Math.max(
       Number(query.page) || 1,
       1,
@@ -280,7 +289,21 @@ export class WorkOrderService {
       100,
     );
 
-    const where: WhereOptions<WorkOrderAttributes> = {};
+    const userConditions = currentUser ? [
+      { createdBy: currentUser.email },
+      { createdBy: String(currentUser.id) },
+    ] : [];
+
+    const where: any = {};
+    if (userConditions.length > 0) {
+      where[Op.or] = userConditions;
+    }
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      where.projectId = (query as any).projectId;
+    }
 
     if (query.projectId) {
       Object.assign(where, {
@@ -327,7 +350,7 @@ export class WorkOrderService {
     };
   }
 
-  async findOne(uuid: string) {
+  async findOne(uuid: string, currentUser?: any) {
     const row = await this.model.findOne({
       where: { uuid },
       include: this.includes,
@@ -342,7 +365,12 @@ export class WorkOrderService {
     return row;
   }
 
-  async update(uuid: string, body: AnyPayload) {
+  async update(
+    uuid: string,
+    body: AnyPayload,
+    userId?: number,
+    currentUser?: any,
+  ) {
     const row = await this.model.findOne({
       where: { uuid },
     });
@@ -398,12 +426,13 @@ export class WorkOrderService {
       );
     }
 
+    payload.updatedBy = currentUser?.email || (userId ? String(userId) : 'system');
     await row.update(payload);
 
     return this.findOne(uuid);
   }
 
-  async remove(uuid: string) {
+  async remove(uuid: string, userId?: number, currentUser?: any) {
     const row = await this.model.findOne({
       where: { uuid },
     });
@@ -414,6 +443,9 @@ export class WorkOrderService {
       );
     }
 
+    if (currentUser?.email || userId) {
+      await row.update({ deletedBy: currentUser?.email || String(userId) });
+    }
     await row.destroy();
 
     return {

@@ -20,10 +20,13 @@ export class ContraVoucherService {
     private readonly sequelize: Sequelize,
   ) {}
 
-  async create(dto: CreateContraVoucherDto): Promise<ContraVoucher> {
+  async create(dto: CreateContraVoucherDto, userId?: number, currentUser?: any): Promise<ContraVoucher> {
     const transaction = await this.sequelize.transaction();
     try {
       const voucher = await this.voucherModel.create({
+        createdBy: userId ? String(userId) : (dto as any).createdBy ?? null,
+        orgId: (dto as any).orgId ?? currentUser?.orgId ?? null,
+        projectId: (dto as any).projectId ?? currentUser?.projectId ?? null,
         ...dto,
         date: new Date(dto.date),
       } as any, { transaction });
@@ -55,13 +58,17 @@ export class ContraVoucherService {
     }
   }
 
-  async findAll(query: QueryContraVoucherDto) {
+  async findAll(query: QueryContraVoucherDto, currentUser?: any) {
     const { page = '1', limit = '10', search, fromDate, toDate, accountId, ...filters } = query;
     const pageNum = parseInt(page, 10);
     const limitNum = parseInt(limit, 10);
     const offset = (pageNum - 1) * limitNum;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) where.orgId = effectiveOrgId;
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) where.projectId = effectiveProjectId;
     Object.keys(filters).forEach((k) => {
       if (filters[k] !== undefined && filters[k] !== null && filters[k] !== '') {
         where[k] = filters[k];
@@ -115,7 +122,7 @@ export class ContraVoucherService {
     };
   }
 
-  async findOne(uuid: string): Promise<ContraVoucher> {
+  async findOne(uuid: string, currentUser?: any): Promise<ContraVoucher> {
     const voucher = await this.voucherModel.findOne({
       where: { uuid },
    
@@ -129,13 +136,18 @@ export class ContraVoucherService {
     return value as ContraVoucher;
   }
 
-  async update(uuid: string, dto: UpdateContraVoucherDto): Promise<ContraVoucher> {
+  async update(uuid: string, dto: UpdateContraVoucherDto, userId?: number, currentUser?: any): Promise<ContraVoucher> {
     const transaction = await this.sequelize.transaction();
     try {
       const voucher = await this.voucherModel.findOne({ where: { uuid } });
       if (!voucher) throw new NotFoundException(`Contra Voucher ${uuid} not found`);
       const { items, details: _details, attachmentName: _attachmentName, ...voucherData } = dto as any;
-      const updateData: any = { ...voucherData };
+      const updateData: any = {
+        ...voucherData,
+        updatedBy: userId ? String(userId) : voucher.updatedBy ?? null,
+        ...((dto as any).orgId !== undefined ? { orgId: (dto as any).orgId } : {}),
+        ...((dto as any).projectId !== undefined ? { projectId: (dto as any).projectId } : {}),
+      };
       if (dto.date) updateData.date = new Date(dto.date);
       await voucher.update(updateData, { transaction });
 
@@ -168,17 +180,20 @@ export class ContraVoucherService {
     }
   }
 
-  async remove(uuid: string): Promise<{ message: string }> {
-    const voucher = await this.findOne(uuid);
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
+    const voucher = await this.voucherModel.findOne({ where: { uuid } });
+    if (!voucher) throw new NotFoundException(`Contra Voucher ${uuid} not found`);
+    await voucher.update({ deletedBy: userId ? String(userId) : null } as any);
     await voucher.destroy();
     return { message: 'Contra Voucher deleted successfully' };
   }
 
-  async restore(uuid: string): Promise<ContraVoucher> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<ContraVoucher> {
     const voucher = await this.voucherModel.findOne({ where: { uuid }, paranoid: false });
     if (!voucher) throw new NotFoundException(`Contra Voucher ${uuid} not found`);
     if (!voucher.deletedAt) throw new BadRequestException('Voucher is not deleted');
     await voucher.restore();
+    await voucher.update({ deletedBy: null, updatedBy: userId ? String(userId) : null } as any);
     return this.findOne(uuid);
   }
 }

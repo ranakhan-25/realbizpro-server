@@ -19,7 +19,7 @@ export class RequirementsReportService {
     @InjectModel(SysUser) private readonly users: typeof SysUser,
   ) {}
 
-  async dropdowns() {
+  async dropdowns(currentUser?: any) {
     const [users, areas, requirementTypes] = await Promise.all([
       this.users.findAll({ where: { isActive: true }, attributes: ['uuid', 'userCode', 'name'], order: [['name', 'ASC']] }),
       this.areas.findAll({ attributes: ['id', 'uuid', 'name', 'city', 'zone'], order: [['name', 'ASC']] }),
@@ -28,7 +28,7 @@ export class RequirementsReportService {
     return { users, areas, requirementTypes };
   }
 
-  async report(query: QueryRequirementsReportDto) {
+  async report(query: QueryRequirementsReportDto, currentUser?: any) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const conditions = ['deleted_at IS NULL'];

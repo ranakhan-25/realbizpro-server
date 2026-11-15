@@ -1,7 +1,9 @@
 // Auto-generated types for EmployeeType
-// Source: src/database/models/hrm/employee/hrm_employee_type-model.ts
+// Source: src\database\models\hrm\employee\hrm_employee_type-model.ts
 
 import { EmployeeTypeStatus } from '../models/hrm/employee/hrm_employee_type-model';
+
+import type { SysOrganization } from '../models/system/sys_organization.model';
 
 export interface EmployeeTypeAttributes {
   id: number;
@@ -15,6 +17,10 @@ export interface EmployeeTypeAttributes {
   updatedBy?: string | null;
   deletedBy?: string | null;
   status: EmployeeTypeStatus;
+  orgId?: number | null;
+
+  // Relations
+  organization?: SysOrganization;
 }
 
 export interface EmployeeTypeCreationAttributes {
@@ -24,11 +30,12 @@ export interface EmployeeTypeCreationAttributes {
   updatedBy?: string | null;
   deletedBy?: string | null;
   status?: EmployeeTypeStatus; // Has default value
+  orgId?: number | null;
 }
 
 export type EmployeeTypeUpdateAttributes = Partial<EmployeeTypeCreationAttributes>;
 
 // Helper type for including relations
 export interface EmployeeTypeWithRelations extends EmployeeTypeAttributes {
-  // No relations defined
+  organization?: SysOrganization;
 }

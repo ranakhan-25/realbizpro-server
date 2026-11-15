@@ -1,13 +1,34 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PurchaseController } from './purchase.controller';
+import { PurchaseService } from './purchase.service';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from '@/common/guards/permissions.guard';
 
 describe('PurchaseController', () => {
   let controller: PurchaseController;
+  const mockService = {
+    create: jest.fn(),
+    findAll: jest.fn(),
+    findOne: jest.fn(),
+    update: jest.fn(),
+    remove: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [PurchaseController],
-    }).compile();
+      providers: [
+        {
+          provide: PurchaseService,
+          useValue: mockService,
+        },
+      ],
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(PermissionsGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     controller = module.get<PurchaseController>(PurchaseController);
   });

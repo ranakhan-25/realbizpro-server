@@ -1,5 +1,5 @@
 // Auto-generated types for SysUpazila
-// Source: src/database/models/system/sys_upazila.model.ts
+// Source: src\database\models\system\sys_upazila.model.ts
 
 import type { SysDistrict } from '../models/system/sys_districts.model';
 import type { SysUnion } from '../models/system/sys_union.model';

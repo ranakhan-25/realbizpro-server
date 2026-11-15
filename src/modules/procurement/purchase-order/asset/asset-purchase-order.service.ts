@@ -20,19 +20,19 @@ import { QueryAssetPurchaseOrderDto } from './dto/query-asset-purchase-order.dto
 import { UpdateAssetPurchaseOrderDto } from './dto/update-asset-purchase-order.dto';
 
 const includes = [
-  { model: SysCompany, as: 'company', attributes: ['uuid', 'name'], required: false },
-  { model: SupplierAccounts, as: 'supplier', attributes: ['uuid', 'supplierCode', 'supplierName'] },
-  { model: ProjectType, as: 'projectType', attributes: ['uuid', 'code', 'name'], required: false },
-  { model: Project, as: 'project', attributes: ['uuid', 'code', 'name'], required: false },
-  { model: BillingCategory, as: 'titleOfWork', attributes: ['uuid', 'code', 'name'], required: false },
-  { model: Task, as: 'task', attributes: ['uuid', 'taskName'], required: false },
-  { model: Site, as: 'site', attributes: ['uuid', 'code', 'name'], required: false },
-  { model: ProcurementAssetCategory, as: 'category', attributes: ['uuid', 'code', 'name'], required: false },
-  { model: ProcurementAssetRequisition, as: 'requisition', attributes: ['uuid', 'code'], required: false },
-  { model: SysUser, as: 'addedBy', attributes: ['id', 'name'], required: false },
-  { model: ProcurementAssetPurchaseOrderItem, as: 'items', include: [
-    { model: ProcurementAssetItemEntry, as: 'item', attributes: ['uuid', 'item_code', 'name'], required: false },
-    { model: ProcurementUnit, as: 'unitRelation', attributes: ['uuid', 'code', 'name'], required: false },
+  { association: 'company', attributes: ['uuid', 'name'], required: false },
+  { association: 'supplier', attributes: ['uuid', 'supplierCode', 'supplierName'] },
+  { association: 'projectType', attributes: ['uuid', 'code', 'name'], required: false },
+  { association: 'project', attributes: ['uuid', 'code', 'name'], required: false },
+  { association: 'titleOfWork', attributes: ['uuid', 'code', 'name'], required: false },
+  { association: 'task', attributes: ['uuid', 'taskName'], required: false },
+  { association: 'site', attributes: ['uuid', 'code', 'name'], required: false },
+  { association: 'category', attributes: ['uuid', 'code', 'name'], required: false },
+  { association: 'requisition', attributes: ['uuid', 'code'], required: false },
+  { association: 'addedBy', attributes: ['id', 'name'], required: false },
+  { association: 'items', include: [
+    { association: 'item', attributes: ['uuid', 'item_code', 'name'], required: false },
+    { association: 'unitRelation', attributes: ['uuid', 'code', 'name'], required: false },
   ] },
 ];
 
@@ -74,7 +74,7 @@ export class AssetPurchaseOrderService {
   private async buildLines(items: CreateAssetPurchaseOrderItemDto[], categoryId?: string, transaction?: Transaction) {
     const result: any[] = [];
     for (const input of items) {
-      const item = await this.itemModel.findOne({ where: { uuid: input.item_id } as any, include: [{ model: ProcurementUnit, as: 'unit' }], transaction });
+      const item = await this.itemModel.findOne({ where: { uuid: input.item_id } as any, include: [{ association: 'unit' }], transaction });
       if (!item) throw new BadRequestException(`Selected asset item ${input.item_id} does not exist`);
       if (categoryId && item.category_id !== categoryId) throw new BadRequestException(`Asset item ${item.item_code} does not belong to selected asset category`);
       const unit = item.unit ?? await this.unitModel.findOne({ where: { uuid: item.unit_id } as any, transaction });
@@ -115,6 +115,8 @@ export class AssetPurchaseOrderService {
   async findAll(query: QueryAssetPurchaseOrderDto) {
     const { page = 1, limit = 10, search, date_from, date_to, ...filters } = query;
     const where: any = {};
+    if ((query as any)?.orgId) where.orgId = (query as any).orgId;
+    if ((query as any)?.projectId) where.projectId = (query as any).projectId;
     for (const key of ['company_id', 'supplier_id', 'project_type_id', 'project_id', 'title_of_work_id', 'added_by_id', 'approval_layer', 'status']) if ((filters as any)[key] !== undefined) where[key] = (filters as any)[key];
     if (date_from && date_to) where.date = { [Op.between]: [date_from, date_to] };
     else if (date_from) where.date = { [Op.gte]: date_from };
@@ -179,7 +181,7 @@ export class AssetPurchaseOrderService {
       this.taskModel.findAll({ attributes: ['uuid', 'uid', 'taskName'], order: [['taskName', 'ASC']] }),
       this.siteModel.findAll({ where: projectId ? { projectId } as any : {}, attributes: ['uuid', 'projectId', 'code', 'name'], order: [['name', 'ASC']] }),
       this.categoryModel.findAll({ attributes: ['uuid', 'code', 'name'], order: [['name', 'ASC']] }),
-      this.itemModel.findAll({ where: categoryId ? { category_id: categoryId } as any : {}, attributes: ['uuid', 'category_id', 'unit_id', 'item_code', 'name', 'purchase_price'], include: [{ model: ProcurementUnit, as: 'unit', attributes: ['uuid', 'code', 'name'] }], order: [['name', 'ASC']] }),
+      this.itemModel.findAll({ where: categoryId ? { category_id: categoryId } as any : {}, attributes: ['uuid', 'category_id', 'unit_id', 'item_code', 'name', 'purchase_price'], include: [{ association: 'unit', attributes: ['uuid', 'code', 'name'] }], order: [['name', 'ASC']] }),
       this.unitModel.findAll({ attributes: ['uuid', 'code', 'name'], order: [['name', 'ASC']] }),
       this.requisitionModel.findAll({ attributes: ['uuid', 'code', 'project_id', 'date'], order: [['createdAt', 'DESC']] }),
       this.userModel.findAll({ attributes: ['id', 'name'], order: [['name', 'ASC']] }),

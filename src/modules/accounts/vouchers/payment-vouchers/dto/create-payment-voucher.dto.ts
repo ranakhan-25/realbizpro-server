@@ -1,8 +1,6 @@
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import {
-  IsString, IsNotEmpty, IsOptional, IsDateString,
-  IsArray, ValidateNested, IsNumber, ArrayMinSize, IsBoolean
-} from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsDateString, IsArray, ValidateNested, IsNumber, ArrayMinSize, IsBoolean } from 'class-validator';
 
 // ==========================================
 // DETAILS (Nicher Table)
@@ -123,4 +121,13 @@ export class CreatePaymentVoucherDto {
   @ValidateNested({ each: true })
   @Type(() => CreatePaymentVoucherEntryDto)
   entries: CreatePaymentVoucherEntryDto[];
+  @ApiPropertyOptional({ example: 'user-uuid' })
+  @IsOptional()
+  @IsString()
+  createdBy?: string;
+
+  @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+  @IsOptional()
+  orgId?: number;
+
 }

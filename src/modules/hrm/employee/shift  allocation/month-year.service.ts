@@ -68,6 +68,8 @@ export class MonthYearService {
 
   async create(
     dto: CreateMonthYearDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<MonthYear> {
     await this.ensureMonthYearAvailable(
       dto.month,
@@ -76,12 +78,17 @@ export class MonthYearService {
     this.validateDates(dto.startDate, dto.endDate);
 
     const record =
-      await this.monthYearModel.create(dto as any);
+      await this.monthYearModel.create({
+        ...dto,
+        createdBy: userId ? String(userId) : (dto as any).createdBy ?? (dto as any).addedById ?? null,
+        orgId: (dto as any).orgId ?? currentUser?.orgId ?? null,
+        projectId: (dto as any).projectId ?? currentUser?.projectId ?? null,
+      } as any);
 
     return this.findOne(record.uuid);
   }
 
-  async findAll(query: QueryMonthYearDto) {
+  async findAll(query: QueryMonthYearDto, currentUser?: any) {
     const {
       page = 1,
       limit = 10,
@@ -100,6 +107,14 @@ export class MonthYearService {
         : (page - 1) * limit;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
 
     if (search) {
       where.month = { [Op.like]: `%${search}%` };
@@ -154,9 +169,7 @@ export class MonthYearService {
     };
   }
 
-  async findOne(
-    uuid: string,
-  ): Promise<MonthYear> {
+  async findOne(uuid: string, currentUser?: any): Promise<MonthYear> {
     const record =
       await this.monthYearModel.findOne({
         where: { uuid } as any,
@@ -171,10 +184,7 @@ export class MonthYearService {
     return record;
   }
 
-  async update(
-    uuid: string,
-    dto: UpdateMonthYearDto,
-  ): Promise<MonthYear> {
+  async update(uuid: string, dto: UpdateMonthYearDto, userId?: number, currentUser?: any): Promise<MonthYear> {
     const record =
       await this.monthYearModel.findOne({
         where: { uuid } as any,
@@ -210,9 +220,7 @@ export class MonthYearService {
     return this.findOne(uuid);
   }
 
-  async remove(
-    uuid: string,
-  ): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const record =
       await this.monthYearModel.findOne({
         where: { uuid } as any,
@@ -225,6 +233,7 @@ export class MonthYearService {
     }
 
     // soft delete
+    await record.update({ deletedBy: userId ? String(userId) : null } as any);
     await record.destroy();
 
     return {
@@ -232,9 +241,7 @@ export class MonthYearService {
     };
   }
 
-  async restore(
-    uuid: string,
-  ): Promise<MonthYear> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<MonthYear> {
     const record =
       await this.monthYearModel.findOne({
         where: { uuid } as any,
@@ -254,6 +261,7 @@ export class MonthYearService {
     }
 
     await record.restore();
+    await record.update({ deletedBy: null, updatedBy: userId ? String(userId) : null } as any);
 
     return this.findOne(uuid);
   }

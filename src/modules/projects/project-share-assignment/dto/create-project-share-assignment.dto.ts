@@ -171,4 +171,11 @@ export class CreateProjectShareAssignmentDto {
   @IsOptional()
   @IsEnum(['active', 'inactive', 'pending'])
   status?: 'active' | 'inactive' | 'pending';
+    @ApiPropertyOptional({ example: 'user-uuid' })
+    @IsOptional()
+    @IsString()
+    createdBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
 }

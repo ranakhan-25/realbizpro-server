@@ -27,6 +27,8 @@ export class LabourWorkBankService {
 
   async create(
     dto: CreateLabourWorkBankDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<LabourWorkBank> {
     const existing =
       await this.labourWorkBankModel.findOne({
@@ -44,7 +46,10 @@ export class LabourWorkBankService {
     const { dueDate, ...labourData } = dto;
 
     const labourWorkBank =
-      await this.labourWorkBankModel.create({
+      await this.labourWorkBankModel.create(({
+        createdBy: userId ? String(userId) : null,
+        orgId: currentUser?.orgId ?? null,
+        projectId: currentUser?.projectId ?? null,
         ...labourData,
         status:
           dto.status ??
@@ -52,12 +57,15 @@ export class LabourWorkBankService {
         ...(dueDate
           ? { dueDate: new Date(dueDate) }
           : {}),
-      });
+      }) as any);
 
     return this.findOne(labourWorkBank.uuid);
   }
 
-  async findAll(query: QueryLabourWorkBankDto) {
+  async findAll(
+    query: QueryLabourWorkBankDto,
+    currentUser?: any,
+  ) {
     const {
       page = 1,
       limit = 10,
@@ -76,6 +84,26 @@ export class LabourWorkBankService {
         : (page - 1) * limit;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      where.projectId = (query as any).projectId;
+    }
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      where.projectId = (query as any).projectId;
+    }
 
     if (search) {
       where[Op.or] = [
@@ -150,6 +178,7 @@ export class LabourWorkBankService {
 
   async findOne(
     uuid: string,
+    currentUser?: any,
   ): Promise<LabourWorkBank> {
     const labourWorkBank =
       await this.labourWorkBankModel.findOne({
@@ -168,6 +197,8 @@ export class LabourWorkBankService {
   async update(
     uuid: string,
     dto: UpdateLabourWorkBankDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<LabourWorkBank> {
     const labourWorkBank =
       await this.labourWorkBankModel.findOne({
@@ -200,19 +231,17 @@ export class LabourWorkBankService {
 
     const { dueDate, ...labourData } = dto;
 
-    await labourWorkBank.update({
+    await labourWorkBank.update(({
       ...labourData,
       ...(dueDate
         ? { dueDate: new Date(dueDate) }
         : {}),
-    });
+    }) as any);
 
     return this.findOne(uuid);
   }
 
-  async remove(
-    uuid: string,
-  ): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const labourWorkBank =
       await this.labourWorkBankModel.findOne({
         where: { uuid } as any,
@@ -225,9 +254,9 @@ export class LabourWorkBankService {
     }
 
     // status → inactive + soft delete
-    await labourWorkBank.update({
+    await labourWorkBank.update(({
       status: LabourWorkBankStatus.INACTIVE,
-    });
+    }) as any);
 
     await labourWorkBank.destroy();
 
@@ -236,9 +265,7 @@ export class LabourWorkBankService {
     };
   }
 
-  async restore(
-    uuid: string,
-  ): Promise<LabourWorkBank> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<LabourWorkBank> {
     const labourWorkBank =
       await this.labourWorkBankModel.findOne({
         where: { uuid } as any,
@@ -259,9 +286,9 @@ export class LabourWorkBankService {
 
     // status → active + restore
     await labourWorkBank.restore();
-    await labourWorkBank.update({
+    await labourWorkBank.update(({
       status: LabourWorkBankStatus.ACTIVE,
-    });
+    }) as any);
 
     return this.findOne(uuid);
   }

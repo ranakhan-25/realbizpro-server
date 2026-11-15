@@ -10,7 +10,7 @@ import {
   Min,
 } from 'class-validator';
 import { ApproveStatus, PaymentStatus } from 'src/database/models/projects/fund-requisition/pr_fund_requisition.model';
-
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class CreateFundRequisitionDto {
   @IsDateString()
@@ -85,4 +85,7 @@ export class CreateFundRequisitionDto {
   @IsString()
   @MaxLength(255)
   updatedBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
 }

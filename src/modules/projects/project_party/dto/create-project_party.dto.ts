@@ -11,7 +11,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PartyType } from 'src/database/models/projects/project_party/pr_project_party_model';
-
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class CreateProjectPartyDto {
   @IsUUID()
@@ -51,4 +51,15 @@ export class CreateProjectPartyDto {
   @IsString()
   @IsOptional()
   addedById?: string;
+    @ApiPropertyOptional({ example: 'user-uuid' })
+    @IsOptional()
+    @IsString()
+    createdBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Project UUID or ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 }

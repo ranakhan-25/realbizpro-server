@@ -6,6 +6,7 @@ import { Op } from 'sequelize';
 import { PaymentVoucher } from 'src/database/models/accounts/vouchers/acc_payment-voucher.model';
 import { PaymentVoucherEntry } from 'src/database/models/accounts/vouchers/acc_payment-voucher-entry.model';
 import { CreatePaymentVoucherDto } from './dto/create-payment-voucher.dto';
+import { UpdatePaymentVoucherDto } from './dto/update-payment-voucher.dto';
 import { GetPaymentVouchersQueryDto } from './dto/query-payment-voucher.dto';
 
 @Injectable()
@@ -16,7 +17,7 @@ export class PaymentVouchersService {
     private sequelize: Sequelize,
   ) {}
 
-  async create(dto: CreatePaymentVoucherDto) {
+  async create(dto: CreatePaymentVoucherDto, userId?: number, currentUser?: any) {
     const t = await this.sequelize.transaction();
 
     try {
@@ -36,6 +37,9 @@ export class PaymentVouchersService {
       // 2. Save Master Data
       const voucher = await this.paymentVoucherModel.create(
         {
+          createdBy: userId ? String(userId) : (dto as any).createdBy ?? null,
+          orgId: (dto as any).orgId ?? currentUser?.orgId ?? null,
+          projectId: (dto as any).projectId ?? currentUser?.projectId ?? null,
           ...dto,
           voucherNo,
           status: 'Pending',
@@ -68,7 +72,7 @@ export class PaymentVouchersService {
     }
   }
 
-  async findAll(query: GetPaymentVouchersQueryDto) {
+  async findAll(query: GetPaymentVouchersQueryDto, currentUser?: any) {
     const { 
       page = 1, limit = 10, search, projectId, workId, 
       siteId, taskId, status, startDate, endDate 
@@ -81,6 +85,7 @@ export class PaymentVouchersService {
       whereCondition.voucherNo = { [Op.iLike]: `%${search}%` };
     }
     if (projectId) whereCondition.projectId = projectId;
+    if ((query as any)?.orgId) whereCondition.orgId = (query as any).orgId;
     if (workId) whereCondition.workId = workId;
     if (siteId) whereCondition.siteId = siteId;
     if (taskId) whereCondition.taskId = taskId;
@@ -134,7 +139,7 @@ export class PaymentVouchersService {
     };
   }
 
-  async findOne(uuid: string) {
+  async findOne(uuid: string, currentUser?: any) {
     const voucher = await this.paymentVoucherModel.findOne({
       where: { uuid },
     });
@@ -149,7 +154,46 @@ export class PaymentVouchersService {
     return result;
   }
 
-  async remove(uuid: string) {
+  
+  async update(uuid: string, dto: UpdatePaymentVoucherDto, userId?: number, currentUser?: any) {
+    const t = await this.sequelize.transaction();
+    try {
+      const voucher = await this.paymentVoucherModel.findOne({ where: { uuid }, transaction: t });
+      if (!voucher) throw new NotFoundException('Payment Voucher not found');
+      const { entries, ...voucherData } = dto as any;
+      await voucher.update({
+        ...voucherData,
+        updatedBy: userId ? String(userId) : voucher.updatedBy ?? null,
+        ...(dto.orgId !== undefined ? { orgId: dto.orgId } : {}),
+        ...(dto.projectId !== undefined ? { projectId: dto.projectId } : {}),
+      }, { transaction: t });
+
+      if (entries) {
+        await this.paymentVoucherEntryModel.destroy({ where: { paymentVoucherId: uuid }, transaction: t });
+        if (entries.length > 0) {
+          await this.paymentVoucherEntryModel.bulkCreate(
+            entries.map((e: any) => ({ ...e, paymentVoucherId: uuid })),
+            { transaction: t }
+          );
+        }
+      }
+      await t.commit();
+      return this.findOne(uuid, currentUser);
+    } catch (error) {
+      await t.rollback();
+      throw new BadRequestException(error.message || 'Failed to update Payment Voucher');
+    }
+  }
+
+  async restore(uuid: string, userId?: number, currentUser?: any) {
+    const voucher = await this.paymentVoucherModel.findOne({ where: { uuid }, paranoid: false });
+    if (!voucher) throw new NotFoundException('Payment Voucher not found');
+    await voucher.restore();
+    await voucher.update({ deletedBy: null, updatedBy: userId ? String(userId) : null } as any);
+    return this.findOne(uuid, currentUser);
+  }
+
+  async remove(uuid: string, userId?: number, currentUser?: any) {
     const t = await this.sequelize.transaction();
     try {
       const voucher = await this.paymentVoucherModel.findOne({

@@ -1,7 +1,9 @@
 // Auto-generated types for SalaryGrade
-// Source: src/database/models/hrm/employee/hrm_salary_grade_model.ts
+// Source: src\database\models\hrm\employee\hrm_salary_grade_model.ts
 
 import { SalaryGradeStatus } from '../models/hrm/employee/hrm_salary_grade_model';
+
+import type { SysOrganization } from '../models/system/sys_organization.model';
 
 export interface SalaryGradeAttributes {
   id: number;
@@ -15,6 +17,10 @@ export interface SalaryGradeAttributes {
   updatedBy?: string | null;
   deletedBy?: string | null;
   status: SalaryGradeStatus;
+  orgId?: number | null;
+
+  // Relations
+  organization?: SysOrganization;
 }
 
 export interface SalaryGradeCreationAttributes {
@@ -24,11 +30,12 @@ export interface SalaryGradeCreationAttributes {
   updatedBy?: string | null;
   deletedBy?: string | null;
   status?: SalaryGradeStatus; // Has default value
+  orgId?: number | null;
 }
 
 export type SalaryGradeUpdateAttributes = Partial<SalaryGradeCreationAttributes>;
 
 // Helper type for including relations
 export interface SalaryGradeWithRelations extends SalaryGradeAttributes {
-  // No relations defined
+  organization?: SysOrganization;
 }

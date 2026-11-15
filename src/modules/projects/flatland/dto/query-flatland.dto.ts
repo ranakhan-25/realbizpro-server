@@ -7,4 +7,7 @@ export class QueryFlatLandDto extends PaginateDto {
   @ApiPropertyOptional({ format: 'uuid', description: 'Filter by related project UUID' }) @IsOptional() @IsUUID() projectId?: string;
   @ApiPropertyOptional({ description: 'Filter by existing site name; FlatLand has no siteId column' }) @IsOptional() @IsString() siteName?: string;
   @ApiPropertyOptional({ enum: FlatLandStatus }) @IsOptional() @IsEnum(FlatLandStatus) status?: FlatLandStatus;
+    @ApiPropertyOptional({ description: 'Filter by organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
 }

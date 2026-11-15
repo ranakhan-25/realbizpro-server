@@ -16,6 +16,10 @@ export class QueryInternalTaskDto {
   @IsOptional() @IsString()
   declare search?: string;
 
+  @ApiPropertyOptional({ description: 'Filter by organization ID' })
+  @IsOptional() @Type(() => Number) @IsInt()
+  declare orgId?: number;
+
   @ApiPropertyOptional({ enum: INTERNAL_TASK_STATUSES })
   @IsOptional() @IsIn(INTERNAL_TASK_STATUSES)
   declare status?: typeof INTERNAL_TASK_STATUSES[number];

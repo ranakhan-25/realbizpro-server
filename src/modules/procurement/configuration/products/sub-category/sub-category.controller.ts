@@ -1,13 +1,8 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Query,
-} from '@nestjs/common';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { CurrentUser, CurrentUserId } from 'src/common/decorators/auth.decorators';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -22,6 +17,7 @@ import { ProcurementSubCategoryService } from './sub-category.service';
 
 @ApiTags('Procurement | configuration | Sub Category')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('procurement/sub-category')
 export class ProcurementSubCategoryController {
   constructor(
@@ -30,12 +26,14 @@ export class ProcurementSubCategoryController {
 
   @Post()
   @ApiOperation({ summary: 'Create a procurement sub category' })
+  @Permissions('create_procurement_sub_category')
   create(@Body() dto: CreateProcurementSubCategoryDto) {
     return this.subCategoryService.create(dto);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get procurement sub categories' })
+  @Permissions('view_procurement_sub_category')
   findAll(@Query() query: QueryProcurementSubCategoryDto) {
     return this.subCategoryService.findAll(query);
   }
@@ -63,6 +61,7 @@ export class ProcurementSubCategoryController {
 
   @Patch(':uuid')
   @ApiOperation({ summary: 'Update procurement sub category' })
+  @Permissions('update_procurement_sub_category')
   update(
     @Param('uuid') uuid: string,
     @Body() dto: UpdateProcurementSubCategoryDto,
@@ -72,12 +71,14 @@ export class ProcurementSubCategoryController {
 
   @Delete(':uuid')
   @ApiOperation({ summary: 'Soft delete procurement sub category' })
+  @Permissions('delete_procurement_sub_category')
   remove(@Param('uuid') uuid: string) {
     return this.subCategoryService.remove(uuid);
   }
 
   @Patch(':uuid/restore')
   @ApiOperation({ summary: 'Restore procurement sub category' })
+  @Permissions('update_procurement_sub_category')
   restore(@Param('uuid') uuid: string) {
     return this.subCategoryService.restore(uuid);
   }

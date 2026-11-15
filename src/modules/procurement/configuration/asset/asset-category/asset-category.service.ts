@@ -20,6 +20,8 @@ export class ProcurementAssetCategoryService {
     const { page = 1, limit = 10, skip, search, sortBy = 'createdAt', sortOrder = 'DESC', withDeleted = false } = query;
     const offset = skip ?? (page - 1) * limit;
     const where: any = {};
+    if ((query as any)?.orgId) where.orgId = (query as any).orgId;
+    if ((query as any)?.projectId) where.projectId = (query as any).projectId;
     if (search) where[Op.or] = [
       { type: { [Op.iLike]: `%${search}%` } },
       { code: { [Op.iLike]: `%${search}%` } },

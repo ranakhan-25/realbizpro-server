@@ -1,102 +1,85 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Query,
-} from '@nestjs/common';
+/* eslint-disable prettier/prettier */
 
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
-
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { BonusGenerateService } from './bonus-generate.service';
 import { CreateBonusGenerateDto } from './dto/create-bonus-generate.dto';
 import { QueryBonusGenerateDto } from './dto/query-bonus-generate.dto';
 import { UpdateBonusGenerateDto } from './dto/update-bonus-generate.dto';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { CurrentUser, CurrentUserId } from 'src/common/decorators/auth.decorators';
 
 @ApiTags('HRM | Employee | Bonus Generate')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('bonus-generate')
 export class BonusGenerateController {
-  constructor(
-    private readonly bonusGenerateService: BonusGenerateService,
-  ) {}
+  constructor(private readonly bonusGenerateService: BonusGenerateService) {}
 
   @Post()
-  @ApiOperation({
-    summary: 'Generate bonus for an employee',
-  })
+  @Permissions('create_bonus_generate')
+  @ApiOperation({ summary: 'Create bonus generate' })
   create(
-    @Body()
-    createBonusGenerateDto: CreateBonusGenerateDto,
+    @Body() dto: CreateBonusGenerateDto,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.bonusGenerateService.create(
-      createBonusGenerateDto,
-    );
+    return this.bonusGenerateService.create(dto, userId, currentUser);
   }
 
   @Get()
-  @ApiOperation({
-    summary:
-      'Get all generated bonuses (paginated)',
-  })
+  @Permissions('list_bonus_generate')
+  @ApiOperation({ summary: 'Get all bonus generates (paginated)' })
   findAll(
-    @Query()
-    query: QueryBonusGenerateDto,
+    @Query() query: QueryBonusGenerateDto,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.bonusGenerateService.findAll(
-      query,
-    );
+    return this.bonusGenerateService.findAll(query, currentUser);
   }
 
   @Get(':uuid')
-  @ApiOperation({
-    summary: 'Get generated bonus by UUID',
-  })
-  findOne(@Param('uuid') uuid: string) {
-    return this.bonusGenerateService.findOne(
-      uuid,
-    );
+  @Permissions('read_bonus_generate')
+  @ApiOperation({ summary: 'Get bonus generate by UUID' })
+  findOne(
+    @Param('uuid') uuid: string,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.bonusGenerateService.findOne(uuid, currentUser);
   }
 
   @Patch(':uuid')
-  @ApiOperation({
-    summary: 'Update generated bonus',
-  })
+  @Permissions('update_bonus_generate')
+  @ApiOperation({ summary: 'Update bonus generate' })
   update(
     @Param('uuid') uuid: string,
-    @Body()
-    updateBonusGenerateDto: UpdateBonusGenerateDto,
+    @Body() dto: UpdateBonusGenerateDto,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.bonusGenerateService.update(
-      uuid,
-      updateBonusGenerateDto,
-    );
+    return this.bonusGenerateService.update(uuid, dto, userId, currentUser);
   }
 
   @Delete(':uuid')
-  @ApiOperation({
-    summary:
-      'Soft delete generated bonus (status → inactive)',
-  })
-  remove(@Param('uuid') uuid: string) {
-    return this.bonusGenerateService.remove(uuid);
+  @Permissions('delete_bonus_generate')
+  @ApiOperation({ summary: 'Delete bonus generate' })
+  remove(
+    @Param('uuid') uuid: string,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.bonusGenerateService.remove(uuid, userId, currentUser);
   }
 
   @Patch(':uuid/restore')
-  @ApiOperation({
-    summary:
-      'Restore soft-deleted generated bonus (status → active)',
-  })
-  restore(@Param('uuid') uuid: string) {
-    return this.bonusGenerateService.restore(
-      uuid,
-    );
+  @Permissions('update_bonus_generate')
+  @ApiOperation({ summary: 'Restore soft-deleted bonus generate' })
+  restore(
+    @Param('uuid') uuid: string,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.bonusGenerateService.restore(uuid, userId, currentUser);
   }
 }
