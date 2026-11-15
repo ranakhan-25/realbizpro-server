@@ -990,13 +990,13 @@ export interface ${className}WithRelations extends ${className}Attributes {${
 
       // Update class declaration to include generic types
       const classRegex = new RegExp(
-        `export class ${className} extends BaseModel(?:<[^>]*>)?`,
+        `export class ${className} extends (BaseModel|TenantBaseModel)(?:<[^>]*>)?`,
       );
       const classMatch =
         content.match(classRegex);
 
       if (classMatch) {
-        const replacement = `export class ${className} extends BaseModel<${className}Attributes, ${className}CreationAttributes>`;
+        const replacement = `export class ${className} extends ${classMatch[1]}<${className}Attributes, ${className}CreationAttributes>`;
         content = content.replace(
           classRegex,
           replacement,

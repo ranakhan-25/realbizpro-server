@@ -235,6 +235,8 @@ import { LiveReportsModule } from './modules/accounts/reports/live-reports/live-
 import { BankReconciliationStatementModule } from './modules/accounts/bank-reconciliation/bank-reconciliation_statement/bank-reconciliation_statement.module';
 import { ListOfChequeRangeModule } from './modules/accounts/bank-reconciliation/list_of_cheque_range/list_of_cheque_range.module';
 import { ListOfChequeModule } from './modules/accounts/bank-reconciliation/list_of_cheque/list_of_cheque.module';
+import { CustomerServiceModule } from './modules/customer-service/customer-service.module';
+
 import { BookingDetailsModule } from './modules/sales_management/booking_details/booking_details.module';
 import { BookingCreatepageModule } from './modules/sales_management/booking_createpage/booking_createpage.module';
 import { HoldModalModule } from './modules/sales_management/inventory/hold_modal/hold_modal.module';
@@ -514,6 +516,7 @@ import { ApprovalModule as BookingApprovalModule } from './modules/sales_managem
     BankReconciliationStatementModule,
     ListOfChequeRangeModule,
     ListOfChequeModule,
+    CustomerServiceModule,
     BookingDetailsModule,
     BookingCreatepageModule,
     HoldModalModule,

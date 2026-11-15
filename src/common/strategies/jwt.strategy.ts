@@ -35,6 +35,10 @@ interface JwtPayload {
   exp?: number;
   jti?: string;
   authType?: string;
+  organization?: any;
+  orgId?: number;
+  isSuperUser?: boolean;
+  roles?: string[];
 }
 
 @Injectable()
@@ -93,6 +97,7 @@ export class JwtStrategy extends PassportStrategy(
   async validate(
     payload: JwtPayload,
   ): Promise<JwtAuthUser> {
+    const cacheKey = `${payload.sub}:${payload.orgId ?? ''}:${payload.isSuperUser ?? ''}:${payload.jti || payload.iat || ''}`;
     const cacheKey = `${payload.authType || 'sys'}:${payload.sub}:${payload.jti || payload.iat || ''}`;
     const cached = this.sessionCache.get(cacheKey);
     if (cached) {
@@ -148,6 +153,11 @@ export class JwtStrategy extends PassportStrategy(
 
     const authUser: JwtAuthUser = {
       ...user,
+      username: payload.username ?? user.username,
+      isSuperUser: payload.isSuperUser !== undefined ? payload.isSuperUser : user.isSuperUser,
+      roles: payload.roles !== undefined ? payload.roles : (user as any).roles,
+      organization: payload.organization !== undefined ? payload.organization : (user as any).organization,
+      orgId: payload.organization?.id ?? (payload.orgId !== undefined ? payload.orgId : user.orgId),
       authType: payload.authType,
       iat: payload.iat,
       exp: payload.exp,

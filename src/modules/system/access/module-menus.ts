@@ -20,6 +20,7 @@ const ACRONYMS: Record<string, string> = {
 };
 
 export function slugToLabel(slug: string): string {
+  if (slug === 'sub-category') return 'Sub-Category';
   return slug
     .split('-')
     .map((w) => ACRONYMS[w.toLowerCase()] ?? w.charAt(0).toUpperCase() + w.slice(1))
@@ -405,6 +406,44 @@ reports
   inventory-status
 `;
 
+const customerService = `
+dashboard
+customers
+  customer-360
+  change-requests
+documents
+  center
+  registration-tracking
+  mutation-khatian-tracking
+handover
+  schedule
+  inspection-snags
+  possession-records
+tickets
+property-care
+  warranty-dlp
+  maintenance-requests
+  work-orders-association
+building-services
+  utility-service
+  security-service
+  parking-service
+  other-services
+building-management
+  service-charge
+  building-committee
+communication
+  inbox-reminders
+  site-visits-appointments
+  feedback-surveys
+reports
+  collections-ageing
+  service-ticket-sla
+  handover-property-care
+settings
+  service-workflow-rules
+`;
+
 export const RAW_MENUS: Record<string, string> = {
   project,
   inventory,
@@ -414,6 +453,8 @@ export const RAW_MENUS: Record<string, string> = {
   cr,
   lams,
   procurement,
+  'customer-service': customerService,
+  customer_service: customerService,
 };
 
 const CACHED_TREES: Record<string, MenuNode[]> = {};
