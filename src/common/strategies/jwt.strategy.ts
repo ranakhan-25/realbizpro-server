@@ -97,8 +97,7 @@ export class JwtStrategy extends PassportStrategy(
   async validate(
     payload: JwtPayload,
   ): Promise<JwtAuthUser> {
-    const cacheKey = `${payload.sub}:${payload.orgId ?? ''}:${payload.isSuperUser ?? ''}:${payload.jti || payload.iat || ''}`;
-    const cacheKey = `${payload.authType || 'sys'}:${payload.sub}:${payload.jti || payload.iat || ''}`;
+    const cacheKey = `${payload.authType || 'sys'}:${payload.sub}:${payload.orgId ?? ''}:${payload.isSuperUser ?? ''}:${payload.jti || payload.iat || ''}`;
     const cached = this.sessionCache.get(cacheKey);
     if (cached) {
       if (Date.now() < cached.expiresAt) {
