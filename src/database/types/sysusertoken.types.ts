@@ -1,5 +1,5 @@
 // Auto-generated types for SysUserToken
-// Source: src/database/models/system/sys_user_token.model.ts
+// Source: src\database\models\system\sys_user_token.model.ts
 
 import type { SysUser } from '../models/system/sys_user.model';
 

@@ -1,5 +1,5 @@
 // Auto-generated types for SysNotification
-// Source: src/database/models/system/sys_notification.model.ts
+// Source: src\database\models\system\sys_notification.model.ts
 
 import type { SysUser } from '../models/system/sys_user.model';
 

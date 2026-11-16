@@ -1,5 +1,5 @@
 // Auto-generated types for Status
-// Source: src/database/models/status.model.ts
+// Source: src\database\models\status.model.ts
 
 export interface StatusAttributes {
   id: number;
