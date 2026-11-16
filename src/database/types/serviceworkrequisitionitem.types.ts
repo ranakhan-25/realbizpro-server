@@ -1,5 +1,5 @@
 // Auto-generated types for ServiceWorkRequisitionItem
-// Source: src\database\models\projects\service-work-requisition-item\pr_service_work_requisition_item.model.ts
+// Source: src/database/models/projects/service-work-requisition-item/pr_service_work_requisition_item.model.ts
 
 import type { ServiceWorkRequisition } from '../models/projects/service-work-requisition/pr_service_work_requisition.model';
 import type { SysOrganization } from '../models/system/sys_organization.model';

@@ -1,5 +1,5 @@
 // Auto-generated types for SysUserDelegation
-// Source: src\database\models\deligation\sys_user_delegations.model.ts
+// Source: src/database/models/deligation/sys_user_delegations.model.ts
 
 import type { SysUser } from '../models/system/sys_user.model';
 import type { SysApprovalWorkflow } from '../models/deligation/sys_approval_workflows.model';

@@ -1,5 +1,5 @@
 // Auto-generated types for InvPurchase
-// Source: src\database\models\inventory\inv_purchase.model.ts
+// Source: src/database/models/inventory/inv_purchase.model.ts
 
 import type { InvSupplier } from '../models/inventory/inv_supplier.model';
 import type { InvPurchaseItem } from '../models/inventory/inv_purchase_item.model';
