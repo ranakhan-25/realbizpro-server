@@ -1,5 +1,5 @@
 // Auto-generated types for Attendance
-// Source: src\database\models\hrm\employee\hrm_attendance_model.ts
+// Source: src/database/models/hrm/employee/hrm_attendance_model.ts
 
 import { AttendanceType } from '../models/hrm/employee/hrm_attendance_model';
 

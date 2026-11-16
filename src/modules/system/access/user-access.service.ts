@@ -388,6 +388,11 @@ export class UserAccessService {
       }
     }
 
+    // Credit Realisation: return full standard menu tree with all enterprise collection routes
+    if (moduleKey === 'cr' || canonicalId === 15) {
+      return getModuleMenuTree('cr', allowedRoutes);
+    }
+
     try {
       const adminMenus = await this.adminMenuService.getMenuTree(
         roleSlug,

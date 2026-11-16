@@ -1,5 +1,5 @@
 // Auto-generated types for LegalDocument
-// Source: src\database\models\lams\legal-document.model.ts
+// Source: src/database/models/lams/legal-document.model.ts
 
 import type { AcquisitionLead } from '../models/lams/acquisition-lead.model';
 

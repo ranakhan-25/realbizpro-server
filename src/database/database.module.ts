@@ -107,6 +107,15 @@ import { MainBooking } from './models/sales_management/sm_main_booking.model';
 import { InstallmentPlan, Installment } from './models/sales_management/sm_pay_installsment_model';
 import { Commission } from './models/sales_management/sm_commission_form_model';
 import { BookingDetails } from './models/sales_management/sm_booking_details_model';
+import { CrInstallmentSetup } from './models/credit-realization/cr_installment_setup.model';
+import { CrSaleAgreement } from './models/credit-realization/cr_sale_agreement.model';
+import { CrInstallmentPlan } from './models/credit-realization/cr_installment_plan.model';
+import { CrInstallmentPayment } from './models/credit-realization/cr_installment_payment.model';
+import { CrPlotDistribution } from './models/credit-realization/cr_plot_distribution.model';
+import { CrRecoveryLog } from './models/credit-realization/cr_recovery_log.model';
+import { CrOfficerAssignment } from './models/credit-realization/cr_officer_assignment.model';
+import { CrFinancialAdjustment } from './models/credit-realization/cr_financial_adjustment.model';
+import { CrWaiverRequest } from './models/credit-realization/cr_waiver_request.model';
 
 @Module({
   imports: [
@@ -220,7 +229,15 @@ import { BookingDetails } from './models/sales_management/sm_booking_details_mod
       Commission,
       BookingDetails,
       BookingCreate,
-       
+      CrInstallmentSetup,
+      CrSaleAgreement,
+      CrInstallmentPlan,
+      CrInstallmentPayment,
+      CrPlotDistribution,
+      CrRecoveryLog,
+      CrOfficerAssignment,
+      CrFinancialAdjustment,
+      CrWaiverRequest,
     ]),
   ],
   providers: [

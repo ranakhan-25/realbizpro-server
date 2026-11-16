@@ -1,5 +1,5 @@
 // Auto-generated types for SysFeatures
-// Source: src\database\models\system\sys_features.model.ts
+// Source: src/database/models/system/sys_features.model.ts
 
 import type { SysModules } from '../models/system/sys_module.model';
 import type { SysPermission } from '../models/system/sys_permission.model';

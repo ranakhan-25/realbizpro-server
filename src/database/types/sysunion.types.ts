@@ -1,5 +1,5 @@
 // Auto-generated types for SysUnion
-// Source: src\database\models\system\sys_union.model.ts
+// Source: src/database/models/system/sys_union.model.ts
 
 import type { SysUpazila } from '../models/system/sys_upazila.model';
 import type { SysUser } from '../models/system/sys_user.model';

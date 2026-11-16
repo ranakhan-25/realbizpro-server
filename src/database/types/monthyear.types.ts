@@ -1,5 +1,5 @@
 // Auto-generated types for MonthYear
-// Source: src\database\models\hrm\employee\hrm_monthyear_model.ts
+// Source: src/database/models/hrm/employee/hrm_monthyear_model.ts
 
 import type { Attendance } from '../models/hrm/employee/hrm_attendance_model';
 import type { SysOrganization } from '../models/system/sys_organization.model';

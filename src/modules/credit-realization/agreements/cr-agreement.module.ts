@@ -4,6 +4,7 @@ import { CrSaleAgreement } from '../../../database/models/credit-realization/cr_
 import { CrInstallmentPlan } from '../../../database/models/credit-realization/cr_installment_plan.model';
 import { CrPlotDistribution } from '../../../database/models/credit-realization/cr_plot_distribution.model';
 import { CrRecoveryLog } from '../../../database/models/credit-realization/cr_recovery_log.model';
+import { CrInstallmentPayment } from '../../../database/models/credit-realization/cr_installment_payment.model';
 import { CrAgreementService } from './cr-agreement.service';
 import { CrAgreementController } from './cr-agreement.controller';
 
@@ -14,6 +15,7 @@ import { CrAgreementController } from './cr-agreement.controller';
       CrInstallmentPlan,
       CrPlotDistribution,
       CrRecoveryLog,
+      CrInstallmentPayment,
     ]),
   ],
   controllers: [CrAgreementController],

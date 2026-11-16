@@ -1,5 +1,5 @@
 // Auto-generated types for CrRecoveryLog
-// Source: src\database\models\credit-realization\cr_recovery_log.model.ts
+// Source: src/database/models/credit-realization/cr_recovery_log.model.ts
 
 import type { CrSaleAgreement } from '../models/credit-realization/cr_sale_agreement.model';
 
@@ -19,6 +19,9 @@ export interface CrRecoveryLogAttributes {
   customer_response?: string | null;
   outcome: string;
   next_action_date?: string | null;
+  geo_location?: string | null;
+  visit_photos?: string | null;
+  visit_outcome?: string | null;
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
@@ -39,6 +42,9 @@ export interface CrRecoveryLogCreationAttributes {
   customer_response?: string | null;
   outcome?: string; // Has default value
   next_action_date?: string | null;
+  geo_location?: string | null;
+  visit_photos?: string | null;
+  visit_outcome?: string | null;
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;

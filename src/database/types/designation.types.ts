@@ -1,5 +1,5 @@
 // Auto-generated types for Designation
-// Source: src\database\models\hrm\employee\hrm_designation_model.ts
+// Source: src/database/models/hrm/employee/hrm_designation_model.ts
 
 import { DesignationStatus } from '../models/hrm/employee/hrm_designation_model';
 
