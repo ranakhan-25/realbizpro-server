@@ -1,5 +1,5 @@
 // Auto-generated types for Investor
-// Source: src/database/models/projects/investor/investor.model.ts
+// Source: src\database\models\projects\investor\investor.model.ts
 
 import { InvestorGroupTier } from '../models/projects/investor/investor.model';
 import { InvestorStatus } from '../models/projects/investor/investor.model';

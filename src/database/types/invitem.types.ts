@@ -1,5 +1,5 @@
 // Auto-generated types for InvItem
-// Source: src/database/models/inventory/inv_item.model.ts
+// Source: src\database\models\inventory\inv_item.model.ts
 
 import type { InvCategory } from '../models/inventory/inv_category.model';
 import type { InvSubCategory } from '../models/inventory/inv_sub_category.model';

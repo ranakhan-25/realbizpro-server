@@ -1,5 +1,5 @@
 // Auto-generated types for SysUserCompany
-// Source: src/database/models/system/sys_user_company.model.ts
+// Source: src\database\models\system\sys_user_company.model.ts
 
 import type { SysUser } from '../models/system/sys_user.model';
 import type { SysCompany } from '../models/system/sys_company.model';

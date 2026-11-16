@@ -1,5 +1,5 @@
 // Auto-generated types for EmployeeType
-// Source: src/database/models/hrm/employee/hrm_employee_type-model.ts
+// Source: src\database\models\hrm\employee\hrm_employee_type-model.ts
 
 import { EmployeeTypeStatus } from '../models/hrm/employee/hrm_employee_type-model';
 

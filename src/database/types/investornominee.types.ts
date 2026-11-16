@@ -1,5 +1,5 @@
 // Auto-generated types for InvestorNominee
-// Source: src/database/models/projects/investor/investor_nominee.model.ts
+// Source: src\database\models\projects\investor\investor_nominee.model.ts
 
 import type { Investor } from '../models/projects/investor/investor.model';
 import type { SysOrganization } from '../models/system/sys_organization.model';

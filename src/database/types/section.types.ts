@@ -1,5 +1,5 @@
 // Auto-generated types for Section
-// Source: src/database/models/hrm/employee/hrm_section_model.ts
+// Source: src\database\models\hrm\employee\hrm_section_model.ts
 
 import { SectionStatus } from '../models/hrm/employee/hrm_section_model';
 
