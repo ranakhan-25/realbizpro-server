@@ -1,5 +1,5 @@
 // Auto-generated types for Under
-// Source: src/database/models/hrm/employee/hrm_under_model.ts
+// Source: src\database\models\hrm\employee\hrm_under_model.ts
 
 import { UnderStatus } from '../models/hrm/employee/hrm_under_model';
 

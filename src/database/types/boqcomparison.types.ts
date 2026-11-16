@@ -1,5 +1,5 @@
 // Auto-generated types for BoqComparison
-// Source: src/database/models/projects/boqcomparison/boq-comparison.model.ts
+// Source: src\database\models\projects\boqcomparison\boq-comparison.model.ts
 
 import { BoqComparisonStatus } from '../models/projects/boqcomparison/boq-comparison.model';
 

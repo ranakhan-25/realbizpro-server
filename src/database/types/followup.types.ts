@@ -1,5 +1,5 @@
 // Auto-generated types for FollowUp
-// Source: src/database/models/lams/follow-up.model.ts
+// Source: src\database\models\lams\follow-up.model.ts
 
 import type { AcquisitionLead } from '../models/lams/acquisition-lead.model';
 

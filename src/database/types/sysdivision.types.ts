@@ -1,5 +1,5 @@
 // Auto-generated types for SysDivision
-// Source: src/database/models/system/sys_divisions.model.ts
+// Source: src\database\models\system\sys_divisions.model.ts
 
 import type { SysDistrict } from '../models/system/sys_districts.model';
 import type { SysUser } from '../models/system/sys_user.model';

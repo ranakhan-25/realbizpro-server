@@ -1,5 +1,5 @@
 // Auto-generated types for ProjectBillingRecord
-// Source: src/database/models/projects/billing/pr_project_billing_record.model.ts
+// Source: src\database\models\projects\billing\pr_project_billing_record.model.ts
 
 import { ProjectBillingResource } from '../models/projects/billing/pr_project_billing_record.model';
 

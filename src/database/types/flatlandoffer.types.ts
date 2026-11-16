@@ -1,5 +1,5 @@
 // Auto-generated types for FlatLandOffer
-// Source: src/database/models/projects/flat-land-offer/pr_flat_land_offer.model.ts
+// Source: src\database\models\projects\flat-land-offer\pr_flat_land_offer.model.ts
 
 import type { Project } from '../models/projects/project/pr_project.model';
 import type { FlatLand } from '../models/projects/flatland/pr_flatland.model';
