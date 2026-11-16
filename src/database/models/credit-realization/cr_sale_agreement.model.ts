@@ -3,6 +3,9 @@ import { BaseModel } from '../../base.model';
 import { CrInstallmentPlan } from './cr_installment_plan.model';
 import { CrPlotDistribution } from './cr_plot_distribution.model';
 import { CrRecoveryLog } from './cr_recovery_log.model';
+import { CrOfficerAssignment } from './cr_officer_assignment.model';
+import { CrFinancialAdjustment } from './cr_financial_adjustment.model';
+import { CrWaiverRequest } from './cr_waiver_request.model';
 
 import type { CrSaleAgreementAttributes, CrSaleAgreementCreationAttributes } from '../../types/crsaleagreement.types';
 
@@ -71,4 +74,13 @@ export class CrSaleAgreement extends BaseModel<CrSaleAgreementAttributes, CrSale
 
   @HasMany(() => CrRecoveryLog, { foreignKey: 'sale_agreement_id' })
   recovery_logs: CrRecoveryLog[];
+
+  @HasMany(() => CrOfficerAssignment, { foreignKey: 'sale_agreement_id' })
+  officer_assignments: CrOfficerAssignment[];
+
+  @HasMany(() => CrFinancialAdjustment, { foreignKey: 'sale_agreement_id' })
+  financial_adjustments: CrFinancialAdjustment[];
+
+  @HasMany(() => CrWaiverRequest, { foreignKey: 'sale_agreement_id' })
+  waiver_requests: CrWaiverRequest[];
 }

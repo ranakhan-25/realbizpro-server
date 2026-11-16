@@ -4,6 +4,9 @@
 import type { CrInstallmentPlan } from '../models/credit-realization/cr_installment_plan.model';
 import type { CrPlotDistribution } from '../models/credit-realization/cr_plot_distribution.model';
 import type { CrRecoveryLog } from '../models/credit-realization/cr_recovery_log.model';
+import type { CrOfficerAssignment } from '../models/credit-realization/cr_officer_assignment.model';
+import type { CrFinancialAdjustment } from '../models/credit-realization/cr_financial_adjustment.model';
+import type { CrWaiverRequest } from '../models/credit-realization/cr_waiver_request.model';
 
 export interface CrSaleAgreementAttributes {
   id: number;
@@ -33,6 +36,9 @@ export interface CrSaleAgreementAttributes {
   installment_plans: CrInstallmentPlan[];
   plot_distributions: CrPlotDistribution[];
   recovery_logs: CrRecoveryLog[];
+  officer_assignments: CrOfficerAssignment[];
+  financial_adjustments: CrFinancialAdjustment[];
+  waiver_requests: CrWaiverRequest[];
 }
 
 export interface CrSaleAgreementCreationAttributes {
@@ -62,4 +68,7 @@ export interface CrSaleAgreementWithRelations extends CrSaleAgreementAttributes 
   installment_plans: CrInstallmentPlan[];
   plot_distributions: CrPlotDistribution[];
   recovery_logs: CrRecoveryLog[];
+  officer_assignments: CrOfficerAssignment[];
+  financial_adjustments: CrFinancialAdjustment[];
+  waiver_requests: CrWaiverRequest[];
 }

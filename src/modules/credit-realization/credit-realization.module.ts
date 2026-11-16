@@ -4,6 +4,9 @@ import { CrAgreementModule } from './agreements/cr-agreement.module';
 import { CrInstallmentModule } from './installments/cr-installment.module';
 import { CrRecoveryModule } from './recovery/cr-recovery.module';
 import { CrReportsModule } from './reports/cr-reports.module';
+import { CrAssignmentModule } from './assignments/cr-assignment.module';
+import { CrAdjustmentModule } from './adjustments/cr-adjustment.module';
+import { CrWaiverModule } from './waivers/cr-waiver.module';
 
 @Module({
   imports: [
@@ -12,6 +15,9 @@ import { CrReportsModule } from './reports/cr-reports.module';
     CrInstallmentModule,
     CrRecoveryModule,
     CrReportsModule,
+    CrAssignmentModule,
+    CrAdjustmentModule,
+    CrWaiverModule,
   ],
   exports: [
     CrSetupModule,
@@ -19,6 +25,9 @@ import { CrReportsModule } from './reports/cr-reports.module';
     CrInstallmentModule,
     CrRecoveryModule,
     CrReportsModule,
+    CrAssignmentModule,
+    CrAdjustmentModule,
+    CrWaiverModule,
   ],
 })
 export class CreditRealizationModule {}

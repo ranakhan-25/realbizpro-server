@@ -1,14 +1,20 @@
-import { Controller, Post, Get, Body, Param } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiParam, ApiBody } from '@nestjs/swagger';
+import { Controller, Post, Get, Body, Param, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiParam, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { CrInstallmentService } from './cr-installment.service';
 import { CreateCrPaymentDto, WaivePenaltyDto } from './dto/create-cr-payment.dto';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from '@/common/guards/permissions.guard';
+import { Permissions } from '@/common/decorators/permissions.decorator';
 
 @ApiTags('Credit Realization - Installments & Payments')
+@ApiBearerAuth()
 @Controller('credit-realization/installments')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class CrInstallmentController {
   constructor(private readonly service: CrInstallmentService) {}
 
   @Get('overdue')
+  @Permissions('credit-realization:read')
   @ApiOperation({
     summary: 'Get all overdue installments with dynamic penalty & delay day calculation',
   })
@@ -17,6 +23,7 @@ export class CrInstallmentController {
   }
 
   @Get(':uuid')
+  @Permissions('credit-realization:read')
   @ApiOperation({ summary: 'Get installment plan details and payment vouchers by UUID' })
   @ApiParam({ name: 'uuid' })
   async findOne(@Param('uuid') uuid: string) {
@@ -24,6 +31,7 @@ export class CrInstallmentController {
   }
 
   @Post(':uuid/payments')
+  @Permissions('credit-realization:write')
   @ApiOperation({ summary: 'Record an installment payment voucher and rebalance dues' })
   @ApiParam({ name: 'uuid' })
   @ApiBody({ type: CreateCrPaymentDto })
@@ -35,6 +43,7 @@ export class CrInstallmentController {
   }
 
   @Post(':uuid/waive-penalty')
+  @Permissions('credit-realization:write')
   @ApiOperation({ summary: 'Waive or reduce delay penalty for an installment' })
   @ApiParam({ name: 'uuid' })
   @ApiBody({ type: WaivePenaltyDto })
