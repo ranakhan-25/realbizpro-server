@@ -24,6 +24,7 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:all": "npm test && npx playwright test",
     "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:cs:e2e": "node scripts/test-cs-final-e2e.js",
     "db:migrate": "sequelize-cli db:migrate",
     "db:migrate:undo": "sequelize-cli db:migrate:undo",
     "db:seed": "ts-node -r tsconfig-paths/register ./node_modules/sequelize-cli/lib/sequelize db:seed:all",
@@ -154,17 +155,5 @@
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.20.0"
-  },
-  "pnpm": {
-    "overrides": {
-      "@nestjs-modules/mailer>mjml": "^5.0.0-alpha.4",
-      "@nestjs-modules/mailer>nodemailer": "^7.0.11",
-      "nodemailer": "^7.0.11",
-      "glob": "^11.0.3",
-      "validator": "^13.15.22",
-      "jws": "^3.2.3",
-      "js-yaml": "^4.1.1",
-      "body-parser": "^2.2.1"
-    }
   }
 }

@@ -1,5 +1,5 @@
 // Auto-generated types for AcquisitionLead
-// Source: src/database/models/lams/acquisition-lead.model.ts
+// Source: src\database\models\lams\acquisition-lead.model.ts
 
 import type { LandOwner } from '../models/lams/land-owner.model';
 import type { FollowUp } from '../models/lams/follow-up.model';

@@ -1,16 +1,10 @@
 /* eslint-disable prettier/prettier */
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  ParseUUIDPipe,
-  Patch,
-  Post,
-  Query,
-  Req,
-} from '@nestjs/common';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { CurrentUser, CurrentUserId } from 'src/common/decorators/auth.decorators';
+/* eslint-disable prettier/prettier */
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { CreateProjectBillingRecordDto } from './dto/create-project-billing-record.dto';
@@ -22,18 +16,19 @@ type AuthenticatedRequest = Request & { user?: { id?: number } };
 
 @ApiTags('Project Billing')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('project-billing')
 export class ProjectBillingRecordController {
   constructor(private readonly billingService: ProjectBillingRecordService) {}
 
   @Post(':resource')
+  @Permissions('create_projects_project_billing_record')
   @ApiOperation({ summary: 'Create a project billing record' })
   create(
     @Param('resource') resource: string,
-    @Body() dto: CreateProjectBillingRecordDto,
-    @Req() request: AuthenticatedRequest,
+    @Body() dto: CreateProjectBillingRecordDto, @CurrentUserId() userId: number, @CurrentUser() currentUser: any
   ) {
-    return this.billingService.create(resource, dto, request.user?.id);
+    return this.billingService.create(resource, dto, userId, currentUser);
   }
 
   @Get(':resource/reports')
@@ -41,8 +36,9 @@ export class ProjectBillingRecordController {
   report(
     @Param('resource') resource: string,
     @Query() query: QueryProjectBillingRecordDto,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.billingService.findAll(resource, query);
+    return this.billingService.findAll(resource, query, currentUser);
   }
 
   @Get(':resource')
@@ -50,8 +46,9 @@ export class ProjectBillingRecordController {
   findAll(
     @Param('resource') resource: string,
     @Query() query: QueryProjectBillingRecordDto,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.billingService.findAll(resource, query);
+    return this.billingService.findAll(resource, query, currentUser);
   }
 
   @Get(':resource/:uuid')
@@ -59,8 +56,9 @@ export class ProjectBillingRecordController {
   findOne(
     @Param('resource') resource: string,
     @Param('uuid', ParseUUIDPipe) uuid: string,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.billingService.findOne(resource, uuid);
+    return this.billingService.findOne(resource, uuid, currentUser);
   }
 
   @Patch(':resource/:uuid')
@@ -69,9 +67,10 @@ export class ProjectBillingRecordController {
     @Param('resource') resource: string,
     @Param('uuid', ParseUUIDPipe) uuid: string,
     @Body() dto: UpdateProjectBillingRecordDto,
-    @Req() request: AuthenticatedRequest,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.billingService.update(resource, uuid, dto, request.user?.id);
+    return this.billingService.update(resource, uuid, dto, userId, currentUser);
   }
 
   @Delete(':resource/:uuid')
@@ -79,7 +78,9 @@ export class ProjectBillingRecordController {
   remove(
     @Param('resource') resource: string,
     @Param('uuid', ParseUUIDPipe) uuid: string,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.billingService.remove(resource, uuid);
+    return this.billingService.remove(resource, uuid, userId, currentUser);
   }
 }

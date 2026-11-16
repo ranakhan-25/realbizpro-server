@@ -131,6 +131,8 @@ export class AttendanceService {
 
   async create(
     dto: CreateAttendanceDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<Attendance> {
     await this.ensureEmployeeExists(
       dto.employeeId,
@@ -146,14 +148,16 @@ export class AttendanceService {
     const record =
       await this.attendanceModel.create({
         ...dto,
-        createdBy: dto.createdBy ?? dto.addedById,
+        createdBy: userId ? String(userId) : (dto as any).createdBy ?? (dto as any).addedById ?? null,
+        orgId: (dto as any).orgId ?? currentUser?.orgId ?? null,
+        projectId: (dto as any).projectId ?? currentUser?.projectId ?? null,
         type: dto.type ?? AttendanceType.WORKDAY,
       } as any);
 
     return this.findOne(record.uuid);
   }
 
-  async findAll(query: QueryAttendanceDto) {
+  async findAll(query: QueryAttendanceDto, currentUser?: any) {
     const {
       page = 1,
       limit = 10,
@@ -179,11 +183,13 @@ export class AttendanceService {
         : (page - 1) * limit;
 
     const where: any = {};
-    if (query.orgId) {
-      where.orgId = query.orgId;
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
     }
-    if ((query as any).projectId) {
-      where.projectId = (query as any).projectId;
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
     }
 
     if (employeeId) {
@@ -241,7 +247,7 @@ export class AttendanceService {
         offset,
         order: [[sortBy, sortOrder]],
         paranoid: !withDeleted,
-      });
+      } as any);
 
     const totalPages =
       Math.ceil(count / limit) || 1;
@@ -273,9 +279,7 @@ export class AttendanceService {
     };
   }
 
-  async findOne(
-    uuid: string,
-  ): Promise<Attendance> {
+  async findOne(uuid: string, currentUser?: any): Promise<Attendance> {
     const record =
       await this.attendanceModel.findOne({
         where: { uuid } as any,
@@ -290,10 +294,7 @@ export class AttendanceService {
     return record;
   }
 
-  async update(
-    uuid: string,
-    dto: UpdateAttendanceDto,
-  ): Promise<Attendance> {
+  async update(uuid: string, dto: UpdateAttendanceDto, userId?: number, currentUser?: any): Promise<Attendance> {
     const record =
       await this.attendanceModel.findOne({
         where: { uuid } as any,
@@ -353,9 +354,7 @@ export class AttendanceService {
     return this.findOne(uuid);
   }
 
-  async remove(
-    uuid: string,
-  ): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const record =
       await this.attendanceModel.findOne({
         where: { uuid } as any,
@@ -368,6 +367,7 @@ export class AttendanceService {
     }
 
     // soft delete
+    await record.update({ deletedBy: userId ? String(userId) : null } as any);
     await record.destroy();
 
     return {
@@ -375,9 +375,7 @@ export class AttendanceService {
     };
   }
 
-  async restore(
-    uuid: string,
-  ): Promise<Attendance> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<Attendance> {
     const record =
       await this.attendanceModel.findOne({
         where: { uuid } as any,
@@ -397,6 +395,7 @@ export class AttendanceService {
     }
 
     await record.restore();
+    await record.update({ deletedBy: null, updatedBy: userId ? String(userId) : null } as any);
 
     return this.findOne(uuid);
   }

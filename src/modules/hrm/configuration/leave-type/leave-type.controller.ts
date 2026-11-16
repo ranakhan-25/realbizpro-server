@@ -1,97 +1,85 @@
 /* eslint-disable prettier/prettier */
 
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Query,
-} from '@nestjs/common';
-
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
-
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { LeaveTypeService } from './leave-type.service';
 import { CreateLeaveTypeDto } from './dto/create-leave-type.dto';
 import { QueryLeaveTypeDto } from './dto/query-leave-type.dto';
 import { UpdateLeaveTypeDto } from './dto/update-leave-type.dto';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { CurrentUser, CurrentUserId } from 'src/common/decorators/auth.decorators';
 
 @ApiTags('HRM | Configuation | Leave Type')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('leave-type')
 export class LeaveTypeController {
-  constructor(
-    private readonly leaveTypeService: LeaveTypeService,
-  ) {}
+  constructor(private readonly leaveTypeService: LeaveTypeService) {}
 
   @Post()
-  @ApiOperation({
-    summary: 'Create a new leave type',
-  })
+  @Permissions('create_leave_type')
+  @ApiOperation({ summary: 'Create leave type' })
   create(
-    @Body()
-    createLeaveTypeDto: CreateLeaveTypeDto,
+    @Body() dto: CreateLeaveTypeDto,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.leaveTypeService.create(
-      createLeaveTypeDto,
-    );
+    return this.leaveTypeService.create(dto, userId, currentUser);
   }
 
   @Get()
-  @ApiOperation({
-    summary: 'Get all leave types (paginated)',
-  })
+  @Permissions('list_leave_type')
+  @ApiOperation({ summary: 'Get all leave types (paginated)' })
   findAll(
-    @Query()
-    query: QueryLeaveTypeDto,
+    @Query() query: QueryLeaveTypeDto,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.leaveTypeService.findAll(query);
+    return this.leaveTypeService.findAll(query, currentUser);
   }
 
   @Get(':uuid')
-  @ApiOperation({
-    summary: 'Get leave type by UUID',
-  })
-  findOne(@Param('uuid') uuid: string) {
-    return this.leaveTypeService.findOne(uuid);
+  @Permissions('read_leave_type')
+  @ApiOperation({ summary: 'Get leave type by UUID' })
+  findOne(
+    @Param('uuid') uuid: string,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.leaveTypeService.findOne(uuid, currentUser);
   }
 
   @Patch(':uuid')
-  @ApiOperation({
-    summary: 'Update leave type',
-  })
+  @Permissions('update_leave_type')
+  @ApiOperation({ summary: 'Update leave type' })
   update(
     @Param('uuid') uuid: string,
-    @Body()
-    updateLeaveTypeDto: UpdateLeaveTypeDto,
+    @Body() dto: UpdateLeaveTypeDto,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.leaveTypeService.update(
-      uuid,
-      updateLeaveTypeDto,
-    );
+    return this.leaveTypeService.update(uuid, dto, userId, currentUser);
   }
 
   @Delete(':uuid')
-  @ApiOperation({
-    summary:
-      'Soft delete leave type (status → inactive)',
-  })
-  remove(@Param('uuid') uuid: string) {
-    return this.leaveTypeService.remove(uuid);
+  @Permissions('delete_leave_type')
+  @ApiOperation({ summary: 'Delete leave type' })
+  remove(
+    @Param('uuid') uuid: string,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.leaveTypeService.remove(uuid, userId, currentUser);
   }
 
   @Patch(':uuid/restore')
-  @ApiOperation({
-    summary:
-      'Restore soft-deleted leave type (status → active)',
-  })
-  restore(@Param('uuid') uuid: string) {
-    return this.leaveTypeService.restore(uuid);
+  @Permissions('update_leave_type')
+  @ApiOperation({ summary: 'Restore soft-deleted leave type' })
+  restore(
+    @Param('uuid') uuid: string,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.leaveTypeService.restore(uuid, userId, currentUser);
   }
 }

@@ -1,95 +1,85 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Query,
-} from '@nestjs/common';
+/* eslint-disable prettier/prettier */
 
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
-
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SectionService } from './section.service';
 import { CreateSectionDto } from './dto/create-section.dto';
 import { QuerySectionDto } from './dto/query-section.dto';
 import { UpdateSectionDto } from './dto/update-section.dto';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { CurrentUser, CurrentUserId } from 'src/common/decorators/auth.decorators';
 
 @ApiTags('HRM | Employee | Section')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('section')
 export class SectionController {
-  constructor(
-    private readonly sectionService: SectionService,
-  ) {}
+  constructor(private readonly sectionService: SectionService) {}
 
   @Post()
-  @ApiOperation({
-    summary: 'Create a new section',
-  })
+  @Permissions('create_section')
+  @ApiOperation({ summary: 'Create section' })
   create(
-    @Body()
-    createSectionDto: CreateSectionDto,
+    @Body() dto: CreateSectionDto,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.sectionService.create(
-      createSectionDto,
-    );
+    return this.sectionService.create(dto, userId, currentUser);
   }
 
   @Get()
-  @ApiOperation({
-    summary: 'Get all sections (paginated)',
-  })
+  @Permissions('list_section')
+  @ApiOperation({ summary: 'Get all sections (paginated)' })
   findAll(
-    @Query()
-    query: QuerySectionDto,
+    @Query() query: QuerySectionDto,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.sectionService.findAll(query);
+    return this.sectionService.findAll(query, currentUser);
   }
 
   @Get(':uuid')
-  @ApiOperation({
-    summary: 'Get section by UUID',
-  })
-  findOne(@Param('uuid') uuid: string) {
-    return this.sectionService.findOne(uuid);
+  @Permissions('read_section')
+  @ApiOperation({ summary: 'Get section by UUID' })
+  findOne(
+    @Param('uuid') uuid: string,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.sectionService.findOne(uuid, currentUser);
   }
 
   @Patch(':uuid')
-  @ApiOperation({
-    summary: 'Update section',
-  })
+  @Permissions('update_section')
+  @ApiOperation({ summary: 'Update section' })
   update(
     @Param('uuid') uuid: string,
-    @Body()
-    updateSectionDto: UpdateSectionDto,
+    @Body() dto: UpdateSectionDto,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.sectionService.update(
-      uuid,
-      updateSectionDto,
-    );
+    return this.sectionService.update(uuid, dto, userId, currentUser);
   }
 
   @Delete(':uuid')
-  @ApiOperation({
-    summary:
-      'Soft delete section (status → inactive)',
-  })
-  remove(@Param('uuid') uuid: string) {
-    return this.sectionService.remove(uuid);
+  @Permissions('delete_section')
+  @ApiOperation({ summary: 'Delete section' })
+  remove(
+    @Param('uuid') uuid: string,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.sectionService.remove(uuid, userId, currentUser);
   }
 
   @Patch(':uuid/restore')
-  @ApiOperation({
-    summary:
-      'Restore soft-deleted section (status → active)',
-  })
-  restore(@Param('uuid') uuid: string) {
-    return this.sectionService.restore(uuid);
+  @Permissions('update_section')
+  @ApiOperation({ summary: 'Restore soft-deleted section' })
+  restore(
+    @Param('uuid') uuid: string,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.sectionService.restore(uuid, userId, currentUser);
   }
 }

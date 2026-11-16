@@ -45,6 +45,8 @@ export class CommissionService {
 
   async create(
     dto: CreateCommissionDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<Commission> {
     await this.ensureEmployeeExists(
       dto.employeeId,
@@ -53,13 +55,15 @@ export class CommissionService {
     const record =
       await this.commissionModel.create({
         ...dto,
-        createdBy: dto.createdBy ?? dto.addedById,
-      });
+        createdBy: userId ? String(userId) : (dto as any).createdBy ?? (dto as any).addedById ?? null,
+        orgId: (dto as any).orgId ?? currentUser?.orgId ?? null,
+        projectId: (dto as any).projectId ?? currentUser?.projectId ?? null,
+      } as any);
 
     return this.findOne(record.uuid);
   }
 
-  async findAll(query: QueryCommissionDto) {
+  async findAll(query: QueryCommissionDto, currentUser?: any) {
     const {
       page = 1,
       limit = 10,
@@ -78,11 +82,13 @@ export class CommissionService {
         : (page - 1) * limit;
 
     const where: any = {};
-    if (query.orgId) {
-      where.orgId = query.orgId;
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
     }
-    if ((query as any).projectId) {
-      where.projectId = (query as any).projectId;
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
     }
 
     if (employeeId) {
@@ -136,9 +142,7 @@ export class CommissionService {
     };
   }
 
-  async findOne(
-    uuid: string,
-  ): Promise<Commission> {
+  async findOne(uuid: string, currentUser?: any): Promise<Commission> {
     const record =
       await this.commissionModel.findOne({
         where: { uuid } as any,
@@ -153,10 +157,7 @@ export class CommissionService {
     return record;
   }
 
-  async update(
-    uuid: string,
-    dto: UpdateCommissionDto,
-  ): Promise<Commission> {
+  async update(uuid: string, dto: UpdateCommissionDto, userId?: number, currentUser?: any): Promise<Commission> {
     const record =
       await this.commissionModel.findOne({
         where: { uuid } as any,
@@ -181,14 +182,12 @@ export class CommissionService {
       ...dto,
       updatedBy:
         dto.addedById ?? record.updatedBy,
-    });
+    } as any);
 
     return this.findOne(uuid);
   }
 
-  async remove(
-    uuid: string,
-  ): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const record =
       await this.commissionModel.findOne({
         where: { uuid } as any,
@@ -201,6 +200,7 @@ export class CommissionService {
     }
 
     // soft delete
+    await record.update({ deletedBy: userId ? String(userId) : null } as any);
     await record.destroy();
 
     return {
@@ -208,9 +208,7 @@ export class CommissionService {
     };
   }
 
-  async restore(
-    uuid: string,
-  ): Promise<Commission> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<Commission> {
     const record =
       await this.commissionModel.findOne({
         where: { uuid } as any,
@@ -230,6 +228,7 @@ export class CommissionService {
     }
 
     await record.restore();
+    await record.update({ deletedBy: null, updatedBy: userId ? String(userId) : null } as any);
 
     return this.findOne(uuid);
   }

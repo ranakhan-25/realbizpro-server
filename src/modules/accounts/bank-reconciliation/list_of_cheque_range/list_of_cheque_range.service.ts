@@ -15,9 +15,14 @@ export class ChequeRangeService {
     private readonly chequeRangeModel: typeof ChequeRange,
   ) {}
 
-  async create(dto: CreateChequeRangeDto): Promise<ChequeRange> {
+  async create(dto: CreateChequeRangeDto, userId?: number, currentUser?: any): Promise<ChequeRange> {
     try {
-      return await this.chequeRangeModel.create(dto as any);
+      return await this.chequeRangeModel.create({
+        ...dto,
+        createdBy: userId ? String(userId) : (dto as any).createdBy ?? null,
+        orgId: (dto as any).orgId ?? currentUser?.orgId ?? null,
+        projectId: (dto as any).projectId ?? currentUser?.projectId ?? null,
+      } as any);
     } catch (error) {
       console.error("❌ ChequeRange Create Error:", error);
       if (error.name === 'SequelizeUniqueConstraintError') {
@@ -27,13 +32,17 @@ export class ChequeRangeService {
     }
   }
 
-  async findAll(query: QueryChequeRangeDto) {
+  async findAll(query: QueryChequeRangeDto, currentUser?: any) {
     const { page = '1', limit = '10', search, ...filters } = query;
     const pageNum = parseInt(page, 10);
     const limitNum = parseInt(limit, 10);
     const offset = (pageNum - 1) * limitNum;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) where.orgId = effectiveOrgId;
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) where.projectId = effectiveProjectId;
     Object.keys(filters).forEach((k) => {
       if (filters[k] !== undefined && filters[k] !== null && filters[k] !== '') {
         where[k] = filters[k];
@@ -61,7 +70,7 @@ export class ChequeRangeService {
     };
   }
 
-  async findOne(uuid: string): Promise<ChequeRange> {
+  async findOne(uuid: string, currentUser?: any): Promise<ChequeRange> {
     const chequeRange = await this.chequeRangeModel.findOne({
       where: { uuid },
     
@@ -70,25 +79,32 @@ export class ChequeRangeService {
     return chequeRange;
   }
 
-  async update(uuid: string, dto: UpdateChequeRangeDto): Promise<ChequeRange> {
+  async update(uuid: string, dto: UpdateChequeRangeDto, userId?: number, currentUser?: any): Promise<ChequeRange> {
     const chequeRange = await this.findOne(uuid);
-    await chequeRange.update(dto);
+    await chequeRange.update({
+      ...dto,
+      updatedBy: userId ? String(userId) : chequeRange.updatedBy ?? null,
+      ...((dto as any).orgId !== undefined ? { orgId: (dto as any).orgId } : {}),
+      ...((dto as any).projectId !== undefined ? { projectId: (dto as any).projectId } : {}),
+    });
     return chequeRange;
   }
 
-  async remove(uuid: string): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const chequeRange = await this.findOne(uuid);
+    await chequeRange.update({ deletedBy: userId ? String(userId) : null } as any);
     await chequeRange.destroy();
     return { message: 'Cheque range deleted successfully.' };
   }
 
-  async restore(uuid: string): Promise<ChequeRange> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<ChequeRange> {
     const chequeRange = await this.chequeRangeModel.findOne({
       where: { uuid },
       paranoid: false,
     });
     if (!chequeRange) throw new NotFoundException(`Cheque Range ${uuid} not found`);
     await chequeRange.restore();
+    await chequeRange.update({ deletedBy: null, updatedBy: userId ? String(userId) : null } as any);
     return chequeRange;
   }
 

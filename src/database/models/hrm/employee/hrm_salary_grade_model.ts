@@ -16,10 +16,10 @@ export enum SalaryGradeStatus {
 }
 
 @Table({
-  tableName: 'salary_grade',
+  tableName: 'hrm_salary_grade',
+  underscored: true,
   timestamps: true,
   paranoid: true,
-  underscored: false,
   indexes: [
     {
       name: 'SalaryGrade_name_idx',

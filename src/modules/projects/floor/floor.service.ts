@@ -21,12 +21,19 @@ export class FloorService {
     private readonly floorModel: typeof Floor,
   ) {}
 
-  async create(dto: CreateFloorDto): Promise<Floor> {
+  async create(
+    dto: CreateFloorDto,
+    userId?: number,
+    currentUser?: any,
+  ): Promise<Floor> {
     const floor = await this.floorModel.create(dto as any);
     return this.findOne(floor.uuid);
   }
 
-  async findAll(query: QueryFloorDto) {
+  async findAll(
+    query: QueryFloorDto,
+    currentUser?: any,
+  ) {
     const {
       page = 1,
       limit = 10,
@@ -44,6 +51,14 @@ export class FloorService {
       skip !== undefined && skip !== null ? skip : (page - 1) * limit;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
     if ((query as any)?.orgId) {
       where.orgId = (query as any).orgId;
     }
@@ -116,7 +131,7 @@ export class FloorService {
     };
   }
 
-  async findOne(uuid: string): Promise<Floor> {
+  async findOne(uuid: string, currentUser?: any): Promise<Floor> {
     const floor = await this.floorModel.findOne({
       where: { uuid } as any,
     });
@@ -128,7 +143,12 @@ export class FloorService {
     return floor;
   }
 
-  async update(uuid: string, dto: UpdateFloorDto): Promise<Floor> {
+  async update(
+    uuid: string,
+    dto: UpdateFloorDto,
+    userId?: number,
+    currentUser?: any,
+  ): Promise<Floor> {
     const floor = await this.floorModel.findOne({
       where: { uuid } as any,
     });
@@ -142,7 +162,7 @@ export class FloorService {
     return this.findOne(uuid);
   }
 
-  async remove(uuid: string): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const floor = await this.floorModel.findOne({
       where: { uuid } as any,
     });
@@ -158,7 +178,7 @@ export class FloorService {
     };
   }
 
-  async restore(uuid: string): Promise<Floor> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<Floor> {
     const floor = await this.floorModel.findOne({
       where: { uuid } as any,
       paranoid: false,

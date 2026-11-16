@@ -48,14 +48,14 @@ export enum MaritalStatus {
 }
 
 @Table({
-  tableName: 'employee_list',
+  tableName: 'hrm_employee_list',
+  underscored: true,
   timestamps: true,
   paranoid: true,
-  underscored: false,
   indexes: [
     {
       name: 'EmployeeList_employeeCode_idx',
-      fields: ['employeeCode'],
+      fields: ['employee_code'],
       unique: true,
     },
     {
@@ -76,35 +76,35 @@ export enum MaritalStatus {
     },
     {
       name: 'EmployeeList_departmentId_idx',
-      fields: ['departmentId'],
+      fields: ['department_id'],
     },
     {
       name: 'EmployeeList_designationId_idx',
-      fields: ['designationId'],
+      fields: ['designation_id'],
     },
     {
       name: 'EmployeeList_unitId_idx',
-      fields: ['unitId'],
+      fields: ['unit_id'],
     },
     {
       name: 'EmployeeList_sectionId_idx',
-      fields: ['sectionId'],
+      fields: ['section_id'],
     },
     {
       name: 'EmployeeList_salaryGradeId_idx',
-      fields: ['salaryGradeId'],
+      fields: ['salary_grade_id'],
     },
     {
       name: 'EmployeeList_shiftId_idx',
-      fields: ['shiftId'],
+      fields: ['shift_id'],
     },
     {
       name: 'EmployeeList_employeeTypeId_idx',
-      fields: ['employeeTypeId'],
+      fields: ['employee_type_id'],
     },
     {
       name: 'EmployeeList_underId_idx',
-      fields: ['underId'],
+      fields: ['under_id'],
     },
     {
       name: 'EmployeeList_status_idx',
@@ -132,7 +132,6 @@ export class EmployeeList
   @Column({
     type: DataType.STRING,
     allowNull: false,
-    unique: true,
   })
   declare employeeCode: string;
 

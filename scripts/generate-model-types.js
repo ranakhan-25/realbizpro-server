@@ -759,8 +759,21 @@ export interface ${className}WithRelations extends ${className}Attributes {${
     const imports = [];
 
     Array.from(relatedModels).forEach((model) => {
-      const modelFilePath =
-        this.modelLocations.get(model);
+      let importedModelName = model;
+      let modelFilePath = this.modelLocations.get(model);
+
+      // Resolve relation aliases such as `MainBooking as Booking`.
+      if (!modelFilePath) {
+        const relationSource = this.project.getSourceFile(originalFilePath);
+        const aliasedImport = relationSource?.getImportDeclarations()
+          .flatMap((imp) => imp.getNamedImports())
+          .find((named) => named.getAliasNode()?.getText() === model);
+
+        if (aliasedImport) {
+          importedModelName = aliasedImport.getName();
+          modelFilePath = this.modelLocations.get(importedModelName);
+        }
+      }
 
       if (modelFilePath) {
         console.log(
@@ -781,8 +794,11 @@ export interface ${className}WithRelations extends ${className}Attributes {${
           relativePath = '../' + relativePath;
         }
 
+        const importName = importedModelName === model
+          ? importedModelName
+          : `${importedModelName} as ${model}`;
         imports.push(
-          `import type { ${model} } from '${relativePath}';`,
+          `import type { ${importName} } from '${relativePath}';`,
         );
         console.log(
           `✅ Generated import: import type { ${model} } from '${relativePath}';`,
@@ -974,13 +990,13 @@ export interface ${className}WithRelations extends ${className}Attributes {${
 
       // Update class declaration to include generic types
       const classRegex = new RegExp(
-        `export class ${className} extends BaseModel(?:<[^>]*>)?`,
+        `export class ${className} extends (BaseModel|TenantBaseModel)(?:<[^>]*>)?`,
       );
       const classMatch =
         content.match(classRegex);
 
       if (classMatch) {
-        const replacement = `export class ${className} extends BaseModel<${className}Attributes, ${className}CreationAttributes>`;
+        const replacement = `export class ${className} extends ${classMatch[1]}<${className}Attributes, ${className}CreationAttributes>`;
         content = content.replace(
           classRegex,
           replacement,

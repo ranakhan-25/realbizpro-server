@@ -1,5 +1,5 @@
 // Auto-generated types for InvStockTransfer
-// Source: src/database/models/inventory/inv_stock_transfer.model.ts
+// Source: src\database\models\inventory\inv_stock_transfer.model.ts
 
 import type { InvItem } from '../models/inventory/inv_item.model';
 

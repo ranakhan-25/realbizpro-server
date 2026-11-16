@@ -28,9 +28,18 @@ export class TaskService {
 
   async create(
     dto: CreateTaskDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<Task> {
+    const projectId = dto.projectId ?? currentUser?.projectId ?? null;
+    if (dto.parentTaskId) {
+      await this.validateParentTask(dto.parentTaskId, projectId);
+    }
     const task =
       await this.taskModel.create({
+        createdBy: userId ? String(userId) : null,
+        orgId: currentUser?.orgId ?? null,
+        projectId,
         ...dto,
         progress: dto.progress ?? 0,
         status:
@@ -48,7 +57,10 @@ export class TaskService {
   // FIND ALL
   // =========================
 
-  async findAll(query: QueryTaskDto) {
+  async findAll(
+    query: QueryTaskDto,
+    currentUser?: any,
+  ) {
     const {
       page = 1,
       limit = 10,
@@ -67,6 +79,14 @@ export class TaskService {
         : (page - 1) * limit;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
     if ((query as any)?.orgId) {
       where.orgId = (query as any).orgId;
     }
@@ -157,6 +177,7 @@ export class TaskService {
 
   async findOne(
     uuid: string,
+    currentUser?: any,
   ): Promise<Task> {
     const task =
       await this.taskModel.findOne({
@@ -179,6 +200,8 @@ export class TaskService {
   async update(
     uuid: string,
     dto: UpdateTaskDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<Task> {
     const task =
       await this.taskModel.findOne({
@@ -191,18 +214,39 @@ export class TaskService {
       );
     }
 
+    const parentTaskId = dto.parentTaskId !== undefined ? dto.parentTaskId : task.parentTaskId;
+    if (parentTaskId) {
+      await this.validateParentTask(parentTaskId, dto.projectId ?? task.projectId, uuid);
+    }
+
     await task.update(dto as any);
 
     return this.findOne(uuid);
+  }
+
+  private async validateParentTask(parentTaskId: string, projectId?: string | null, taskUuid?: string) {
+    const visited = new Set<string>(taskUuid ? [taskUuid] : []);
+    let currentParentId: string | null | undefined = parentTaskId;
+    while (currentParentId) {
+      if (visited.has(currentParentId)) {
+        throw new BadRequestException('Parent task selection would create a task cycle');
+      }
+      visited.add(currentParentId);
+      const parent = await this.taskModel.findOne({
+        where: { uuid: currentParentId, projectId: projectId ?? null } as any,
+      });
+      if (!parent) {
+        throw new BadRequestException('Parent task must exist in the same project');
+      }
+      currentParentId = parent.parentTaskId;
+    }
   }
 
   // =========================
   // REMOVE / SOFT DELETE
   // =========================
 
-  async remove(
-    uuid: string,
-  ): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const task =
       await this.taskModel.findOne({
         where: { uuid } as any,
@@ -229,9 +273,7 @@ export class TaskService {
   // RESTORE
   // =========================
 
-  async restore(
-    uuid: string,
-  ): Promise<Task> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<Task> {
     const task =
       await this.taskModel.findOne({
         where: {

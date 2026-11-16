@@ -1,95 +1,85 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Query,
-} from '@nestjs/common';
+/* eslint-disable prettier/prettier */
 
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
-
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SalaryGradeService } from './salary-grade.service';
 import { CreateSalaryGradeDto } from './dto/create-salary-grade.dto';
 import { QuerySalaryGradeDto } from './dto/query-salary-grade.dto';
 import { UpdateSalaryGradeDto } from './dto/update-salary-grade.dto';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { CurrentUser, CurrentUserId } from 'src/common/decorators/auth.decorators';
 
 @ApiTags('HRM | Employee | Salary Grade')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('salary-grade')
 export class SalaryGradeController {
-  constructor(
-    private readonly salaryGradeService: SalaryGradeService,
-  ) {}
+  constructor(private readonly salaryGradeService: SalaryGradeService) {}
 
   @Post()
-  @ApiOperation({
-    summary: 'Create a new salary grade',
-  })
+  @Permissions('create_salary_grade')
+  @ApiOperation({ summary: 'Create salary grade' })
   create(
-    @Body()
-    createSalaryGradeDto: CreateSalaryGradeDto,
+    @Body() dto: CreateSalaryGradeDto,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.salaryGradeService.create(
-      createSalaryGradeDto,
-    );
+    return this.salaryGradeService.create(dto, userId, currentUser);
   }
 
   @Get()
-  @ApiOperation({
-    summary: 'Get all salary grades (paginated)',
-  })
+  @Permissions('list_salary_grade')
+  @ApiOperation({ summary: 'Get all salary grades (paginated)' })
   findAll(
-    @Query()
-    query: QuerySalaryGradeDto,
+    @Query() query: QuerySalaryGradeDto,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.salaryGradeService.findAll(query);
+    return this.salaryGradeService.findAll(query, currentUser);
   }
 
   @Get(':uuid')
-  @ApiOperation({
-    summary: 'Get salary grade by UUID',
-  })
-  findOne(@Param('uuid') uuid: string) {
-    return this.salaryGradeService.findOne(uuid);
+  @Permissions('read_salary_grade')
+  @ApiOperation({ summary: 'Get salary grade by UUID' })
+  findOne(
+    @Param('uuid') uuid: string,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.salaryGradeService.findOne(uuid, currentUser);
   }
 
   @Patch(':uuid')
-  @ApiOperation({
-    summary: 'Update salary grade',
-  })
+  @Permissions('update_salary_grade')
+  @ApiOperation({ summary: 'Update salary grade' })
   update(
     @Param('uuid') uuid: string,
-    @Body()
-    updateSalaryGradeDto: UpdateSalaryGradeDto,
+    @Body() dto: UpdateSalaryGradeDto,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.salaryGradeService.update(
-      uuid,
-      updateSalaryGradeDto,
-    );
+    return this.salaryGradeService.update(uuid, dto, userId, currentUser);
   }
 
   @Delete(':uuid')
-  @ApiOperation({
-    summary:
-      'Soft delete salary grade (status → inactive)',
-  })
-  remove(@Param('uuid') uuid: string) {
-    return this.salaryGradeService.remove(uuid);
+  @Permissions('delete_salary_grade')
+  @ApiOperation({ summary: 'Delete salary grade' })
+  remove(
+    @Param('uuid') uuid: string,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.salaryGradeService.remove(uuid, userId, currentUser);
   }
 
   @Patch(':uuid/restore')
-  @ApiOperation({
-    summary:
-      'Restore soft-deleted salary grade (status → active)',
-  })
-  restore(@Param('uuid') uuid: string) {
-    return this.salaryGradeService.restore(uuid);
+  @Permissions('update_salary_grade')
+  @ApiOperation({ summary: 'Restore soft-deleted salary grade' })
+  restore(
+    @Param('uuid') uuid: string,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.salaryGradeService.restore(uuid, userId, currentUser);
   }
 }

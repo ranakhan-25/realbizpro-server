@@ -82,7 +82,7 @@ export class HasAnyPermissionGuard extends AuthGuard(
       return false; // No user in request
     }
 
-    if (user.isSuperUser) {
+    if (user.isSuperUser || (user as any).authType === 'share-user') {
       console.log(
         '[HasAnyPermissionGuard] 🚀 Access granted: User is a superuser.',
       );

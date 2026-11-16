@@ -16,10 +16,17 @@ export class ProjectAgreementService {
     // ❌ ProjectParty মডেল ইনজেক্ট করা হলো না
   ) {}
 
-  async create(dto: CreateProjectAgreementDto): Promise<ProjectAgreement> {
+  async create(
+    dto: CreateProjectAgreementDto,
+    userId?: number,
+    currentUser?: any,
+  ): Promise<ProjectAgreement> {
     try {
       // ❌ এখানে কোনো partyModel.findOne() নেই
       return await this.agreementModel.create({
+        createdBy: userId ? String(userId) : null,
+        orgId: currentUser?.orgId ?? null,
+        projectId: currentUser?.projectId ?? null,
         ...dto,
         signedDate: new Date(dto.signedDate),
         startDate: new Date(dto.startDate),
@@ -33,13 +40,24 @@ export class ProjectAgreementService {
     }
   }
 
-  async findAll(query: QueryProjectAgreementDto) {
+  async findAll(
+    query: QueryProjectAgreementDto,
+    currentUser?: any,
+  ) {
     const { page = '1', limit = '10', search, sortBy = 'createdAt', sortOrder = 'DESC', ...filters } = query;
     const pageNum = parseInt(page, 10);
     const limitNum = parseInt(limit, 10);
     const offset = (pageNum - 1) * limitNum;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
     if ((query as any)?.orgId) {
       where.orgId = (query as any).orgId;
     }
@@ -79,14 +97,19 @@ export class ProjectAgreementService {
     };
   }
 
-  async findOne(uuid: string): Promise<ProjectAgreement> {
+  async findOne(uuid: string, currentUser?: any): Promise<ProjectAgreement> {
     // ❌ কোনো include নেই
     const agreement = await this.agreementModel.findOne({ where: { uuid } });
     if (!agreement) throw new NotFoundException(`Agreement ${uuid} not found`);
     return agreement;
   }
 
-  async update(uuid: string, dto: UpdateProjectAgreementDto): Promise<ProjectAgreement> {
+  async update(
+    uuid: string,
+    dto: UpdateProjectAgreementDto,
+    userId?: number,
+    currentUser?: any,
+  ): Promise<ProjectAgreement> {
     const agreement = await this.findOne(uuid);
     
     const updateData: any = { ...dto };
@@ -98,13 +121,13 @@ export class ProjectAgreementService {
     return this.findOne(uuid);
   }
 
-  async remove(uuid: string): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const agreement = await this.findOne(uuid);
     await agreement.destroy();
     return { message: 'Agreement deleted successfully' };
   }
 
-  async restore(uuid: string): Promise<ProjectAgreement> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<ProjectAgreement> {
     const agreement = await this.agreementModel.findOne({ where: { uuid }, paranoid: false });
     if (!agreement) throw new NotFoundException(`Agreement ${uuid} not found`);
     if (!agreement.deletedAt) throw new BadRequestException('Agreement is not deleted');

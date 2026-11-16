@@ -1,5 +1,5 @@
 // Auto-generated types for Department
-// Source: src/database/models/hrm/employee/hrm_department_model.ts
+// Source: src\database\models\hrm\employee\hrm_department_model.ts
 
 import { DepartmentStatus } from '../models/hrm/employee/hrm_department_model';
 

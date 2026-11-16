@@ -20,9 +20,9 @@ export enum UnitStatus {
 
 @Table({
   tableName: 'hrm_unit',
+  underscored: true,
   timestamps: true,
   paranoid: true,
-  underscored: false,
   indexes: [
     { name: 'HrmUnit_name_idx', fields: ['name'] },
     {
@@ -48,6 +48,7 @@ export class Unit
   @Column({
     type: DataType.STRING,
     allowNull: true,
+    field: 'added_by_id',
   })
   declare addedById?: string;
 

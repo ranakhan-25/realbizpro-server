@@ -335,6 +335,13 @@ export function buildDynamicMenuTree(
   if (cleaned.length === 0) {
     return getModuleMenuTree(moduleKey, allowedRoutes);
   }
+  if (moduleKey === 'customer-service' && !cleaned.some((n) => n.slug === 'dashboard')) {
+    cleaned.unshift({
+      label: 'Dashboard',
+      slug: 'dashboard',
+      path: 'dashboard',
+    });
+  }
   return cleaned;
 }
 
@@ -374,12 +381,23 @@ export class UserAccessService {
   ): Promise<MenuNode[]> {
     const canonicalId = getCanonicalModuleId(modId);
 
+    // Customer Service sidebar directly reflects the Dynamic Module Tree features
+    if (moduleKey === 'customer-service' || canonicalId === 33) {
+      if (featList && featList.length > 0) {
+        return buildDynamicMenuTree(featList, moduleKey, allowedRoutes);
+      }
+    }
+
     try {
       const adminMenus = await this.adminMenuService.getMenuTree(
         roleSlug,
         String(canonicalId),
       );
-      if (adminMenus && adminMenus.length > 0) {
+      if (
+        adminMenus &&
+        adminMenus.length > 0 &&
+        adminMenus.length >= (featList?.length || 0)
+      ) {
         let tree = adminMenus.map((item) =>
           convertAdminMenuToMenuNode(item, moduleKey),
         );

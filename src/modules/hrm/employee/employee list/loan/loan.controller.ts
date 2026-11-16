@@ -1,91 +1,85 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Query,
-} from '@nestjs/common';
+/* eslint-disable prettier/prettier */
 
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
-
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { LoanService } from './loan.service';
 import { CreateLoanDto } from './dto/create-loan.dto';
 import { QueryLoanDto } from './dto/query-loan.dto';
 import { UpdateLoanDto } from './dto/update-loan.dto';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { CurrentUser, CurrentUserId } from 'src/common/decorators/auth.decorators';
 
 @ApiTags('HRM | Employee | Loan')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('loan')
 export class LoanController {
-  constructor(
-    private readonly loanService: LoanService,
-  ) {}
+  constructor(private readonly loanService: LoanService) {}
 
   @Post()
-  @ApiOperation({
-    summary: 'Create a new loan',
-  })
+  @Permissions('create_loan')
+  @ApiOperation({ summary: 'Create loan' })
   create(
-    @Body()
-    createLoanDto: CreateLoanDto,
+    @Body() dto: CreateLoanDto,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.loanService.create(createLoanDto);
+    return this.loanService.create(dto, userId, currentUser);
   }
 
   @Get()
-  @ApiOperation({
-    summary: 'Get all loans (paginated)',
-  })
+  @Permissions('list_loan')
+  @ApiOperation({ summary: 'Get all loans (paginated)' })
   findAll(
-    @Query()
-    query: QueryLoanDto,
+    @Query() query: QueryLoanDto,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.loanService.findAll(query);
+    return this.loanService.findAll(query, currentUser);
   }
 
   @Get(':uuid')
-  @ApiOperation({
-    summary: 'Get loan by UUID',
-  })
-  findOne(@Param('uuid') uuid: string) {
-    return this.loanService.findOne(uuid);
+  @Permissions('read_loan')
+  @ApiOperation({ summary: 'Get loan by UUID' })
+  findOne(
+    @Param('uuid') uuid: string,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.loanService.findOne(uuid, currentUser);
   }
 
   @Patch(':uuid')
-  @ApiOperation({
-    summary: 'Update loan',
-  })
+  @Permissions('update_loan')
+  @ApiOperation({ summary: 'Update loan' })
   update(
     @Param('uuid') uuid: string,
-    @Body()
-    updateLoanDto: UpdateLoanDto,
+    @Body() dto: UpdateLoanDto,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.loanService.update(
-      uuid,
-      updateLoanDto,
-    );
+    return this.loanService.update(uuid, dto, userId, currentUser);
   }
 
   @Delete(':uuid')
-  @ApiOperation({
-    summary: 'Soft delete loan',
-  })
-  remove(@Param('uuid') uuid: string) {
-    return this.loanService.remove(uuid);
+  @Permissions('delete_loan')
+  @ApiOperation({ summary: 'Delete loan' })
+  remove(
+    @Param('uuid') uuid: string,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.loanService.remove(uuid, userId, currentUser);
   }
 
   @Patch(':uuid/restore')
-  @ApiOperation({
-    summary: 'Restore soft-deleted loan',
-  })
-  restore(@Param('uuid') uuid: string) {
-    return this.loanService.restore(uuid);
+  @Permissions('update_loan')
+  @ApiOperation({ summary: 'Restore soft-deleted loan' })
+  restore(
+    @Param('uuid') uuid: string,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.loanService.restore(uuid, userId, currentUser);
   }
 }

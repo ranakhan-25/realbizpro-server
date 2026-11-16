@@ -19,10 +19,10 @@ export enum EmployeeTypeStatus {
 }
 
 @Table({
-  tableName: 'employee_type',
+  tableName: 'hrm_employee_type',
+  underscored: true,
   timestamps: true,
   paranoid: true,
-  underscored: false,
   indexes: [
     {
       name: 'EmployeeType_name_idx',

@@ -25,7 +25,7 @@ export class ProjectSiteService {
     private readonly sequelize: Sequelize,
   ) {}
 
-  async create(dto: CreateProjectSiteDto, userId?: number) {
+  async create(dto: CreateProjectSiteDto, userId?: number, currentUser?: any) {
     const uuid = await this.sequelize.transaction(async (transaction) => {
       const existing = await this.siteModel.findOne({
         where: { code: dto.code } as WhereOptions<Site>,
@@ -60,7 +60,10 @@ export class ProjectSiteService {
     return this.findOne(uuid);
   }
 
-  async findAll(query: QueryProjectSiteDto) {
+  async findAll(
+    query: QueryProjectSiteDto,
+    currentUser?: any,
+  ) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const search = query.search?.trim();
@@ -75,6 +78,9 @@ export class ProjectSiteService {
           ],
         }
       : {};
+    if (query.projectId) {
+      (where as any).projectId = query.projectId;
+    }
 
     const { rows, count } = await this.siteModel.findAndCountAll({
       where: where as WhereOptions<Site>,
@@ -95,7 +101,7 @@ export class ProjectSiteService {
     };
   }
 
-  async findOne(uuid: string): Promise<Site> {
+  async findOne(uuid: string, currentUser?: any): Promise<Site> {
     const site = await this.siteModel.findOne({
       where: { uuid } as WhereOptions<Site>,
       include: [{ model: this.projectModel, as: 'project', attributes: ['uuid', 'code', 'name'] }],
@@ -112,6 +118,7 @@ export class ProjectSiteService {
     uuid: string,
     dto: UpdateProjectSiteDto,
     userId?: number,
+    currentUser?: any,
   ): Promise<Site> {
     await this.sequelize.transaction(async (transaction) => {
       const site = await this.siteModel.findOne({
@@ -161,7 +168,7 @@ export class ProjectSiteService {
     return this.findOne(uuid);
   }
 
-  async remove(uuid: string): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const site = await this.siteModel.findOne({
       where: { uuid } as WhereOptions<Site>,
     });
@@ -173,7 +180,7 @@ export class ProjectSiteService {
     return { message: `Site "${uuid}" deleted successfully` };
   }
 
-  async restore(uuid: string): Promise<Site> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<Site> {
     const site = await this.siteModel.findOne({
       where: { uuid } as WhereOptions<Site>,
       paranoid: false,

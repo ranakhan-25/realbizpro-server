@@ -19,7 +19,7 @@ export class EmployeeKpiService {
   ) {}
 
   async create(dto: CreateEmployeeKpiDto, userId?: number, currentUser?: any) {
-    const relations = await this.validateRelations(dto);
+    const relations = await this.validateRelations(dto, currentUser?.orgId);
     const orgId = dto.orgId ?? currentUser?.orgId ?? null;
     const createdBy = userId ? String(userId) : (dto.createdBy ?? null);
     const persistenceData = {
@@ -51,9 +51,10 @@ export class EmployeeKpiService {
         { workType3: { [Op.iLike]: `%${search}%` } },
       ];
     }
+    const withDeleted = query.withDeleted === true || String(query.withDeleted) === 'true';
     const { rows, count } = await this.kpis.findAndCountAll({
       where,
-      paranoid: !query.withDeleted,
+      paranoid: !withDeleted,
       include: this.includes(),
       order: [['createdAt', 'DESC']],
       limit,
@@ -78,7 +79,7 @@ export class EmployeeKpiService {
   async update(uuid: string, dto: UpdateEmployeeKpiDto, userId?: number, currentUser?: any) {
     const kpi = await this.getActive(uuid, currentUser);
     const next = { ...this.toPublic(kpi), ...dto } as CreateEmployeeKpiDto;
-    const relations = await this.validateRelations(next);
+    const relations = await this.validateRelations(next, currentUser?.orgId);
     const changes: Record<string, any> = this.toPersistence(next, relations, dto);
     if (userId) changes.updatedBy = String(userId);
     if (dto.orgId !== undefined) changes.orgId = dto.orgId;
@@ -108,11 +109,13 @@ export class EmployeeKpiService {
 
   async dropdowns(currentUser?: any) {
     const teamWhere: any = { isActive: true };
+    const userWhere: any = { isActive: true };
     if (currentUser?.orgId) {
       teamWhere.orgId = currentUser.orgId;
+      userWhere.orgId = currentUser.orgId;
     }
     const [users, teams] = await Promise.all([
-      this.users.findAll({ where: { isActive: true }, attributes: ['uuid', 'userCode', 'name'], order: [['name', 'ASC']] }),
+      this.users.findAll({ where: userWhere, attributes: ['uuid', 'userCode', 'name'], order: [['name', 'ASC']] }),
       this.teams.findAll({ where: teamWhere, attributes: ['id', 'uuid', 'name'], order: [['name', 'ASC']] }),
     ]);
     return { types: Object.values(EmployeeKpiType), statuses: ['ACTIVE', 'INACTIVE'], workTypes: this.workTypes, users, teams };
@@ -125,17 +128,17 @@ export class EmployeeKpiService {
     ];
   }
 
-  private async validateRelations(dto: CreateEmployeeKpiDto) {
+  private async validateRelations(dto: CreateEmployeeKpiDto, orgId?: number) {
     this.validateDates(dto.fromDate, dto.toDate);
     if (dto.type === EmployeeKpiType.TEAM) {
       if (!dto.teamId) throw new BadRequestException('teamId is required for TEAM KPI');
-      const team = await this.teams.findOne({ where: { id: dto.teamId, isActive: true } });
+      const team = await this.teams.findOne({ where: { id: dto.teamId, isActive: true, ...(orgId ? { orgId } : {}) } });
       if (!team) throw new BadRequestException('Selected team is missing or inactive');
       return { team, user: undefined };
     }
     if (dto.teamId) throw new BadRequestException('teamId is not allowed for INDIVIDUAL KPI');
     if (dto.userId) {
-      const user = await this.users.findOne({ where: { uuid: dto.userId, isActive: true } });
+      const user = await this.users.findOne({ where: { uuid: dto.userId, isActive: true, ...(orgId ? { orgId } : {}) } });
       if (!user) throw new BadRequestException('Selected employee is missing or inactive');
       return { team: undefined, user };
     }

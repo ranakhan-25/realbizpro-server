@@ -1,5 +1,5 @@
 // Auto-generated types for NegotiationProcess
-// Source: src/database/models/lams/negotiation-process.model.ts
+// Source: src\database\models\lams\negotiation-process.model.ts
 
 import type { AcquisitionLead } from '../models/lams/acquisition-lead.model';
 

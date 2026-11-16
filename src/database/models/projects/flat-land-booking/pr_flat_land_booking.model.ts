@@ -24,6 +24,7 @@ import { SysOrganization } from "src/database/models/system/sys_organization.mod
 })
 export class FlatLandBooking extends BaseModel<FlatLandBookingAttributes, FlatLandBookingCreationAttributes> {
   @ForeignKey(() => Project)
+  @Column({ type: DataType.UUID, allowNull: false, field: 'project_id' })
   @Column({
               field: 'project_id', type: DataType.UUID, allowNull: false })
   declare projectId: string;
@@ -90,6 +91,9 @@ export class FlatLandBooking extends BaseModel<FlatLandBookingAttributes, FlatLa
 
   @Column({ type: DataType.STRING(100), allowNull: false, defaultValue: 'Pending' })
   declare status: string;
+
+  @Column({ type: DataType.JSONB, allowNull: false, defaultValue: {} })
+  declare details: Record<string, unknown>;
 
   @Column({
           field: 'created_by', type: DataType.STRING, allowNull: true })

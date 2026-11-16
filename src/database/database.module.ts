@@ -64,8 +64,50 @@ import { ShareProjectDocument } from './models/share-project/share-project-docum
 import { ShareProjectSubmission } from './models/share-project/share-project-submission.model';
 import { ShareProjectReview } from './models/share-project/share-project-review.model';
 import { ShareProjectStatusHistory } from './models/share-project/share-project-status-history.model';
+import { CsCustomerProfile } from './models/customer-service/cs_customer_profile.model';
+import { CsBookingHandover } from './models/customer-service/cs_booking_handover.model';
+import { CsChangeRequest } from './models/customer-service/cs_change_request.model';
+import { CsUtilityTechnician } from './models/customer-service/cs_utility_technician.model';
+import { CsWarrantyItem } from './models/customer-service/cs_warranty_item.model';
+import { CsUtilityTicket } from './models/customer-service/cs_utility_ticket.model';
+import { CsSecurityCompany } from './models/customer-service/cs_security_company.model';
+import { CsSecurityGuard } from './models/customer-service/cs_security_guard.model';
+import { CsSecurityRoster } from './models/customer-service/cs_security_roster.model';
+import { CsSecurityVisitorLog } from './models/customer-service/cs_security_visitor_log.model';
+import { CsParkingSlot } from './models/customer-service/cs_parking_slot.model';
+import { CsParkingAssignment } from './models/customer-service/cs_parking_assignment.model';
+import { CsParkingExternalRental } from './models/customer-service/cs_parking_external_rental.model';
+import { CsServiceChargeRate } from './models/customer-service/cs_service_charge_rate.model';
+import { CsFlatServiceCharge } from './models/customer-service/cs_flat_service_charge.model';
+import { CsBuildingIncome } from './models/customer-service/cs_building_income.model';
+import { CsBuildingExpense } from './models/customer-service/cs_building_expense.model';
+import { CsCommitteeMember } from './models/customer-service/cs_committee_member.model';
+import { CsCommitteeDecision } from './models/customer-service/cs_committee_decision.model';
+import { CsHandoverSnag } from './models/customer-service/cs_handover_snag.model';
+import { CsServiceTicket } from './models/customer-service/cs_service_ticket.model';
+import { CsCustomerDocument } from './models/customer-service/cs_customer_document.model';
+import { CsRegistrationTracking } from './models/customer-service/cs_registration_tracking.model';
+import { CsMutationTracking } from './models/customer-service/cs_mutation_tracking.model';
+import { CsWarrantyDlpClaim } from './models/customer-service/cs_warranty_dlp_claim.model';
+import { CsMaintenanceRequest } from './models/customer-service/cs_maintenance_request.model';
+import { CsOwnersAssociation } from './models/customer-service/cs_owners_association.model';
+import { CsServiceWorkflowRule } from './models/customer-service/cs_service_workflow_rule.model';
+import { BookingAgreement } from './models/sales_management/sm_booking_agreement.model';
+import { BookingCancellation } from './models/sales_management/sm_booking_cancellation.model';
+import { BookingCommission } from './models/sales_management/sm_booking_commission.model';
+import { BookingDocument } from './models/sales_management/sm_booking_document.model';
+import { BookingHandover } from './models/sales_management/sm_booking_handover.model';
+import { BookingOverview } from './models/sales_management/sm_booking_overview.model';
+import { BookingRegistration } from './models/sales_management/sm_booking_registration.model';
+import { BookingTransfer } from './models/sales_management/sm_booking_transfer.model';
+import { BookingInstallment } from './models/sales_management/sm_booking_installment.model';
+import { PayCommission } from './models/sales_management/sm_pay_commission.model';
+import { BookingCreate as Booking, BookingCreate } from './models/sales_management/sm_booking_create_model';
+import { MainBooking } from './models/sales_management/sm_main_booking.model';
+import { InstallmentPlan, Installment } from './models/sales_management/sm_pay_installsment_model';
+import { Commission } from './models/sales_management/sm_commission_form_model';
+import { BookingDetails } from './models/sales_management/sm_booking_details_model';
 
-@Global()
 @Module({
   imports: [
     SequelizeModule.forRootAsync({
@@ -133,6 +175,52 @@ import { ShareProjectStatusHistory } from './models/share-project/share-project-
       ShareProjectSubmission,
       ShareProjectReview,
       ShareProjectStatusHistory,
+      CsCustomerProfile,
+      CsBookingHandover,
+      CsChangeRequest,
+      CsUtilityTechnician,
+      CsWarrantyItem,
+      CsUtilityTicket,
+      CsSecurityCompany,
+      CsSecurityGuard,
+      CsSecurityRoster,
+      CsSecurityVisitorLog,
+      CsParkingSlot,
+      CsParkingAssignment,
+      CsParkingExternalRental,
+      CsServiceChargeRate,
+      CsFlatServiceCharge,
+      CsBuildingIncome,
+      CsBuildingExpense,
+      CsCommitteeMember,
+      CsCommitteeDecision,
+      CsHandoverSnag,
+      CsServiceTicket,
+      CsCustomerDocument,
+      CsRegistrationTracking,
+      CsMutationTracking,
+      CsWarrantyDlpClaim,
+      CsMaintenanceRequest,
+      CsOwnersAssociation,
+      CsServiceWorkflowRule,
+      ShareProjectStatusHistory, 
+      BookingAgreement,
+      BookingCancellation,
+      BookingCommission,
+      BookingDocument,
+      BookingHandover,
+      BookingOverview,
+      BookingRegistration,
+      BookingTransfer,
+      BookingInstallment,
+      PayCommission,
+      Booking,
+      MainBooking,
+      InstallmentPlan,
+      Commission,
+      BookingDetails,
+      BookingCreate,
+       
     ]),
   ],
   providers: [

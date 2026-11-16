@@ -26,10 +26,10 @@ export enum AttendanceType {
 }
 
 @Table({
-  tableName: 'attendance',
+  tableName: 'hrm_attendance',
+  underscored: true,
   timestamps: true,
   paranoid: true,
-  underscored: false,
   indexes: [
     {
       name: 'Attendance_date_idx',
@@ -37,23 +37,23 @@ export enum AttendanceType {
     },
     {
       name: 'Attendance_employeeId_idx',
-      fields: ['employeeId'],
+      fields: ['employee_id'],
     },
     {
       name: 'Attendance_monthYearId_idx',
-      fields: ['monthYearId'],
+      fields: ['month_year_id'],
     },
     {
       name: 'Attendance_departmentId_idx',
-      fields: ['departmentId'],
+      fields: ['department_id'],
     },
     {
       name: 'Attendance_shiftId_idx',
-      fields: ['shiftId'],
+      fields: ['shift_id'],
     },
     {
       name: 'Attendance_employeeId_date_idx',
-      fields: ['employeeId', 'date'],
+      fields: ['employee_id', 'date'],
       unique: true,
     },
     {

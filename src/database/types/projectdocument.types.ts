@@ -1,5 +1,5 @@
 // Auto-generated types for ProjectDocument
-// Source: src/database/models/projects/project-document/pr_project_document.model.ts
+// Source: src\database\models\projects\project-document\pr_project_document.model.ts
 
 import type { Project } from '../models/projects/project/pr_project.model';
 import type { SysOrganization } from '../models/system/sys_organization.model';

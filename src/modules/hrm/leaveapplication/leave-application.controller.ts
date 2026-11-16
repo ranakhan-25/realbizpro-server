@@ -1,113 +1,86 @@
 /* eslint-disable prettier/prettier */
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Query,
-} from '@nestjs/common';
 
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
-
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { LeaveApplicationService } from './leave-application.service';
 import { CreateLeaveApplicationDto } from './dto/create-leave-application.dto';
-import {
-  FindOneLeaveApplicationQueryDto,
-  QueryLeaveApplicationDto,
-} from './dto/query-leave-application.dto';
+import { FindOneLeaveApplicationQueryDto, QueryLeaveApplicationDto } from './dto/query-leave-application.dto';
 import { UpdateLeaveApplicationDto } from './dto/update-leave-application.dto';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { CurrentUser, CurrentUserId } from 'src/common/decorators/auth.decorators';
 
 @ApiTags('HRM | Leave | Leave Application')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('leave-application')
 export class LeaveApplicationController {
-  constructor(
-    private readonly leaveApplicationService: LeaveApplicationService,
-  ) {}
+  constructor(private readonly leaveApplicationService: LeaveApplicationService) {}
 
   @Post()
-  @ApiOperation({
-    summary: 'Create a new leave application',
-  })
+  @Permissions('create_leave_application')
+  @ApiOperation({ summary: 'Create leave application' })
   create(
-    @Body()
-    createLeaveApplicationDto: CreateLeaveApplicationDto,
+    @Body() createLeaveApplicationDto: CreateLeaveApplicationDto,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.leaveApplicationService.create(
-      createLeaveApplicationDto,
-    );
+    return this.leaveApplicationService.create(createLeaveApplicationDto, userId, currentUser);
   }
 
   @Get()
-  @ApiOperation({
-    summary:
-      'Get all leave applications (paginated)',
-  })
+  @Permissions('list_leave_application')
+  @ApiOperation({ summary: 'Get all leave applications (paginated)' })
   findAll(
-    @Query()
-    query: QueryLeaveApplicationDto,
+    @Query() query: QueryLeaveApplicationDto,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.leaveApplicationService.findAll(
-      query,
-    );
+    return this.leaveApplicationService.findAll(query, currentUser);
   }
 
   @Get(':uuid')
-  @ApiOperation({
-    summary: 'Get leave application by UUID',
-  })
+  @Permissions('read_leave_application')
+  @ApiOperation({ summary: 'Get leave application by UUID' })
   findOne(
     @Param('uuid') uuid: string,
-    @Query()
-    query: FindOneLeaveApplicationQueryDto,
+    @Query() query: FindOneLeaveApplicationQueryDto,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.leaveApplicationService.findOne(
-      uuid,
-      query.withRelations,
-    );
+    return this.leaveApplicationService.findOne(uuid, query?.withRelations, currentUser);
   }
 
   @Patch(':uuid')
-  @ApiOperation({
-    summary: 'Update leave application',
-  })
+  @Permissions('update_leave_application')
+  @ApiOperation({ summary: 'Update leave application' })
   update(
     @Param('uuid') uuid: string,
-    @Body()
-    updateLeaveApplicationDto: UpdateLeaveApplicationDto,
+    @Body() updateLeaveApplicationDto: UpdateLeaveApplicationDto,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.leaveApplicationService.update(
-      uuid,
-      updateLeaveApplicationDto,
-    );
+    return this.leaveApplicationService.update(uuid, updateLeaveApplicationDto, userId, currentUser);
   }
 
   @Delete(':uuid')
-  @ApiOperation({
-    summary:
-      'Soft delete leave application (status → cancelled)',
-  })
-  remove(@Param('uuid') uuid: string) {
-    return this.leaveApplicationService.remove(
-      uuid,
-    );
+  @Permissions('delete_leave_application')
+  @ApiOperation({ summary: 'Soft delete leave application (status → cancelled)' })
+  remove(
+    @Param('uuid') uuid: string,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.leaveApplicationService.remove(uuid, userId, currentUser);
   }
 
   @Patch(':uuid/restore')
-  @ApiOperation({
-    summary:
-      'Restore soft-deleted leave application (status → pending)',
-  })
-  restore(@Param('uuid') uuid: string) {
-    return this.leaveApplicationService.restore(
-      uuid,
-    );
+  @Permissions('update_leave_application')
+  @ApiOperation({ summary: 'Restore soft-deleted leave application' })
+  restore(
+    @Param('uuid') uuid: string,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.leaveApplicationService.restore(uuid, userId, currentUser);
   }
 }
