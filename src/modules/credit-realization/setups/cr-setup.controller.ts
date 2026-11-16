@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Put, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Put, Delete, Body, Param, Req, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiParam, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { CrSetupService } from './cr-setup.service';
 import {
@@ -8,6 +8,7 @@ import {
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '@/common/guards/permissions.guard';
 import { Permissions } from '@/common/decorators/permissions.decorator';
+import { getTenantOrgId, getUserAuditEmail } from '../common/tenant.util';
 
 @ApiTags('Credit Realization - Installment Setups & Policies')
 @ApiBearerAuth()
@@ -20,23 +21,27 @@ export class CrSetupController {
   @Permissions('credit-realization:write')
   @ApiOperation({ summary: 'Create an installment policy plan setup' })
   @ApiBody({ type: CreateCrInstallmentSetupDto })
-  async create(@Body() createDto: CreateCrInstallmentSetupDto) {
-    return this.service.create(createDto);
+  async create(@Body() createDto: CreateCrInstallmentSetupDto, @Req() req: any) {
+    const orgId = getTenantOrgId(req);
+    const userEmail = getUserAuditEmail(req);
+    return this.service.create(createDto, orgId, userEmail);
   }
 
   @Get()
   @Permissions('credit-realization:read')
   @ApiOperation({ summary: 'List all installment setups' })
-  async findAll() {
-    return this.service.findAll();
+  async findAll(@Req() req: any) {
+    const orgId = getTenantOrgId(req);
+    return this.service.findAll(orgId);
   }
 
   @Get(':uuid')
   @Permissions('credit-realization:read')
   @ApiOperation({ summary: 'Get installment setup by UUID' })
   @ApiParam({ name: 'uuid' })
-  async findOne(@Param('uuid') uuid: string) {
-    return this.service.findOne(uuid);
+  async findOne(@Param('uuid') uuid: string, @Req() req: any) {
+    const orgId = getTenantOrgId(req);
+    return this.service.findOne(uuid, orgId);
   }
 
   @Put(':uuid')
@@ -47,15 +52,21 @@ export class CrSetupController {
   async update(
     @Param('uuid') uuid: string,
     @Body() updateDto: UpdateCrInstallmentSetupDto,
+    @Req() req: any,
   ) {
-    return this.service.update(uuid, updateDto);
+    const orgId = getTenantOrgId(req);
+    const userEmail = getUserAuditEmail(req);
+    return this.service.update(uuid, updateDto, orgId, userEmail);
   }
 
   @Delete(':uuid')
   @Permissions('credit-realization:write')
   @ApiOperation({ summary: 'Delete installment setup' })
   @ApiParam({ name: 'uuid' })
-  async remove(@Param('uuid') uuid: string) {
-    return this.service.remove(uuid);
+  async remove(@Param('uuid') uuid: string, @Req() req: any) {
+    const orgId = getTenantOrgId(req);
+    const userEmail = getUserAuditEmail(req);
+    return this.service.remove(uuid, orgId, userEmail);
   }
 }
+

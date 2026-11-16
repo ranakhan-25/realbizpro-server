@@ -1,10 +1,11 @@
-import { Controller, Post, Get, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, Req, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiParam, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { CrInstallmentService } from './cr-installment.service';
 import { CreateCrPaymentDto, WaivePenaltyDto } from './dto/create-cr-payment.dto';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '@/common/guards/permissions.guard';
 import { Permissions } from '@/common/decorators/permissions.decorator';
+import { getTenantOrgId, getUserAuditEmail } from '../common/tenant.util';
 
 @ApiTags('Credit Realization - Installments & Payments')
 @ApiBearerAuth()
@@ -18,16 +19,18 @@ export class CrInstallmentController {
   @ApiOperation({
     summary: 'Get all overdue installments with dynamic penalty & delay day calculation',
   })
-  async getOverdueInstallments() {
-    return this.service.getOverdueInstallments();
+  async getOverdueInstallments(@Req() req: any) {
+    const orgId = getTenantOrgId(req);
+    return this.service.getOverdueInstallments(orgId);
   }
 
   @Get(':uuid')
   @Permissions('credit-realization:read')
   @ApiOperation({ summary: 'Get installment plan details and payment vouchers by UUID' })
   @ApiParam({ name: 'uuid' })
-  async findOne(@Param('uuid') uuid: string) {
-    return this.service.findOne(uuid);
+  async findOne(@Param('uuid') uuid: string, @Req() req: any) {
+    const orgId = getTenantOrgId(req);
+    return this.service.findOne(uuid, orgId);
   }
 
   @Post(':uuid/payments')
@@ -38,8 +41,11 @@ export class CrInstallmentController {
   async recordPayment(
     @Param('uuid') uuid: string,
     @Body() dto: CreateCrPaymentDto,
+    @Req() req: any,
   ) {
-    return this.service.recordPayment(uuid, dto);
+    const orgId = getTenantOrgId(req);
+    const userEmail = getUserAuditEmail(req);
+    return this.service.recordPayment(uuid, dto, orgId, userEmail);
   }
 
   @Post(':uuid/waive-penalty')
@@ -50,7 +56,11 @@ export class CrInstallmentController {
   async waivePenalty(
     @Param('uuid') uuid: string,
     @Body() dto: WaivePenaltyDto,
+    @Req() req: any,
   ) {
-    return this.service.waivePenalty(uuid, dto);
+    const orgId = getTenantOrgId(req);
+    const userEmail = getUserAuditEmail(req);
+    return this.service.waivePenalty(uuid, dto, orgId, userEmail);
   }
 }
+

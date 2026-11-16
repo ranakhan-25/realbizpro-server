@@ -22,6 +22,7 @@ import { CreateCrAdjustmentDto } from './dto/create-cr-adjustment.dto';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '@/common/guards/permissions.guard';
 import { Permissions } from '@/common/decorators/permissions.decorator';
+import { getTenantOrgId, getUserAuditEmail } from '../common/tenant.util';
 
 @ApiTags('Credit Realization - Financial Adjustments & Credit/Debit Notes')
 @ApiBearerAuth()
@@ -35,8 +36,8 @@ export class CrAdjustmentController {
   @ApiOperation({ summary: 'Create financial adjustment (credit note, debit note, or rounding)' })
   @ApiBody({ type: CreateCrAdjustmentDto })
   async create(@Body() createDto: CreateCrAdjustmentDto, @Req() req: any) {
-    const orgId = req.user?.org_id || req.user?.organization_id;
-    const userEmail = req.user?.email;
+    const orgId = getTenantOrgId(req);
+    const userEmail = getUserAuditEmail(req);
     return this.service.create(createDto, orgId, userEmail);
   }
 
@@ -52,7 +53,7 @@ export class CrAdjustmentController {
     @Query('status') status?: string,
     @Req() req?: any,
   ) {
-    const orgId = req.user?.org_id || req.user?.organization_id;
+    const orgId = getTenantOrgId(req);
     return this.service.findAll({
       org_id: orgId,
       sale_agreement_id: saleAgreementId ? parseInt(saleAgreementId, 10) : undefined,
@@ -66,7 +67,7 @@ export class CrAdjustmentController {
   @ApiOperation({ summary: 'Get adjustment details by UUID' })
   @ApiParam({ name: 'uuid' })
   async findOne(@Param('uuid') uuid: string, @Req() req: any) {
-    const orgId = req.user?.org_id || req.user?.organization_id;
+    const orgId = getTenantOrgId(req);
     return this.service.findOne(uuid, orgId);
   }
 
@@ -79,8 +80,8 @@ export class CrAdjustmentController {
     @Body('reason') reason: string,
     @Req() req: any,
   ) {
-    const orgId = req.user?.org_id || req.user?.organization_id;
-    const userEmail = req.user?.email;
+    const orgId = getTenantOrgId(req);
+    const userEmail = getUserAuditEmail(req);
     return this.service.reverse(uuid, orgId, userEmail, reason);
   }
 
@@ -89,8 +90,9 @@ export class CrAdjustmentController {
   @ApiOperation({ summary: 'Delete financial adjustment' })
   @ApiParam({ name: 'uuid' })
   async remove(@Param('uuid') uuid: string, @Req() req: any) {
-    const orgId = req.user?.org_id || req.user?.organization_id;
-    const userEmail = req.user?.email;
+    const orgId = getTenantOrgId(req);
+    const userEmail = getUserAuditEmail(req);
     return this.service.remove(uuid, orgId, userEmail);
   }
 }
+

@@ -93,18 +93,20 @@ export class CrAdjustmentService {
       where,
       include: [
         {
-          model: CrSaleAgreement,
+          model: this.agreementModel,
+          as: 'sale_agreement',
           attributes: [
             'id',
             'uuid',
             'agreement_number',
             'customer_name',
-            'project_name',
-            'unit_number',
+            'property_type',
+            'unit_identifier',
           ],
         },
         {
-          model: CrInstallmentPlan,
+          model: this.planModel,
+          as: 'installment_plan',
           attributes: [
             'id',
             'uuid',
@@ -129,10 +131,12 @@ export class CrAdjustmentService {
       where,
       include: [
         {
-          model: CrSaleAgreement,
+          model: this.agreementModel,
+          as: 'sale_agreement',
         },
         {
-          model: CrInstallmentPlan,
+          model: this.planModel,
+          as: 'installment_plan',
         },
       ],
     });

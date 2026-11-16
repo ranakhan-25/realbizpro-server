@@ -17,13 +17,14 @@ export class CrInstallmentService {
     private readonly agreementModel: typeof CrSaleAgreement,
   ) {}
 
-  async getOverdueInstallments() {
+  async getOverdueInstallments(orgId?: string) {
     const today = new Date().toISOString().split('T')[0];
 
     const overduePlans = await this.planModel.findAll({
       where: {
         due_date: { [Op.lt]: today },
         due_amount: { [Op.gt]: 0 },
+        ...(orgId ? { org_id: orgId } : {}),
       },
       include: [{ model: this.agreementModel, as: 'sale_agreement' }],
       order: [['due_date', 'ASC']],
@@ -58,9 +59,12 @@ export class CrInstallmentService {
     return updatedResults;
   }
 
-  async findOne(uuid: string): Promise<CrInstallmentPlan> {
+  async findOne(uuid: string, orgId?: string): Promise<CrInstallmentPlan> {
     const plan = await this.planModel.findOne({
-      where: { uuid },
+      where: {
+        uuid,
+        ...(orgId ? { org_id: orgId } : {}),
+      },
       include: [
         { model: this.paymentModel, as: 'payments' },
         { model: this.agreementModel, as: 'sale_agreement' },
@@ -70,8 +74,13 @@ export class CrInstallmentService {
     return plan;
   }
 
-  async recordPayment(uuid: string, dto: CreateCrPaymentDto) {
-    const plan = await this.findOne(uuid);
+  async recordPayment(
+    uuid: string,
+    dto: CreateCrPaymentDto,
+    orgId?: string,
+    userEmail?: string,
+  ) {
+    const plan = await this.findOne(uuid, orgId);
 
     const paymentAmount = Number(dto.paid_amount);
     if (paymentAmount <= 0) {
@@ -82,7 +91,8 @@ export class CrInstallmentService {
     const payment = await this.paymentModel.create({
       ...dto,
       installment_plan_id: plan.id,
-      org_id: plan.org_id,
+      org_id: plan.org_id || orgId,
+      ...(userEmail ? { createdBy: userEmail } : {}),
     } as any);
 
     // Update plan balances
@@ -97,18 +107,24 @@ export class CrInstallmentService {
       paid_amount: parseFloat(newPaid.toFixed(2)),
       due_amount: parseFloat(newDue.toFixed(2)),
       status: newStatus,
+      ...(userEmail ? { updatedBy: userEmail } : {}),
     });
 
     return {
       success: true,
       message: 'Payment recorded successfully',
       payment,
-      updated_plan: await this.findOne(uuid),
+      updated_plan: await this.findOne(uuid, orgId),
     };
   }
 
-  async waivePenalty(uuid: string, dto: WaivePenaltyDto) {
-    const plan = await this.findOne(uuid);
+  async waivePenalty(
+    uuid: string,
+    dto: WaivePenaltyDto,
+    orgId?: string,
+    userEmail?: string,
+  ) {
+    const plan = await this.findOne(uuid, orgId);
 
     const currentWaived = Number(plan.penalty_waived || 0);
     const newWaived = currentWaived + Number(dto.amount_to_waive);
@@ -118,12 +134,13 @@ export class CrInstallmentService {
     await plan.update({
       penalty_waived: parseFloat(newWaived.toFixed(2)),
       penalty_amount: parseFloat(netPenalty.toFixed(2)),
+      ...(userEmail ? { updatedBy: userEmail } : {}),
     });
 
     return {
       success: true,
       message: 'Penalty waived successfully',
-      plan: await this.findOne(uuid),
+      plan: await this.findOne(uuid, orgId),
     };
   }
 }

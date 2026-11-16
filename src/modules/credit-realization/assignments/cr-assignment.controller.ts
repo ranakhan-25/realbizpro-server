@@ -27,6 +27,7 @@ import {
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '@/common/guards/permissions.guard';
 import { Permissions } from '@/common/decorators/permissions.decorator';
+import { getTenantOrgId, getUserAuditEmail } from '../common/tenant.util';
 
 @ApiTags('Credit Realization - Recovery Officer Assignments')
 @ApiBearerAuth()
@@ -40,8 +41,8 @@ export class CrAssignmentController {
   @ApiOperation({ summary: 'Assign recovery officer to sale agreement or customer' })
   @ApiBody({ type: CreateCrAssignmentDto })
   async create(@Body() createDto: CreateCrAssignmentDto, @Req() req: any) {
-    const orgId = req.user?.org_id || req.user?.organization_id;
-    const userEmail = req.user?.email;
+    const orgId = getTenantOrgId(req);
+    const userEmail = getUserAuditEmail(req);
     return this.service.create(createDto, orgId, userEmail);
   }
 
@@ -59,8 +60,8 @@ export class CrAssignmentController {
     },
     @Req() req: any,
   ) {
-    const orgId = req.user?.org_id || req.user?.organization_id;
-    const userEmail = req.user?.email;
+    const orgId = getTenantOrgId(req);
+    const userEmail = getUserAuditEmail(req);
     return this.service.bulkAssign(body, orgId, userEmail);
   }
 
@@ -76,7 +77,7 @@ export class CrAssignmentController {
     @Query('sale_agreement_id') saleAgreementId?: string,
     @Req() req?: any,
   ) {
-    const orgId = req.user?.org_id || req.user?.organization_id;
+    const orgId = getTenantOrgId(req);
     return this.service.findAll({
       org_id: orgId,
       officer_id: officerId,
@@ -90,7 +91,7 @@ export class CrAssignmentController {
   @ApiOperation({ summary: 'Get officer assignment details by UUID' })
   @ApiParam({ name: 'uuid' })
   async findOne(@Param('uuid') uuid: string, @Req() req: any) {
-    const orgId = req.user?.org_id || req.user?.organization_id;
+    const orgId = getTenantOrgId(req);
     return this.service.findOne(uuid, orgId);
   }
 
@@ -104,8 +105,8 @@ export class CrAssignmentController {
     @Body() updateDto: UpdateCrAssignmentDto,
     @Req() req: any,
   ) {
-    const orgId = req.user?.org_id || req.user?.organization_id;
-    const userEmail = req.user?.email;
+    const orgId = getTenantOrgId(req);
+    const userEmail = getUserAuditEmail(req);
     return this.service.update(uuid, updateDto, orgId, userEmail);
   }
 
@@ -119,8 +120,8 @@ export class CrAssignmentController {
     @Body() updateDto: UpdateCrAssignmentDto,
     @Req() req: any,
   ) {
-    const orgId = req.user?.org_id || req.user?.organization_id;
-    const userEmail = req.user?.email;
+    const orgId = getTenantOrgId(req);
+    const userEmail = getUserAuditEmail(req);
     return this.service.update(uuid, updateDto, orgId, userEmail);
   }
 
@@ -129,7 +130,7 @@ export class CrAssignmentController {
   @ApiOperation({ summary: 'Recalculate collected amount and status against actual receipts' })
   @ApiParam({ name: 'uuid' })
   async syncProgress(@Param('uuid') uuid: string, @Req() req: any) {
-    const orgId = req.user?.org_id || req.user?.organization_id;
+    const orgId = getTenantOrgId(req);
     return this.service.syncProgress(uuid, orgId);
   }
 
@@ -138,8 +139,9 @@ export class CrAssignmentController {
   @ApiOperation({ summary: 'Delete officer assignment' })
   @ApiParam({ name: 'uuid' })
   async remove(@Param('uuid') uuid: string, @Req() req: any) {
-    const orgId = req.user?.org_id || req.user?.organization_id;
-    const userEmail = req.user?.email;
+    const orgId = getTenantOrgId(req);
+    const userEmail = getUserAuditEmail(req);
     return this.service.remove(uuid, orgId, userEmail);
   }
 }
+

@@ -4,6 +4,7 @@ import { CrReportsService } from './cr-reports.service';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '@/common/guards/permissions.guard';
 import { Permissions } from '@/common/decorators/permissions.decorator';
+import { getTenantOrgId } from '../common/tenant.util';
 
 @ApiTags('Credit Realization - Reports & Aging Analysis')
 @ApiBearerAuth()
@@ -19,7 +20,7 @@ export class CrReportsController {
       'Get 5-bucket aging matrix (0-30, 31-60, 61-90, 91-120, 120+ days) with overdue amounts',
   })
   async getAgingAnalysis(@Req() req: any) {
-    const orgId = req.user?.org_id || req.user?.organization_id;
+    const orgId = getTenantOrgId(req);
     return this.service.getAgingAnalysis(orgId);
   }
 
@@ -27,7 +28,7 @@ export class CrReportsController {
   @Permissions('credit-realization:read')
   @ApiOperation({ summary: 'Get macro overview of overdue principal vs penalties' })
   async getOverdueSummary(@Req() req: any) {
-    const orgId = req.user?.org_id || req.user?.organization_id;
+    const orgId = getTenantOrgId(req);
     return this.service.getOverdueSummary(orgId);
   }
 
@@ -35,7 +36,7 @@ export class CrReportsController {
   @Permissions('credit-realization:read')
   @ApiOperation({ summary: 'Get total payment collections categorized by payment method' })
   async getCollectionSummary(@Req() req: any) {
-    const orgId = req.user?.org_id || req.user?.organization_id;
+    const orgId = getTenantOrgId(req);
     return this.service.getCollectionSummary(orgId);
   }
 
@@ -43,7 +44,7 @@ export class CrReportsController {
   @Permissions('credit-realization:read')
   @ApiOperation({ summary: 'Get officer target quotas vs actual collections leaderboard' })
   async getOfficerPerformance(@Req() req: any) {
-    const orgId = req.user?.org_id || req.user?.organization_id;
+    const orgId = getTenantOrgId(req);
     return this.service.getOfficerPerformance(orgId);
   }
 
@@ -51,7 +52,8 @@ export class CrReportsController {
   @Permissions('credit-realization:read')
   @ApiOperation({ summary: 'Get top overdue debtors list with recovery interaction logs' })
   async getDefaultersLeaderboard(@Req() req: any) {
-    const orgId = req.user?.org_id || req.user?.organization_id;
+    const orgId = getTenantOrgId(req);
     return this.service.getDefaultersLeaderboard(orgId);
   }
 }
+

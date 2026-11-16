@@ -54,16 +54,18 @@ export class CrAssignmentService {
       where,
       include: [
         {
-          model: CrSaleAgreement,
+          model: this.agreementModel,
+          as: 'sale_agreement',
           attributes: [
             'id',
             'uuid',
             'agreement_number',
             'customer_id',
             'customer_name',
-            'project_name',
-            'unit_number',
-            'total_sale_value',
+            'customer_phone',
+            'property_type',
+            'unit_identifier',
+            'total_price',
             'status',
           ],
         },
@@ -80,7 +82,8 @@ export class CrAssignmentService {
       where,
       include: [
         {
-          model: CrSaleAgreement,
+          model: this.agreementModel,
+          as: 'sale_agreement',
         },
       ],
     });

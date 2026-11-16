@@ -26,6 +26,7 @@ import {
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '@/common/guards/permissions.guard';
 import { Permissions } from '@/common/decorators/permissions.decorator';
+import { getTenantOrgId, getUserAuditEmail } from '../common/tenant.util';
 
 @ApiTags('Credit Realization - Penalty Waiver Requests & Approval')
 @ApiBearerAuth()
@@ -39,8 +40,8 @@ export class CrWaiverController {
   @ApiOperation({ summary: 'Submit delay penalty waiver request' })
   @ApiBody({ type: CreateCrWaiverDto })
   async create(@Body() createDto: CreateCrWaiverDto, @Req() req: any) {
-    const orgId = req.user?.org_id || req.user?.organization_id;
-    const userEmail = req.user?.email;
+    const orgId = getTenantOrgId(req);
+    const userEmail = getUserAuditEmail(req);
     return this.service.create(createDto, orgId, userEmail);
   }
 
@@ -54,7 +55,7 @@ export class CrWaiverController {
     @Query('approval_status') approvalStatus?: string,
     @Req() req?: any,
   ) {
-    const orgId = req.user?.org_id || req.user?.organization_id;
+    const orgId = getTenantOrgId(req);
     return this.service.findAll({
       org_id: orgId,
       sale_agreement_id: saleAgreementId ? parseInt(saleAgreementId, 10) : undefined,
@@ -67,7 +68,7 @@ export class CrWaiverController {
   @ApiOperation({ summary: 'Get waiver request details by UUID' })
   @ApiParam({ name: 'uuid' })
   async findOne(@Param('uuid') uuid: string, @Req() req: any) {
-    const orgId = req.user?.org_id || req.user?.organization_id;
+    const orgId = getTenantOrgId(req);
     return this.service.findOne(uuid, orgId);
   }
 
@@ -81,8 +82,8 @@ export class CrWaiverController {
     @Body() dto: UpdateCrWaiverStatusDto,
     @Req() req: any,
   ) {
-    const orgId = req.user?.org_id || req.user?.organization_id;
-    const userEmail = req.user?.email;
+    const orgId = getTenantOrgId(req);
+    const userEmail = getUserAuditEmail(req);
     return this.service.updateStatus(uuid, dto, orgId, userEmail);
   }
 
@@ -91,8 +92,9 @@ export class CrWaiverController {
   @ApiOperation({ summary: 'Delete pending waiver request' })
   @ApiParam({ name: 'uuid' })
   async remove(@Param('uuid') uuid: string, @Req() req: any) {
-    const orgId = req.user?.org_id || req.user?.organization_id;
-    const userEmail = req.user?.email;
+    const orgId = getTenantOrgId(req);
+    const userEmail = getUserAuditEmail(req);
     return this.service.remove(uuid, orgId, userEmail);
   }
 }
+

@@ -280,10 +280,17 @@ kpi
 const cr = `
 dashboard
 agreements
-setups
-recovery
+schedule
+due
 receipt-voucher
 overdue-list
+assignments
+waivers
+performance
+recovery
+followups
+visits
+setups
 reports
   realization-summary-report
   sale-collection-report
