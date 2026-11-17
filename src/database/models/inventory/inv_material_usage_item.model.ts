@@ -1,4 +1,4 @@
-import { Column, DataType, Table, PrimaryKey, Default, ForeignKey, BelongsTo } from 'sequelize-typescript';
+import { Column, DataType, Table, PrimaryKey, Default, ForeignKey, BelongsTo, Index } from 'sequelize-typescript';
 import { BaseModel } from '../../base.model';
 import { InvMaterialUsage } from './inv_material_usage.model';
 import { InvItem } from './inv_item.model';
@@ -42,9 +42,10 @@ export class InvMaterialUsageItem extends BaseModel<InvMaterialUsageItemAttribut
   @Column({ type: DataType.STRING, allowNull: true, field: 'deleted_by' })
   declare deletedBy?: string;
 
+  @Index({ name: 'idx_inv_material_usage_item_org_id' })
   @Column({
     type: DataType.STRING,
-    allowNull: true,
+    allowNull: false,
   })
-  declare projectId?: string;
+  declare org_id: string;
 }

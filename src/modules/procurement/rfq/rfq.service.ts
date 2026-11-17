@@ -20,19 +20,19 @@ import { QueryRfqDto } from './dto/query-rfq.dto';
 import { UpdateRfqDto } from './dto/update-rfq.dto';
 
 const include = [
-  { model: SysCompany, as: 'company', attributes: ['uuid', 'name'], required: false },
-  { model: SupplierAccounts, as: 'supplier', attributes: ['uuid', 'supplierCode', 'supplierName'] },
-  { model: ProjectType, as: 'projectType', attributes: ['uuid', 'code', 'name'], required: false },
-  { model: Project, as: 'project', attributes: ['uuid', 'code', 'name'], required: false },
-  { model: BillingCategory, as: 'titleOfWork', attributes: ['uuid', 'code', 'name'], required: false },
-  { model: Task, as: 'task', attributes: ['uuid', 'taskName'], required: false },
-  { model: Site, as: 'site', attributes: ['uuid', 'code', 'name'], required: false },
-  { model: Category, as: 'category', attributes: ['uuid', 'code', 'name'], required: false },
-  { model: MaterialRequisition, as: 'requisition', attributes: ['uuid', 'code'], required: false },
-  { model: SysUser, as: 'addedBy', attributes: ['id', 'name'], required: false },
-  { model: ProcurementRfqItem, as: 'items', include: [
-    { model: ProcurementItemEntry, as: 'item', attributes: ['uuid', 'item_code', 'name'], required: false },
-    { model: ProcurementUnit, as: 'unitRelation', attributes: ['uuid', 'code', 'name'], required: false },
+  { association: 'company', attributes: ['uuid', 'name'], required: false },
+  { association: 'supplier', attributes: ['uuid', 'supplierCode', 'supplierName'] },
+  { association: 'projectType', attributes: ['uuid', 'code', 'name'], required: false },
+  { association: 'project', attributes: ['uuid', 'code', 'name'], required: false },
+  { association: 'titleOfWork', attributes: ['uuid', 'code', 'name'], required: false },
+  { association: 'task', attributes: ['uuid', 'taskName'], required: false },
+  { association: 'site', attributes: ['uuid', 'code', 'name'], required: false },
+  { association: 'category', attributes: ['uuid', 'code', 'name'], required: false },
+  { association: 'requisition', attributes: ['uuid', 'code'], required: false },
+  { association: 'addedBy', attributes: ['id', 'name'], required: false },
+  { association: 'items', include: [
+    { association: 'item', attributes: ['uuid', 'item_code', 'name'], required: false },
+    { association: 'unitRelation', attributes: ['uuid', 'code', 'name'], required: false },
   ] },
 ];
 
@@ -77,7 +77,7 @@ export class RfqService {
   private async buildLines(inputs: CreateRfqItemDto[], categoryId?: string, transaction?: Transaction) {
     const lines: any[] = [];
     for (const input of inputs) {
-      const item = await this.itemModel.findOne({ where: { uuid: input.item_id } as any, include: [{ model: ProcurementUnit, as: 'unit' }], transaction });
+      const item = await this.itemModel.findOne({ where: { uuid: input.item_id } as any, include: [{ association: 'unit' }], transaction });
       if (!item) throw new BadRequestException(`Selected item ${input.item_id} does not exist`);
       if (categoryId && item.category_id !== categoryId) throw new BadRequestException(`Item ${item.item_code} does not belong to selected category`);
       const unit = item.unit ?? await this.unitModel.findOne({ where: { uuid: item.unit_id } as any, transaction });
@@ -112,6 +112,8 @@ export class RfqService {
   async findAll(query: QueryRfqDto) {
     const { page = 1, limit = 10, search, sortOrder = 'DESC', ...filters } = query;
     const where: any = {};
+    if ((query as any)?.orgId) where.orgId = (query as any).orgId;
+    if ((query as any)?.projectId) where.projectId = (query as any).projectId;
     for (const key of ['date', 'company_id', 'supplier_id', 'project_id', 'title_of_work_id', 'requisition_id', 'added_by_id']) if ((filters as any)[key] !== undefined) where[key] = (filters as any)[key];
     if (search) where[Op.or] = [{ code: { [Op.like]: `%${search}%` } }, { reference: { [Op.like]: `%${search}%` } }];
     const { rows, count } = await this.rfqModel.findAndCountAll({ where, include, distinct: true, limit, offset: (page - 1) * limit, order: [['createdAt', sortOrder]] });
@@ -171,7 +173,7 @@ export class RfqService {
       this.taskModel.findAll({ attributes: ['uuid', 'uid', 'taskName'], order: [['taskName', 'ASC']] }),
       this.siteModel.findAll({ where: projectId ? { projectId } as any : {}, attributes: ['uuid', 'projectId', 'code', 'name'], order: [['name', 'ASC']] }),
       this.categoryModel.findAll({ attributes: ['uuid', 'type', 'code', 'name'], order: [['name', 'ASC']] }),
-      this.itemModel.findAll({ where: categoryId ? { category_id: categoryId } as any : {}, attributes: ['uuid', 'category_id', 'unit_id', 'item_code', 'name', 'purchase_price'], include: [{ model: ProcurementUnit, as: 'unit', attributes: ['uuid', 'code', 'name'] }], order: [['name', 'ASC']] }),
+      this.itemModel.findAll({ where: categoryId ? { category_id: categoryId } as any : {}, attributes: ['uuid', 'category_id', 'unit_id', 'item_code', 'name', 'purchase_price'], include: [{ association: 'unit', attributes: ['uuid', 'code', 'name'] }], order: [['name', 'ASC']] }),
       this.unitModel.findAll({ attributes: ['uuid', 'code', 'name'], order: [['name', 'ASC']] }),
       this.requisitionModel.findAll({ attributes: ['uuid', 'code', 'date', 'projectId'], order: [['createdAt', 'DESC']] }),
       this.userModel.findAll({ attributes: ['id', 'name'], order: [['name', 'ASC']] }),

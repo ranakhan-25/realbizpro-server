@@ -1,5 +1,5 @@
 // Auto-generated types for FollowUp
-// Source: src/database/models/lams/follow-up.model.ts
+// Source: src\database\models\lams\follow-up.model.ts
 
 import type { AcquisitionLead } from '../models/lams/acquisition-lead.model';
 
@@ -18,7 +18,7 @@ export interface FollowUpAttributes {
   created_by?: number | null;
   added_by?: number | null;
   deleted_by?: number | null;
-  projectId?: string | null;
+  org_id: string;
 
   // Relations
   acquisition_lead?: AcquisitionLead;
@@ -34,7 +34,7 @@ export interface FollowUpCreationAttributes {
   created_by?: number | null;
   added_by?: number | null;
   deleted_by?: number | null;
-  projectId?: string | null;
+  org_id: string;
 }
 
 export type FollowUpUpdateAttributes = Partial<FollowUpCreationAttributes>;

@@ -1,5 +1,5 @@
 // Auto-generated types for BillingCategory
-// Source: src/database/models/projects/billing/pr_category.model.ts
+// Source: src\database\models\projects\billing\pr_category.model.ts
 
 import { CategoryType } from '../models/projects/billing/pr_category.model';
 
@@ -15,6 +15,7 @@ import type { ProcurementPurchaseOrder } from '../models/procurement/purchase-or
 import type { ProcurementAssetPurchaseOrder } from '../models/procurement/purchase-order/pr_asset_purchase_order.model';
 import type { ProcurementGrn } from '../models/procurement/grn/pr_grn.model';
 import type { ProcurementAssetGrn } from '../models/procurement/grn/pr_asset_grn.model';
+import type { SysOrganization } from '../models/system/sys_organization.model';
 
 export interface BillingCategoryAttributes {
   id: number;
@@ -29,6 +30,7 @@ export interface BillingCategoryAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
 
   // Relations
   materialRequisitions?: MaterialRequisition[];
@@ -43,6 +45,7 @@ export interface BillingCategoryAttributes {
   procurementAssetPurchaseOrders?: ProcurementAssetPurchaseOrder[];
   procurementGrns?: ProcurementGrn[];
   procurementAssetGrns?: ProcurementAssetGrn[];
+  organization?: SysOrganization;
 }
 
 export interface BillingCategoryCreationAttributes {
@@ -53,6 +56,7 @@ export interface BillingCategoryCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
 }
 
 export type BillingCategoryUpdateAttributes = Partial<BillingCategoryCreationAttributes>;
@@ -71,4 +75,5 @@ export interface BillingCategoryWithRelations extends BillingCategoryAttributes 
   procurementAssetPurchaseOrders?: ProcurementAssetPurchaseOrder[];
   procurementGrns?: ProcurementGrn[];
   procurementAssetGrns?: ProcurementAssetGrn[];
+  organization?: SysOrganization;
 }

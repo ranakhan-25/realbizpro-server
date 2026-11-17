@@ -5,6 +5,7 @@ import { LandOwner } from '../../../database/models/lams/land-owner.model';
 import { FollowUp } from '../../../database/models/lams/follow-up.model';
 import { NegotiationProcess } from '../../../database/models/lams/negotiation-process.model';
 import { LegalDocument } from '../../../database/models/lams/legal-document.model';
+import { LeadStageLog } from '../../../database/models/lams/lead-stage-log.model';
 import { AcquisitionLeadController } from './acquisition-lead.controller';
 import { AcquisitionLeadService } from './acquisition-lead.service';
 
@@ -16,9 +17,11 @@ import { AcquisitionLeadService } from './acquisition-lead.service';
       FollowUp,
       NegotiationProcess,
       LegalDocument,
+      LeadStageLog,
     ]),
   ],
   controllers: [AcquisitionLeadController],
   providers: [AcquisitionLeadService],
+  exports: [AcquisitionLeadService],
 })
 export class AcquisitionLeadModule {}

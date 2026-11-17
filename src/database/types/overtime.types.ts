@@ -1,7 +1,9 @@
 // Auto-generated types for Overtime
-// Source: src/database/models/hrm/employee/hrm_overtime_model.ts
+// Source: src\database\models\hrm\employee\hrm_overtime_model.ts
 
 import type { EmployeeList } from '../models/hrm/employee/hrm_employeeList_model';
+import type { SysOrganization } from '../models/system/sys_organization.model';
+import type { Project } from '../models/projects/project/pr_project.model';
 
 export interface OvertimeAttributes {
   id: number;
@@ -17,9 +19,13 @@ export interface OvertimeAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
+  projectId?: string | null;
 
   // Relations
   employee?: EmployeeList;
+  organization?: SysOrganization;
+  project?: Project;
 }
 
 export interface OvertimeCreationAttributes {
@@ -31,6 +37,8 @@ export interface OvertimeCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
+  projectId?: string | null;
 }
 
 export type OvertimeUpdateAttributes = Partial<OvertimeCreationAttributes>;
@@ -38,4 +46,6 @@ export type OvertimeUpdateAttributes = Partial<OvertimeCreationAttributes>;
 // Helper type for including relations
 export interface OvertimeWithRelations extends OvertimeAttributes {
   employee?: EmployeeList;
+  organization?: SysOrganization;
+  project?: Project;
 }

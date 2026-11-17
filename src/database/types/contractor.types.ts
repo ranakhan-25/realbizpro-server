@@ -1,11 +1,12 @@
 // Auto-generated types for Contractor
-// Source: src/database/models/projects/contract/pr_contractor.model.ts
+// Source: src\database\models\projects\contract\pr_contractor.model.ts
 
 import { ContractorUnderStatus } from '../models/projects/contract/pr_contractor.model';
 import { ContractorStatus } from '../models/projects/contract/pr_contractor.model';
 
 import type { ProcurementWorkOrder } from '../models/procurement/work-order/pr_procurement_work_order.model';
 import type { ProcurementWorkBill } from '../models/procurement/work-order/pr_work_bill.model';
+import type { SysOrganization } from '../models/system/sys_organization.model';
 
 export interface ContractorAttributes {
   id: number;
@@ -27,10 +28,12 @@ export interface ContractorAttributes {
   updatedBy?: string | null;
   deletedBy?: string | null;
   status: ContractorStatus;
+  orgId?: number | null;
 
   // Relations
   procurementWorkOrders?: ProcurementWorkOrder[];
   procurementWorkBills?: ProcurementWorkBill[];
+  organization?: SysOrganization;
 }
 
 export interface ContractorCreationAttributes {
@@ -48,6 +51,7 @@ export interface ContractorCreationAttributes {
   updatedBy?: string | null;
   deletedBy?: string | null;
   status?: ContractorStatus; // Has default value
+  orgId?: number | null;
 }
 
 export type ContractorUpdateAttributes = Partial<ContractorCreationAttributes>;
@@ -56,4 +60,5 @@ export type ContractorUpdateAttributes = Partial<ContractorCreationAttributes>;
 export interface ContractorWithRelations extends ContractorAttributes {
   procurementWorkOrders?: ProcurementWorkOrder[];
   procurementWorkBills?: ProcurementWorkBill[];
+  organization?: SysOrganization;
 }

@@ -18,6 +18,9 @@ export class QueryTransferLeadListDto {
   @ApiPropertyOptional({ description: 'Search lead code, name, mobile, or transfer reason' })
   @IsOptional() @IsString() declare search?: string;
 
+  @ApiPropertyOptional({ description: 'Filter by organization ID' })
+  @IsOptional() @Type(() => Number) @IsInt() declare orgId?: number;
+
   @ApiPropertyOptional({ default: 1 })
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) declare page?: number;
 

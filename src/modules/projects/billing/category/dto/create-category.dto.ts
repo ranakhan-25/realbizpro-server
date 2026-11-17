@@ -8,7 +8,7 @@ import {
   MaxLength,
 } from 'class-validator';
 import { CategoryType } from 'src/database/models/projects/billing/pr_category.model';
-
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class CreateCategoryDto {
   @IsEnum(CategoryType)
@@ -36,4 +36,7 @@ export class CreateCategoryDto {
   @IsString()
   @IsOptional()
   updatedBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
 }

@@ -179,4 +179,11 @@ export class CreateFlatLandDto {
   @IsOptional()
   @IsEnum(FlatLandStatus)
   status?: FlatLandStatus;
+    @ApiPropertyOptional({ example: 'user-uuid' })
+    @IsOptional()
+    @IsString()
+    createdBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
 }

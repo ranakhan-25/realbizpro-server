@@ -2,6 +2,7 @@ import { BelongsTo, Column, DataType, ForeignKey, HasMany, Table } from 'sequeli
 import { BaseModel } from 'src/database/base.model';
 import { Lead } from '../lead/crm-lead.model';
 import { SysUser } from 'src/database/models/system/sys_user.model';
+import { SysOrganization } from 'src/database/models/system/sys_organization.model';
 
 import type { TaskTypeAttributes, TaskTypeCreationAttributes } from '../../../types/tasktype.types';
 
@@ -13,10 +14,17 @@ import type { CrmInternalTaskAssigneeAttributes, CrmInternalTaskAssigneeCreation
 export class TaskType extends BaseModel<TaskTypeAttributes, TaskTypeCreationAttributes> {
   @Column({ type: DataType.STRING(255), allowNull: false }) declare name: string;
   @Column({ type: DataType.STRING(255), allowNull: true }) declare code?: string;
-  @Column({ type: DataType.STRING(255), allowNull: true, field: 'created_by' }) declare createdBy?: string;
-  @Column({ type: DataType.STRING(255), allowNull: true, field: 'updated_by' }) declare updatedBy?: string;
-  @Column({ type: DataType.STRING(255), allowNull: true, field: 'deleted_by' }) declare deletedBy?: string;
-  @Column({ type: DataType.STRING(255), allowNull: true, field: 'project_id' }) declare projectId?: string;
+
+  @ForeignKey(() => SysOrganization)
+  @Column({ type: DataType.BIGINT, allowNull: true, field: 'org_id', defaultValue: null })
+  declare orgId?: number | null;
+  @BelongsTo(() => SysOrganization, { foreignKey: 'orgId', targetKey: 'id', as: 'organization' })
+  declare organization?: SysOrganization;
+
+  @Column({ type: DataType.STRING(255), allowNull: true, field: 'created_by', defaultValue: null }) declare createdBy?: string | null;
+  @Column({ type: DataType.STRING(255), allowNull: true, field: 'updated_by', defaultValue: null }) declare updatedBy?: string | null;
+  @Column({ type: DataType.STRING(255), allowNull: true, field: 'deleted_by', defaultValue: null }) declare deletedBy?: string | null;
+  @Column({ type: DataType.STRING(255), allowNull: true, field: 'project_id', defaultValue: null }) declare projectId?: string | null;
 
   @HasMany(() => CrmInternalTask, { foreignKey: 'taskTypeId', sourceKey: 'id', as: 'tasks' }) declare tasks?: CrmInternalTask[];
 }
@@ -32,10 +40,17 @@ export class CrmInternalTask extends BaseModel<CrmInternalTaskAttributes, CrmInt
   @Column({ type: DataType.STRING(255), allowNull: true, defaultValue: 'todo' }) declare status?: string;
   @ForeignKey(() => Lead)
   @Column({ type: DataType.BIGINT, allowNull: true, field: 'related_lead_id' }) declare relatedLeadId?: number;
-  @Column({ type: DataType.STRING(255), allowNull: true, field: 'created_by' }) declare createdBy?: string;
-  @Column({ type: DataType.STRING(255), allowNull: true, field: 'updated_by' }) declare updatedBy?: string;
-  @Column({ type: DataType.STRING(255), allowNull: true, field: 'deleted_by' }) declare deletedBy?: string;
-  @Column({ type: DataType.STRING(255), allowNull: true, field: 'project_id' }) declare projectId?: string;
+
+  @ForeignKey(() => SysOrganization)
+  @Column({ type: DataType.BIGINT, allowNull: true, field: 'org_id', defaultValue: null })
+  declare orgId?: number | null;
+  @BelongsTo(() => SysOrganization, { foreignKey: 'orgId', targetKey: 'id', as: 'organization' })
+  declare organization?: SysOrganization;
+
+  @Column({ type: DataType.STRING(255), allowNull: true, field: 'created_by', defaultValue: null }) declare createdBy?: string | null;
+  @Column({ type: DataType.STRING(255), allowNull: true, field: 'updated_by', defaultValue: null }) declare updatedBy?: string | null;
+  @Column({ type: DataType.STRING(255), allowNull: true, field: 'deleted_by', defaultValue: null }) declare deletedBy?: string | null;
+  @Column({ type: DataType.STRING(255), allowNull: true, field: 'project_id', defaultValue: null }) declare projectId?: string | null;
 
   @BelongsTo(() => TaskType, { foreignKey: 'taskTypeId', targetKey: 'id', as: 'taskType' }) declare taskType?: TaskType;
   @BelongsTo(() => Lead, { foreignKey: 'relatedLeadId', targetKey: 'id', as: 'lead' }) declare lead?: Lead;
@@ -51,10 +66,17 @@ export class CrmInternalTaskAssignee extends BaseModel<CrmInternalTaskAssigneeAt
   @Column({ type: DataType.STRING(255), allowNull: true, field: 'assigned_by' }) declare assignedBy?: string;
   @Column({ type: DataType.STRING(255), allowNull: true, defaultValue: 'assigned' }) declare status?: string;
   @Column({ type: DataType.DATE, allowNull: true, field: 'completed_at' }) declare completedAt?: Date;
-  @Column({ type: DataType.STRING(255), allowNull: true, field: 'created_by' }) declare createdBy?: string;
-  @Column({ type: DataType.STRING(255), allowNull: true, field: 'updated_by' }) declare updatedBy?: string;
-  @Column({ type: DataType.STRING(255), allowNull: true, field: 'deleted_by' }) declare deletedBy?: string;
-  @Column({ type: DataType.STRING(255), allowNull: true, field: 'project_id' }) declare projectId?: string;
+
+  @ForeignKey(() => SysOrganization)
+  @Column({ type: DataType.BIGINT, allowNull: true, field: 'org_id', defaultValue: null })
+  declare orgId?: number | null;
+  @BelongsTo(() => SysOrganization, { foreignKey: 'orgId', targetKey: 'id', as: 'organization' })
+  declare organization?: SysOrganization;
+
+  @Column({ type: DataType.STRING(255), allowNull: true, field: 'created_by', defaultValue: null }) declare createdBy?: string | null;
+  @Column({ type: DataType.STRING(255), allowNull: true, field: 'updated_by', defaultValue: null }) declare updatedBy?: string | null;
+  @Column({ type: DataType.STRING(255), allowNull: true, field: 'deleted_by', defaultValue: null }) declare deletedBy?: string | null;
+  @Column({ type: DataType.STRING(255), allowNull: true, field: 'project_id', defaultValue: null }) declare projectId?: string | null;
 
   @BelongsTo(() => CrmInternalTask, { foreignKey: 'taskId', targetKey: 'id', as: 'task' }) declare task?: CrmInternalTask;
   @BelongsTo(() => SysUser, { foreignKey: 'userId', targetKey: 'userCode', as: 'assignedUser' }) declare assignedUser?: SysUser;

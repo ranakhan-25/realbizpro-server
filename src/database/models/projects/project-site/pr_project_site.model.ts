@@ -24,6 +24,7 @@ import { ProcurementAssetPurchaseOrder } from '../../procurement/purchase-order/
 import { ProcurementGrn } from '../../procurement/grn/pr_grn.model';
 import { ProcurementAssetGrn } from '../../procurement/grn/pr_asset_grn.model';
 import { ProcurementHireOrder } from '../../procurement/equipment-hire/pr_hire_order.model';
+import { SysOrganization } from "src/database/models/system/sys_organization.model";
 
 @Table({
   tableName: 'sites',
@@ -109,20 +110,37 @@ export class Site
   @HasMany(() => ProcurementHireOrder, { foreignKey: 'site_id', sourceKey: 'uuid', as: 'equipmentHireOrders' }) declare equipmentHireOrders?: ProcurementHireOrder[];
   // ─── Audit fields ───────────────────────────────────────
   @Column({
-    type: DataType.INTEGER, // change to STRING / UUID if needed
-    allowNull: true,
-  })
-  declare createdBy?: number;
+          field: 'created_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
+  declare createdBy?: string;
 
   @Column({
-    type: DataType.INTEGER,
-    allowNull: true,
-  })
-  declare updatedBy?: number;
+          field: 'updated_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
+  declare updatedBy?: any;
 
   @Column({
-    type: DataType.INTEGER,
-    allowNull: true,
-  })
-  declare deletedBy?: number;
+          field: 'deleted_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
+  declare deletedBy?: string;
+    @ForeignKey(() => SysOrganization)
+    @Column({
+            type: DataType.BIGINT,
+            allowNull: true,
+            field: 'org_id',
+            defaultValue: null,
+          })
+    declare orgId?: number | null;
+    @BelongsTo(() => SysOrganization, {
+            foreignKey: 'orgId',
+            targetKey: 'id',
+            as: 'organization',
+          })
+    declare organization?: SysOrganization;
 }

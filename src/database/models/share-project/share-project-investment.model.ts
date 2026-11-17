@@ -13,6 +13,17 @@ export enum ShareProjectInvestmentStatus {
 
 @Table({ tableName: 'share_project_investments', timestamps: true, paranoid: true, underscored: true })
 export class ShareProjectInvestment extends BaseModel<ShareProjectInvestmentAttributes, ShareProjectInvestmentCreationAttributes> {
+  @Column({ type: DataType.STRING(40), allowNull: true, unique: true })
+  declare code?: string;
+
+  @Column({ type: DataType.STRING(150), allowNull: true })
+  declare investorName?: string;
+
+  @Column({ type: DataType.STRING(255), allowNull: true })
+  declare investorEmail?: string;
+
+  @Column({ type: DataType.STRING(20), allowNull: true })
+  declare investorPhone?: string;
   @ForeignKey(() => ShareProject)
   @Column({ type: DataType.UUID, allowNull: false, field: 'project_uuid' })
   declare projectId: string;

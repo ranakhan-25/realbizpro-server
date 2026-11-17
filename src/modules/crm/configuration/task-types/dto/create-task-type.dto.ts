@@ -13,4 +13,8 @@ export class CreateTaskTypeDto {
   @ApiPropertyOptional({ enum: ['Active', 'Inactive'], default: 'Active' })
   @IsOptional() @IsIn(['Active', 'Inactive'])
   declare status?: 'Active' | 'Inactive';
+
+  @ApiPropertyOptional({ type: Number, description: 'Organization ID' })
+  @IsOptional()
+  declare orgId?: number;
 }

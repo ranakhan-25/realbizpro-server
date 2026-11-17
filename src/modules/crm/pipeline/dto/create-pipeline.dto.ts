@@ -14,4 +14,8 @@ export class CreatePipelineDto {
   @ApiPropertyOptional({ minimum: 0, default: 0, example: 25000000, description: 'Estimated pipeline value in BDT' })
   @IsOptional() @Type(() => Number) @IsNumber({ maxDecimalPlaces: 2 }) @Min(0)
   declare estimatedPipelineValue?: number;
+
+  @ApiPropertyOptional({ example: 1 })
+  @IsOptional() @IsInt()
+  declare orgId?: number;
 }

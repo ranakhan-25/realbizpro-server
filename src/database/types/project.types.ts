@@ -1,5 +1,5 @@
 // Auto-generated types for Project
-// Source: src/database/models/projects/project/pr_project.model.ts
+// Source: src\database\models\projects\project\pr_project.model.ts
 
 import { ProjectStatus } from '../models/projects/project/pr_project.model';
 
@@ -41,6 +41,7 @@ import type { CrmLeadPipeline } from '../models/crm/lead/crm-lead-pipeline.model
 import type { LeadPropertyInterest } from '../models/crm/lead/crm-lead-property-interest.model';
 import type { Lead } from '../models/crm/lead/crm-lead.model';
 import type { CrmLeadNegotiation } from '../models/crm/call-center/crm-lead-negotiation.model';
+import type { SysOrganization } from '../models/system/sys_organization.model';
 
 export interface ProjectAttributes {
   id: number;
@@ -68,6 +69,7 @@ export interface ProjectAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
 
   // Relations
   type?: ProjectType;
@@ -108,6 +110,7 @@ export interface ProjectAttributes {
   crmLeadInterests?: LeadPropertyInterest[];
   crmLeads?: Lead[];
   crmNegotiations?: CrmLeadNegotiation[];
+  organization?: SysOrganization;
 }
 
 export interface ProjectCreationAttributes {
@@ -131,6 +134,7 @@ export interface ProjectCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
 }
 
 export type ProjectUpdateAttributes = Partial<ProjectCreationAttributes>;
@@ -175,4 +179,5 @@ export interface ProjectWithRelations extends ProjectAttributes {
   crmLeadInterests?: LeadPropertyInterest[];
   crmLeads?: Lead[];
   crmNegotiations?: CrmLeadNegotiation[];
+  organization?: SysOrganization;
 }

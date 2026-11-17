@@ -10,7 +10,7 @@ import {
   Min,
 } from 'class-validator';
 import { CategoryType } from 'src/database/models/projects/billing/pr_category.model';
-
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class QueryCategoryDto {
   @IsOptional()
@@ -39,4 +39,7 @@ export class QueryCategoryDto {
   @IsOptional()
   @IsEnum(CategoryType)
   type?: CategoryType;
+    @ApiPropertyOptional({ description: 'Filter by organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
 }

@@ -1,11 +1,8 @@
+import { SysOrganization } from 'src/database/models/system/sys_organization.model';
+import { Project } from 'src/database/models/projects/project/pr_project.model';
 /* eslint-disable prettier/prettier */
 
-import {
-  Column,
-  DataType,
-  HasMany,
-  Table,
-} from 'sequelize-typescript';
+import { Column, DataType, HasMany, Table, ForeignKey, BelongsTo } from 'sequelize-typescript';
 import { BaseModel } from 'src/database/base.model';
 import type {
   ProcurementBrandAttributes,
@@ -64,4 +61,38 @@ export class ProcurementBrand
     allowNull: true,
   })
   declare deletedBy?: string;
+
+
+  @ForeignKey(() => SysOrganization)
+  @Column({
+    type: DataType.BIGINT,
+    allowNull: true,
+    field: 'org_id',
+    defaultValue: null,
+  })
+  declare orgId?: number | null;
+
+  @BelongsTo(() => SysOrganization, {
+    foreignKey: 'orgId',
+    targetKey: 'id',
+    as: 'organization',
+  })
+  declare organization?: SysOrganization;
+
+  @ForeignKey(() => Project)
+  @Column({
+    type: DataType.UUID,
+    allowNull: true,
+    field: 'project_id',
+    defaultValue: null,
+  })
+  declare projectId?: string | null;
+
+  @BelongsTo(() => Project, {
+    foreignKey: 'projectId',
+    targetKey: 'uuid',
+    as: 'project',
+  })
+  declare project?: Project;
+
 }

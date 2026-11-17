@@ -17,19 +17,22 @@ export class ProjectTypeService {
     private readonly projectTypeModel: typeof ProjectType,
   ) {}
 
-  async create(dto: CreateProjectTypeDto, userId?: number) {
+  async create(dto: CreateProjectTypeDto, userId?: number, currentUser?: any) {
     if (dto.code) {
       await this.ensureCodeUnique(dto.code);
     }
 
-    const projectType = await this.projectTypeModel.create({
+    const projectType = await this.projectTypeModel.create(({
       ...dto,
-      createdBy: userId,
-    });
+      createdBy: userId ? String(userId) : undefined,
+    }) as any);
     return projectType;
   }
 
-  async findAll(query: QueryProjectTypeDto) {
+  async findAll(
+    query: QueryProjectTypeDto,
+    currentUser?: any,
+  ) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const search = query.search?.trim();
@@ -62,7 +65,7 @@ export class ProjectTypeService {
     };
   }
 
-  async findOne(uuid: string) {
+  async findOne(uuid: string, currentUser?: any) {
     const projectType = await this.projectTypeModel.findOne({
       where: { uuid } as WhereOptions<ProjectType>,
     });
@@ -80,6 +83,7 @@ export class ProjectTypeService {
     uuid: string,
     dto: UpdateProjectTypeDto,
     userId?: number,
+    currentUser?: any,
   ) {
     const projectType = await this.findOne(uuid);
 
@@ -98,14 +102,14 @@ export class ProjectTypeService {
       }
     }
 
-    await projectType.update({
+    await projectType.update(({
       ...dto,
-      updatedBy: userId,
-    });
+      updatedBy: userId ? String(userId) : undefined,
+    }) as any);
     return projectType;
   }
 
-  async remove(uuid: string) {
+  async remove(uuid: string, userId?: number, currentUser?: any) {
     const projectType = await this.findOne(uuid);
     await projectType.destroy();
     return { message: 'Project type deleted successfully' };

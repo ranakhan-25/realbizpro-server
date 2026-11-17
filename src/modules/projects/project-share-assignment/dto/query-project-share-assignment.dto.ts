@@ -36,4 +36,7 @@ export class QueryProjectShareAssignmentDto extends PaginateDto {
   @IsOptional()
   @IsUUID()
   siteId?: string;
+    @ApiPropertyOptional({ description: 'Filter by organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
 }

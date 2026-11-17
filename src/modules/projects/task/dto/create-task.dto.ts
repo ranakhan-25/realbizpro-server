@@ -14,6 +14,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  IsUUID,
   Max,
   Min,
 } from 'class-validator';
@@ -41,6 +42,12 @@ export class CreateTaskDto {
     message: 'Task name is required',
   })
   taskName: string;
+
+  @ApiPropertyOptional({ description: 'Parent task UUID within the same project' })
+  @IsOptional()
+  @IsUUID('all')
+  @Transform(({ value }) => value === '' ? null : value)
+  parentTaskId?: string | null;
 
   @ApiPropertyOptional({
     description: 'Task progress percentage',
@@ -176,4 +183,11 @@ export class CreateTaskDto {
     value === '' ? null : value,
   )
   deletedBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Project UUID or ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 }

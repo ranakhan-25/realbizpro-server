@@ -7,6 +7,7 @@ import {
   IsUUID,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class CreateServiceWorkRequisitionItemDto {
   @IsUUID()
@@ -59,4 +60,11 @@ export class CreateServiceWorkRequisitionItemDto {
   @IsString()
   @IsOptional()
   deletedBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Project UUID or ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 }

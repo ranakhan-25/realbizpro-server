@@ -94,6 +94,8 @@ export class LeaveApplicationService {
 
   async create(
     dto: CreateLeaveApplicationDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<LeaveApplication> {
     this.validateDates(dto.fromDate, dto.toDate);
     await this.ensureRelationsExist(dto);
@@ -101,16 +103,18 @@ export class LeaveApplicationService {
     const record =
       await this.leaveApplicationModel.create({
         ...dto,
-        createdBy: dto.addedById,
+        createdBy: userId ? String(userId) : (dto as any).createdBy ?? (dto as any).addedById ?? null,
+        orgId: (dto as any).orgId ?? currentUser?.orgId ?? null,
+        projectId: (dto as any).projectId ?? currentUser?.projectId ?? null,
         status:
           dto.status ??
           LeaveApplicationStatus.PENDING,
-      });
+      } as any);
 
     return this.findOne(record.uuid);
   }
 
-  async findAll(query: QueryLeaveApplicationDto) {
+  async findAll(query: QueryLeaveApplicationDto, currentUser?: any) {
     const {
       page = 1,
       limit = 10,
@@ -135,6 +139,14 @@ export class LeaveApplicationService {
         : (page - 1) * limit;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
 
     if (search) {
       where.reason = {
@@ -218,10 +230,7 @@ export class LeaveApplicationService {
     };
   }
 
-  async findOne(
-    uuid: string,
-    withRelations = false,
-  ): Promise<LeaveApplication> {
+  async findOne(uuid: string, withRelations = false, currentUser?: any): Promise<LeaveApplication> {
     const record =
       await this.leaveApplicationModel.findOne({
         where: { uuid } as any,
@@ -239,10 +248,7 @@ export class LeaveApplicationService {
     return record;
   }
 
-  async update(
-    uuid: string,
-    dto: UpdateLeaveApplicationDto,
-  ): Promise<LeaveApplication> {
+  async update(uuid: string, dto: UpdateLeaveApplicationDto, userId?: number, currentUser?: any): Promise<LeaveApplication> {
     const record =
       await this.leaveApplicationModel.findOne({
         where: { uuid } as any,
@@ -265,14 +271,12 @@ export class LeaveApplicationService {
       ...dto,
       updatedBy:
         dto.addedById ?? record.updatedBy,
-    });
+    } as any);
 
     return this.findOne(uuid);
   }
 
-  async remove(
-    uuid: string,
-  ): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const record =
       await this.leaveApplicationModel.findOne({
         where: { uuid } as any,
@@ -287,7 +291,8 @@ export class LeaveApplicationService {
     // status → cancelled + soft delete
     await record.update({
       status: LeaveApplicationStatus.CANCELLED,
-    });
+      deletedBy: userId ? String(userId) : null,
+    } as any);
 
     await record.destroy();
 
@@ -296,9 +301,7 @@ export class LeaveApplicationService {
     };
   }
 
-  async restore(
-    uuid: string,
-  ): Promise<LeaveApplication> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<LeaveApplication> {
     const record =
       await this.leaveApplicationModel.findOne({
         where: { uuid } as any,
@@ -320,7 +323,9 @@ export class LeaveApplicationService {
     await record.restore();
     await record.update({
       status: LeaveApplicationStatus.PENDING,
-    });
+      deletedBy: null,
+      updatedBy: userId ? String(userId) : null,
+    } as any);
 
     return this.findOne(uuid);
   }

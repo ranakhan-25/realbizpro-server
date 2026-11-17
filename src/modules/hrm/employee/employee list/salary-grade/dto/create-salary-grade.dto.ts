@@ -48,4 +48,11 @@ export class CreateSalaryGradeDto {
   @IsOptional()
   @IsEnum(SalaryGradeStatus)
   status?: SalaryGradeStatus;
+    @ApiPropertyOptional({ example: 'user-uuid' })
+    @IsOptional()
+    @IsString()
+    createdBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
 }

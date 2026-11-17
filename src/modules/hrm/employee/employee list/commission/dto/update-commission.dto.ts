@@ -1,8 +1,14 @@
 /* eslint-disable prettier/prettier */
 
-import { PartialType } from '@nestjs/swagger';
+import { PartialType, ApiPropertyOptional } from '@nestjs/swagger';
 import { CreateCommissionDto } from './create-commission.dto';
+import { IsOptional, IsString } from "class-validator";
 
 export class UpdateCommissionDto extends PartialType(
   CreateCommissionDto,
-) {}
+) {
+    @ApiPropertyOptional({ example: 'user-uuid' })
+    @IsOptional()
+    @IsString()
+    updatedBy?: string;
+}

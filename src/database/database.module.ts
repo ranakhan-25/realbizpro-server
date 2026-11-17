@@ -30,6 +30,9 @@ import { SysOrganization } from './models/system/sys_organization.model';
 import { SysOrgEntitlement } from './models/system/sys_org_entitlement.model';
 import { SysRoleFeature } from './models/system/sys_role_feature.model';
 import { SysUserFeatureOverride } from './models/system/sys_user_feature_override.model';
+import { SysCustomPermission } from './models/system/sys_custom_permission.model';
+import { SysUserCustomPermission } from './models/system/sys_user_custom_permission.model';
+import { SysSubscriptionPayment } from './models/system/sys_subscription_payment.model';
 import {
   SysTenantSite,
   SysTenantMenu,
@@ -92,8 +95,22 @@ import { CsServiceWorkflowRule } from './models/customer-service/cs_service_work
 import { CsCommunicationLog } from './models/customer-service/cs_communication_log.model';
 import { CsSiteVisitAppointment } from './models/customer-service/cs_site_visit_appointment.model';
 import { CsCustomerFeedback } from './models/customer-service/cs_customer_feedback.model';
+import { BookingAgreement } from './models/sales_management/sm_booking_agreement.model';
+import { BookingCancellation } from './models/sales_management/sm_booking_cancellation.model';
+import { BookingCommission } from './models/sales_management/sm_booking_commission.model';
+import { BookingDocument } from './models/sales_management/sm_booking_document.model';
+import { BookingHandover } from './models/sales_management/sm_booking_handover.model';
+import { BookingOverview } from './models/sales_management/sm_booking_overview.model';
+import { BookingRegistration } from './models/sales_management/sm_booking_registration.model';
+import { BookingTransfer } from './models/sales_management/sm_booking_transfer.model';
+import { BookingInstallment } from './models/sales_management/sm_booking_installment.model';
+import { PayCommission } from './models/sales_management/sm_pay_commission.model';
+import { BookingCreate as Booking, BookingCreate } from './models/sales_management/sm_booking_create_model';
+import { MainBooking } from './models/sales_management/sm_main_booking.model';
+import { InstallmentPlan, Installment } from './models/sales_management/sm_pay_installsment_model';
+import { Commission } from './models/sales_management/sm_commission_form_model';
+import { BookingDetails } from './models/sales_management/sm_booking_details_model';
 
-@Global()
 @Module({
   imports: [
     SequelizeModule.forRootAsync({
@@ -128,6 +145,9 @@ import { CsCustomerFeedback } from './models/customer-service/cs_customer_feedba
       SysOrgEntitlement,
       SysRoleFeature,
       SysUserFeatureOverride,
+      SysCustomPermission,
+      SysUserCustomPermission,
+      SysSubscriptionPayment,
       SysTenantSite,
       SysTenantMenu,
       SysTenantMenuItem,
@@ -189,6 +209,23 @@ import { CsCustomerFeedback } from './models/customer-service/cs_customer_feedba
       CsCommunicationLog,
       CsSiteVisitAppointment,
       CsCustomerFeedback,
+      ShareProjectStatusHistory, 
+      BookingAgreement,
+      BookingCancellation,
+      BookingCommission,
+      BookingDocument,
+      BookingHandover,
+      BookingOverview,
+      BookingRegistration,
+      BookingTransfer,
+      BookingInstallment,
+      PayCommission,
+      Booking,
+      MainBooking,
+      InstallmentPlan,
+      Commission,
+      BookingDetails,
+      BookingCreate,
     ]),
   ],
   providers: [

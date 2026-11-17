@@ -61,7 +61,7 @@ export class GrnVsInvoiceService {
             { association: 'supplier', attributes: ['uuid', 'supplierCode', 'supplierName'], required: false },
             { association: 'project', attributes: ['uuid', 'code', 'name'], required: false },
             { association: 'projectType', attributes: ['uuid', 'code', 'name'], required: false },
-            { association: 'purchaseBills', attributes: ['uuid', 'code', 'date', 'grand_total'], required: false },
+            { association: 'purchaseBills', through: { attributes: [] }, attributes: ['uuid', 'code', 'date', 'grand_total'], required: false },
           ],
         },
         {

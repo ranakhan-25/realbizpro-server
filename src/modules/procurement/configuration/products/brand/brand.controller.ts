@@ -1,13 +1,8 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Query,
-} from '@nestjs/common';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { CurrentUser, CurrentUserId } from 'src/common/decorators/auth.decorators';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -21,6 +16,7 @@ import { ProcurementBrandService } from './brand.service';
 
 @ApiTags('Procurement | configuration | Brand')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('procurement/brand')
 export class ProcurementBrandController {
   constructor(
@@ -29,12 +25,14 @@ export class ProcurementBrandController {
 
   @Post()
   @ApiOperation({ summary: 'Create a procurement brand' })
+  @Permissions('create_procurement_brand')
   create(@Body() dto: CreateProcurementBrandDto) {
     return this.brandService.create(dto);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get procurement brands (paginated)' })
+  @Permissions('view_procurement_brand')
   findAll(@Query() query: QueryProcurementBrandDto) {
     return this.brandService.findAll(query);
   }
@@ -48,6 +46,7 @@ export class ProcurementBrandController {
 
   @Patch(':uuid')
   @ApiOperation({ summary: 'Update procurement brand' })
+  @Permissions('update_procurement_brand')
   update(
     @Param('uuid') uuid: string,
     @Body() dto: UpdateProcurementBrandDto,
@@ -57,12 +56,14 @@ export class ProcurementBrandController {
 
   @Delete(':uuid')
   @ApiOperation({ summary: 'Soft delete procurement brand' })
+  @Permissions('delete_procurement_brand')
   remove(@Param('uuid') uuid: string) {
     return this.brandService.remove(uuid);
   }
 
   @Patch(':uuid/restore')
   @ApiOperation({ summary: 'Restore procurement brand' })
+  @Permissions('update_procurement_brand')
   restore(@Param('uuid') uuid: string) {
     return this.brandService.restore(uuid);
   }

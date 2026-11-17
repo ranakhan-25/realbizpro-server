@@ -2,6 +2,7 @@
 
 import { Type } from 'class-transformer';
 import { IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class CreateBuildingDto {
   @IsOptional()
@@ -42,4 +43,15 @@ export class CreateBuildingDto {
   @IsOptional()
   @IsString()
   addedBy?: string;
+    @ApiPropertyOptional({ example: 'user-uuid' })
+    @IsOptional()
+    @IsString()
+    createdBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Project UUID or ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 }

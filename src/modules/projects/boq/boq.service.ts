@@ -42,7 +42,11 @@ export class BoqService {
 
   // ---------- CRUD ----------
 
-  async create(dto: CreateBoqDto): Promise<Boq> {
+  async create(
+    dto: CreateBoqDto,
+    userId?: number,
+    currentUser?: any,
+  ): Promise<Boq> {
     if (dto.projectId) {
       await this.ensureProjectExists(dto.projectId);
     }
@@ -55,7 +59,10 @@ export class BoqService {
     return this.findOne(record.uuid);
   }
 
-  async findAll(query: QueryBoqDto) {
+  async findAll(
+    query: QueryBoqDto,
+    currentUser?: any,
+  ) {
     const {
       page = 1,
       limit = 10,
@@ -76,6 +83,26 @@ export class BoqService {
         : (page - 1) * limit;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      where.projectId = (query as any).projectId;
+    }
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      where.projectId = (query as any).projectId;
+    }
 
     if (projectId) {
       where.projectId = projectId;
@@ -137,7 +164,7 @@ export class BoqService {
     };
   }
 
-  async findOne(uuid: string): Promise<Boq> {
+  async findOne(uuid: string, currentUser?: any): Promise<Boq> {
     const record = await this.boqModel.findOne({
       where: { uuid } as any,
     });
@@ -154,6 +181,8 @@ export class BoqService {
   async update(
     uuid: string,
     dto: UpdateBoqDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<Boq> {
     const record = await this.boqModel.findOne({
       where: { uuid } as any,
@@ -180,9 +209,7 @@ export class BoqService {
     return this.findOne(uuid);
   }
 
-  async remove(
-    uuid: string,
-  ): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const record = await this.boqModel.findOne({
       where: { uuid } as any,
     });
@@ -201,7 +228,7 @@ export class BoqService {
     };
   }
 
-  async restore(uuid: string): Promise<Boq> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<Boq> {
     const record = await this.boqModel.findOne({
       where: { uuid } as any,
       paranoid: false,

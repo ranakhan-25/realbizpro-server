@@ -2,6 +2,7 @@ import { BelongsTo, Column, DataType, ForeignKey, Table } from 'sequelize-typesc
 import { BaseModel } from 'src/database/base.model';
 import { LeadTeam } from 'src/database/models/crm/lead/crm-lead-master-data.model';
 import { SysUser } from 'src/database/models/system/sys_user.model';
+import { SysOrganization } from 'src/database/models/system/sys_organization.model';
 
 import type { CrmEmployeeKpiAttributes, CrmEmployeeKpiCreationAttributes } from '../../../types/crmemployeekpi.types';
 
@@ -48,14 +49,30 @@ export class CrmEmployeeKpi extends BaseModel<CrmEmployeeKpiAttributes, CrmEmplo
   @Column({ type: DataType.ENUM('ACTIVE', 'INACTIVE'), allowNull: false, defaultValue: 'ACTIVE' })
   declare status: 'ACTIVE' | 'INACTIVE';
 
-  @Column({ type: DataType.STRING, allowNull: true, field: 'created_by' })
-  declare createdBy?: string;
+  @ForeignKey(() => SysOrganization)
+  @Column({
+    type: DataType.BIGINT,
+    allowNull: true,
+    field: 'org_id',
+    defaultValue: null,
+  })
+  declare orgId?: number | null;
 
-  @Column({ type: DataType.STRING, allowNull: true, field: 'updated_by' })
-  declare updatedBy?: string;
+  @BelongsTo(() => SysOrganization, {
+    foreignKey: 'orgId',
+    targetKey: 'id',
+    as: 'organization',
+  })
+  declare organization?: SysOrganization;
 
-  @Column({ type: DataType.STRING, allowNull: true, field: 'deleted_by' })
-  declare deletedBy?: string;
+  @Column({ type: DataType.STRING, allowNull: true, field: 'created_by', defaultValue: null })
+  declare createdBy?: string | null;
+
+  @Column({ type: DataType.STRING, allowNull: true, field: 'updated_by', defaultValue: null })
+  declare updatedBy?: string | null;
+
+  @Column({ type: DataType.STRING, allowNull: true, field: 'deleted_by', defaultValue: null })
+  declare deletedBy?: string | null;
 
   @BelongsTo(() => SysUser, { foreignKey: 'userId', targetKey: 'uuid', as: 'user' })
   declare user?: SysUser;

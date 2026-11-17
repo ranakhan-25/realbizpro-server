@@ -1,5 +1,5 @@
 // Auto-generated types for InvMaterialUsage
-// Source: src/database/models/inventory/inv_material_usage.model.ts
+// Source: src\database\models\inventory\inv_material_usage.model.ts
 
 import type { InvMaterialUsageItem } from '../models/inventory/inv_material_usage_item.model';
 
@@ -13,7 +13,7 @@ export interface InvMaterialUsageAttributes {
   note?: string | null;
   company_id?: number | null;
   project_id?: number | null;
-  projectId?: string | null;
+  org_id: string;
   site_id?: number | null;
   task_id?: number | null;
   worker_id?: number | null;
@@ -30,7 +30,7 @@ export interface InvMaterialUsageCreationAttributes {
   note?: string | null;
   company_id?: number | null;
   project_id?: number | null;
-  projectId?: string | null;
+  org_id: string;
   site_id?: number | null;
   task_id?: number | null;
   worker_id?: number | null;

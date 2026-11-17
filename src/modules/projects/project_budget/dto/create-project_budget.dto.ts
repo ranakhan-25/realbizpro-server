@@ -10,7 +10,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { BudgetCategoryType, BudgetStatus } from 'src/database/models/projects/project_budget/pr_project_budget_model';
-
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class CreateProjectBudgetDto {
   @IsUUID()
@@ -44,4 +44,15 @@ export class CreateProjectBudgetDto {
   @IsString()
   @IsOptional()
   addedById?: string;
+    @ApiPropertyOptional({ example: 'user-uuid' })
+    @IsOptional()
+    @IsString()
+    createdBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Project UUID or ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 }

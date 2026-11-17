@@ -52,8 +52,8 @@ export class CrPlotDistribution extends BaseModel<CrPlotDistributionAttributes, 
   @Column({ type: DataType.STRING, allowNull: true, field: 'deleted_by' })
   declare deletedBy?: string;
 
-  @Column({ type: DataType.STRING, allowNull: true, field: 'project_id' })
-  declare projectId?: string;
+  @Column({ type: DataType.STRING, allowNull: true, field: 'org_id' })
+  declare org_id?: string;
 
   @BelongsTo(() => CrSaleAgreement, { foreignKey: 'sale_agreement_id' })
   sale_agreement: CrSaleAgreement;

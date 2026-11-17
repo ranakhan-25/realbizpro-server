@@ -21,6 +21,20 @@ export enum ShareProjectStatus {
 
 @Table({ tableName: 'share_projects', timestamps: true, paranoid: true, underscored: true })
 export class ShareProject extends BaseModel<ShareProjectAttributes, ShareProjectCreationAttributes> {
+  @Column({ type: DataType.STRING(40), allowNull: true, unique: true })
+  declare code?: string;
+
+  @Column({ type: DataType.STRING(150), allowNull: true })
+  declare creatorName?: string;
+
+  @Column({ type: DataType.STRING(255), allowNull: true })
+  declare creatorEmail?: string;
+
+  @Column({ type: DataType.STRING(20), allowNull: true })
+  declare creatorPhone?: string;
+
+  @Column({ type: DataType.STRING(255), allowNull: true })
+  declare companyName?: string;
   @ForeignKey(() => ShareUser)
   @Column({ type: DataType.BIGINT, allowNull: false, field: 'owner_id' })
   declare ownerId: number;
@@ -53,7 +67,7 @@ export class ShareProject extends BaseModel<ShareProjectAttributes, ShareProject
   declare startDate?: string;
   @Column({ type: DataType.DATEONLY, allowNull: true, field: 'end_date' })
   declare endDate?: string;
-  @Column({ type: DataType.STRING(255), allowNull: true, field: 'thumbnail_url' })
+  @Column({ type: DataType.TEXT, allowNull: true, field: 'thumbnail_url' })
   declare thumbnailUrl?: string;
   @Column({
     type: DataType.ENUM(...Object.values(ShareProjectStatus)),

@@ -12,5 +12,6 @@ import { EmployeeKpiCallReportService } from './employee-kpi-call-report.service
   imports: [SequelizeModule.forFeature([CrmEmployeeKpi, LeadActivity, LeadTeam, LeadTeamMember, SysUser])],
   controllers: [EmployeeKpiCallReportController],
   providers: [EmployeeKpiCallReportService],
+  exports: [EmployeeKpiCallReportService],
 })
 export class EmployeeKpiCallReportModule {}

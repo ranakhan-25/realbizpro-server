@@ -1,10 +1,11 @@
 // Auto-generated types for ShareConfiguration
-// Source: src/database/models/projects/investor/configuration.model.ts
+// Source: src\database\models\projects\investor\configuration.model.ts
 
 import { ShareConfigurationStatus } from '../models/projects/investor/configuration.model';
 
 import type { Project } from '../models/projects/project/pr_project.model';
 import type { Investor } from '../models/projects/investor/investor.model';
+import type { SysOrganization } from '../models/system/sys_organization.model';
 
 export interface ShareConfigurationAttributes {
   id: number;
@@ -23,10 +24,12 @@ export interface ShareConfigurationAttributes {
   updatedBy?: string | null;
   deletedBy?: string | null;
   status: ShareConfigurationStatus;
+  orgId?: number | null;
 
   // Relations
   project?: Project;
   investor?: Investor;
+  organization?: SysOrganization;
 }
 
 export interface ShareConfigurationCreationAttributes {
@@ -41,6 +44,7 @@ export interface ShareConfigurationCreationAttributes {
   updatedBy?: string | null;
   deletedBy?: string | null;
   status?: ShareConfigurationStatus; // Has default value
+  orgId?: number | null;
 }
 
 export type ShareConfigurationUpdateAttributes = Partial<ShareConfigurationCreationAttributes>;
@@ -49,4 +53,5 @@ export type ShareConfigurationUpdateAttributes = Partial<ShareConfigurationCreat
 export interface ShareConfigurationWithRelations extends ShareConfigurationAttributes {
   project?: Project;
   investor?: Investor;
+  organization?: SysOrganization;
 }

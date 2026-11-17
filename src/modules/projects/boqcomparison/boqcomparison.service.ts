@@ -20,16 +20,26 @@ export class BoqComparisonService {
     private readonly boqComparisonModel: typeof BoqComparison,
   ) {}
 
-  async create(dto: CreateBoqComparisonDto): Promise<BoqComparison> {
+  async create(
+    dto: CreateBoqComparisonDto,
+    userId?: number,
+    currentUser?: any,
+  ): Promise<BoqComparison> {
     const boqComparison = await this.boqComparisonModel.create({
-      ...dto,
+        createdBy: userId ? String(userId) : null,
+        orgId: currentUser?.orgId ?? null,
+        projectId: currentUser?.projectId ?? null,
+        ...dto,
       status: dto.status ?? BoqComparisonStatus.IN_PROGRESS,
     } as any);
 
     return this.findOne(boqComparison.uuid);
   }
 
-  async findAll(query: QueryBoqComparisonDto) {
+  async findAll(
+    query: QueryBoqComparisonDto,
+    currentUser?: any,
+  ) {
     const {
       page = 1,
       limit = 10,
@@ -47,6 +57,26 @@ export class BoqComparisonService {
       skip !== undefined && skip !== null ? skip : (page - 1) * limit;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      where.projectId = (query as any).projectId;
+    }
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      where.projectId = (query as any).projectId;
+    }
 
     if (search) {
       where[Op.or] = [
@@ -107,7 +137,7 @@ export class BoqComparisonService {
     };
   }
 
-  async findOne(uuid: string): Promise<BoqComparison> {
+  async findOne(uuid: string, currentUser?: any): Promise<BoqComparison> {
     const boqComparison = await this.boqComparisonModel.findOne({
       where: { uuid } as any,
     });
@@ -119,7 +149,12 @@ export class BoqComparisonService {
     return boqComparison;
   }
 
-  async update(uuid: string, dto: UpdateBoqComparisonDto): Promise<BoqComparison> {
+  async update(
+    uuid: string,
+    dto: UpdateBoqComparisonDto,
+    userId?: number,
+    currentUser?: any,
+  ): Promise<BoqComparison> {
     const boqComparison = await this.boqComparisonModel.findOne({
       where: { uuid } as any,
     });
@@ -133,7 +168,7 @@ export class BoqComparisonService {
     return this.findOne(uuid);
   }
 
-  async remove(uuid: string): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const boqComparison = await this.boqComparisonModel.findOne({
       where: { uuid } as any,
     });
@@ -149,7 +184,7 @@ export class BoqComparisonService {
     };
   }
 
-  async restore(uuid: string): Promise<BoqComparison> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<BoqComparison> {
     const boqComparison = await this.boqComparisonModel.findOne({
       where: { uuid } as any,
       paranoid: false,

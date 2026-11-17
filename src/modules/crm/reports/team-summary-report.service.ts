@@ -20,7 +20,7 @@ export class TeamSummaryReportService {
     @InjectModel(LeadTeamMember) private readonly teamMembers: typeof LeadTeamMember,
   ) {}
 
-  async dropdowns() {
+  async dropdowns(currentUser?: any) {
     const teams = await this.teams.findAll({
       where: { isActive: true },
       attributes: ['id', 'uuid', 'name', 'leaderId'],
@@ -29,7 +29,7 @@ export class TeamSummaryReportService {
     return { teams };
   }
 
-  async report(query: QueryTeamSummaryReportDto) {
+  async report(query: QueryTeamSummaryReportDto, currentUser?: any) {
     const leadWhere: any = {};
     if (query.dateFrom || query.dateTo) leadWhere.leadDate = { ...(query.dateFrom ? { [Op.gte]: query.dateFrom } : {}), ...(query.dateTo ? { [Op.lte]: query.dateTo } : {}) };
 

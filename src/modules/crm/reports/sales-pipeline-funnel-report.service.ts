@@ -20,7 +20,7 @@ export class SalesPipelineFunnelReportService {
     @InjectModel(SysUser) private readonly users: typeof SysUser,
   ) {}
 
-  async dropdowns() {
+  async dropdowns(currentUser?: any) {
     const [users, teams, projects] = await Promise.all([
       this.users.findAll({ where: { isActive: true }, attributes: ['uuid', 'userCode', 'name'], order: [['name', 'ASC']] }),
       this.teams.findAll({ attributes: ['id', 'uuid', 'name'], order: [['name', 'ASC']] }),
@@ -29,7 +29,7 @@ export class SalesPipelineFunnelReportService {
     return { users, teams, projects };
   }
 
-  async report(query: QuerySalesPipelineFunnelReportDto) {
+  async report(query: QuerySalesPipelineFunnelReportDto, currentUser?: any) {
     const [leads, stages, teams, members, users, projects] = await Promise.all([
       this.leads.findAll({ attributes: ['id', 'uuid', 'leadCode', 'clientName', 'status', 'leadDate', 'leadStageId', 'assignedTo', 'projectId'] }),
       this.stages.findAll({ where: { isActive: true }, attributes: ['id', 'uuid', 'name', 'sortOrder'], order: [['sortOrder', 'ASC'], ['id', 'ASC']] }),

@@ -1,7 +1,10 @@
 // Auto-generated types for LabourWorkBank
-// Source: src/database/models/projects/contract/pr_labour_work_bank.model.ts
+// Source: src\database\models\projects\contract\pr_labour_work_bank.model.ts
 
 import { LabourWorkBankStatus } from '../models/projects/contract/pr_labour_work_bank.model';
+
+import type { SysOrganization } from '../models/system/sys_organization.model';
+import type { Project } from '../models/projects/project/pr_project.model';
 
 export interface LabourWorkBankAttributes {
   id: number;
@@ -23,6 +26,12 @@ export interface LabourWorkBankAttributes {
   updatedBy?: string | null;
   deletedBy?: string | null;
   status: LabourWorkBankStatus;
+  orgId?: number | null;
+  projectId?: string | null;
+
+  // Relations
+  organization?: SysOrganization;
+  project?: Project;
 }
 
 export interface LabourWorkBankCreationAttributes {
@@ -40,11 +49,14 @@ export interface LabourWorkBankCreationAttributes {
   updatedBy?: string | null;
   deletedBy?: string | null;
   status?: LabourWorkBankStatus; // Has default value
+  orgId?: number | null;
+  projectId?: string | null;
 }
 
 export type LabourWorkBankUpdateAttributes = Partial<LabourWorkBankCreationAttributes>;
 
 // Helper type for including relations
 export interface LabourWorkBankWithRelations extends LabourWorkBankAttributes {
-  // No relations defined
+  organization?: SysOrganization;
+  project?: Project;
 }

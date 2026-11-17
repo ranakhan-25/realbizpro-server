@@ -1,5 +1,5 @@
 // Auto-generated types for SupplierAccounts
-// Source: src/database/models/projects/contract/pr_supplier_accounts.model.ts
+// Source: src\database\models\projects\contract\pr_supplier_accounts.model.ts
 
 import { SupplierAccountsStatus } from '../models/projects/contract/pr_supplier_accounts.model';
 
@@ -15,6 +15,7 @@ import type { ProcurementAssetGrn } from '../models/procurement/grn/pr_asset_grn
 import type { ProcurementAssetPurchaseBill } from '../models/procurement/purchase-bill/pr_asset_purchase_bill.model';
 import type { ProcurementHireOrder } from '../models/procurement/equipment-hire/pr_hire_order.model';
 import type { ProcurementHireBill } from '../models/procurement/equipment-hire/pr_hire_bill.model';
+import type { SysOrganization } from '../models/system/sys_organization.model';
 
 export interface SupplierAccountsAttributes {
   id: number;
@@ -36,6 +37,7 @@ export interface SupplierAccountsAttributes {
   updatedBy?: string | null;
   deletedBy?: string | null;
   status: SupplierAccountsStatus;
+  orgId?: number | null;
 
   // Relations
   procurementRfqs?: ProcurementRfq[];
@@ -50,6 +52,7 @@ export interface SupplierAccountsAttributes {
   procurementAssetPurchaseBills?: ProcurementAssetPurchaseBill[];
   equipmentHireOrders?: ProcurementHireOrder[];
   equipmentHireBills?: ProcurementHireBill[];
+  organization?: SysOrganization;
 }
 
 export interface SupplierAccountsCreationAttributes {
@@ -67,6 +70,7 @@ export interface SupplierAccountsCreationAttributes {
   updatedBy?: string | null;
   deletedBy?: string | null;
   status?: SupplierAccountsStatus; // Has default value
+  orgId?: number | null;
 }
 
 export type SupplierAccountsUpdateAttributes = Partial<SupplierAccountsCreationAttributes>;
@@ -85,4 +89,5 @@ export interface SupplierAccountsWithRelations extends SupplierAccountsAttribute
   procurementAssetPurchaseBills?: ProcurementAssetPurchaseBill[];
   equipmentHireOrders?: ProcurementHireOrder[];
   equipmentHireBills?: ProcurementHireBill[];
+  organization?: SysOrganization;
 }

@@ -31,6 +31,21 @@ export class EntitledFeatureSummaryDto {
 
   @ApiProperty({ example: '/crm/leads/transfers' })
   routePath?: string;
+
+  @ApiPropertyOptional({ example: ['read', 'write', 'delete'] })
+  actions?: string[];
+
+  @ApiPropertyOptional({ example: true })
+  canView?: boolean;
+
+  @ApiPropertyOptional({ example: true })
+  canCreate?: boolean;
+
+  @ApiPropertyOptional({ example: true })
+  canEdit?: boolean;
+
+  @ApiPropertyOptional({ example: false })
+  canDelete?: boolean;
 }
 
 export class EntitledModuleSummaryDto {

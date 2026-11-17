@@ -382,14 +382,12 @@ export class AuthService {
     return tokens;
   }
 
-  // ─────────────────────────────────────────────
-  // ✅ UPDATED: oldPassword + newPassword + confirmPassword
-  // ─────────────────────────────────────────────
+  // ✅ UPDATED: identifier + oldPassword + newPassword + confirmPassword
   async changePassword(
-    userId: number,
     dto: ChangePasswordDto,
   ): Promise<void> {
     const {
+      identifier,
       oldPassword,
       newPassword,
       confirmPassword,
@@ -409,9 +407,17 @@ export class AuthService {
       );
     }
 
-    // 3. Find user
-    const user =
-      await this.userModel.findByPk(userId);
+    // 3. Find user by email or username
+    const user = await this.userModel.findOne({
+      where: {
+        [Op.or]: [
+          { email: identifier },
+          { username: identifier },
+        ],
+        isActive: true,
+      },
+    });
+
     if (!user) {
       throw new UnauthorizedException(
         'User not found',
@@ -443,11 +449,11 @@ export class AuthService {
     });
 
     await this.userTokenModel.destroy({
-      where: { userId },
+      where: { userId: user.id },
     });
 
     await this.cacheService.del(
-      this.getRefreshTokenKey(userId),
+      this.getRefreshTokenKey(user.id),
       { prefix: 'auth' },
     );
   }

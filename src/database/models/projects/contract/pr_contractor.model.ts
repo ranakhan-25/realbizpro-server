@@ -4,8 +4,7 @@ import {
   Column,
   DataType,
   HasMany,
-  Table,
-} from 'sequelize-typescript';
+  Table, ForeignKey, BelongsTo } from 'sequelize-typescript';
 import { BaseModel } from 'src/database/base.model';
 import { ProcurementWorkOrder } from '../../procurement/work-order/pr_procurement_work_order.model';
 import { ProcurementWorkBill } from '../../procurement/work-order/pr_work_bill.model';
@@ -15,6 +14,7 @@ import {
   ContractorCreationAttributes,
   ContractorUpdateAttributes,
 } from 'src/database/types/contractor.types';
+import { SysOrganization } from "src/database/models/system/sys_organization.model";
 
 export enum ContractorUnderStatus {
   WORKER = 'worker',
@@ -107,21 +107,24 @@ export class Contractor
   declare addedById?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'created_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare createdBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'updated_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare updatedBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'deleted_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare deletedBy?: string;
 
   @Column({
@@ -137,4 +140,18 @@ export class Contractor
   declare procurementWorkOrders?: ProcurementWorkOrder[];
   @HasMany(() => ProcurementWorkBill, { foreignKey: 'vendor_id', sourceKey: 'uuid', as: 'procurementWorkBills' })
   declare procurementWorkBills?: ProcurementWorkBill[];
+    @ForeignKey(() => SysOrganization)
+    @Column({
+            type: DataType.BIGINT,
+            allowNull: true,
+            field: 'org_id',
+            defaultValue: null,
+          })
+    declare orgId?: number | null;
+    @BelongsTo(() => SysOrganization, {
+            foreignKey: 'orgId',
+            targetKey: 'id',
+            as: 'organization',
+          })
+    declare organization?: SysOrganization;
 }

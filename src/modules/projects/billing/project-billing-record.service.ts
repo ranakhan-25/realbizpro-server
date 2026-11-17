@@ -31,7 +31,7 @@ export class ProjectBillingRecordService {
     return resource as ProjectBillingResource;
   }
 
-  async create(resourceName: string, dto: CreateProjectBillingRecordDto, userId?: number) {
+  async create(resourceName: string, dto: CreateProjectBillingRecordDto, userId?: number, currentUser?: any) {
     const resource = this.validateResource(resourceName);
     const uuid = await this.sequelize.transaction(async (transaction) => {
       const project = await this.projectModel.findOne({
@@ -49,28 +49,41 @@ export class ProjectBillingRecordService {
           amount: dto.amount ?? 0,
           status: dto.status ?? 'active',
           details: dto.details ?? {},
-          createdBy: userId === undefined ? undefined : String(userId),
+          createdBy: currentUser?.email || (userId === undefined ? undefined : String(userId)),
+          updatedBy: currentUser?.email || (userId === undefined ? undefined : String(userId)),
         },
         { transaction },
       );
       return record.uuid;
     });
-    return this.findOne(resource, uuid);
+    return this.findOne(resource, uuid, currentUser);
   }
 
-  async findAll(resourceName: string, query: QueryProjectBillingRecordDto) {
+  async findAll(
+    resourceName: string, query: QueryProjectBillingRecordDto,
+    currentUser?: any,
+  ) {
     const resource = this.validateResource(resourceName);
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const search = query.search?.trim();
-    const where: WhereOptions<ProjectBillingRecord> = {
+    const userConditions = currentUser ? [
+      { createdBy: currentUser.email },
+      { createdBy: String(currentUser.id) },
+    ] : [];
+    const where: any = {
       resource,
+      ...(userConditions.length > 0 ? { [Op.or]: userConditions } : {}),
       ...(search
         ? {
-            [Op.or]: [
-              { code: { [Op.iLike]: `%${search}%` } },
-              { title: { [Op.iLike]: `%${search}%` } },
-              { description: { [Op.iLike]: `%${search}%` } },
+            [Op.and]: [
+              {
+                [Op.or]: [
+                  { code: { [Op.iLike]: `%${search}%` } },
+                  { title: { [Op.iLike]: `%${search}%` } },
+                  { description: { [Op.iLike]: `%${search}%` } },
+                ],
+              },
             ],
           }
         : {}),
@@ -90,7 +103,7 @@ export class ProjectBillingRecordService {
     };
   }
 
-  async findOne(resourceName: string, uuid: string) {
+  async findOne(resourceName: string, uuid: string, currentUser?: any) {
     const resource = this.validateResource(resourceName);
     const record = await this.recordModel.findOne({
       where: { uuid, resource } as WhereOptions<ProjectBillingRecord>,
@@ -104,12 +117,7 @@ export class ProjectBillingRecordService {
     return record;
   }
 
-  async update(
-    resourceName: string,
-    uuid: string,
-    dto: UpdateProjectBillingRecordDto,
-    userId?: number,
-  ) {
+  async update(resourceName: string, uuid: string, dto: UpdateProjectBillingRecordDto, userId?: number, currentUser?: any) {
     const resource = this.validateResource(resourceName);
     await this.sequelize.transaction(async (transaction) => {
       const record = await this.recordModel.findOne({
@@ -135,21 +143,24 @@ export class ProjectBillingRecordService {
           ...(recordDate !== undefined
             ? { recordDate: recordDate ? new Date(recordDate) : null }
             : {}),
-          updatedBy: userId === undefined ? undefined : String(userId),
+          updatedBy: currentUser?.email || (userId === undefined ? undefined : String(userId)),
         },
         { transaction },
       );
     });
-    return this.findOne(resource, uuid);
+    return this.findOne(resource, uuid, currentUser);
   }
 
-  async remove(resourceName: string, uuid: string) {
+  async remove(resourceName: string, uuid: string, userId?: number, currentUser?: any) {
     const resource = this.validateResource(resourceName);
     const record = await this.recordModel.findOne({
       where: { uuid, resource } as WhereOptions<ProjectBillingRecord>,
     });
     if (!record) {
       throw new NotFoundException(`Billing record "${uuid}" not found`);
+    }
+    if (currentUser?.email || userId) {
+      await record.update({ deletedBy: currentUser?.email || String(userId) });
     }
     await record.destroy();
     return { message: `Billing record "${uuid}" deleted successfully` };

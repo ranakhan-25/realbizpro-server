@@ -1,5 +1,5 @@
 // Auto-generated types for CrRecoveryLog
-// Source: src/database/models/credit-realization/cr_recovery_log.model.ts
+// Source: src\database\models\credit-realization\cr_recovery_log.model.ts
 
 import type { CrSaleAgreement } from '../models/credit-realization/cr_sale_agreement.model';
 
@@ -22,7 +22,7 @@ export interface CrRecoveryLogAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id?: string | null;
 
   // Relations
   sale_agreement: CrSaleAgreement;
@@ -42,7 +42,7 @@ export interface CrRecoveryLogCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id?: string | null;
 }
 
 export type CrRecoveryLogUpdateAttributes = Partial<CrRecoveryLogCreationAttributes>;

@@ -1,7 +1,8 @@
 // Auto-generated types for ProjectTeamMember
-// Source: src/database/models/projects/project-team-member/pr_project_team_member.model.ts
+// Source: src\database\models\projects\project-team-member\pr_project_team_member.model.ts
 
 import type { Project } from '../models/projects/project/pr_project.model';
+import type { SysOrganization } from '../models/system/sys_organization.model';
 
 export interface ProjectTeamMemberAttributes {
   id: number;
@@ -16,9 +17,11 @@ export interface ProjectTeamMemberAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
 
   // Relations
   project?: Project;
+  organization?: SysOrganization;
 }
 
 export interface ProjectTeamMemberCreationAttributes {
@@ -29,6 +32,7 @@ export interface ProjectTeamMemberCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
 }
 
 export type ProjectTeamMemberUpdateAttributes = Partial<ProjectTeamMemberCreationAttributes>;
@@ -36,4 +40,5 @@ export type ProjectTeamMemberUpdateAttributes = Partial<ProjectTeamMemberCreatio
 // Helper type for including relations
 export interface ProjectTeamMemberWithRelations extends ProjectTeamMemberAttributes {
   project?: Project;
+  organization?: SysOrganization;
 }

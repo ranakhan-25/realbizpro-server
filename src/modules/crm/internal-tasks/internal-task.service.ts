@@ -28,27 +28,35 @@ export class InternalTaskService {
     @InjectConnection() private readonly sequelize: Sequelize,
   ) {}
 
-  async create(dto: CreateInternalTaskDto, actor?: string) {
+  async create(dto: CreateInternalTaskDto, userId?: number, currentUser?: any) {
     return this.sequelize.transaction(async transaction => {
       const relations = await this.resolveRelations(dto, transaction);
+      const orgId = dto.orgId ?? currentUser?.orgId ?? null;
+      const actor = userId ? String(userId) : null;
       const task = await this.tasks.create({
-        title: dto.title.trim(), description: dto.description?.trim() || null,
-        priority: dto.priority, status: dto.status,
+        title: dto.title.trim(),
+        description: dto.description?.trim() || null,
+        priority: dto.priority,
+        status: dto.status,
         dueDate: dto.dueDate ? new Date(dto.dueDate) : null,
         projectId: relations.project?.code ?? null,
         taskTypeId: relations.taskType?.id ?? null,
         relatedLeadId: relations.lead?.id ?? null,
+        orgId,
         createdBy: actor,
       } as any, { transaction });
-      await this.syncAssignees(task, dto.assignedTo ?? [], actor, transaction, relations.project?.code);
-      return this.findOne(task.uuid, transaction);
+      await this.syncAssignees(task, dto.assignedTo ?? [], actor, transaction, relations.project?.code, orgId);
+      return this.findOne(task.uuid, currentUser, transaction);
     });
   }
 
-  async findAll(query: QueryInternalTaskDto) {
+  async findAll(query: QueryInternalTaskDto, currentUser?: any) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const where: any = {};
+    if (currentUser?.orgId) {
+      where.orgId = currentUser.orgId;
+    }
     const search = query.search?.trim();
     if (search) where[Op.or] = [
       { title: { [Op.iLike]: `%${search}%` } },
@@ -62,26 +70,36 @@ export class InternalTaskService {
       include[2] = { association: 'assignees', required: true, where: { userId: query.assignedTo } };
     }
     const { rows, count } = await this.tasks.findAndCountAll({
-      attributes: ['uuid', 'title', 'description', 'priority', 'status', 'dueDate', 'projectId', 'taskTypeId', 'relatedLeadId', 'createdBy', 'createdAt', 'updatedAt'],
+      attributes: ['uuid', 'title', 'description', 'priority', 'status', 'dueDate', 'projectId', 'taskTypeId', 'relatedLeadId', 'orgId', 'createdBy', 'updatedBy', 'deletedBy', 'createdAt', 'updatedAt'],
       where, include, distinct: true, limit, offset: (page - 1) * limit, order: [['createdAt', 'DESC']],
     });
     const relations = await this.resolvePublicRelations(rows);
     return { data: rows.map(row => this.toPublic(row, relations)), meta: { page, limit, total: count, totalPages: Math.ceil(count / limit) || 1 } };
   }
 
-  async findOne(uuid: string, transaction?: Transaction) {
-    const row = await this.tasks.findOne({ where: { uuid }, include: INCLUDE, transaction });
+  async findOne(uuid: string, currentUser?: any, transaction?: Transaction) {
+    const where: any = { uuid };
+    if (currentUser?.orgId) {
+      where.orgId = currentUser.orgId;
+    }
+    const row = await this.tasks.findOne({ where, include: INCLUDE, transaction });
     if (!row) throw new NotFoundException(`Internal task ${uuid} not found`);
     const relations = await this.resolvePublicRelations([row], transaction);
     return this.toPublic(row, relations);
   }
 
-  async update(uuid: string, dto: UpdateInternalTaskDto, actor?: string) {
+  async update(uuid: string, dto: UpdateInternalTaskDto, userId?: number, currentUser?: any) {
     return this.sequelize.transaction(async transaction => {
-      const task = await this.tasks.findOne({ where: { uuid }, transaction });
+      const where: any = { uuid };
+      if (currentUser?.orgId) {
+        where.orgId = currentUser.orgId;
+      }
+      const task = await this.tasks.findOne({ where, transaction });
       if (!task) throw new NotFoundException(`Internal task ${uuid} not found`);
       const relations = await this.resolveRelations(dto, transaction);
       const changes: Record<string, any> = {};
+      const orgId = dto.orgId ?? task.orgId ?? currentUser?.orgId ?? null;
+      const actor = userId ? String(userId) : null;
       if (dto.title !== undefined) changes.title = dto.title.trim();
       if (dto.description !== undefined) changes.description = dto.description.trim() || null;
       if (dto.priority !== undefined) changes.priority = dto.priority;
@@ -90,30 +108,40 @@ export class InternalTaskService {
       if (dto.projectCode !== undefined) changes.projectId = relations.project?.code ?? null;
       if (dto.taskTypeUuid !== undefined) changes.taskTypeId = relations.taskType?.id ?? null;
       if (dto.relatedLeadUuid !== undefined) changes.relatedLeadId = relations.lead?.id ?? null;
+      if (dto.orgId !== undefined) changes.orgId = dto.orgId;
       if (actor) changes.updatedBy = actor;
       await task.update(changes, { transaction });
-      if (dto.assignedTo !== undefined) await this.syncAssignees(task, dto.assignedTo, actor, transaction, task.projectId);
-      return this.findOne(uuid, transaction);
+      if (dto.assignedTo !== undefined) await this.syncAssignees(task, dto.assignedTo, actor, transaction, task.projectId, orgId);
+      return this.findOne(uuid, currentUser, transaction);
     });
   }
 
-  async remove(uuid: string, actor?: string) {
-    const task = await this.tasks.findOne({ where: { uuid } });
+  async remove(uuid: string, userId?: number, currentUser?: any) {
+    const where: any = { uuid };
+    if (currentUser?.orgId) {
+      where.orgId = currentUser.orgId;
+    }
+    const task = await this.tasks.findOne({ where });
     if (!task) throw new NotFoundException(`Internal task ${uuid} not found`);
-    if (actor) await task.update({ deletedBy: actor });
+    if (userId) await task.update({ deletedBy: String(userId) });
     await task.destroy();
     return { message: `Internal task ${uuid} deleted successfully` };
   }
 
-  async restore(uuid: string) {
-    const task = await this.tasks.findOne({ where: { uuid }, paranoid: false });
+  async restore(uuid: string, userId?: number, currentUser?: any) {
+    const where: any = { uuid };
+    if (currentUser?.orgId) {
+      where.orgId = currentUser.orgId;
+    }
+    const task = await this.tasks.findOne({ where, paranoid: false });
     if (!task) throw new NotFoundException(`Internal task ${uuid} not found`);
     if (!task.deletedAt) throw new BadRequestException(`Internal task ${uuid} is not deleted`);
+    if (userId) await task.update({ updatedBy: String(userId) });
     await task.restore();
-    return this.findOne(uuid);
+    return this.findOne(uuid, currentUser);
   }
 
-  async dropdowns() {
+  async dropdowns(currentUser?: any) {
     const [projects, users, taskTypes] = await Promise.all([
       this.projects.findAll({ attributes: ['uuid', 'name', 'code'], order: [['name', 'ASC']] }),
       this.users.findAll({ attributes: ['uuid', 'userCode', 'name'], order: [['name', 'ASC']] }),
@@ -135,8 +163,12 @@ export class InternalTaskService {
     const projects = projectCodes.length
       ? await this.projects.findAll({ where: { code: { [Op.in]: projectCodes } } as any, attributes: ['uuid', 'name', 'code'], transaction })
       : [];
+    const isUuid = (val: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
+    const validUuids = userIds.filter(isUuid);
+    const userConditions: any[] = [{ userCode: { [Op.in]: userIds } }];
+    if (validUuids.length) userConditions.push({ uuid: { [Op.in]: validUuids } });
     const users = userIds.length
-      ? await this.users.findAll({ where: { [Op.or]: [{ userCode: { [Op.in]: userIds } }, { uuid: { [Op.in]: userIds } }] } as any, attributes: ['uuid', 'userCode', 'name'], transaction })
+      ? await this.users.findAll({ where: { [Op.or]: userConditions } as any, attributes: ['uuid', 'userCode', 'name'], transaction })
       : [];
     return {
       projects: new Map(projects.map(project => [project.code, { uuid: project.uuid, name: project.name, code: project.code }])),
@@ -156,13 +188,24 @@ export class InternalTaskService {
     return { project, taskType, lead };
   }
 
-  private async syncAssignees(task: CrmInternalTask, userUuids: string[], actor: string | undefined, transaction: Transaction, projectUuid?: string | null) {
+  private async syncAssignees(task: CrmInternalTask, userUuids: string[], actor: string | null, transaction: Transaction, projectUuid?: string | null, orgId?: number | null) {
     const distinctIds = [...new Set(userUuids)];
-    const users = distinctIds.length ? await this.users.findAll({ where: { [Op.or]: [{ userCode: { [Op.in]: distinctIds } }, { uuid: { [Op.in]: distinctIds } }] } as any, attributes: ['uuid', 'userCode'], transaction }) : [];
+    const isUuid = (val: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
+    const validUuids = distinctIds.filter(isUuid);
+    const userConditions: any[] = [{ userCode: { [Op.in]: distinctIds } }];
+    if (validUuids.length) userConditions.push({ uuid: { [Op.in]: validUuids } });
+    const users = distinctIds.length ? await this.users.findAll({ where: { [Op.or]: userConditions } as any, attributes: ['uuid', 'userCode'], transaction }) : [];
     if (users.length !== distinctIds.length) throw new BadRequestException('One or more assigned users were not found');
     const userIdByInput = new Map(users.flatMap(user => [[user.uuid, user.userCode ?? user.uuid], ...(user.userCode ? [[user.userCode, user.userCode]] : [])] as [string, string][]));
     await this.assignees.destroy({ where: { taskId: task.id }, transaction });
-    if (distinctIds.length) await this.assignees.bulkCreate(distinctIds.map(inputId => ({ taskId: task.id, userId: userIdByInput.get(inputId)!, assignedBy: actor, createdBy: actor, projectId: projectUuid ?? null } as any)), { transaction });
+    if (distinctIds.length) await this.assignees.bulkCreate(distinctIds.map(inputId => ({
+      taskId: task.id,
+      userId: userIdByInput.get(inputId)!,
+      assignedBy: actor,
+      createdBy: actor,
+      projectId: projectUuid ?? null,
+      orgId: orgId ?? null,
+    } as any)), { transaction });
   }
 
   private toPublic(row: CrmInternalTask, relations: { projects: Map<string, any>; users: Map<string, SysUser> }) {
@@ -193,11 +236,15 @@ export class InternalTaskService {
       priority: this.displayStatus(data.priority),
       status: this.displayStatus(data.status),
       progress: progressByStatus[this.displayStatus(data.status)] ?? 0,
-      startDate: data.createdAt ?? null,
+      startDate: data.created_at ?? data.createdAt ?? null,
       dueDate: data.dueDate ?? null,
-      createdBy: data.createdBy ?? null,
-      createdAt: data.createdAt,
-      updatedAt: data.updatedAt,
+      orgId: data.org_id ?? data.orgId ?? null,
+      org_id: data.org_id ?? data.orgId ?? null,
+      created_by: data.created_by ?? data.createdBy ?? null,
+      updated_by: data.updated_by ?? data.updatedBy ?? null,
+      deleted_by: data.deleted_by ?? data.deletedBy ?? null,
+      created_at: data.created_at ?? data.createdAt,
+      updated_at: data.updated_at ?? data.updatedAt,
     };
   }
 

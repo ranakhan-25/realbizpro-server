@@ -12,4 +12,13 @@ export class CreateProcurementItemEntryDto {
   @ApiPropertyOptional({ description: 'Brand UUID' }) @IsOptional() @IsUUID() brand_id?: string;
   @ApiProperty({ description: 'Unit UUID' }) @IsUUID() @IsNotEmpty() unit_id: string;
   @ApiPropertyOptional() @IsOptional() @IsString() createdBy?: string;
+
+  @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+  @IsOptional()
+  orgId?: number;
+
+  @ApiPropertyOptional({ description: 'Project UUID or ID' })
+  @IsOptional()
+  projectId?: string;
+
 }

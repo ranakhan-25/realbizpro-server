@@ -85,6 +85,8 @@ export class ProcurementWorkOrderService {
     const page = query.page ?? 1;
     const limit = Math.min(query.limit ?? 10, 100);
     const where: any = {};
+    if ((query as any)?.orgId) where.orgId = (query as any).orgId;
+    if ((query as any)?.projectId) where.projectId = (query as any).projectId;
     if (query.project_id) where.project_id = query.project_id;
     if (query.type) where.type = query.type;
     if (query.status) where.status = query.status;

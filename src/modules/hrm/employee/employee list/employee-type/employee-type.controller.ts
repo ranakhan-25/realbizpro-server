@@ -1,97 +1,85 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Query,
-} from '@nestjs/common';
+/* eslint-disable prettier/prettier */
 
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
-
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { EmployeeTypeService } from './employee-type.service';
 import { CreateEmployeeTypeDto } from './dto/create-employee-type.dto';
 import { QueryEmployeeTypeDto } from './dto/query-employee-type.dto';
 import { UpdateEmployeeTypeDto } from './dto/update-employee-type.dto';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { CurrentUser, CurrentUserId } from 'src/common/decorators/auth.decorators';
 
 @ApiTags('HRM | Employee | Employee Type')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('employee-type')
 export class EmployeeTypeController {
-  constructor(
-    private readonly employeeTypeService: EmployeeTypeService,
-  ) {}
+  constructor(private readonly employeeTypeService: EmployeeTypeService) {}
 
   @Post()
-  @ApiOperation({
-    summary: 'Create a new employee type',
-  })
+  @Permissions('create_employee_type')
+  @ApiOperation({ summary: 'Create employee type' })
   create(
-    @Body()
-    createEmployeeTypeDto: CreateEmployeeTypeDto,
+    @Body() dto: CreateEmployeeTypeDto,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.employeeTypeService.create(
-      createEmployeeTypeDto,
-    );
+    return this.employeeTypeService.create(dto, userId, currentUser);
   }
 
   @Get()
-  @ApiOperation({
-    summary: 'Get all employee types (paginated)',
-  })
+  @Permissions('list_employee_type')
+  @ApiOperation({ summary: 'Get all employee types (paginated)' })
   findAll(
-    @Query()
-    query: QueryEmployeeTypeDto,
+    @Query() query: QueryEmployeeTypeDto,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.employeeTypeService.findAll(
-      query,
-    );
+    return this.employeeTypeService.findAll(query, currentUser);
   }
 
   @Get(':uuid')
-  @ApiOperation({
-    summary: 'Get employee type by UUID',
-  })
-  findOne(@Param('uuid') uuid: string) {
-    return this.employeeTypeService.findOne(uuid);
+  @Permissions('read_employee_type')
+  @ApiOperation({ summary: 'Get employee type by UUID' })
+  findOne(
+    @Param('uuid') uuid: string,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.employeeTypeService.findOne(uuid, currentUser);
   }
 
   @Patch(':uuid')
-  @ApiOperation({
-    summary: 'Update employee type',
-  })
+  @Permissions('update_employee_type')
+  @ApiOperation({ summary: 'Update employee type' })
   update(
     @Param('uuid') uuid: string,
-    @Body()
-    updateEmployeeTypeDto: UpdateEmployeeTypeDto,
+    @Body() dto: UpdateEmployeeTypeDto,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.employeeTypeService.update(
-      uuid,
-      updateEmployeeTypeDto,
-    );
+    return this.employeeTypeService.update(uuid, dto, userId, currentUser);
   }
 
   @Delete(':uuid')
-  @ApiOperation({
-    summary:
-      'Soft delete employee type (status → inactive)',
-  })
-  remove(@Param('uuid') uuid: string) {
-    return this.employeeTypeService.remove(uuid);
+  @Permissions('delete_employee_type')
+  @ApiOperation({ summary: 'Delete employee type' })
+  remove(
+    @Param('uuid') uuid: string,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.employeeTypeService.remove(uuid, userId, currentUser);
   }
 
   @Patch(':uuid/restore')
-  @ApiOperation({
-    summary:
-      'Restore soft-deleted employee type (status → active)',
-  })
-  restore(@Param('uuid') uuid: string) {
-    return this.employeeTypeService.restore(uuid);
+  @Permissions('update_employee_type')
+  @ApiOperation({ summary: 'Restore soft-deleted employee type' })
+  restore(
+    @Param('uuid') uuid: string,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.employeeTypeService.restore(uuid, userId, currentUser);
   }
 }

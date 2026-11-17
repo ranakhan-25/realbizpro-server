@@ -21,4 +21,8 @@ export class CreateProfessionDto {
   @ApiPropertyOptional({ description: 'Existing project identifier, if applicable' })
   @IsOptional() @IsString()
   declare projectId?: string;
+
+  @ApiPropertyOptional({ type: Number, description: 'Organization ID' })
+  @IsOptional()
+  declare orgId?: number;
 }

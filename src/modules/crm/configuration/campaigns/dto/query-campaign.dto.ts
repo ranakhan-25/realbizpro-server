@@ -27,4 +27,8 @@ export class QueryCampaignDto {
   @ApiPropertyOptional({ type: Boolean, default: false })
   @IsOptional() @Transform(({ value }) => value === true || value === 'true') @IsBoolean()
   declare withDeleted?: boolean;
+
+  @ApiPropertyOptional({ type: Number, description: 'Organization ID' })
+  @IsOptional() @Type(() => Number) @IsInt()
+  declare orgId?: number;
 }

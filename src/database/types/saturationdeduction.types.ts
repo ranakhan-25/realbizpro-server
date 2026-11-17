@@ -1,9 +1,11 @@
 // Auto-generated types for SaturationDeduction
-// Source: src/database/models/hrm/employee/hrm_saturationdeduction_model.ts
+// Source: src\database\models\hrm\employee\hrm_saturationdeduction_model.ts
 
 import { PaymentType } from '../models/hrm/employee/hrm_payment_enum';
 
 import type { EmployeeList } from '../models/hrm/employee/hrm_employeeList_model';
+import type { SysOrganization } from '../models/system/sys_organization.model';
+import type { Project } from '../models/projects/project/pr_project.model';
 
 export interface SaturationDeductionAttributes {
   id: number;
@@ -19,9 +21,13 @@ export interface SaturationDeductionAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
+  projectId?: string | null;
 
   // Relations
   employee?: EmployeeList;
+  organization?: SysOrganization;
+  project?: Project;
 }
 
 export interface SaturationDeductionCreationAttributes {
@@ -33,6 +39,8 @@ export interface SaturationDeductionCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
+  projectId?: string | null;
 }
 
 export type SaturationDeductionUpdateAttributes = Partial<SaturationDeductionCreationAttributes>;
@@ -40,4 +48,6 @@ export type SaturationDeductionUpdateAttributes = Partial<SaturationDeductionCre
 // Helper type for including relations
 export interface SaturationDeductionWithRelations extends SaturationDeductionAttributes {
   employee?: EmployeeList;
+  organization?: SysOrganization;
+  project?: Project;
 }

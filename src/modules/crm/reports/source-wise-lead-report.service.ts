@@ -31,7 +31,7 @@ export class SourceWiseLeadReportService {
     @InjectModel(SysUser) private readonly users: typeof SysUser,
   ) {}
 
-  async dropdowns() {
+  async dropdowns(currentUser?: any) {
     const [users, leadSources] = await Promise.all([
       this.users.findAll({ where: { isActive: true }, attributes: ['uuid', 'name', 'userCode'], order: [['name', 'ASC']] }),
       this.sources.findAll({ where: { isActive: true }, attributes: ['id', 'uuid', 'name', 'code'], order: [['name', 'ASC']] }),
@@ -39,8 +39,9 @@ export class SourceWiseLeadReportService {
     return { users, leadSources };
   }
 
-  async report(query: QuerySourceWiseLeadReportDto) {
+  async report(query: QuerySourceWiseLeadReportDto, currentUser?: any) {
     const where: any = {};
+    if (currentUser?.orgId) { where.orgId = currentUser.orgId; }
     if (query.dateFrom || query.dateTo) where.leadDate = { ...(query.dateFrom ? { [Op.gte]: query.dateFrom } : {}), ...(query.dateTo ? { [Op.lte]: query.dateTo } : {}) };
     if (query.userId) where.assignedTo = query.userId;
     if (query.leadSourceId) where.leadSourceId = query.leadSourceId;

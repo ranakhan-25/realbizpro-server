@@ -81,4 +81,15 @@ export class CreateBonusGenerateDto {
   @IsOptional()
   @IsEnum(BonusGenerateStatus)
   status?: BonusGenerateStatus;
+    @ApiPropertyOptional({ example: 'user-uuid' })
+    @IsOptional()
+    @IsString()
+    createdBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Project UUID or ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 }

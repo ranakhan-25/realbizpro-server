@@ -17,3 +17,7 @@
   - `GET /realbizpro/api/v1/files/content/{key}` (`@Public()`) streams file content directly to clients.
 - **Deletion**:
   - `DELETE /realbizpro/api/v1/files/{key}` removes from S3/MinIO and marks in DB.
+
+## Documentation and Specifications Protocol
+- **Primary Project Location**: All architecture plans, specifications, module audits, and markdown documentation must always be saved directly inside the project repository within the `docs/` folder (for example, `docs/enterprise_architecture_plan_lams_inventory.md`).
+- Never save project plans, guides, or specifications outside the repository workspace.

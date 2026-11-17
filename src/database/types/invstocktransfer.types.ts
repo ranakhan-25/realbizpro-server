@@ -1,5 +1,5 @@
 // Auto-generated types for InvStockTransfer
-// Source: src/database/models/inventory/inv_stock_transfer.model.ts
+// Source: src\database\models\inventory\inv_stock_transfer.model.ts
 
 import type { InvItem } from '../models/inventory/inv_item.model';
 
@@ -21,7 +21,7 @@ export interface InvStockTransferAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id: string;
 
   // Relations
   item: InvItem;
@@ -40,7 +40,7 @@ export interface InvStockTransferCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id: string;
 }
 
 export type InvStockTransferUpdateAttributes = Partial<InvStockTransferCreationAttributes>;

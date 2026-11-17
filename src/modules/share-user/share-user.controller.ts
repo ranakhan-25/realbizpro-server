@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, ParseIntPipe, ParseUUIDPipe, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { IsOptional, IsString, MinLength } from 'class-validator';
 import { Public } from '../../common/decorators/public.decorator';
 import { ShareUserAuthGuard } from './share-user-auth.guard';
 import { ShareUserRoleGuard, ShareUserRoles } from './share-user-role.guard';
@@ -15,6 +16,12 @@ import {
   UpdateShareUserProfileDto,
   VerifyShareUserEmailDto,
 } from './dto/share-user-auth.dto';
+
+class AdminUpdateShareUserDto {
+  @IsOptional() @IsString() name?: string;
+  @IsOptional() @IsString() phone?: string;
+  @IsOptional() @IsString() @MinLength(8) password?: string;
+}
 
 @ApiTags('Share User')
 @Controller('share-user')
@@ -44,4 +51,8 @@ export class ShareUserController {
   @Patch(':uuid/block') block(@Param('uuid', ParseUUIDPipe) uuid: string) { return this.service.setBlocked(uuid, true); }
   @ApiBearerAuth() @UseGuards(ShareUserAuthGuard, ShareUserRoleGuard) @ShareUserRoles(ShareUserRole.SUPER_ADMIN)
   @Patch(':uuid/unblock') unblock(@Param('uuid', ParseUUIDPipe) uuid: string) { return this.service.setBlocked(uuid, false); }
+  @ApiBearerAuth() @UseGuards(ShareUserAuthGuard, ShareUserRoleGuard) @ShareUserRoles(ShareUserRole.SUPER_ADMIN)
+  @Post('admin/create') adminCreate(@Body() dto: RegisterShareUserDto) { return this.service.adminCreateUser(dto); }
+  @ApiBearerAuth() @UseGuards(ShareUserAuthGuard, ShareUserRoleGuard) @ShareUserRoles(ShareUserRole.SUPER_ADMIN)
+  @Patch(':uuid/admin-update') adminUpdate(@Param('uuid', ParseUUIDPipe) uuid: string, @Body() dto: AdminUpdateShareUserDto) { return this.service.adminUpdateUser(uuid, dto); }
 }

@@ -146,4 +146,11 @@ export class CreateContractorDto {
   @IsOptional()
   @IsEnum(ContractorStatus)
   status?: ContractorStatus;
+    @ApiPropertyOptional({ example: 'user-uuid' })
+    @IsOptional()
+    @IsString()
+    createdBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
 }

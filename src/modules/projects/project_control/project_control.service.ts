@@ -36,7 +36,11 @@ export class ProjectControlService {
     }
   }
 
-  async create(createDto: CreateProjectControlDto): Promise<ProjectControl> {
+  async create(
+    createDto: CreateProjectControlDto,
+    userId?: number,
+    currentUser?: any,
+  ): Promise<ProjectControl> {
     try {
       return await this.controlModel.create(createDto as any);
     } catch (error) {
@@ -47,7 +51,10 @@ export class ProjectControlService {
     }
   }
 
-  async findAll(query: QueryProjectControlDto) {
+  async findAll(
+    query: QueryProjectControlDto,
+    currentUser?: any,
+  ) {
     const { page = '1', limit = '10', search, status, ...filters } = query;
     
     const pageNum = parseInt(page, 10);
@@ -55,6 +62,18 @@ export class ProjectControlService {
     const offset = (pageNum - 1) * limitNum;
 
     const whereClause: any = {};
+    if ((query as any)?.orgId) {
+      whereClause.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      whereClause.projectId = (query as any).projectId;
+    }
+    if ((query as any)?.orgId) {
+      whereClause.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      whereClause.projectId = (query as any).projectId;
+    }
     Object.keys(filters).forEach((key) => {
       const value = filters[key];
       if (value !== undefined && value !== null && value !== '') {
@@ -106,7 +125,7 @@ export class ProjectControlService {
     };
   }
 
-  async findOne(uuid: string): Promise<ProjectControl> {
+  async findOne(uuid: string, currentUser?: any): Promise<ProjectControl> {
     const control = await this.controlModel.findOne({ where: { uuid } });
     if (!control) {
       throw new NotFoundException(`Control with UUID ${uuid} not found`);
@@ -114,23 +133,25 @@ export class ProjectControlService {
     return control;
   }
 
-  async update(uuid: string, updateDto: UpdateProjectControlDto): Promise<ProjectControl> {
+  async update(
+    uuid: string,
+    updateDto: UpdateProjectControlDto,
+    userId?: number,
+    currentUser?: any,
+  ): Promise<ProjectControl> {
     const control = await this.findOne(uuid);
     return control.update(updateDto);
   }
 
-  async remove(uuid: string, deletedBy?: string): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const control = await this.findOne(uuid);
     
-    if (deletedBy) {
-      await control.update({ deletedBy });
-    }
-    
+    await control.update({ deletedBy: userId ? String(userId) : null } as any);
     await control.destroy(); // Soft delete
     return { message: 'Control entry deleted successfully' };
   }
 
-  async restore(uuid: string): Promise<ProjectControl> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<ProjectControl> {
     const control = await this.controlModel.findOne({ 
       where: { uuid },
       paranoid: false 
@@ -145,11 +166,12 @@ export class ProjectControlService {
     }
 
     await control.restore();
+    await control.update({ deletedBy: null, updatedBy: userId ? String(userId) : null } as any);
     return control;
   }
 
   // Helper endpoint for top Cards (Total Controls, OK, Warning, Critical Breaches)
-  async getSummary(projectUuid: string) {
+  async getSummary(projectUuid: string, currentUser?: any) {
     const controls = await this.controlModel.findAll({ where: { projectUuid } });
     
     let totalControls = controls.length;

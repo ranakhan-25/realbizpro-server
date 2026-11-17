@@ -1,5 +1,5 @@
 // Auto-generated types for InvSupplier
-// Source: src/database/models/inventory/inv_supplier.model.ts
+// Source: src\database\models\inventory\inv_supplier.model.ts
 
 import type { InvPurchase } from '../models/inventory/inv_purchase.model';
 
@@ -22,7 +22,7 @@ export interface InvSupplierAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id: string;
 
   // Relations
   purchases?: InvPurchase[];
@@ -42,7 +42,7 @@ export interface InvSupplierCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id: string;
 }
 
 export type InvSupplierUpdateAttributes = Partial<InvSupplierCreationAttributes>;

@@ -82,10 +82,11 @@ export class InvItem extends BaseModel<InvItemAttributes, InvItemCreationAttribu
   @Column({ type: DataType.STRING, allowNull: true, field: 'deleted_by' })
   declare deletedBy?: string;
 
+  @Index({ name: 'idx_inv_item_org_id' })
   @Column({
     type: DataType.STRING,
-    allowNull: true,
+    allowNull: false,
   })
-  declare projectId?: string;
+  declare org_id: string;
 }
 

@@ -1,7 +1,8 @@
 // Auto-generated types for ProjectShareConfiguration
-// Source: src/database/models/projects/project-share-configuration/pr_project_share_configuration.model.ts
+// Source: src\database\models\projects\project-share-configuration\pr_project_share_configuration.model.ts
 
 import type { Project } from '../models/projects/project/pr_project.model';
+import type { SysOrganization } from '../models/system/sys_organization.model';
 
 export interface ProjectShareConfigurationAttributes {
   id: number;
@@ -19,9 +20,11 @@ export interface ProjectShareConfigurationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
 
   // Relations
   project?: Project;
+  organization?: SysOrganization;
 }
 
 export interface ProjectShareConfigurationCreationAttributes {
@@ -35,6 +38,7 @@ export interface ProjectShareConfigurationCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
 }
 
 export type ProjectShareConfigurationUpdateAttributes = Partial<ProjectShareConfigurationCreationAttributes>;
@@ -42,4 +46,5 @@ export type ProjectShareConfigurationUpdateAttributes = Partial<ProjectShareConf
 // Helper type for including relations
 export interface ProjectShareConfigurationWithRelations extends ProjectShareConfigurationAttributes {
   project?: Project;
+  organization?: SysOrganization;
 }

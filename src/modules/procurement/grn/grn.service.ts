@@ -79,12 +79,12 @@ export class GrnService {
     const result: any[] = [];
     for (const input of inputs) {
       const poLine = input.purchase_order_item_id
-        ? await this.purchaseOrderItemModel.findOne({ where: { uuid: input.purchase_order_item_id } as any, include: [{ model: ProcurementPurchaseOrder, as: 'purchaseOrder' }], transaction })
+        ? await this.purchaseOrderItemModel.findOne({ where: { uuid: input.purchase_order_item_id } as any, include: [{ association: 'purchaseOrder' }], transaction })
         : null;
       if (input.purchase_order_item_id && !poLine) throw new BadRequestException('Selected purchase-order item does not exist');
       if (poLine && purchaseOrderId && poLine.purchase_order_id !== purchaseOrderId) throw new BadRequestException('Purchase-order item does not belong to selected purchase order');
       const itemId = input.item_id ?? poLine?.item_id;
-      const item = itemId ? await this.itemModel.findOne({ where: { uuid: itemId } as any, include: [{ model: ProcurementUnit, as: 'unit' }], transaction }) : null;
+      const item = itemId ? await this.itemModel.findOne({ where: { uuid: itemId } as any, include: [{ association: 'unit' }], transaction }) : null;
       if (itemId && !item) throw new BadRequestException(`Selected item ${itemId} does not exist`);
       if (!item && !input.item_code) throw new BadRequestException('Each GRN line must reference an item or provide an item code');
       if (categoryId && item && item.category_id !== categoryId) throw new BadRequestException(`Item ${item.item_code} does not belong to selected category`);
@@ -108,6 +108,8 @@ export class GrnService {
   async findAll(query: QueryGrnDto) {
     const { page = 1, limit = 10, search, date_from, date_to, already_billed, withDeleted, deleted_only, ...filters } = query as any;
     const where: any = {};
+    if ((query as any)?.orgId) where.orgId = (query as any).orgId;
+    if ((query as any)?.projectId) where.projectId = (query as any).projectId;
     for (const key of ['company_id', 'supplier_id', 'project_type_id', 'project_id', 'title_of_work_id', 'task_id', 'added_by_id', 'approval_layer', 'status']) if ((filters as any)[key] !== undefined) where[key] = (filters as any)[key];
     if (date_from && date_to) where.date = { [Op.between]: [date_from, date_to] };
     else if (date_from) where.date = { [Op.gte]: date_from };

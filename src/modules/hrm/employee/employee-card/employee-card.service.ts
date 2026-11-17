@@ -14,7 +14,7 @@ export class EmployeeCardService {
     private readonly employeeListModel: typeof EmployeeList,
   ) {}
 
-  async findAll(query: QueryEmployeeCardDto) {
+  async findAll(query: QueryEmployeeCardDto, currentUser?: any) {
     const {
       departmentId,
       designationId,
@@ -25,6 +25,14 @@ export class EmployeeCardService {
     const skip = (page - 1) * limit;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
 
     if (departmentId) {
       where.departmentId = departmentId;

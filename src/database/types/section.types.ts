@@ -1,9 +1,10 @@
 // Auto-generated types for Section
-// Source: src/database/models/hrm/employee/hrm_section_model.ts
+// Source: src\database\models\hrm\employee\hrm_section_model.ts
 
 import { SectionStatus } from '../models/hrm/employee/hrm_section_model';
 
 import type { EmployeeList } from '../models/hrm/employee/hrm_employeeList_model';
+import type { SysOrganization } from '../models/system/sys_organization.model';
 
 export interface SectionAttributes {
   id: number;
@@ -17,9 +18,11 @@ export interface SectionAttributes {
   updatedBy?: string | null;
   deletedBy?: string | null;
   status: SectionStatus;
+  orgId?: number | null;
 
   // Relations
   employees?: EmployeeList[];
+  organization?: SysOrganization;
 }
 
 export interface SectionCreationAttributes {
@@ -29,6 +32,7 @@ export interface SectionCreationAttributes {
   updatedBy?: string | null;
   deletedBy?: string | null;
   status?: SectionStatus; // Has default value
+  orgId?: number | null;
 }
 
 export type SectionUpdateAttributes = Partial<SectionCreationAttributes>;
@@ -36,4 +40,5 @@ export type SectionUpdateAttributes = Partial<SectionCreationAttributes>;
 // Helper type for including relations
 export interface SectionWithRelations extends SectionAttributes {
   employees?: EmployeeList[];
+  organization?: SysOrganization;
 }

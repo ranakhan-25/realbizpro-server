@@ -4,8 +4,7 @@ import {
   Column,
   DataType,
   HasMany,
-  Table,
-} from 'sequelize-typescript';
+  Table, ForeignKey, BelongsTo } from 'sequelize-typescript';
 import { MaterialRequisition } from '../material-requisition/pr_material_requisition.model';
 import { Quotation } from '../quatation/pr_quotation.model';
 import { BillingSubCategory } from './pr_sub_category.model';
@@ -24,6 +23,7 @@ import { ProcurementPurchaseOrder } from '../../procurement/purchase-order/pr_pu
 import { ProcurementAssetPurchaseOrder } from '../../procurement/purchase-order/pr_asset_purchase_order.model';
 import { ProcurementGrn } from '../../procurement/grn/pr_grn.model';
 import { ProcurementAssetGrn } from '../../procurement/grn/pr_asset_grn.model';
+import { SysOrganization } from "src/database/models/system/sys_organization.model";
 
 export enum CategoryType {
   PRODUCT = 'Product',
@@ -108,20 +108,37 @@ export class BillingCategory
   @HasMany(() => ProcurementAssetGrn, { foreignKey: 'title_of_work_id', sourceKey: 'uuid', as: 'procurementAssetGrns' }) declare procurementAssetGrns?: ProcurementAssetGrn[];
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'created_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare createdBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'updated_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare updatedBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          field: 'deleted_by',
+          type: DataType.STRING,
+          allowNull: true,
+        })
   declare deletedBy?: string;
+    @ForeignKey(() => SysOrganization)
+    @Column({
+            type: DataType.BIGINT,
+            allowNull: true,
+            field: 'org_id',
+            defaultValue: null,
+          })
+    declare orgId?: number | null;
+    @BelongsTo(() => SysOrganization, {
+            foreignKey: 'orgId',
+            targetKey: 'id',
+            as: 'organization',
+          })
+    declare organization?: SysOrganization;
 }

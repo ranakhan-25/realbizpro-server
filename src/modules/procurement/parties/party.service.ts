@@ -24,6 +24,8 @@ export class PartyService {
   async findAll(query: PartyQueryDto) {
     const page = Math.max(1, Number(query.page) || 1); const limit = Math.min(100, Math.max(1, Number(query.limit) || 10));
     const where: any = {};
+    if ((query as any)?.orgId) where.orgId = (query as any).orgId;
+    if ((query as any)?.projectId) where.projectId = (query as any).projectId;
     if (query.type) where.type = query.type;
     if (query.status) where.status = query.status;
     if (query.startDate || query.endDate) where.createdAt = { ...(query.startDate ? { [Op.gte]: new Date(query.startDate) } : {}), ...(query.endDate ? { [Op.lte]: new Date(`${query.endDate}T23:59:59.999Z`) } : {}) };
@@ -40,7 +42,7 @@ export class PartyService {
   }
 
   async findOne(uuid: string, includeDeleted = false) {
-    const party = await this.parties.findOne({ where: { uuid }, paranoid: !includeDeleted, include: [{ association: 'documents', required: false }] });
+    const party = await this.parties.findOne({ where: { uuid }, paranoid: !includeDeleted, include: [{ association: 'documents', required: false, paranoid: !includeDeleted }] });
     if (!party) throw new NotFoundException(`Party ${uuid} not found`);
     return party;
   }

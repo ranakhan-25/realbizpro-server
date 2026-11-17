@@ -17,6 +17,7 @@ export class EmployeeHierarchyService {
 
   async findAll(
     query: QueryEmployeeHierarchyDto,
+    currentUser?: any,
   ) {
     const {
       search,
@@ -28,6 +29,14 @@ export class EmployeeHierarchyService {
     } = query;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
 
     if (search) {
       where[Op.or] = [

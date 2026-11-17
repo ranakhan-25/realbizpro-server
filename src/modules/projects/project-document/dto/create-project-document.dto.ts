@@ -44,4 +44,11 @@ export class CreateProjectDocumentDto {
   @IsString()
   @Transform(({ value }) => (value === '' ? null : value))
   rajuk?: string;
+    @ApiPropertyOptional({ example: 'user-uuid' })
+    @IsOptional()
+    @IsString()
+    createdBy?: string;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
 }

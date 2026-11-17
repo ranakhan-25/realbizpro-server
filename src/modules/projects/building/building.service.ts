@@ -20,7 +20,11 @@ export class BuildingService {
     private readonly buildingModel: typeof Building,
   ) {}
 
-  async create(dto: CreateBuildingDto): Promise<Building> {
+  async create(
+    dto: CreateBuildingDto,
+    userId?: number,
+    currentUser?: any,
+  ): Promise<Building> {
     const siteUid = dto.siteUid || dto.siteUuid;
     if (!siteUid) {
       throw new BadRequestException('siteUid or siteUuid is required');
@@ -42,7 +46,7 @@ export class BuildingService {
     }
 
     try {
-      const building = await this.buildingModel.create({
+      const building = await this.buildingModel.create(({
         uid: dto.uid,
         buildingCode,
         buildingName: dto.buildingName,
@@ -51,7 +55,10 @@ export class BuildingService {
         status: dto.status ?? 'Active',
         siteUid,
         addedBy: dto.addedBy,
-      });
+        createdBy: dto.createdBy ?? dto.addedBy,
+        orgId: dto.orgId,
+        projectId: dto.projectId,
+      }) as any);
       return this.findOne(building.uuid);
     } catch (error) {
       if (error instanceof Error) {
@@ -66,7 +73,10 @@ export class BuildingService {
     }
   }
 
-  async findAll(query: QueryBuildingDto) {
+  async findAll(
+    query: QueryBuildingDto,
+    currentUser?: any,
+  ) {
     const page = Number.parseInt(query.page ?? '1', 10);
     const limit = Number.parseInt(query.limit ?? '10', 10);
     const offset =
@@ -74,6 +84,12 @@ export class BuildingService {
         ? Number.parseInt(query.skip, 10)
         : (page - 1) * limit;
     const where: Record<string | symbol, unknown> = {};
+    if ((query as any)?.orgId) {
+      where.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      where.projectId = (query as any).projectId;
+    }
 
     if (query.search) {
       where[Op.or] = [
@@ -115,7 +131,7 @@ export class BuildingService {
     };
   }
 
-  async findOne(uuid: string): Promise<Building> {
+  async findOne(uuid: string, currentUser?: any): Promise<Building> {
     const building = await this.buildingModel.findOne({ where: { uuid } });
     if (!building) {
       throw new NotFoundException(`Building ${uuid} not found`);
@@ -123,7 +139,12 @@ export class BuildingService {
     return building;
   }
 
-  async update(uuid: string, dto: UpdateBuildingDto): Promise<Building> {
+  async update(
+    uuid: string,
+    dto: UpdateBuildingDto,
+    userId?: number,
+    currentUser?: any,
+  ): Promise<Building> {
     const building = await this.findOne(uuid);
     const { siteUuid, ...updates } = dto;
     if (siteUuid && !updates.siteUid) {
@@ -133,13 +154,13 @@ export class BuildingService {
     return this.findOne(uuid);
   }
 
-  async remove(uuid: string): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const building = await this.findOne(uuid);
     await building.destroy();
     return { message: 'Building deleted successfully' };
   }
 
-  async restore(uuid: string): Promise<Building> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<Building> {
     const building = await this.buildingModel.findOne({
       where: { uuid },
       paranoid: false,

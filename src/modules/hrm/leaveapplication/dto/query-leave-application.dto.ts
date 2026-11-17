@@ -175,6 +175,13 @@ export class QueryLeaveApplicationDto {
   )
   @IsBoolean()
   withDeleted?: boolean = false;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
+    @ApiPropertyOptional({ description: 'Project UUID or ID' })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 }
 
 export class FindOneLeaveApplicationQueryDto {

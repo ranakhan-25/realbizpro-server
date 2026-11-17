@@ -1,7 +1,9 @@
 // Auto-generated types for EmployeeSalary
-// Source: src/database/models/hrm/employee/hrm_employeesalary_model.ts
+// Source: src\database\models\hrm\employee\hrm_employeesalary_model.ts
 
 import type { EmployeeList } from '../models/hrm/employee/hrm_employeeList_model';
+import type { SysOrganization } from '../models/system/sys_organization.model';
+import type { Project } from '../models/projects/project/pr_project.model';
 
 export interface EmployeeSalaryAttributes {
   id: number;
@@ -15,9 +17,13 @@ export interface EmployeeSalaryAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
+  projectId?: string | null;
 
   // Relations
   employee?: EmployeeList;
+  organization?: SysOrganization;
+  project?: Project;
 }
 
 export interface EmployeeSalaryCreationAttributes {
@@ -27,6 +33,8 @@ export interface EmployeeSalaryCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
+  projectId?: string | null;
 }
 
 export type EmployeeSalaryUpdateAttributes = Partial<EmployeeSalaryCreationAttributes>;
@@ -34,4 +42,6 @@ export type EmployeeSalaryUpdateAttributes = Partial<EmployeeSalaryCreationAttri
 // Helper type for including relations
 export interface EmployeeSalaryWithRelations extends EmployeeSalaryAttributes {
   employee?: EmployeeList;
+  organization?: SysOrganization;
+  project?: Project;
 }

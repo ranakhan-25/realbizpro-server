@@ -1,97 +1,85 @@
 /* eslint-disable prettier/prettier */
 
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Query,
-} from '@nestjs/common';
-
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
-
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { DepartmentService } from './department.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { QueryDepartmentDto } from './dto/query-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { CurrentUser, CurrentUserId } from 'src/common/decorators/auth.decorators';
 
 @ApiTags('HRM | Employee | Department')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('department')
 export class DepartmentController {
-  constructor(
-    private readonly departmentService: DepartmentService,
-  ) {}
+  constructor(private readonly departmentService: DepartmentService) {}
 
   @Post()
-  @ApiOperation({
-    summary: 'Create a new department',
-  })
+  @Permissions('create_department')
+  @ApiOperation({ summary: 'Create department' })
   create(
-    @Body()
-    createDepartmentDto: CreateDepartmentDto,
+    @Body() dto: CreateDepartmentDto,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.departmentService.create(
-      createDepartmentDto,
-    );
+    return this.departmentService.create(dto, userId, currentUser);
   }
 
   @Get()
-  @ApiOperation({
-    summary: 'Get all departments (paginated)',
-  })
+  @Permissions('list_department')
+  @ApiOperation({ summary: 'Get all departments (paginated)' })
   findAll(
-    @Query()
-    query: QueryDepartmentDto,
+    @Query() query: QueryDepartmentDto,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.departmentService.findAll(query);
+    return this.departmentService.findAll(query, currentUser);
   }
 
   @Get(':uuid')
-  @ApiOperation({
-    summary: 'Get department by UUID',
-  })
-  findOne(@Param('uuid') uuid: string) {
-    return this.departmentService.findOne(uuid);
+  @Permissions('read_department')
+  @ApiOperation({ summary: 'Get department by UUID' })
+  findOne(
+    @Param('uuid') uuid: string,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.departmentService.findOne(uuid, currentUser);
   }
 
   @Patch(':uuid')
-  @ApiOperation({
-    summary: 'Update department',
-  })
+  @Permissions('update_department')
+  @ApiOperation({ summary: 'Update department' })
   update(
     @Param('uuid') uuid: string,
-    @Body()
-    updateDepartmentDto: UpdateDepartmentDto,
+    @Body() dto: UpdateDepartmentDto,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
   ) {
-    return this.departmentService.update(
-      uuid,
-      updateDepartmentDto,
-    );
+    return this.departmentService.update(uuid, dto, userId, currentUser);
   }
 
   @Delete(':uuid')
-  @ApiOperation({
-    summary:
-      'Soft delete department (status → inactive)',
-  })
-  remove(@Param('uuid') uuid: string) {
-    return this.departmentService.remove(uuid);
+  @Permissions('delete_department')
+  @ApiOperation({ summary: 'Delete department' })
+  remove(
+    @Param('uuid') uuid: string,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.departmentService.remove(uuid, userId, currentUser);
   }
 
   @Patch(':uuid/restore')
-  @ApiOperation({
-    summary:
-      'Restore soft-deleted department (status → active)',
-  })
-  restore(@Param('uuid') uuid: string) {
-    return this.departmentService.restore(uuid);
+  @Permissions('update_department')
+  @ApiOperation({ summary: 'Restore soft-deleted department' })
+  restore(
+    @Param('uuid') uuid: string,
+    @CurrentUserId() userId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.departmentService.restore(uuid, userId, currentUser);
   }
 }

@@ -18,8 +18,10 @@ import { InventoryModule } from './modules/inventory/inventory.module';
 import { AppService } from './app.service';
 import { AuthLoggingInterceptor } from './common/interceptors/auth-logging.interceptor';
 import { ErrorTransformInterceptor } from './common/interceptors/error-transform.interceptor';
+import { ShareUserTenantInterceptor } from './common/interceptors/share-user-tenant.interceptor';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { CacheModule } from './common/services/cache.module';
+import { ShareUserTenantHooksService } from './database/share-user-tenant-hooks.service';
 
 import {
   getRealIP,
@@ -49,6 +51,7 @@ import { JobLogModule } from './modules/system/job-log/job-log.module';
 import { CompanyModule } from './modules/system/sys-company/sys-company.module';
 import { PlansModule } from './modules/system/plans/plans.module';
 import { OrganizationsModule } from './modules/system/organizations/organizations.module';
+import { SubscriptionPaymentsModule } from './modules/system/subscription-payments/subscription-payments.module';
 import { TenantCmsModule } from './modules/system/cms/tenant-cms.module';
 import { UserAccessModule } from './modules/system/access/user-access.module';
 import { AdminDashboardModule } from './modules/system/dashboard/admin-dashboard.module';
@@ -60,6 +63,7 @@ import { HrmMobileAuthFaceModule } from './modules/user-management/hrm-mobile-au
 import { FeaturesModule } from './modules/user-management/features/feature.module';
 import { RolesModule } from './modules/user-management/roles/roles.module';
 import { PermissionsModule } from './modules/user-management/permissions/permissions.module';
+import { CustomPermissionsModule } from './modules/user-management/custom-permissions/custom-permissions.module';
 import { EmailModule } from './modules/email/email.module';
 import { ModulesModule } from './modules/modules/modules.module';
 import { MenuModule } from './modules/menu/menu.module';
@@ -68,6 +72,7 @@ import { ApprovalsModule } from './modules/approvals/approvals.module';
 import { ProjectTypeModule } from './modules/projects/project-type/project-type.module';
 import { ShareUserModule } from './modules/share-user/share-user.module';
 import { ShareProjectModule } from './modules/share-project/share-project.module';
+import { LocationsModule } from './modules/locations/locations.module';
 
 import { ProjectSiteModule } from './modules/projects/project-site/project-site.module';
 import { CustomerAccountModule } from './modules/projects/contract/customer-accounts/customer_accounts.module';
@@ -111,7 +116,7 @@ import { ProjectShareAssignmentModule } from './modules/projects/project-share-a
 import { CategoryModule } from './modules/projects/billing/category/category.module';
 import { SubCategoryModule } from './modules/projects/billing/sub-category/sub-category.module';
 import { FlatLandBookingModule } from './modules/projects/flat-land-booking/flat-land-booking.module';
-import { CommissionModule } from './modules/hrm/employee/employee list/commission/commission.module';
+import { CommissionModule as EmployeeCommissionModule } from './modules/hrm/employee/employee list/commission/commission.module';
 import { AllowanceModule } from './modules/hrm/employee/employee list/allowance/allowance.module';
 import { EmployeeListModule } from './modules/hrm/employee/employee list/employee-list/employee-list.module';
 import { EmployeeSalaryModule } from './modules/hrm/employee/employee list/employee-salary/employee-salary.module';
@@ -218,16 +223,40 @@ import { ExpenseReportsModule } from './modules/accounts/reports/expense_reports
 import { ChatsOfGroupeModule } from './modules/accounts/configuration/chats_of_groupe/chats_of_groupe.module';
 import { ChatsOfAccountsModule } from './modules/accounts/configuration/chats_of_accounts/chats_of_accounts.module';
 import { LeaveApplicationModule } from './modules/hrm/leaveapplication/leave-application.module';
+import { PaySlipModule } from './modules/hrm/pay-slip/pay-slip.module';
+import { LiveHrmReportsModule } from './modules/hrm/reports/live-hrm-reports.module';
+import { HrmKpiModule } from './modules/hrm/kpi/hrm-kpi.module';
 import { ExpenseListModule } from './modules/accounts/vouchers/expense_list/expense_list.module';
 import { ReceivedVouchersModule } from './modules/accounts/vouchers/received-vouchers/received-vouchers.module';
 import { PaymentVouchersModule } from './modules/accounts/vouchers/payment-vouchers/payment-vouchers.module';
 import { JournalVoucherModule } from './modules/accounts/vouchers/journal_vouchers/journal_vouchers.module';
 import { ContraVoucherModule } from './modules/accounts/vouchers/contra_vouchers/contra_vouchers.module';
+import { LiveReportsModule } from './modules/accounts/reports/live-reports/live-reports.module';
 import { BankReconciliationStatementModule } from './modules/accounts/bank-reconciliation/bank-reconciliation_statement/bank-reconciliation_statement.module';
 import { ListOfChequeRangeModule } from './modules/accounts/bank-reconciliation/list_of_cheque_range/list_of_cheque_range.module';
 import { ListOfChequeModule } from './modules/accounts/bank-reconciliation/list_of_cheque/list_of_cheque.module';
 import { CustomerServiceModule } from './modules/customer-service/customer-service.module';
 
+import { BookingDetailsModule } from './modules/sales_management/booking_details/booking_details.module';
+import { BookingCreatepageModule } from './modules/sales_management/booking_createpage/booking_createpage.module';
+import { HoldModalModule } from './modules/sales_management/inventory/hold_modal/hold_modal.module';
+import { PricingFormModule } from './modules/sales_management/inventory/pricing_form/pricing_form.module';
+import { DiscountModule } from './modules/sales_management/discounts/discounts_form/discounts_form.module';
+import { PaymodalModule } from './modules/sales_management/commission/paymodal/paymodal.module';
+import { OverviewModule } from './modules/sales_management/booking/details/overview/overview.module';
+import { InstallmentsModule } from './modules/sales_management/booking/details/installments/installments.module';
+import { AgreementModule } from './modules/sales_management/booking/details/agreement/agreement.module';
+import { CancellationModule } from './modules/sales_management/booking/details/cancellation/cancellation.module';
+import { RegistrationModule } from './modules/sales_management/booking/details/registration/registration.module';
+import { HandoverModule } from './modules/sales_management/booking/details/handover/handover.module';
+import { TransferModule } from './modules/sales_management/booking/details/transfer/transfer.module';
+import { CommissionModule } from './modules/sales_management/booking/details/commission/commission.module';
+import { DocumentsModule } from './modules/sales_management/booking/details/documents/documents.module';
+import { AgreementsModule } from './modules/sales_management/agreementview/agreementview.module';
+import { CencellationviewModule } from './modules/sales_management/cencellationview/cencellationview.module';
+import { PayInstallemntModule } from './modules/sales_management/pay_installemnt/pay_installemnt.module';
+import { CommissionFormModule } from './modules/sales_management/commmission/commission_form/commission_form.module';
+import { ApprovalModule as BookingApprovalModule } from './modules/sales_management/approvals/approvals.module';
 
 @Module({
   imports: [
@@ -296,17 +325,19 @@ import { CustomerServiceModule } from './modules/customer-service/customer-servi
     ModulesModule,
     FeaturesModule,
     PermissionsModule,
+    CustomPermissionsModule,
     RolesModule,
     UsersModule,
     MenuModule,
     ModuleUserModule,
-    ApprovalsModule,
+    BookingApprovalModule,
     NotificationModule,
     EmailModule,
     MaterialRequisitionModule,
     ProjectTypeModule,
     ShareUserModule,
     ShareProjectModule,
+    LocationsModule,
     ProjectSiteModule,
     ProjectModule,
     UsersModule,
@@ -334,6 +365,7 @@ import { CustomerServiceModule } from './modules/customer-service/customer-servi
     CompanyModule,
     PlansModule,
     OrganizationsModule,
+    SubscriptionPaymentsModule,
     TenantCmsModule,
     UserAccessModule,
     AdminDashboardModule,
@@ -378,7 +410,7 @@ import { CustomerServiceModule } from './modules/customer-service/customer-servi
     BonusGenerateModule,
     SectionModule,
     UnitModule,
-    CommissionModule,
+    EmployeeCommissionModule,
     AllowanceModule,
     EmployeeListModule,
     EmployeeSalaryModule,
@@ -472,19 +504,43 @@ import { CustomerServiceModule } from './modules/customer-service/customer-servi
     ChatsOfGroupeModule,
     ChatsOfAccountsModule,
     LeaveApplicationModule,
+    PaySlipModule,
+    LiveHrmReportsModule,
+    HrmKpiModule,
     ExpenseListModule,
     ReceivedVouchersModule,
     PaymentVouchersModule,
     JournalVoucherModule,
     ContraVoucherModule,
+    LiveReportsModule,
     BankReconciliationStatementModule,
     ListOfChequeRangeModule,
     ListOfChequeModule,
     CustomerServiceModule,
+    BookingDetailsModule,
+    BookingCreatepageModule,
+    HoldModalModule,
+    PricingFormModule,
+    DiscountModule,
+    PaymodalModule,
+    OverviewModule,
+    InstallmentsModule,
+    AgreementModule,
+    CancellationModule,
+    RegistrationModule,
+    HandoverModule,
+    TransferModule,
+    DocumentsModule,
+    AgreementsModule,
+    CencellationviewModule,
+    PayInstallemntModule,
+    CommissionFormModule,
+
   ],
   controllers: [AppController, HealthController],
   providers: [
     AppService,
+    ShareUserTenantHooksService,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
@@ -492,6 +548,10 @@ import { CustomerServiceModule } from './modules/customer-service/customer-servi
     {
       provide: APP_INTERCEPTOR,
       useClass: AuthLoggingInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ShareUserTenantInterceptor,
     },
     {
       provide: APP_INTERCEPTOR,

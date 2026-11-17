@@ -1,4 +1,8 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req } from '@nestjs/common';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { CurrentUser, CurrentUserId } from 'src/common/decorators/auth.decorators';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AssetGrnService } from './asset-grn.service';
 import { CreateAssetGrnDto, UpdateAssetGrnDto } from './dto/asset-grn.dto';
@@ -6,6 +10,7 @@ import { QueryAssetGrnDto } from './dto/query-asset-grn.dto';
 
 @ApiTags('Procurement | Asset Goods Receipt Note(GRN)')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('procurement/asset-grn')
 export class AssetGrnController {
   constructor(private readonly service: AssetGrnService) {}

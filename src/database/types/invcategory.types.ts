@@ -1,5 +1,5 @@
 // Auto-generated types for InvCategory
-// Source: src/database/models/inventory/inv_category.model.ts
+// Source: src\database\models\inventory\inv_category.model.ts
 
 import type { InvSubCategory } from '../models/inventory/inv_sub_category.model';
 import type { InvItem } from '../models/inventory/inv_item.model';
@@ -22,7 +22,7 @@ export interface InvCategoryAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id: string;
 
   // Relations
   sub_categories?: InvSubCategory[];
@@ -42,7 +42,7 @@ export interface InvCategoryCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id: string;
 }
 
 export type InvCategoryUpdateAttributes = Partial<InvCategoryCreationAttributes>;

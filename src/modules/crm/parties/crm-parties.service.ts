@@ -34,10 +34,13 @@ export class CrmPartiesService {
     return rows.map(user => ({ uuid: user.uuid, name: [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username || user.uuid, username: user.username }));
   }
 
-  async findAll(query: QueryCrmPartyDto) {
+  async findAll(query: QueryCrmPartyDto, currentUser?: any) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const where: any = {};
+    if (currentUser?.orgId) {
+      where.orgId = currentUser.orgId;
+    }
     if (query.partyType) where.partyType = query.partyType;
     if (query.status) where.status = query.status;
     const search = query.search?.trim();
@@ -55,16 +58,30 @@ export class CrmPartiesService {
       offset: (page - 1) * limit,
       distinct: true,
     });
-    return { data: rows, meta: { page, limit, total: count, totalPages: Math.ceil(count / limit) || 1 } };
+    const mappedRows = rows.map(r => this.toPublic(r));
+    return { data: mappedRows, meta: { page, limit, total: count, totalPages: Math.ceil(count / limit) || 1 } };
   }
 
-  async create(dto: CreateCrmPartyDto, actorUuid?: string) {
-    return this.parties.create({ ...dto, status: dto.status ?? CrmPartyStatus.ACTIVE, createdByUuid: actorUuid } as any);
+  async create(dto: CreateCrmPartyDto, userId?: number, currentUser?: any) {
+    const orgId = dto.orgId ?? currentUser?.orgId ?? null;
+    const actor = userId ? String(userId) : null;
+    const party = await this.parties.create({
+      ...dto,
+      status: dto.status ?? CrmPartyStatus.ACTIVE,
+      orgId,
+      createdBy: actor,
+      createdByUuid: currentUser?.uuid ?? null,
+    } as any);
+    return this.findOne(party.uuid, currentUser);
   }
 
-  async findOne(uuid: string) {
+  async findOne(uuid: string, currentUser?: any) {
+    const where: any = { uuid };
+    if (currentUser?.orgId) {
+      where.orgId = currentUser.orgId;
+    }
     const party = await this.parties.findOne({
-      where: { uuid },
+      where,
       include: [
         { association: 'assignee', attributes: [...userAttributes], required: false },
         { association: 'assignments', include: [{ association: 'assignee', attributes: [...userAttributes] }, { association: 'assignedBy', attributes: [...userAttributes] }], required: false },
@@ -73,66 +90,127 @@ export class CrmPartiesService {
       order: [[{ model: CrmPartyAssignment, as: 'assignments' }, 'createdAt', 'DESC'], [{ model: CrmPartyCommunication, as: 'communications' }, 'occurredAt', 'DESC']],
     });
     if (!party) throw new NotFoundException(`CRM party ${uuid} not found`);
-    return party;
+    return this.toPublic(party);
   }
 
-  async update(uuid: string, dto: UpdateCrmPartyDto, actorUuid?: string) {
-    const party = await this.getParty(uuid);
-    await party.update({ ...dto, updatedByUuid: actorUuid });
-    return this.findOne(uuid);
+  async update(uuid: string, dto: UpdateCrmPartyDto, userId?: number, currentUser?: any) {
+    const party = await this.getParty(uuid, currentUser);
+    const actor = userId ? String(userId) : null;
+    await party.update({
+      ...dto,
+      ...(userId ? { updatedBy: actor } : {}),
+      ...(currentUser?.uuid ? { updatedByUuid: currentUser.uuid } : {}),
+    } as any);
+    return this.findOne(uuid, currentUser);
   }
 
-  async remove(uuid: string, actorUuid?: string) {
-    const party = await this.getParty(uuid);
-    await party.update({ deletedByUuid: actorUuid });
+  async remove(uuid: string, userId?: number, currentUser?: any) {
+    const party = await this.getParty(uuid, currentUser);
+    const actor = userId ? String(userId) : null;
+    await party.update({
+      ...(userId ? { deletedBy: actor } : {}),
+      ...(currentUser?.uuid ? { deletedByUuid: currentUser.uuid } : {}),
+    } as any);
     await party.destroy();
     return { message: `CRM party ${uuid} soft-deleted successfully` };
   }
 
-  async restore(uuid: string) {
-    const party = await this.parties.findOne({ where: { uuid }, paranoid: false });
+  async restore(uuid: string, userId?: number, currentUser?: any) {
+    const where: any = { uuid };
+    if (currentUser?.orgId) {
+      where.orgId = currentUser.orgId;
+    }
+    const party = await this.parties.findOne({ where, paranoid: false });
     if (!party) throw new NotFoundException(`CRM party ${uuid} not found`);
     if (!party.deletedAt) throw new BadRequestException(`CRM party ${uuid} is not deleted`);
     await party.restore();
-    await party.update({ deletedByUuid: null });
-    return this.findOne(uuid);
+    const actor = userId ? String(userId) : null;
+    await party.update({
+      deletedByUuid: null,
+      deletedBy: null,
+      ...(userId ? { updatedBy: actor } : {}),
+    } as any);
+    return this.findOne(uuid, currentUser);
   }
 
-  async assign(uuid: string, dto: AssignCrmPartyDto, actorUuid?: string) {
-    const party = await this.getParty(uuid);
+  async assign(uuid: string, dto: AssignCrmPartyDto, userId?: number, currentUser?: any) {
+    const party = await this.getParty(uuid, currentUser);
     const assignee = await this.users.findOne({ where: { uuid: dto.assigneeUuid, isActive: true } as any });
     if (!assignee) throw new NotFoundException(`Active user ${dto.assigneeUuid} not found`);
+    const actor = userId ? String(userId) : null;
+    const actorUuid = currentUser?.uuid ?? null;
+    const orgId = party.orgId ?? currentUser?.orgId ?? null;
     const transaction = await this.parties.sequelize!.transaction();
     try {
-      await this.assignments.create({ partyUuid: party.uuid, assigneeUuid: assignee.uuid, assignedByUuid: actorUuid, note: dto.note } as any, { transaction });
-      await party.update({ assignedToUuid: assignee.uuid, updatedByUuid: actorUuid }, { transaction });
+      await this.assignments.create({
+        partyUuid: party.uuid,
+        assigneeUuid: assignee.uuid,
+        assignedByUuid: actorUuid,
+        note: dto.note,
+        orgId,
+        createdBy: actor,
+      } as any, { transaction });
+      await party.update({
+        assignedToUuid: assignee.uuid,
+        updatedByUuid: actorUuid,
+        updatedBy: actor,
+      } as any, { transaction });
       await transaction.commit();
     } catch (error) {
       await transaction.rollback();
       throw error;
     }
-    return this.findOne(uuid);
+    return this.findOne(uuid, currentUser);
   }
 
-  async findAssignments(uuid: string) {
-    await this.getParty(uuid);
+  async findAssignments(uuid: string, currentUser?: any) {
+    await this.getParty(uuid, currentUser);
     return this.assignments.findAll({ where: { partyUuid: uuid }, include: [{ association: 'assignee', attributes: [...userAttributes] }, { association: 'assignedBy', attributes: [...userAttributes] }], order: [['createdAt', 'DESC']] });
   }
 
-  async logCommunication(uuid: string, dto: CreateCrmPartyCommunicationDto, actorUuid?: string) {
-    const party = await this.getParty(uuid);
-    const event = await this.communications.create({ partyUuid: party.uuid, ...dto, loggedByUuid: actorUuid } as any);
+  async logCommunication(uuid: string, dto: CreateCrmPartyCommunicationDto, userId?: number, currentUser?: any) {
+    const party = await this.getParty(uuid, currentUser);
+    const actor = userId ? String(userId) : null;
+    const actorUuid = currentUser?.uuid ?? null;
+    const orgId = party.orgId ?? currentUser?.orgId ?? null;
+    const event = await this.communications.create({
+      partyUuid: party.uuid,
+      ...dto,
+      loggedByUuid: actorUuid,
+      orgId,
+      createdBy: actor,
+    } as any);
     return this.communications.findByPk(event.id, { include: [{ association: 'party' }, { association: 'loggedBy', attributes: [...userAttributes] }] });
   }
 
-  async findCommunications(uuid: string) {
-    await this.getParty(uuid);
+  async findCommunications(uuid: string, currentUser?: any) {
+    await this.getParty(uuid, currentUser);
     return this.communications.findAll({ where: { partyUuid: uuid }, include: [{ association: 'loggedBy', attributes: [...userAttributes] }], order: [['occurredAt', 'DESC']] });
   }
 
-  private async getParty(uuid: string, transaction?: Transaction) {
-    const party = await this.parties.findOne({ where: { uuid }, transaction });
+  private async getParty(uuid: string, currentUser?: any, transaction?: Transaction) {
+    const where: any = { uuid };
+    if (currentUser?.orgId) {
+      where.orgId = currentUser.orgId;
+    }
+    const party = await this.parties.findOne({ where, transaction });
     if (!party) throw new NotFoundException(`CRM party ${uuid} not found`);
     return party;
+  }
+
+  private toPublic(party: CrmParty) {
+    const item = party.toJSON() as any;
+    item.created_at = item.created_at ?? item.createdAt;
+    item.updated_at = item.updated_at ?? item.updatedAt;
+    item.deleted_at = item.deleted_at ?? item.deletedAt ?? null;
+    delete item.createdAt;
+    delete item.updatedAt;
+    delete item.deletedAt;
+    item.orgId = item.org_id ?? item.orgId ?? null;
+    item.org_id = item.org_id ?? item.orgId ?? null;
+    item.created_by = item.created_by ?? item.createdBy ?? item.createdByUuid ?? null;
+    item.updated_by = item.updated_by ?? item.updatedBy ?? item.updatedByUuid ?? null;
+    item.deleted_by = item.deleted_by ?? item.deletedBy ?? item.deletedByUuid ?? null;
+    return item;
   }
 }

@@ -16,9 +16,16 @@ export class ProjectProgressService {
     private readonly progressModel: typeof ProjectProgress,
   ) {}
 
-  async create(createDto: CreateProjectProgressDto): Promise<ProjectProgress> {
+  async create(
+    createDto: CreateProjectProgressDto,
+    userId?: number,
+    currentUser?: any,
+  ): Promise<ProjectProgress> {
     try {
       return await this.progressModel.create({
+        createdBy: userId ? String(userId) : null,
+        orgId: currentUser?.orgId ?? null,
+        projectId: currentUser?.projectId ?? null,
         ...createDto,
         // ✅ Convert string to Date before saving to Database
         asOfDate: new Date(createDto.asOfDate),
@@ -28,7 +35,10 @@ export class ProjectProgressService {
     }
   }
 
-  async findAll(query: QueryProjectProgressDto) {
+  async findAll(
+    query: QueryProjectProgressDto,
+    currentUser?: any,
+  ) {
     const { page = '1', limit = '10', search, fromDate, toDate, ...filters } = query;
     
     const pageNum = parseInt(page, 10);
@@ -37,6 +47,18 @@ export class ProjectProgressService {
 
     // ✅ Filter out undefined/null/empty string values
     const whereClause: any = {};
+    if ((query as any)?.orgId) {
+      whereClause.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      whereClause.projectId = (query as any).projectId;
+    }
+    if ((query as any)?.orgId) {
+      whereClause.orgId = (query as any).orgId;
+    }
+    if ((query as any)?.projectId) {
+      whereClause.projectId = (query as any).projectId;
+    }
     Object.keys(filters).forEach((key) => {
       const value = filters[key];
       if (value !== undefined && value !== null && value !== '') {
@@ -89,7 +111,7 @@ export class ProjectProgressService {
     };
   }
 
-  async findOne(uuid: string): Promise<ProjectProgress> {
+  async findOne(uuid: string, currentUser?: any): Promise<ProjectProgress> {
     const progress = await this.progressModel.findOne({ where: { uuid } });
     if (!progress) {
       throw new NotFoundException(`Progress with UUID ${uuid} not found`);
@@ -97,7 +119,12 @@ export class ProjectProgressService {
     return progress;
   }
 
-  async update(uuid: string, updateDto: UpdateProjectProgressDto): Promise<ProjectProgress> {
+  async update(
+    uuid: string,
+    updateDto: UpdateProjectProgressDto,
+    userId?: number,
+    currentUser?: any,
+  ): Promise<ProjectProgress> {
     const progress = await this.findOne(uuid);
     
     // ✅ Convert asOfDate to Date if provided
@@ -109,18 +136,15 @@ export class ProjectProgressService {
     return progress.update(updateData);
   }
 
-  async remove(uuid: string, deletedBy?: string): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const progress = await this.findOne(uuid);
     
-    if (deletedBy) {
-      await progress.update({ deletedBy });
-    }
-    
+    await progress.update({ deletedBy: userId ? String(userId) : null } as any);
     await progress.destroy(); // Soft delete
     return { message: 'Progress entry deleted successfully' };
   }
 
-  async restore(uuid: string): Promise<ProjectProgress> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<ProjectProgress> {
     const progress = await this.progressModel.findOne({ 
       where: { uuid },
       paranoid: false 
@@ -135,11 +159,12 @@ export class ProjectProgressService {
     }
 
     await progress.restore();
+    await progress.update({ deletedBy: null, updatedBy: userId ? String(userId) : null } as any);
     return progress;
   }
 
   // Helper endpoint for top Cards (Latest Physical, Latest Financial, Variance, Total Logs)
-  async getSummary(projectUuid: string) {
+  async getSummary(projectUuid: string, currentUser?: any) {
     // Get latest record
     const latest = await this.progressModel.findOne({
       where: { projectUuid },

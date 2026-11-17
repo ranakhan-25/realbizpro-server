@@ -37,6 +37,10 @@ export interface JwtAuthUser {
   warehouse?: any;
   receivingPoint?: any;
   distribution?: any;
+  authType?: string;
+  shareUserId?: number;
+  shareUserUuid?: string;
+  role?: string;
   iat?: number;
   exp?: number;
 }

@@ -15,6 +15,7 @@ import {
 import { BaseModel } from 'src/database/base.model';
 
 import { AllowanceDeductionSetup } from '../configuration/allowance_deducation_setup';
+import { SysOrganization } from "src/database/models/system/sys_organization.model";
 
 export enum SalaryGradeItemType {
   ALLOWANCE = 'Allowance',
@@ -22,13 +23,14 @@ export enum SalaryGradeItemType {
 }
 
 @Table({
-  tableName: 'salary_grade_item',
+  tableName: 'hrm_salary_grade_item',
+  underscored: true,
   timestamps: true,
   paranoid: true,
   indexes: [
     {
       name: 'SalaryGradeItem_setupId_idx',
-      fields: ['setupId'],
+      fields: ['setup_id'],
     },
     {
       name: 'SalaryGradeItem_deletedAt_idx',
@@ -92,20 +94,37 @@ export class SalaryGradeItem extends BaseModel<
   declare amount: number;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          type: DataType.STRING,
+          allowNull: true,
+          field: 'created_by',
+        })
   declare createdBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          type: DataType.STRING,
+          allowNull: true,
+          field: 'updated_by',
+        })
   declare updatedBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          type: DataType.STRING,
+          allowNull: true,
+          field: 'deleted_by',
+        })
   declare deletedBy?: string;
+    @ForeignKey(() => SysOrganization)
+    @Column({
+            type: DataType.BIGINT,
+            allowNull: true,
+            field: 'org_id',
+            defaultValue: null,
+          })
+    declare orgId?: number | null;
+    @BelongsTo(() => SysOrganization, {
+            foreignKey: 'orgId',
+            targetKey: 'id',
+            as: 'organization',
+          })
+    declare organization?: SysOrganization;
 }

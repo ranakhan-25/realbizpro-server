@@ -16,11 +16,14 @@ export class VouchersService {
     private sequelize: Sequelize,
   ) {}
 
-  async create(dto: CreateVoucherDto): Promise<Voucher> {
+  async create(dto: CreateVoucherDto, userId?: number, currentUser?: any): Promise<Voucher> {
     const transaction = await this.sequelize.transaction();
     try {
       const voucher = await this.voucherModel.create(
         {
+          createdBy: userId ? String(userId) : (dto as any).createdBy ?? null,
+          orgId: (dto as any).orgId ?? currentUser?.orgId ?? null,
+          projectId: (dto as any).projectId ?? currentUser?.projectId ?? null,
           ...dto,
           accountId: dto.accountId || 'Unassigned',
           paymentMethod: dto.paymentMethod || 'Cash',
@@ -45,7 +48,7 @@ export class VouchersService {
   // ==============================
   // GET ALL VOUCHERS (Updated with Pagination)
   // ==============================
-  async findAll(query: GetVouchersQueryDto) {
+  async findAll(query: GetVouchersQueryDto, currentUser?: any) {
     const { 
       page = 1, 
       limit = 10, 
@@ -65,8 +68,9 @@ export class VouchersService {
       whereCondition.voucherNo = { [Op.iLike]: `%${search}%` }; // iLike = Case insensitive (Postgres)
     }
 
-    // 2. Filter by Project / Work
+    // 2. Filter by Project / Work / Org
     if (projectId) whereCondition.projectId = projectId;
+    if ((query as any)?.orgId) whereCondition.orgId = (query as any).orgId;
     if (workId) whereCondition.workId = workId;
     if (status) whereCondition.status = status;
 
@@ -122,7 +126,7 @@ export class VouchersService {
     };
   }
 
-  async findOne(uuid: string): Promise<Voucher> {
+  async findOne(uuid: string, currentUser?: any): Promise<Voucher> {
     const voucher = await this.voucherModel.findOne({
       where: { uuid },
     });
@@ -136,7 +140,7 @@ export class VouchersService {
     return result;
   }
 
-  async update(uuid: string, dto: UpdateReceivedVoucherDto): Promise<Voucher> {
+  async update(uuid: string, dto: UpdateReceivedVoucherDto, userId?: number, currentUser?: any): Promise<Voucher> {
     const transaction = await this.sequelize.transaction();
     try {
       const voucher = await this.voucherModel.findOne({
@@ -148,7 +152,12 @@ export class VouchersService {
       }
 
       const { entries, ...voucherData } = dto;
-      await voucher.update(voucherData, { transaction });
+      await voucher.update({
+        ...voucherData,
+        updatedBy: userId ? String(userId) : voucher.updatedBy ?? null,
+        ...((dto as any).orgId !== undefined ? { orgId: (dto as any).orgId } : {}),
+        ...((dto as any).projectId !== undefined ? { projectId: (dto as any).projectId } : {}),
+      }, { transaction });
 
       if (entries) {
         await this.voucherEntryModel.destroy({
@@ -171,7 +180,7 @@ export class VouchersService {
     }
   }
 
-  async remove(uuid: string): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const transaction = await this.sequelize.transaction();
     try {
       const voucher = await this.voucherModel.findOne({
@@ -194,4 +203,13 @@ export class VouchersService {
       throw error;
     }
   }
+
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<Voucher> {
+    const voucher = await this.voucherModel.findOne({ where: { uuid }, paranoid: false });
+    if (!voucher) throw new NotFoundException(`Voucher ${uuid} not found`);
+    await voucher.restore();
+    await voucher.update({ deletedBy: null, updatedBy: userId ? String(userId) : null } as any);
+    return this.findOne(uuid, currentUser);
+  }
+
 }

@@ -19,6 +19,8 @@ export class ProcurementLaborTypeService {
     const page = Math.max(1, Number(query.page) || 1);
     const limit = Math.min(100, Math.max(1, Number(query.limit) || 10));
     const where: any = {};
+    if ((query as any)?.orgId) where.orgId = (query as any).orgId;
+    if ((query as any)?.projectId) where.projectId = (query as any).projectId;
     if (query.status) where.status = query.status;
     if (query.search) where[Op.or] = [
       { name: { [Op.iLike]: `%${query.search}%` } },

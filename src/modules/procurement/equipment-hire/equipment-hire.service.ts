@@ -68,7 +68,7 @@ export class EquipmentHireService {
       this.sites.findAll({ where: projectId ? { projectId } as any : {}, attributes: ['uuid', 'projectId', 'code', 'name', 'location'], order: [['name', 'ASC']] }),
       this.equipment.findAll({ attributes: ['uuid', 'item_code', 'name', 'unit_id', 'category_id'], include: [{ association: 'unit', attributes: ['uuid', 'code', 'name'], required: false }], order: [['name', 'ASC']] }),
       this.units.findAll({ attributes: ['uuid', 'code', 'name'], order: [['name', 'ASC']] }),
-      this.requisitions.findAll({ where: { status: ProcurementAssetRequisitionStatus.APPROVED, approval_layer: ProcurementAssetRequisitionApprovalLayer.ALL_APPROVALS_COMPLETED, ...(projectId ? { project_id: projectId } : {}) } as any, include: [{ association: 'items', attributes: ['uuid', 'item_id', 'item_code', 'item_name', 'unit_id', 'unit', 'demand_qty', 'rate'], include: [{ association: 'item', attributes: ['uuid', 'name', 'item_code'], required: false }] }], order: [['date', 'DESC']] }),
+      this.requisitions.findAll({ where: { status: ProcurementAssetRequisitionStatus.APPROVED, approval_layer: ProcurementAssetRequisitionApprovalLayer.ALL_APPROVALS_COMPLETED, ...(projectId ? { project_id: projectId } : {}) } as any, include: [{ association: 'project', attributes: ['uuid', 'name'], required: false }, { association: 'items', attributes: ['uuid', 'item_id', 'item_code', 'item_name', 'unit_id', 'unit', 'demand_qty', 'rate'], include: [{ association: 'item', attributes: ['uuid', 'name', 'item_code'], required: false }] }], order: [['date', 'DESC']] }),
       this.users.findAll({ attributes: ['id', 'name'], order: [['name', 'ASC']] }),
     ]);
     const reqItemIds = requisitions.flatMap((req: any) => (req.items ?? []).map((item: any) => item.uuid));
@@ -102,6 +102,8 @@ export class EquipmentHireService {
 
   private async list(model: any, query: QueryHireOrderDto | QueryHireMovementDto, numberField: string, include: any[], includeDeleted = false) {
     const page = Math.max(1, Number(query.page) || 1); const limit = Math.min(100, Math.max(1, Number(query.limit) || 10)); const where: any = {};
+    if ((query as any)?.orgId) where.orgId = (query as any).orgId;
+    if ((query as any)?.projectId) where.projectId = (query as any).projectId;
     const number = (query as QueryHireMovementDto).number ?? (query as QueryHireOrderDto).hire_no;
     if (number) where[numberField] = { [Op.iLike]: `%${number}%` };
     if (query.status) where.status = query.status;

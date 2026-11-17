@@ -1,5 +1,5 @@
 // Auto-generated types for InvPurchaseItem
-// Source: src/database/models/inventory/inv_purchase_item.model.ts
+// Source: src\database\models\inventory\inv_purchase_item.model.ts
 
 import type { InvPurchase } from '../models/inventory/inv_purchase.model';
 import type { InvItem } from '../models/inventory/inv_item.model';
@@ -18,7 +18,7 @@ export interface InvPurchaseItemAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id: string;
 
   // Relations
   purchase?: InvPurchase;
@@ -34,7 +34,7 @@ export interface InvPurchaseItemCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id: string;
 }
 
 export type InvPurchaseItemUpdateAttributes = Partial<InvPurchaseItemCreationAttributes>;

@@ -27,6 +27,8 @@ export class DesignationService {
 
   async create(
     dto: CreateDesignationDto,
+    userId?: number,
+    currentUser?: any,
   ): Promise<Designation> {
     // relation: (departmentId + name) একসাথে unique
     const existing =
@@ -46,6 +48,9 @@ export class DesignationService {
     const designation =
       await this.designationModel.create({
         ...dto,
+        createdBy: userId ? String(userId) : (dto as any).createdBy ?? (dto as any).addedById ?? null,
+        orgId: (dto as any).orgId ?? currentUser?.orgId ?? null,
+        projectId: (dto as any).projectId ?? currentUser?.projectId ?? null,
         status:
           dto.status ?? DesignationStatus.ACTIVE,
       } as any);
@@ -53,7 +58,7 @@ export class DesignationService {
     return this.findOne(designation.uuid);
   }
 
-  async findAll(query: QueryDesignationDto) {
+  async findAll(query: QueryDesignationDto, currentUser?: any) {
     const {
       page = 1,
       limit = 10,
@@ -72,6 +77,14 @@ export class DesignationService {
         : (page - 1) * limit;
 
     const where: any = {};
+    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) {
+      where.orgId = effectiveOrgId;
+    }
+    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    if (effectiveProjectId) {
+      where.projectId = effectiveProjectId;
+    }
 
     if (search) {
       where.name = { [Op.iLike]: `%${search}%` };
@@ -135,19 +148,17 @@ export class DesignationService {
     };
   }
 
-  async getDropdown(): Promise<any[]> {
+  async getDropdown(currentUser?: any): Promise<any[]> {
     return this.designationModel.findAll({
       attributes: ['id', 'uuid', 'name'],
       where: {
         status: DesignationStatus.ACTIVE,
       },
       order: [['name', 'ASC']],
-    });
+    } as any);
   }
 
-  async findOne(
-    uuid: string,
-  ): Promise<Designation> {
+  async findOne(uuid: string, currentUser?: any): Promise<Designation> {
     const designation =
       await this.designationModel.findOne({
         where: { uuid } as any,
@@ -170,10 +181,7 @@ export class DesignationService {
     return designation;
   }
 
-  async update(
-    uuid: string,
-    dto: UpdateDesignationDto,
-  ): Promise<Designation> {
+  async update(uuid: string, dto: UpdateDesignationDto, userId?: number, currentUser?: any): Promise<Designation> {
     const designation =
       await this.designationModel.findOne({
         where: { uuid } as any,
@@ -214,14 +222,15 @@ export class DesignationService {
 
     await designation.update({
       ...dto,
-    });
+      updatedBy: userId ? String(userId) : null,
+      ...((dto as any).orgId !== undefined ? { orgId: (dto as any).orgId } : {}),
+      ...((dto as any).projectId !== undefined ? { projectId: (dto as any).projectId } : {}),
+    } as any);
 
     return this.findOne(uuid);
   }
 
-  async remove(
-    uuid: string,
-  ): Promise<{ message: string }> {
+  async remove(uuid: string, userId?: number, currentUser?: any): Promise<{ message: string }> {
     const designation =
       await this.designationModel.findOne({
         where: { uuid } as any,
@@ -236,7 +245,8 @@ export class DesignationService {
     // status → inactive + soft delete
     await designation.update({
       status: DesignationStatus.INACTIVE,
-    });
+      deletedBy: userId ? String(userId) : null,
+    } as any);
 
     await designation.destroy();
 
@@ -245,9 +255,7 @@ export class DesignationService {
     };
   }
 
-  async restore(
-    uuid: string,
-  ): Promise<Designation> {
+  async restore(uuid: string, userId?: number, currentUser?: any): Promise<Designation> {
     const designation =
       await this.designationModel.findOne({
         where: { uuid } as any,
@@ -270,7 +278,7 @@ export class DesignationService {
     await designation.restore();
     await designation.update({
       status: DesignationStatus.ACTIVE,
-    });
+    } as any);
 
     return this.findOne(uuid);
   }

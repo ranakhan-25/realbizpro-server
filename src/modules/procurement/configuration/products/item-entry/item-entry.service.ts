@@ -62,6 +62,8 @@ export class ProcurementItemEntryService {
     const { page = 1, limit = 10, skip, search, category_id, sub_category_id, sortBy = 'createdAt', sortOrder = 'DESC', withDeleted = false } = query;
     const offset = skip ?? (page - 1) * limit;
     const where: any = {};
+    if ((query as any)?.orgId) where.orgId = (query as any).orgId;
+    if ((query as any)?.projectId) where.projectId = (query as any).projectId;
     if (category_id) where.category_id = category_id;
     if (sub_category_id) where.sub_category_id = sub_category_id;
     if (search) where[Op.or] = [

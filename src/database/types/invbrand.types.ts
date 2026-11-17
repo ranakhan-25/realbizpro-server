@@ -1,5 +1,5 @@
 // Auto-generated types for InvBrand
-// Source: src/database/models/inventory/inv_brand.model.ts
+// Source: src\database\models\inventory\inv_brand.model.ts
 
 import type { InvItem } from '../models/inventory/inv_item.model';
 
@@ -17,7 +17,7 @@ export interface InvBrandAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id: string;
 
   // Relations
   items: InvItem[];
@@ -32,7 +32,7 @@ export interface InvBrandCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id: string;
 }
 
 export type InvBrandUpdateAttributes = Partial<InvBrandCreationAttributes>;

@@ -1,5 +1,5 @@
 // Auto-generated types for CrPlotDistribution
-// Source: src/database/models/credit-realization/cr_plot_distribution.model.ts
+// Source: src\database\models\credit-realization\cr_plot_distribution.model.ts
 
 import type { CrSaleAgreement } from '../models/credit-realization/cr_sale_agreement.model';
 
@@ -23,7 +23,7 @@ export interface CrPlotDistributionAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id?: string | null;
 
   // Relations
   sale_agreement: CrSaleAgreement;
@@ -44,7 +44,7 @@ export interface CrPlotDistributionCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
-  projectId?: string | null;
+  org_id?: string | null;
 }
 
 export type CrPlotDistributionUpdateAttributes = Partial<CrPlotDistributionCreationAttributes>;

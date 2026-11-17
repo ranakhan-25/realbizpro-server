@@ -109,4 +109,7 @@ export class QuerySectionDto {
   )
   @IsBoolean()
   withDeleted?: boolean = false;
+    @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+    @IsOptional()
+    orgId?: number;
 }

@@ -1,3 +1,4 @@
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsBooleanString, IsDateString, IsEnum, IsInt, IsOptional, IsString, IsUUID, Max, Min } from 'class-validator';
 import { ProcurementGrnApprovalLayer, ProcurementGrnStatus } from 'src/database/models/procurement/grn/pr_grn.model';
@@ -20,4 +21,12 @@ export class QueryGrnDto {
   @IsOptional() @IsBooleanString() already_billed?: string;
   @IsOptional() withDeleted?: boolean | string;
   @IsOptional() deleted_only?: boolean | string;
+
+  @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+  @IsOptional()
+  orgId?: number;
+
+  @ApiPropertyOptional({ description: 'Project UUID or ID' })
+  @IsOptional()
+  projectId?: string;
 }

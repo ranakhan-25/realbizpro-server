@@ -7,6 +7,14 @@ export class CreateLaborTypeDto {
   @ApiProperty({ example: 'Mason' }) @IsString() @IsNotEmpty() @MaxLength(150) name: string;
   @ApiProperty({ example: 'Person' }) @IsString() @IsNotEmpty() @MaxLength(80) unit: string;
   @ApiPropertyOptional({ enum: LaborTypeStatus, default: LaborTypeStatus.ACTIVE }) @IsOptional() @IsEnum(LaborTypeStatus) status?: LaborTypeStatus;
+  @ApiPropertyOptional({ example: 1, description: 'Organization ID' })
+  @IsOptional()
+  orgId?: number;
+
+  @ApiPropertyOptional({ example: '550e8400-e29b-41d4-a716-446655440000', description: 'Project ID' })
+  @IsOptional()
+  @IsString()
+  projectId?: string;
 }
 
 export class UpdateLaborTypeDto extends PartialType(CreateLaborTypeDto) {}

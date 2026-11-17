@@ -1,8 +1,9 @@
 // Auto-generated types for FlatLandBooking
-// Source: src/database/models/projects/flat-land-booking/pr_flat_land_booking.model.ts
+// Source: src\database\models\projects\flat-land-booking\pr_flat_land_booking.model.ts
 
 import type { Project } from '../models/projects/project/pr_project.model';
 import type { FlatLand } from '../models/projects/flatland/pr_flatland.model';
+import type { SysOrganization } from '../models/system/sys_organization.model';
 
 export interface FlatLandBookingAttributes {
   id: number;
@@ -27,13 +28,16 @@ export interface FlatLandBookingAttributes {
   due: number;
   attachment?: string | null;
   status: string;
+  details: Record<string, unknown>;
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
 
   // Relations
   project?: Project;
   flatLand?: FlatLand;
+  organization?: SysOrganization;
 }
 
 export interface FlatLandBookingCreationAttributes {
@@ -54,9 +58,11 @@ export interface FlatLandBookingCreationAttributes {
   due?: number; // Has default value
   attachment?: string | null;
   status?: string; // Has default value
+  details?: Record<string, unknown>; // Has default value
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
 }
 
 export type FlatLandBookingUpdateAttributes = Partial<FlatLandBookingCreationAttributes>;
@@ -65,4 +71,5 @@ export type FlatLandBookingUpdateAttributes = Partial<FlatLandBookingCreationAtt
 export interface FlatLandBookingWithRelations extends FlatLandBookingAttributes {
   project?: Project;
   flatLand?: FlatLand;
+  organization?: SysOrganization;
 }

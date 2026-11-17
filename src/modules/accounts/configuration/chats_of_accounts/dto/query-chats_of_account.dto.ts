@@ -1,11 +1,7 @@
+import { ApiPropertyOptional } from '@nestjs/swagger';
 /* eslint-disable prettier/prettier */
 
-import { 
-  IsString, 
-  IsOptional, 
-  IsNumberString,
-  IsUUID
-} from 'class-validator';
+import { IsString, IsOptional, IsNumberString, IsUUID } from 'class-validator';
 
 export class QueryChartOfAccountDto {
   @IsString()
@@ -27,4 +23,13 @@ export class QueryChartOfAccountDto {
   @IsNumberString()
   @IsOptional()
   limit?: string;
+  @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
+  @IsOptional()
+  orgId?: number;
+
+  @ApiPropertyOptional({ description: 'Project UUID or ID' })
+  @IsOptional()
+  @IsString()
+  projectId?: string;
+
 }

@@ -70,6 +70,8 @@ export class MaterialIssueService {
     const page = Math.max(Number(query.page) || 1, 1);
     const limit = Math.min(Math.max(Number(query.limit) || 10, 1), 100);
     const where: any = {};
+    if ((query as any)?.orgId) where.orgId = (query as any).orgId;
+    if ((query as any)?.projectId) where.projectId = (query as any).projectId;
     if (query.status) where.status = query.status;
     if (query.date_from || query.date_to) where.date = { ...(query.date_from ? { [Op.gte]: query.date_from } : {}), ...(query.date_to ? { [Op.lte]: query.date_to } : {}) };
     if (query.grn_no) where['$grn.code$'] = { [Op.iLike]: `%${query.grn_no}%` };

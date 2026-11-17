@@ -14,18 +14,28 @@ export class OfferService {
     @InjectModel(Lead) private readonly leads: typeof Lead,
   ) {}
 
-  async create(dto: CreateOfferDto) {
-    const row = await this.offers.create({ ...dto, name: dto.name.trim(), status: dto.status ?? OfferStatus.ACTIVE } as any);
+  async create(dto: CreateOfferDto, userId?: number, currentUser?: any) {
+    const row = await this.offers.create({
+      ...dto,
+      name: dto.name.trim(),
+      status: dto.status ?? OfferStatus.ACTIVE,
+      createdBy: userId ? String(userId) : dto.createdBy ?? null,
+      updatedBy: null,
+      deletedBy: null,
+      orgId: dto.orgId ?? currentUser?.orgId ?? null,
+    } as any);
     return this.findOne(row.uuid);
   }
 
-  async findAll(query: QueryOfferDto) {
+  async findAll(query: QueryOfferDto, currentUser?: any) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const where: any = {};
     if (query.status) where.status = query.status;
     const search = query.search?.trim();
     if (search) where.name = { [Op.iLike]: `%${search}%` };
+    const effectiveOrgId = query.orgId ?? currentUser?.orgId;
+    if (effectiveOrgId) where.orgId = effectiveOrgId;
     const { rows, count } = await this.offers.findAndCountAll({
       where, limit, offset: (page - 1) * limit, order: [['createdAt', 'DESC']],
       paranoid: !query.withDeleted,
@@ -36,40 +46,51 @@ export class OfferService {
     };
   }
 
-  async findOne(uuid: string) {
+  async findOne(uuid: string, currentUser?: any) {
+    const where: any = { uuid };
+    if (currentUser?.orgId) where.orgId = currentUser.orgId;
     const row = await this.offers.findOne({
-      where: { uuid },
+      where,
       include: [{ association: 'leads', attributes: ['uuid', 'leadCode', 'clientName'], required: false }],
     });
     if (!row) throw new NotFoundException(`Offer ${uuid} not found`);
     return this.toPublicOffer(row);
   }
 
-  async update(uuid: string, dto: UpdateOfferDto) {
+  async update(uuid: string, dto: UpdateOfferDto, userId?: number, currentUser?: any) {
     const row = await this.offers.findOne({ where: { uuid } });
     if (!row) throw new NotFoundException(`Offer ${uuid} not found`);
-    await row.update({ ...dto, ...(dto.name !== undefined ? { name: dto.name.trim() } : {}) } as any);
+    await row.update({
+      ...dto,
+      ...(dto.name !== undefined ? { name: dto.name.trim() } : {}),
+      updatedBy: userId ? String(userId) : row.updatedBy ?? null,
+      ...(dto.orgId !== undefined ? { orgId: dto.orgId } : {}),
+    } as any);
     return this.findOne(uuid);
   }
 
-  async remove(uuid: string) {
+  async remove(uuid: string, userId?: number, currentUser?: any) {
     const row = await this.offers.findOne({ where: { uuid } });
     if (!row) throw new NotFoundException(`Offer ${uuid} not found`);
+    await row.update({ deletedBy: userId ? String(userId) : null } as any);
     await row.destroy({ force: false });
     return { message: `Offer ${uuid} deleted successfully` };
   }
 
-  async restore(uuid: string) {
+  async restore(uuid: string, userId?: number, currentUser?: any) {
     const row = await this.offers.findOne({ where: { uuid }, paranoid: false });
     if (!row) throw new NotFoundException(`Offer ${uuid} not found`);
     if (!row.deletedAt) throw new BadRequestException(`Offer ${uuid} is not deleted`);
     await row.restore();
+    await row.update({ deletedBy: null, updatedBy: userId ? String(userId) : row.updatedBy ?? null } as any);
     return this.findOne(uuid);
   }
 
-  async dropdown() {
+  async dropdown(currentUser?: any) {
+    const where: any = { status: OfferStatus.ACTIVE };
+    if (currentUser?.orgId) where.orgId = currentUser.orgId;
     const rows = await this.offers.findAll({
-      where: { status: OfferStatus.ACTIVE }, attributes: ['uuid', 'name'], order: [['name', 'ASC']],
+      where, attributes: ['uuid', 'name'], order: [['name', 'ASC']],
     });
     return rows.map(row => {
       const result = row.toJSON() as Record<string, any>;
@@ -88,7 +109,16 @@ export class OfferService {
   private toPublicOffer(row: CrmOffer) {
     const data = row.toJSON() as Record<string, any>;
     delete data.id;
-    data.addedBy = data.createdBy ?? null;
+    data.created_at = data.created_at ?? data.createdAt;
+    data.updated_at = data.updated_at ?? data.updatedAt;
+    data.deleted_at = data.deleted_at ?? data.deletedAt ?? null;
+    delete data.createdAt;
+    delete data.updatedAt;
+    delete data.deletedAt;
+    data.created_by = data.createdBy ?? data.created_by ?? null;
+    data.updated_by = data.updatedBy ?? data.updated_by ?? null;
+    data.deleted_by = data.deletedBy ?? data.deleted_by ?? null;
+    delete data.addedBy;
     delete data.createdBy;
     delete data.updatedBy;
     delete data.deletedBy;

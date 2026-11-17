@@ -1,5 +1,5 @@
 // Auto-generated types for EmployeeList
-// Source: src/database/models/hrm/employee/hrm_employeeList_model.ts
+// Source: src\database\models\hrm\employee\hrm_employeeList_model.ts
 
 import { MaritalStatus } from '../models/hrm/employee/hrm_employeeList_model';
 import { EmployeeListStatus } from '../models/hrm/employee/hrm_employeeList_model';
@@ -23,6 +23,8 @@ import type { Attendance } from '../models/hrm/employee/hrm_attendance_model';
 import type { BonusGenerate } from '../models/hrm/employee/hrm_bonus_generate_model';
 import type { AttendanceReconciliation } from '../models/hrm/attendance/attendance_reconciliation_model';
 import type { LeaveApplication } from '../models/hrm/leaveapplication/leaveapplication_modes';
+import type { SysOrganization } from '../models/system/sys_organization.model';
+import type { Project } from '../models/projects/project/pr_project.model';
 
 export interface EmployeeListAttributes {
   id: number;
@@ -69,6 +71,8 @@ export interface EmployeeListAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
+  projectId?: string | null;
 
   // Relations
   unit?: Unit;
@@ -90,6 +94,8 @@ export interface EmployeeListAttributes {
   bonusGenerates?: BonusGenerate[];
   attendanceReconciliations?: AttendanceReconciliation[];
   leaveApplications?: LeaveApplication[];
+  organization?: SysOrganization;
+  project?: Project;
 }
 
 export interface EmployeeListCreationAttributes {
@@ -132,6 +138,8 @@ export interface EmployeeListCreationAttributes {
   createdBy?: string | null;
   updatedBy?: string | null;
   deletedBy?: string | null;
+  orgId?: number | null;
+  projectId?: string | null;
 }
 
 export type EmployeeListUpdateAttributes = Partial<EmployeeListCreationAttributes>;
@@ -157,4 +165,6 @@ export interface EmployeeListWithRelations extends EmployeeListAttributes {
   bonusGenerates?: BonusGenerate[];
   attendanceReconciliations?: AttendanceReconciliation[];
   leaveApplications?: LeaveApplication[];
+  organization?: SysOrganization;
+  project?: Project;
 }

@@ -15,6 +15,8 @@ import type {
   AttendanceAttributes,
   AttendanceCreationAttributes,
 } from '../../../types/attendance.types';
+import { SysOrganization } from "src/database/models/system/sys_organization.model";
+import { Project } from "src/database/models/projects/project/pr_project.model";
 
 export enum AttendanceType {
   WORKDAY = 'workday',
@@ -24,10 +26,10 @@ export enum AttendanceType {
 }
 
 @Table({
-  tableName: 'attendance',
+  tableName: 'hrm_attendance',
+  underscored: true,
   timestamps: true,
   paranoid: true,
-  underscored: false,
   indexes: [
     {
       name: 'Attendance_date_idx',
@@ -35,23 +37,23 @@ export enum AttendanceType {
     },
     {
       name: 'Attendance_employeeId_idx',
-      fields: ['employeeId'],
+      fields: ['employee_id'],
     },
     {
       name: 'Attendance_monthYearId_idx',
-      fields: ['monthYearId'],
+      fields: ['month_year_id'],
     },
     {
       name: 'Attendance_departmentId_idx',
-      fields: ['departmentId'],
+      fields: ['department_id'],
     },
     {
       name: 'Attendance_shiftId_idx',
-      fields: ['shiftId'],
+      fields: ['shift_id'],
     },
     {
       name: 'Attendance_employeeId_date_idx',
-      fields: ['employeeId', 'date'],
+      fields: ['employee_id', 'date'],
       unique: true,
     },
     {
@@ -216,20 +218,51 @@ export class Attendance extends BaseModel<
   declare addedById?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          type: DataType.STRING,
+          allowNull: true,
+          field: 'created_by',
+        })
   declare createdBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          type: DataType.STRING,
+          allowNull: true,
+          field: 'updated_by',
+        })
   declare updatedBy?: string;
 
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
+          type: DataType.STRING,
+          allowNull: true,
+          field: 'deleted_by',
+        })
   declare deletedBy?: string;
+    @ForeignKey(() => SysOrganization)
+    @Column({
+            type: DataType.BIGINT,
+            allowNull: true,
+            field: 'org_id',
+            defaultValue: null,
+          })
+    declare orgId?: number | null;
+    @BelongsTo(() => SysOrganization, {
+            foreignKey: 'orgId',
+            targetKey: 'id',
+            as: 'organization',
+          })
+    declare organization?: SysOrganization;
+    @ForeignKey(() => Project)
+    @Column({
+            type: DataType.UUID,
+            allowNull: true,
+            field: 'project_id',
+            defaultValue: null,
+          })
+    declare projectId?: string | null;
+    @BelongsTo(() => Project, {
+            foreignKey: 'projectId',
+            targetKey: 'uuid',
+            as: 'project',
+          })
+    declare project?: Project;
 }

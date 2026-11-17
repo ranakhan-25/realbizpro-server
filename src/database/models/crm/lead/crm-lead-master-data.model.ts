@@ -8,6 +8,7 @@ import {
 } from 'sequelize-typescript';
 import { BaseModel } from 'src/database/base.model';
 import { SysUser } from 'src/database/models/system/sys_user.model';
+import { SysOrganization } from 'src/database/models/system/sys_organization.model';
 import { Lead } from './crm-lead.model';
 import { LeadTeamMember } from './crm-lead-team-member.model';
 import { LeadActivity } from './crm-lead-activity.model';
@@ -15,30 +16,50 @@ import { LeadRequirement } from './crm-lead-requirement.model';
 import { Project } from 'src/database/models/projects/project/pr_project.model';
 
 abstract class LeadMasterModel extends BaseModel {
+  @ForeignKey(() => SysOrganization)
+  @Column({
+    type: DataType.BIGINT,
+    allowNull: true,
+    field: 'org_id',
+    defaultValue: null,
+  })
+  declare orgId?: number | null;
+
+  @BelongsTo(() => SysOrganization, {
+    foreignKey: 'orgId',
+    targetKey: 'id',
+    as: 'organization',
+  })
+  declare organization?: SysOrganization;
+
   @Column({
     type: DataType.STRING,
     allowNull: true,
     field: 'created_by',
+    defaultValue: null,
   })
-  declare createdBy?: string;
+  declare createdBy?: string | null;
   @Column({
     type: DataType.STRING,
     allowNull: true,
     field: 'updated_by',
+    defaultValue: null,
   })
-  declare updatedBy?: string;
+  declare updatedBy?: string | null;
   @Column({
     type: DataType.STRING,
     allowNull: true,
     field: 'deleted_by',
+    defaultValue: null,
   })
-  declare deletedBy?: string;
+  declare deletedBy?: string | null;
   @Column({
     type: DataType.STRING,
     allowNull: true,
     field: 'project_id',
+    defaultValue: null,
   })
-  declare projectId?: string;
+  declare projectId?: string | null;
 }
 
 @Table({
