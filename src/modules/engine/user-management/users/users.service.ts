@@ -1,5 +1,6 @@
 import {
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
@@ -11,6 +12,8 @@ import { Sequelize } from 'sequelize-typescript';
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
     @InjectModel(SysUser)
     private userModel: typeof SysUser,
@@ -181,10 +184,13 @@ export class UsersService {
   async findBasicUser(id: number): Promise<any> {
     const cacheKey = `user:basic:v5:${id}`;
 
-    const cached =
-      await this.redisService.get(cacheKey);
-    if (cached) {
-      return JSON.parse(cached);
+    try {
+      const cached = await this.redisService.get(cacheKey);
+      if (cached) {
+        return JSON.parse(cached);
+      }
+    } catch (cacheErr) {
+      this.logger.warn(`Redis get failed for ${cacheKey}, falling back to DB: ${cacheErr?.message || cacheErr}`);
     }
 
     const user = await this.userModel.findByPk(
@@ -243,11 +249,15 @@ export class UsersService {
         designation: null,
         employee: null,
       };
-      await this.redisService.set(
-        cacheKey,
-        JSON.stringify(plainUser),
-        300,
-      );
+      try {
+        await this.redisService.set(
+          cacheKey,
+          JSON.stringify(plainUser),
+          300,
+        );
+      } catch (setErr) {
+        this.logger.warn(`Redis set failed for ${cacheKey}: ${setErr?.message || setErr}`);
+      }
       return plainUser;
     }
 

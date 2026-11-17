@@ -48,4 +48,6 @@ export class PartyQueryDto {
   @ApiPropertyOptional({ default: 1 }) @IsOptional() @Type(() => Number) page?: number;
   @ApiPropertyOptional({ default: 10 }) @IsOptional() @Type(() => Number) limit?: number;
   @ApiPropertyOptional({ enum: ['ASC', 'DESC'], default: 'DESC' }) @IsOptional() @IsEnum(['ASC', 'DESC']) sortOrder?: 'ASC' | 'DESC';
+  @ApiPropertyOptional() @IsOptional() withDeleted?: boolean | string;
+  @ApiPropertyOptional() @IsOptional() deleted_only?: boolean | string;
 }

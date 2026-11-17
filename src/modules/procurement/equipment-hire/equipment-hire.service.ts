@@ -21,22 +21,22 @@ import { ProcurementUnit } from 'src/database/models/procurement/configuration/p
 import { CreateHireBillDto, CreateHireInDto, CreateHireOrderDto, CreateHireOutDto, QueryEquipmentSiteDto, QueryHireMovementDto, QueryHireOrderDto } from './dto/equipment-hire.dto';
 
 const orderInclude: any[] = [
-  { model: Project, as: 'project', attributes: ['uuid', 'code', 'name'] },
-  { model: Site, as: 'site', attributes: ['uuid', 'code', 'name'], required: false },
-  { model: SupplierAccounts, as: 'vendor', attributes: ['uuid', 'supplierCode', 'supplierName'] },
-  { model: ProcurementAssetRequisition, as: 'requisition', attributes: ['uuid', 'code', 'status'], required: false },
-  { model: SysUser, as: 'addedBy', attributes: ['id', 'name'], required: false },
-  { model: ProcurementHireOrderItem, as: 'items', include: [
-    { model: ProcurementAssetItemEntry, as: 'equipment', attributes: ['uuid', 'item_code', 'name'], required: false },
-    { model: ProcurementUnit, as: 'unitRelation', attributes: ['uuid', 'code', 'name'], required: false },
+  { association: 'project', attributes: ['uuid', 'code', 'name'] },
+  { association: 'site', attributes: ['uuid', 'code', 'name'], required: false },
+  { association: 'vendor', attributes: ['uuid', 'supplierCode', 'supplierName'] },
+  { association: 'requisition', attributes: ['uuid', 'code', 'status'], required: false },
+  { association: 'addedBy', attributes: ['id', 'name'], required: false },
+  { association: 'items', include: [
+    { association: 'equipment', attributes: ['uuid', 'item_code', 'name'], required: false },
+    { association: 'unitRelation', attributes: ['uuid', 'code', 'name'], required: false },
   ] },
 ];
-const movementInclude: any[] = [{ model: ProcurementHireOrder, as: 'hireOrder', include: orderInclude }];
+const movementInclude: any[] = [{ association: 'hireOrder', include: orderInclude }];
 const billInclude: any[] = [
-  { model: ProcurementHireOrder, as: 'hireOrder', attributes: ['uuid', 'hire_no', 'status'], required: true },
-  { model: Project, as: 'project', attributes: ['uuid', 'code', 'name'] },
-  { model: SupplierAccounts, as: 'vendor', attributes: ['uuid', 'supplierCode', 'supplierName'] },
-  { model: ProcurementHireBillItem, as: 'items', include: [{ model: ProcurementHireOrderItem, as: 'hireOrderItem', attributes: ['uuid', 'equipment_description', 'unit', 'charged_by'], required: false }] },
+  { association: 'hireOrder', attributes: ['uuid', 'hire_no', 'status'], required: true },
+  { association: 'project', attributes: ['uuid', 'code', 'name'] },
+  { association: 'vendor', attributes: ['uuid', 'supplierCode', 'supplierName'] },
+  { association: 'items', include: [{ association: 'hireOrderItem', attributes: ['uuid', 'equipment_description', 'unit', 'charged_by'], required: false }] },
 ];
 
 @Injectable()
@@ -66,9 +66,9 @@ export class EquipmentHireService {
       this.projects.findAll({ attributes: ['uuid', 'code', 'name'], order: [['name', 'ASC']] }),
       this.vendors.findAll({ attributes: ['uuid', 'supplierCode', 'supplierName'], order: [['supplierName', 'ASC']] }),
       this.sites.findAll({ where: projectId ? { projectId } as any : {}, attributes: ['uuid', 'projectId', 'code', 'name', 'location'], order: [['name', 'ASC']] }),
-      this.equipment.findAll({ attributes: ['uuid', 'item_code', 'name', 'unit_id', 'category_id'], include: [{ model: ProcurementUnit, as: 'unit', attributes: ['uuid', 'code', 'name'], required: false }], order: [['name', 'ASC']] }),
+      this.equipment.findAll({ attributes: ['uuid', 'item_code', 'name', 'unit_id', 'category_id'], include: [{ association: 'unit', attributes: ['uuid', 'code', 'name'], required: false }], order: [['name', 'ASC']] }),
       this.units.findAll({ attributes: ['uuid', 'code', 'name'], order: [['name', 'ASC']] }),
-      this.requisitions.findAll({ where: { status: ProcurementAssetRequisitionStatus.APPROVED, approval_layer: ProcurementAssetRequisitionApprovalLayer.ALL_APPROVALS_COMPLETED, ...(projectId ? { project_id: projectId } : {}) } as any, include: [{ model: Project, as: 'project', attributes: ['uuid', 'name'], required: false }, { model: ProcurementAssetRequisitionItem, as: 'items', attributes: ['uuid', 'item_id', 'item_code', 'item_name', 'unit_id', 'unit', 'demand_qty', 'rate'], include: [{ model: ProcurementAssetItemEntry, as: 'item', attributes: ['uuid', 'name', 'item_code'], required: false }] }], order: [['date', 'DESC']] }),
+      this.requisitions.findAll({ where: { status: ProcurementAssetRequisitionStatus.APPROVED, approval_layer: ProcurementAssetRequisitionApprovalLayer.ALL_APPROVALS_COMPLETED, ...(projectId ? { project_id: projectId } : {}) } as any, include: [{ association: 'items', attributes: ['uuid', 'item_id', 'item_code', 'item_name', 'unit_id', 'unit', 'demand_qty', 'rate'], include: [{ association: 'item', attributes: ['uuid', 'name', 'item_code'], required: false }] }], order: [['date', 'DESC']] }),
       this.users.findAll({ attributes: ['id', 'name'], order: [['name', 'ASC']] }),
     ]);
     const reqItemIds = requisitions.flatMap((req: any) => (req.items ?? []).map((item: any) => item.uuid));
@@ -77,10 +77,27 @@ export class EquipmentHireService {
     for (const row of reserved as any[]) reservedQty.set(row.requisition_item_id, (reservedQty.get(row.requisition_item_id) ?? 0) + Number(row.quantity));
     const approvedEquipmentRequisitions = requisitions.map((req: any) => ({ ...req.toJSON(), items: (req.items ?? []).map((item: any) => ({ ...item.toJSON(), open_qty: Math.max(0, Number(item.demand_qty) - (reservedQty.get(item.uuid) ?? 0)) })).filter((item: any) => item.open_qty > 0) })).filter((req: any) => req.items.length > 0);
     const [orderStatuses, billStatuses, eligibleHireOrders] = await Promise.all([
-      Promise.resolve(Object.values(HireOrderStatus)), Promise.resolve(['pending', 'approved', 'paid', 'partially_paid', 'cancelled']),
-      this.orders.findAll({ where: { status: { [Op.in]: [HireOrderStatus.ACTIVE, HireOrderStatus.CLOSED] } }, attributes: ['uuid', 'hire_no', 'project_id', 'vendor_id', 'hire_from', 'hire_to', 'status'], include: [{ model: Project, as: 'project', attributes: ['uuid', 'name'], required: false }, { model: SupplierAccounts, as: 'vendor', attributes: ['uuid', 'supplierName'], required: false }] }),
+      Promise.resolve(Object.values(HireOrderStatus)),
+      Promise.resolve(['pending', 'approved', 'paid', 'partially_paid', 'cancelled']),
+      this.orders.findAll({ where: { status: { [Op.in]: [HireOrderStatus.ACTIVE, HireOrderStatus.CLOSED] } }, attributes: ['uuid', 'hire_no', 'project_id', 'vendor_id', 'hire_from', 'hire_to', 'status'], include: [{ association: 'project', attributes: ['uuid', 'name'], required: false }, { association: 'vendor', attributes: ['uuid', 'supplierName'], required: false }] }),
     ]);
-    return { projects, vendors, sites, equipment, units, approvedEquipmentRequisitions, eligibleHireOrders, users, hireModes: Object.values(HireOrderMode), orderStatuses, billStatuses, chargedBy: ['hour', 'day', 'week', 'month', 'shift', 'fixed'] };
+    return {
+      projects,
+      vendors,
+      sites,
+      equipment,
+      assets: equipment,
+      units,
+      approvedEquipmentRequisitions,
+      eligibleHireOrders,
+      users,
+      hireModes: Object.values(HireOrderMode),
+      modes: Object.values(HireOrderMode),
+      orderStatuses,
+      billStatuses,
+      statuses: Object.values(HireOrderStatus),
+      chargedBy: ['hour', 'day', 'week', 'month', 'shift', 'fixed'],
+    };
   }
 
   private async list(model: any, query: QueryHireOrderDto | QueryHireMovementDto, numberField: string, include: any[], includeDeleted = false) {
@@ -103,14 +120,14 @@ export class EquipmentHireService {
   listDeletedHireOuts(query: QueryHireMovementDto) { return this.list(this.hireOuts, query, 'hire_out_no', movementInclude, true); }
   listDeletedBills(query: QueryHireMovementDto) { return this.list(this.bills, query, 'bill_no', billInclude, true); }
   async viewOrder(uuid: string) { const row = await this.orders.findOne({ where: { uuid }, include: orderInclude }); if (!row) throw new NotFoundException('Hire order not found'); return row; }
-  async viewHireIn(uuid: string, transaction?: Transaction) { const row = await this.hireIns.findOne({ where: { uuid }, include: [{ model: ProcurementHireOrder, as: 'hireOrder', include: orderInclude }, { model: SysUser, as: 'receivedBy', attributes: ['id', 'name'], required: false }, { model: ProcurementHireInItem, as: 'items', include: [{ model: ProcurementHireOrderItem, as: 'hireOrderItem' }] }], transaction }); if (!row) throw new NotFoundException('Hire In record not found'); return row; }
-  async viewHireOut(uuid: string, transaction?: Transaction) { const row = await this.hireOuts.findOne({ where: { uuid }, include: [{ model: ProcurementHireOrder, as: 'hireOrder', include: orderInclude }, { model: SysUser, as: 'returnedBy', attributes: ['id', 'name'], required: false }, { model: ProcurementHireOutItem, as: 'items', include: [{ model: ProcurementHireOrderItem, as: 'hireOrderItem' }] }], transaction }); if (!row) throw new NotFoundException('Hire Out record not found'); return row; }
+  async viewHireIn(uuid: string, transaction?: Transaction) { const row = await this.hireIns.findOne({ where: { uuid }, include: [{ association: 'hireOrder', include: orderInclude }, { association: 'receivedBy', attributes: ['id', 'name'], required: false }, { association: 'items', include: [{ association: 'hireOrderItem' }] }], transaction }); if (!row) throw new NotFoundException('Hire In record not found'); return row; }
+  async viewHireOut(uuid: string, transaction?: Transaction) { const row = await this.hireOuts.findOne({ where: { uuid }, include: [{ association: 'hireOrder', include: orderInclude }, { association: 'returnedBy', attributes: ['id', 'name'], required: false }, { association: 'items', include: [{ association: 'hireOrderItem' }] }], transaction }); if (!row) throw new NotFoundException('Hire Out record not found'); return row; }
   async viewBill(uuid: string, transaction?: Transaction) { const row = await this.bills.findOne({ where: { uuid }, include: billInclude, transaction }); if (!row) throw new NotFoundException('Hire bill not found'); return row; }
 
   private async buildOrderItems(inputs: CreateHireOrderDto['items'], requisitionId?: string, transaction?: Transaction, excludingOrderId?: string) {
     const built: any[] = [];
     for (const input of inputs) {
-      const equipment = input.equipment_id ? await this.equipment.findOne({ where: { uuid: input.equipment_id } as any, include: [{ model: ProcurementUnit, as: 'unit' }], transaction }) : null;
+      const equipment = input.equipment_id ? await this.equipment.findOne({ where: { uuid: input.equipment_id } as any, include: [{ association: 'unit' }], transaction }) : null;
       if (input.equipment_id && !equipment) throw new BadRequestException('Selected equipment does not exist');
       const reqItem = input.requisition_item_id ? await this.requisitionItems.findOne({ where: { uuid: input.requisition_item_id } as any, transaction }) : null;
       if (input.requisition_item_id && (!reqItem || reqItem.requisition_id !== requisitionId)) throw new BadRequestException('Equipment requisition item does not belong to selected approved requisition');
@@ -160,7 +177,7 @@ export class EquipmentHireService {
     });
   }
   async updateOrder(uuid: string, dto: CreateHireOrderDto, actorId?: number) {
-    const order = await this.orders.findOne({ where: { uuid }, include: [{ model: ProcurementHireIn, as: 'hireIns' }, { model: ProcurementHireOut, as: 'hireOuts' }, { model: ProcurementHireBill, as: 'bills' }] } as any);
+    const order = await this.orders.findOne({ where: { uuid }, include: [{ association: 'hireIns' }, { association: 'hireOuts' }, { association: 'bills' }] } as any);
     if (!order) throw new NotFoundException('Hire order not found');
     if ((order as any).hireIns?.length || (order as any).hireOuts?.length || (order as any).bills?.length) throw new BadRequestException('Hire orders with Hire In/Out or bill records cannot be edited');
     if (dto.hire_mode === HireOrderMode.REQUISITION_BASED && !dto.requisition_id) throw new BadRequestException('Approved equipment requisition is required for requisition-based hire');
@@ -178,7 +195,7 @@ export class EquipmentHireService {
     });
   }
   async deleteOrder(uuid: string, actorId?: number) {
-    const order: any = await this.orders.findOne({ where: { uuid }, include: [{ model: ProcurementHireIn, as: 'hireIns' }, { model: ProcurementHireOut, as: 'hireOuts' }, { model: ProcurementHireBill, as: 'bills' }] }); if (!order) throw new NotFoundException('Hire order not found');
+    const order: any = await this.orders.findOne({ where: { uuid }, include: [{ association: 'hireIns' }, { association: 'hireOuts' }, { association: 'bills' }] }); if (!order) throw new NotFoundException('Hire order not found');
     if (order.hireIns?.length || order.hireOuts?.length || order.bills?.length) throw new BadRequestException('Delete linked Hire In/Out and bill records before deleting this hire order');
     const deletedBy = actorId === undefined ? undefined : String(actorId);
     await this.orderItems.update({ deletedBy } as any, { where: { hire_order_id: uuid } as any }); await this.orderItems.destroy({ where: { hire_order_id: uuid } as any });
@@ -236,7 +253,7 @@ export class EquipmentHireService {
   async createBill(dto: CreateHireBillDto, actorId?: number) {
     if (dto.period_to < dto.period_from) throw new BadRequestException('Bill period end must not be before start');
     return this.sequelize.transaction(async transaction => {
-      const order = await this.orders.findOne({ where: { uuid: dto.hire_order_id }, include: [{ model: ProcurementHireOrderItem, as: 'items' }], transaction });
+      const order = await this.orders.findOne({ where: { uuid: dto.hire_order_id }, include: [{ association: 'items' }], transaction });
       if (!order) throw new BadRequestException('Hire order not found');
       if (![HireOrderStatus.ACTIVE, HireOrderStatus.CLOSED].includes(order.status)) throw new BadRequestException('Bills can only be created from active or closed hire orders');
       const orderLines: any[] = (order as any).items ?? [];
@@ -276,12 +293,12 @@ export class EquipmentHireService {
     if (kind === 'hireOrder') return this.viewOrder(uuid); if (kind === 'hireIn') return this.viewHireIn(uuid); if (kind === 'hireOut') return this.viewHireOut(uuid); return this.viewBill(uuid);
   }
   async onSite(query: QueryEquipmentSiteDto) {
-    const orders: any[] = await this.orders.findAll({ where: { project_id: query.project_id, status: { [Op.in]: [HireOrderStatus.ACTIVE, HireOrderStatus.CLOSED] } }, include: [{ model: Site, as: 'site', attributes: ['uuid', 'name', 'location'], required: false }, { model: SupplierAccounts, as: 'vendor', attributes: ['uuid', 'supplierName'] }, { model: ProcurementHireOrderItem, as: 'items', include: [{ model: ProcurementAssetItemEntry, as: 'equipment', attributes: ['uuid', 'name', 'item_code'], required: false }] }] });
+    const orders: any[] = await this.orders.findAll({ where: { project_id: query.project_id, status: { [Op.in]: [HireOrderStatus.ACTIVE, HireOrderStatus.CLOSED] } }, include: [{ association: 'site', attributes: ['uuid', 'name', 'location'], required: false }, { association: 'vendor', attributes: ['uuid', 'supplierName'] }, { association: 'items', include: [{ association: 'equipment', attributes: ['uuid', 'name', 'item_code'], required: false }] }] });
     const lines: any[] = orders.flatMap(order => (order.items ?? []).map((item: any) => ({ order, item })));
     const ids = lines.map(({ item }) => item.uuid); if (!ids.length) return { data: [], project_id: query.project_id, total: 0 };
     const [received, returned] = await Promise.all([
-      this.hireInItems.findAll({ where: { hire_order_item_id: { [Op.in]: ids } }, include: [{ model: ProcurementHireIn, as: 'hireIn', attributes: ['uuid'], required: true, where: { status: { [Op.ne]: 'cancelled' } } }] }),
-      this.hireOutItems.findAll({ where: { hire_order_item_id: { [Op.in]: ids } }, include: [{ model: ProcurementHireOut, as: 'hireOut', attributes: ['uuid'], required: true, where: { status: { [Op.ne]: 'cancelled' } } }] }),
+      this.hireInItems.findAll({ where: { hire_order_item_id: { [Op.in]: ids } }, include: [{ association: 'hireIn', attributes: ['uuid'], required: true, where: { status: { [Op.ne]: 'cancelled' } } }] }),
+      this.hireOutItems.findAll({ where: { hire_order_item_id: { [Op.in]: ids } }, include: [{ association: 'hireOut', attributes: ['uuid'], required: true, where: { status: { [Op.ne]: 'cancelled' } } }] }),
     ]);
     const receivedMap = new Map<string, number>(); const returnedMap = new Map<string, number>();
     for (const row of received as any[]) receivedMap.set(row.hire_order_item_id, (receivedMap.get(row.hire_order_item_id) ?? 0) + Number(row.quantity));

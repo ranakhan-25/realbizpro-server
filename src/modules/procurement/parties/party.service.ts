@@ -28,12 +28,19 @@ export class PartyService {
     if (query.status) where.status = query.status;
     if (query.startDate || query.endDate) where.createdAt = { ...(query.startDate ? { [Op.gte]: new Date(query.startDate) } : {}), ...(query.endDate ? { [Op.lte]: new Date(`${query.endDate}T23:59:59.999Z`) } : {}) };
     if (query.search) where[Op.or] = ['code', 'name', 'phone', 'tradeLicenseNo', 'nidNo'].map((field) => ({ [field]: { [Op.iLike]: `%${query.search}%` } }));
-    const result = await this.parties.findAndCountAll({ where, include: [{ model: PartyDocument, as: 'documents', required: false }], limit, offset: (page - 1) * limit, order: [['createdAt', query.sortOrder ?? 'DESC']], distinct: true });
+    let paranoid = true;
+    if (query.deleted_only === 'true' || (query as any).deleted_only === true) {
+      where.deletedAt = { [Op.ne]: null };
+      paranoid = false;
+    } else if (query.withDeleted === 'true' || (query as any).withDeleted === true) {
+      paranoid = false;
+    }
+    const result = await this.parties.findAndCountAll({ where, paranoid, include: [{ association: 'documents', required: false }], limit, offset: (page - 1) * limit, order: [['createdAt', query.sortOrder ?? 'DESC']], distinct: true });
     return { data: result.rows, meta: { page, limit, total: result.count, totalPages: Math.ceil(result.count / limit) } };
   }
 
   async findOne(uuid: string, includeDeleted = false) {
-    const party = await this.parties.findOne({ where: { uuid }, paranoid: !includeDeleted, include: [{ model: PartyDocument, as: 'documents', required: false, paranoid: !includeDeleted }] });
+    const party = await this.parties.findOne({ where: { uuid }, paranoid: !includeDeleted, include: [{ association: 'documents', required: false }] });
     if (!party) throw new NotFoundException(`Party ${uuid} not found`);
     return party;
   }

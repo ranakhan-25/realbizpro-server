@@ -18,4 +18,6 @@ export class QueryGrnDto {
   @IsOptional() @IsEnum(ProcurementGrnApprovalLayer) approval_layer?: ProcurementGrnApprovalLayer;
   @IsOptional() @IsEnum(ProcurementGrnStatus) status?: ProcurementGrnStatus;
   @IsOptional() @IsBooleanString() already_billed?: string;
+  @IsOptional() withDeleted?: boolean | string;
+  @IsOptional() deleted_only?: boolean | string;
 }

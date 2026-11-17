@@ -21,22 +21,22 @@ import { QueryGrnDto } from './dto/query-grn.dto';
 import { UpdateGrnDto, UpdateGrnItemDto } from './dto/update-grn.dto';
 
 const includes = [
-  { model: SysCompany, as: 'company', attributes: ['uuid', 'name'], required: false },
-  { model: SupplierAccounts, as: 'supplier', attributes: ['uuid', 'supplierCode', 'supplierName'] },
-  { model: ProjectType, as: 'projectType', attributes: ['uuid', 'code', 'name'], required: false },
-  { model: Project, as: 'project', attributes: ['uuid', 'code', 'name'], required: false },
-  { model: BillingCategory, as: 'titleOfWork', attributes: ['uuid', 'code', 'name'], required: false },
-  { model: Task, as: 'task', attributes: ['uuid', 'taskName'], required: false },
-  { model: Site, as: 'site', attributes: ['uuid', 'code', 'name'], required: false },
-  { model: Category, as: 'category', attributes: ['uuid', 'code', 'name'], required: false },
-  { model: ProcurementPurchaseOrder, as: 'purchaseOrder', attributes: ['uuid', 'code', 'reference'], required: false },
-  { model: ProcurementMaterialRequisition, as: 'requisition', attributes: ['uuid', 'code'], required: false },
-  { model: SysUser, as: 'addedBy', attributes: ['id', 'name'], required: false },
-  { model: ProcurementGrnItem, as: 'items', include: [
-    { model: ProcurementItemEntry, as: 'item', attributes: ['uuid', 'item_code', 'name'], required: false },
-    { model: ProcurementUnit, as: 'unitRelation', attributes: ['uuid', 'code', 'name'], required: false },
-    { model: ProcurementPurchaseOrderItem, as: 'purchaseOrderItem', attributes: ['uuid', 'item_code', 'quantity', 'rate'], required: false },
-  ] },
+  { association: 'company', attributes: ['uuid', 'name'], required: false },
+  { association: 'supplier', attributes: ['uuid', 'supplierCode', 'supplierName'], required: false },
+  { association: 'projectType', attributes: ['uuid', 'code', 'name'], required: false },
+  { association: 'project', attributes: ['uuid', 'code', 'name'], required: false },
+  { association: 'titleOfWork', attributes: ['uuid', 'code', 'name'], required: false },
+  { association: 'task', attributes: ['uuid', 'taskName'], required: false },
+  { association: 'site', attributes: ['uuid', 'code', 'name'], required: false },
+  { association: 'category', attributes: ['uuid', 'code', 'name'], required: false },
+  { association: 'purchaseOrder', attributes: ['uuid', 'code', 'reference'], required: false },
+  { association: 'requisition', attributes: ['uuid', 'code'], required: false },
+  { association: 'addedBy', attributes: ['id', 'name'], required: false },
+  { association: 'items', include: [
+    { association: 'item', attributes: ['uuid', 'item_code', 'name'], required: false },
+    { association: 'unitRelation', attributes: ['uuid', 'code', 'name'], required: false },
+    { association: 'purchaseOrderItem', attributes: ['uuid', 'item_code', 'quantity', 'rate'], required: false },
+  ], required: false },
 ];
 
 @Injectable()
@@ -106,15 +106,24 @@ export class GrnService {
   }
 
   async findAll(query: QueryGrnDto) {
-    const { page = 1, limit = 10, search, date_from, date_to, already_billed, ...filters } = query;
+    const { page = 1, limit = 10, search, date_from, date_to, already_billed, withDeleted, deleted_only, ...filters } = query as any;
     const where: any = {};
     for (const key of ['company_id', 'supplier_id', 'project_type_id', 'project_id', 'title_of_work_id', 'task_id', 'added_by_id', 'approval_layer', 'status']) if ((filters as any)[key] !== undefined) where[key] = (filters as any)[key];
     if (date_from && date_to) where.date = { [Op.between]: [date_from, date_to] };
     else if (date_from) where.date = { [Op.gte]: date_from };
     else if (date_to) where.date = { [Op.lte]: date_to };
-    if (already_billed !== undefined) where.already_billed = already_billed === 'true';
+    if (already_billed !== undefined) where.already_billed = already_billed === 'true' || already_billed === true;
     if (search) where[Op.or] = [{ code: { [Op.like]: `%${search}%` } }, { reference: { [Op.like]: `%${search}%` } }];
-    const { rows, count } = await this.grnModel.findAndCountAll({ where, include: includes, distinct: true, limit, offset: (page - 1) * limit, order: [['createdAt', 'DESC']] });
+
+    let paranoid = true;
+    if (deleted_only === 'true' || deleted_only === true) {
+      where.deletedAt = { [Op.ne]: null };
+      paranoid = false;
+    } else if (withDeleted === 'true' || withDeleted === true) {
+      paranoid = false;
+    }
+
+    const { rows, count } = await this.grnModel.findAndCountAll({ where, paranoid, include: includes, distinct: true, limit, offset: (page - 1) * limit, order: [['createdAt', 'DESC']] });
     return { data: rows, meta: { total: count, page, limit, totalPages: Math.ceil(count / limit) || 1 } };
   }
 
@@ -180,7 +189,7 @@ export class GrnService {
       this.taskModel.findAll({ attributes: ['uuid', 'uid', 'taskName'], order: [['taskName', 'ASC']] }),
       this.siteModel.findAll({ where: projectId ? { projectId } as any : {}, attributes: ['uuid', 'projectId', 'code', 'name'], order: [['name', 'ASC']] }),
       this.categoryModel.findAll({ attributes: ['uuid', 'code', 'name'], order: [['name', 'ASC']] }),
-      this.itemModel.findAll({ where: categoryId ? { category_id: categoryId } as any : {}, attributes: ['uuid', 'category_id', 'unit_id', 'item_code', 'name', 'purchase_price'], include: [{ model: ProcurementUnit, as: 'unit', attributes: ['uuid', 'code', 'name'] }], order: [['name', 'ASC']] }),
+      this.itemModel.findAll({ where: categoryId ? { category_id: categoryId } as any : {}, attributes: ['uuid', 'category_id', 'unit_id', 'item_code', 'name', 'purchase_price'], include: [{ association: 'unit', attributes: ['uuid', 'code', 'name'] }], order: [['name', 'ASC']] }),
       this.unitModel.findAll({ attributes: ['uuid', 'code', 'name'], order: [['name', 'ASC']] }),
       this.purchaseOrderModel.findAll({ attributes: ['uuid', 'code', 'reference', 'supplier_id', 'project_id'], order: [['createdAt', 'DESC']] }),
       this.requisitionModel.findAll({ attributes: ['uuid', 'code', 'project_id', 'date'], order: [['createdAt', 'DESC']] }),

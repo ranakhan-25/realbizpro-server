@@ -89,6 +89,9 @@ import { CsWarrantyDlpClaim } from './models/customer-service/cs_warranty_dlp_cl
 import { CsMaintenanceRequest } from './models/customer-service/cs_maintenance_request.model';
 import { CsOwnersAssociation } from './models/customer-service/cs_owners_association.model';
 import { CsServiceWorkflowRule } from './models/customer-service/cs_service_workflow_rule.model';
+import { CsCommunicationLog } from './models/customer-service/cs_communication_log.model';
+import { CsSiteVisitAppointment } from './models/customer-service/cs_site_visit_appointment.model';
+import { CsCustomerFeedback } from './models/customer-service/cs_customer_feedback.model';
 
 @Global()
 @Module({
@@ -183,6 +186,9 @@ import { CsServiceWorkflowRule } from './models/customer-service/cs_service_work
       CsMaintenanceRequest,
       CsOwnersAssociation,
       CsServiceWorkflowRule,
+      CsCommunicationLog,
+      CsSiteVisitAppointment,
+      CsCustomerFeedback,
     ]),
   ],
   providers: [

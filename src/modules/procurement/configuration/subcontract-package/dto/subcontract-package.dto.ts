@@ -16,4 +16,6 @@ export class QuerySubcontractPackageDto {
   @ApiPropertyOptional({ enum: SubcontractPackageStatus }) @IsOptional() @IsEnum(SubcontractPackageStatus) status?: SubcontractPackageStatus;
   @ApiPropertyOptional({ default: 1 }) @IsOptional() @Type(() => Number) page?: number;
   @ApiPropertyOptional({ default: 10 }) @IsOptional() @Type(() => Number) limit?: number;
+  @ApiPropertyOptional() @IsOptional() withDeleted?: boolean | string;
+  @ApiPropertyOptional() @IsOptional() deleted_only?: boolean | string;
 }

@@ -38,4 +38,12 @@ export class QueryMaintenanceDto {
   @IsOptional()
   @IsEnum(MaintenanceStatus)
   status?: MaintenanceStatus;
+
+  @ApiPropertyOptional({ description: 'Filter soft-deleted maintenance requests' })
+  @IsOptional()
+  is_deleted?: boolean;
+
+  @ApiPropertyOptional({ description: 'CamelCase alias' })
+  @IsOptional()
+  isDeleted?: boolean;
 }

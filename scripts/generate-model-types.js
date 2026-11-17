@@ -679,7 +679,7 @@ class SequelizeTypeGenerator {
       .join('\n');
 
     const fileContent = `// Auto-generated types for ${className}
-// Source: ${path.relative(process.cwd(), originalFilePath)}
+// Source: ${path.relative(process.cwd(), originalFilePath).replace(/\\/g, '/')}
 
 ${enumImports}${relationImports}export interface ${className}Attributes {
 ${attributesBody}${relationsSection}
