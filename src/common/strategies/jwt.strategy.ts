@@ -46,7 +46,10 @@ export class JwtStrategy extends PassportStrategy(
   Strategy,
 ) {
   // In-memory token validation cache to eliminate repeated remote WAN queries across bursts (TTL: 30s)
-  private readonly sessionCache = new Map<string, { user: JwtAuthUser; expiresAt: number }>();
+  private readonly sessionCache = new Map<
+    string,
+    { user: JwtAuthUser; expiresAt: number }
+  >();
 
   constructor(
     private readonly configService: ConfigService<AllConfigType>,
@@ -64,8 +67,9 @@ export class JwtStrategy extends PassportStrategy(
         },
       );
     const shareJwtSecret =
-      configService.get<string>('SHARE_PROJECT_JWT_SECRET' as any) ||
-      'share-project-development-secret';
+      configService.get<string>(
+        'SHARE_PROJECT_JWT_SECRET' as any,
+      ) || 'share-project-development-secret';
 
     super({
       jwtFromRequest:
@@ -74,15 +78,23 @@ export class JwtStrategy extends PassportStrategy(
       secretOrKeyProvider: (
         _request: any,
         rawJwtToken: string,
-        done: (err: any, secretOrKey?: string | Buffer) => void,
+        done: (
+          err: any,
+          secretOrKey?: string | Buffer,
+        ) => void,
       ) => {
         try {
           const parts = rawJwtToken?.split('.');
           if (parts?.length === 3) {
             const decoded = JSON.parse(
-              Buffer.from(parts[1], 'base64url').toString('utf8'),
+              Buffer.from(
+                parts[1],
+                'base64url',
+              ).toString('utf8'),
             );
-            if (decoded?.authType === 'share-user') {
+            if (
+              decoded?.authType === 'share-user'
+            ) {
               return done(null, shareJwtSecret);
             }
           }
@@ -97,9 +109,9 @@ export class JwtStrategy extends PassportStrategy(
   async validate(
     payload: JwtPayload,
   ): Promise<JwtAuthUser> {
-    const cacheKey = `${payload.sub}:${payload.orgId ?? ''}:${payload.isSuperUser ?? ''}:${payload.jti || payload.iat || ''}`;
-    const cacheKey = `${payload.authType || 'sys'}:${payload.sub}:${payload.jti || payload.iat || ''}`;
-    const cached = this.sessionCache.get(cacheKey);
+    const cacheKey = `${payload.authType || 'sys'}:${payload.sub}:${payload.orgId ?? ''}:${payload.isSuperUser ?? ''}:${payload.jti || payload.iat || ''}`;
+    const cached =
+      this.sessionCache.get(cacheKey);
     if (cached) {
       if (Date.now() < cached.expiresAt) {
         return cached.user;
@@ -108,7 +120,10 @@ export class JwtStrategy extends PassportStrategy(
     }
 
     if (payload.authType === 'share-user') {
-      return this.validateShareUser(payload, cacheKey);
+      return this.validateShareUser(
+        payload,
+        cacheKey,
+      );
     }
 
     // 1. Check if token is blacklisted in cache
@@ -154,10 +169,23 @@ export class JwtStrategy extends PassportStrategy(
     const authUser: JwtAuthUser = {
       ...user,
       username: payload.username ?? user.username,
-      isSuperUser: payload.isSuperUser !== undefined ? payload.isSuperUser : user.isSuperUser,
-      roles: payload.roles !== undefined ? payload.roles : (user as any).roles,
-      organization: payload.organization !== undefined ? payload.organization : (user as any).organization,
-      orgId: payload.organization?.id ?? (payload.orgId !== undefined ? payload.orgId : user.orgId),
+      isSuperUser:
+        payload.isSuperUser !== undefined
+          ? payload.isSuperUser
+          : user.isSuperUser,
+      roles:
+        payload.roles !== undefined
+          ? payload.roles
+          : user.roles,
+      organization:
+        payload.organization !== undefined
+          ? payload.organization
+          : user.organization,
+      orgId:
+        payload.organization?.id ??
+        (payload.orgId !== undefined
+          ? payload.orgId
+          : user.orgId),
       authType: payload.authType,
       iat: payload.iat,
       exp: payload.exp,
@@ -176,8 +204,11 @@ export class JwtStrategy extends PassportStrategy(
     payload: JwtPayload,
     cacheKey: string,
   ): Promise<JwtAuthUser> {
-    const shareUserModel = this.sequelize.model(ShareUser) as typeof ShareUser;
-    const shareUser = await shareUserModel.findByPk(payload.sub);
+    const shareUserModel = this.sequelize.model(
+      ShareUser,
+    ) as typeof ShareUser;
+    const shareUser =
+      await shareUserModel.findByPk(payload.sub);
 
     if (
       !shareUser ||
@@ -185,12 +216,20 @@ export class JwtStrategy extends PassportStrategy(
       shareUser.status === ShareUserStatus.BLOCKED
     ) {
       this.sessionCache.delete(cacheKey);
-      throw new UnauthorizedException('Share User is inactive or not found');
+      throw new UnauthorizedException(
+        'Share User is inactive or not found',
+      );
     }
 
-    const normalizedEmail = (shareUser.email || '').trim().toLowerCase();
+    const normalizedEmail = (
+      shareUser.email || ''
+    )
+      .trim()
+      .toLowerCase();
     if (!normalizedEmail) {
-      throw new UnauthorizedException('Share User email is required');
+      throw new UnauthorizedException(
+        'Share User email is required',
+      );
     }
 
     const orgCode =
@@ -201,8 +240,12 @@ export class JwtStrategy extends PassportStrategy(
         .slice(0, 16)
         .toUpperCase();
 
-    const orgModel = this.sequelize.model(SysOrganization) as typeof SysOrganization;
-    let org = await orgModel.findOne({ where: { code: orgCode } });
+    const orgModel = this.sequelize.model(
+      SysOrganization,
+    ) as typeof SysOrganization;
+    let org = await orgModel.findOne({
+      where: { code: orgCode },
+    });
 
     if (!org) {
       try {
@@ -211,17 +254,22 @@ export class JwtStrategy extends PassportStrategy(
           code: orgCode,
           email: normalizedEmail,
           phone: shareUser.phone ?? undefined,
-          subscriptionStatus: OrgSubscriptionStatus.ACTIVE,
+          subscriptionStatus:
+            OrgSubscriptionStatus.ACTIVE,
           maxUsers: 999999,
           maxProjects: 999999,
-        } as any);
+        });
       } catch {
-        org = await orgModel.findOne({ where: { code: orgCode } });
+        org = await orgModel.findOne({
+          where: { code: orgCode },
+        });
       }
     }
 
     if (!org) {
-      throw new UnauthorizedException('Unable to initialize organization scope for Share User');
+      throw new UnauthorizedException(
+        'Unable to initialize organization scope for Share User',
+      );
     }
 
     const authUser: JwtAuthUser = {
@@ -240,9 +288,13 @@ export class JwtStrategy extends PassportStrategy(
       isOrgAdmin: true,
       orgId: org.id,
       orgUuid: org.uuid,
-      organization: org.toJSON ? org.toJSON() : org,
+      organization: org.toJSON
+        ? org.toJSON()
+        : org,
       role: shareUser.role,
-      roles: ['org-admin', shareUser.role].filter(Boolean),
+      roles: ['org-admin', shareUser.role].filter(
+        Boolean,
+      ),
       authType: 'share-user',
       iat: payload.iat,
       exp: payload.exp,
