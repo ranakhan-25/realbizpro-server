@@ -29,8 +29,11 @@ describe('CustomerServiceBookingsService (Unit Tests)', () => {
     it('should allow valid sequential transitions', () => {
       expect(ALLOWED_TRANSITIONS[HandoverStatus.UNDER_CONSTRUCTION]).toEqual([
         HandoverStatus.READY_FOR_SNAGGING,
+        HandoverStatus.SCHEDULED,
       ]);
       expect(ALLOWED_TRANSITIONS[HandoverStatus.READY_FOR_SNAGGING]).toEqual([
+        HandoverStatus.SNAG_RECTIFICATION,
+        HandoverStatus.READY_FOR_KEY_DELIVERY,
         HandoverStatus.DLP_ACTIVE,
       ]);
       expect(ALLOWED_TRANSITIONS[HandoverStatus.DLP_ACTIVE]).toEqual([

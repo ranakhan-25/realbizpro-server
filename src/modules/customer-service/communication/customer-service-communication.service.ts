@@ -434,10 +434,12 @@ export class CustomerServiceCommunicationService {
       this.logger.warn(`Failed to create system notification for ${commNo}: ${err.message}`);
     }
 
+    const mapped = this.mapMessageRow(row);
     return {
       success: true,
       message: `Message dispatched successfully via ${dto.channel}`,
-      ...this.mapMessageRow(row),
+      data: mapped,
+      ...mapped,
     };
   }
 
@@ -634,10 +636,12 @@ export class CustomerServiceCommunicationService {
       createdBy: ctx.userId || null,
     } as any);
 
+    const mapped = this.mapVisitRow(row);
     return {
       success: true,
       message: `Site visit appointment '${visitNo}' booked successfully for ${customerName}`,
-      ...this.mapVisitRow(row),
+      data: mapped,
+      ...mapped,
     };
   }
 
@@ -878,10 +882,12 @@ export class CustomerServiceCommunicationService {
       createdBy: ctx.userId || null,
     } as any);
 
+    const mapped = this.mapFeedbackRow(row);
     return {
       success: true,
       message: `Feedback '${feedbackNo}' recorded successfully (${npsCategory})`,
-      ...this.mapFeedbackRow(row),
+      data: mapped,
+      ...mapped,
     };
   }
 
