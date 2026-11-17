@@ -26,7 +26,7 @@ export class LeadCategoryService {
       deletedBy: null,
       orgId: dto.orgId ?? currentUser?.orgId ?? null,
     } as any);
-    return this.findOne(row.uuid);
+    return { ...this.toPublicCategory(row), leads: [] };
   }
 
   async findAll(query: QueryLeadCategoryDto, currentUser?: any) {
@@ -55,29 +55,24 @@ export class LeadCategoryService {
   async findOne(uuid: string, currentUser?: any) {
     const where: any = { uuid };
     if (currentUser?.orgId) where.orgId = currentUser.orgId;
-    const row = await this.categories.findOne({
-      where,
-      include: [{ association: 'leads', attributes: ['uuid', 'leadCode', 'clientName'], required: false }],
-    });
+    const row = await this.categories.findOne({ where });
     if (!row) throw new NotFoundException(`Lead category ${uuid} not found`);
     const result = this.toPublicCategory(row);
-    const relatedLeads = (row.leads ?? []).map(lead => ({
-      uuid: lead.uuid, leadCode: lead.leadCode, clientName: lead.clientName,
-    }));
-    return { ...result, leads: relatedLeads };
+    return { ...result, leads: [] };
   }
 
   async update(uuid: string, dto: UpdateLeadCategoryDto, userId?: number, currentUser?: any) {
     const row = await this.categories.findOne({ where: { uuid } });
     if (!row) throw new NotFoundException(`Lead category ${uuid} not found`);
+    const { createdBy, ...updateData } = dto as any;
     await row.update({
-      ...dto,
+      ...updateData,
       ...(dto.name ? { name: dto.name.trim() } : {}),
       ...(dto.code ? { code: dto.code.trim() } : {}),
       updatedBy: userId ? String(userId) : row.updatedBy ?? null,
       ...(dto.orgId !== undefined ? { orgId: dto.orgId } : {}),
     } as any);
-    return this.findOne(uuid);
+    return { ...this.toPublicCategory(row), leads: [] };
   }
 
   async remove(uuid: string, userId?: number, currentUser?: any) {

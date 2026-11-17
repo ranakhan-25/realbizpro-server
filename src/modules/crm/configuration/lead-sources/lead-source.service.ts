@@ -58,7 +58,6 @@ export class LeadSourceService {
       where,
       include: [
         { association: 'leads', attributes: ['uuid', 'leadCode', 'clientName'], required: false },
-        { association: 'campaigns', attributes: ['uuid', 'name', 'status'], required: false },
       ],
     });
     if (!row) throw new NotFoundException(`Lead source ${uuid} not found`);

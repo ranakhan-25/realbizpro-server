@@ -26,10 +26,9 @@ import { SysOrganization } from "src/database/models/system/sys_organization.mod
 export class ProjectDocument extends BaseModel<ProjectDocumentAttributes, ProjectDocumentCreationAttributes> {
   @ForeignKey(() => Project)
   @Column({
-              field: 'project_id',
-              type: DataType.UUID,
-              allowNull: false,
-            })
+    type: DataType.UUID,
+    allowNull: false,
+  })
   declare projectId: string;
 
   @Column({
