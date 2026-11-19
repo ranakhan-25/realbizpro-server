@@ -1,12 +1,17 @@
+databases:
+  - name: realbiz-db
+    databaseName: realbiz_prod
+    user: realbiz_user
+    plan: free
+    region: singapore
+
 services:
   - type: web
     name: realbiz-pro-api
-    runtime: node
+    runtime: docker
     plan: free
     region: singapore
     branch: main
-    buildCommand: npm install && npm run build
-    startCommand: npm run start:prod
     healthCheckPath: /realbizpro/api/v1/health
     envVars:
       - key: NODE_ENV
@@ -14,7 +19,7 @@ services:
       - key: PORT
         value: 10000
       - key: BACKEND_DOMAIN
-        sync: false
+        value: https://realbiz-pro-api.onrender.com
       - key: API_PREFIX
         value: api
       - key: CORS_ORIGIN
@@ -30,23 +35,33 @@ services:
 
       # JWT
       - key: JWT_SECRET
-        sync: false
+        generateValue: true
       - key: JWT_EXPIRES_IN
         value: 1d
 
-      # Database (PostgreSQL from Render)
-      - key: DATABASE_HOST
-        sync: false
-      - key: DATABASE_PORT
-        value: "5432"
-      - key: DATABASE_USERNAME
-        sync: false
-      - key: DATABASE_PASSWORD
-        sync: false
-      - key: DATABASE_NAME
-        sync: false
+      # Database (Linked automatically from realbiz-db above)
       - key: DATABASE_DIALECT
         value: postgres
+      - key: DATABASE_HOST
+        fromDatabase:
+          name: realbiz-db
+          property: host
+      - key: DATABASE_PORT
+        fromDatabase:
+          name: realbiz-db
+          property: port
+      - key: DATABASE_NAME
+        fromDatabase:
+          name: realbiz-db
+          property: database
+      - key: DATABASE_USERNAME
+        fromDatabase:
+          name: realbiz-db
+          property: user
+      - key: DATABASE_PASSWORD
+        fromDatabase:
+          name: realbiz-db
+          property: password
       - key: DATABASE_MAX_CONNECTIONS
         value: "10"
       - key: DATABASE_IDLE_TIMEOUT
@@ -68,19 +83,19 @@ services:
 
       # Redis (Upstash)
       - key: REDIS_URL
-        sync: false
+        value: rediss://default:gQAAAAAAAVIuAAIgcDJlMWZiMGQ2N2E2OTk0ZjM1YWQxOGE2NjE0MDI5ZjIyYw@first-skink-86574.upstash.io:6379
 
-      # MinIO / S3 Compatible
+      # MinIO / Storage
       - key: MINIO_ENDPOINT
-        sync: false
+        value: localhost
       - key: MINIO_PORT
         value: "9000"
       - key: MINIO_USE_SSL
         value: "false"
       - key: MINIO_ACCESS_KEY
-        sync: false
+        value: minioadmin
       - key: MINIO_SECRET_KEY
-        sync: false
+        value: minioadmin123
       - key: MINIO_DEFAULT_BUCKET
         value: uploads
 
@@ -94,15 +109,15 @@ services:
       - key: THUMBNAIL_ENABLED
         value: "true"
 
-      # Email
+      # Email (Mailtrap)
       - key: MAIL_HOST
-        sync: false
+        value: sandbox.smtp.mailtrap.io
       - key: MAIL_PORT
         value: "587"
       - key: MAIL_USER
-        sync: false
+        value: ee01d9c7f44675
       - key: MAIL_PASSWORD
-        sync: false
+        value: aa8e037ab08828
       - key: MAIL_DEFAULT_EMAIL
         value: noreply@easysofts.com
       - key: MAIL_DEFAULT_NAME
@@ -114,8 +129,6 @@ services:
       - key: MAIL_REQUIRE_TLS
         value: "false"
 
-      - key: ADMIN_EMAILS
-        sync: false
       - key: APP_NAME
         value: RealBiz Pro API
       - key: PERFORMANCE_WARNING_THRESHOLD

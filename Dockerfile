@@ -6,8 +6,8 @@ WORKDIR /app
 # Install build dependencies for native modules (argon2, sharp, etc.)
 RUN apk add --no-cache python3 make g++ vips-dev
 
-COPY package*.json ./
-RUN npm ci --legacy-peer-deps
+COPY package.json ./
+RUN npm install --legacy-peer-deps
 
 COPY . .
 RUN npm run build
@@ -23,8 +23,8 @@ RUN apk add --no-cache vips chromium nss freetype harfbuzz ca-certificates ttf-f
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
-COPY package*.json ./
-RUN npm ci --only=production --legacy-peer-deps
+COPY package.json ./
+RUN npm install --only=production --legacy-peer-deps
 
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/scripts ./scripts
