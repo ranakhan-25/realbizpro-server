@@ -7,8 +7,6 @@
   "license": "UNLICENSED",
   "scripts": {
     "generate-types": "node scripts/generate-model-types.js",
-    "prepare": "node scripts/generate-model-types.js",
-    "prebuild": "node scripts/generate-model-types.js",
     "build": "nest build",
     "postbuild": "node -e \"const fs=require('fs'); if(fs.existsSync('firebase-service-account.json')){ fs.mkdirSync('dist/modules', {recursive: true}); fs.copyFileSync('firebase-service-account.json', 'dist/modules/firebase-service-account.json'); }\"",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -36,10 +34,6 @@
     "push": "bash scripts/git-push.sh"
   },
   "overrides": {
-    "@nestjs-modules/mailer": {
-      "mjml": "^5.0.0-alpha.4",
-      "nodemailer": "^7.0.11"
-    },
     "glob": "^11.1.0"
   },
   "dependencies": {
@@ -48,7 +42,7 @@
     "@bull-board/api": "^8.0.2",
     "@bull-board/express": "^8.0.2",
     "@easysofts/id-logic": "^1.0.3",
-    "@nestjs-modules/mailer": "1.9.1",
+    "@nestjs-modules/mailer": "^2.0.2",
     "@nestjs/axios": "^4.0.1",
     "@nestjs/bull": "^11.0.4",
     "@nestjs/bullmq": "^11.0.3",

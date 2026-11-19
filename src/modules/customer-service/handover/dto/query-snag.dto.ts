@@ -43,4 +43,12 @@ export class QuerySnagDto {
   @IsOptional()
   @IsString()
   search?: string;
+
+  @ApiPropertyOptional({ description: 'Filter soft-deleted snag records' })
+  @IsOptional()
+  is_deleted?: boolean;
+
+  @ApiPropertyOptional({ description: 'CamelCase alias' })
+  @IsOptional()
+  isDeleted?: boolean;
 }

@@ -28,6 +28,9 @@ import { CsWarrantyDlpClaim } from 'src/database/models/customer-service/cs_warr
 import { CsMaintenanceRequest } from 'src/database/models/customer-service/cs_maintenance_request.model';
 import { CsOwnersAssociation } from 'src/database/models/customer-service/cs_owners_association.model';
 import { CsServiceWorkflowRule } from 'src/database/models/customer-service/cs_service_workflow_rule.model';
+import { CsCommunicationLog } from 'src/database/models/customer-service/cs_communication_log.model';
+import { CsSiteVisitAppointment } from 'src/database/models/customer-service/cs_site_visit_appointment.model';
+import { CsCustomerFeedback } from 'src/database/models/customer-service/cs_customer_feedback.model';
 import { FlatLandBooking } from 'src/database/models/projects/flat-land-booking/pr_flat_land_booking.model';
 import { FlatLand } from 'src/database/models/projects/flatland/pr_flatland.model';
 import { CrSaleAgreement } from 'src/database/models/credit-realization/cr_sale_agreement.model';
@@ -36,6 +39,7 @@ import { CrInstallmentPayment } from 'src/database/models/credit-realization/cr_
 import { Project } from 'src/database/models/projects/project/pr_project.model';
 import { SysNotification } from 'src/database/models/system/sys_notification.model';
 import { SysOrganization } from 'src/database/models/system/sys_organization.model';
+import { SysUser } from 'src/database/models/system/sys_user.model';
 import { CustomerServiceTenantGuard } from './common/customer-service-tenant.guard';
 import { CustomerServiceController } from './customer-service.controller';
 import { CustomerServiceService } from './customer-service.service';
@@ -63,6 +67,10 @@ import { CustomerServicePropertyCareController } from './property-care/customer-
 import { CustomerServicePropertyCareService } from './property-care/customer-service-property-care.service';
 import { CustomerServiceSettingsController } from './settings/customer-service-settings.controller';
 import { CustomerServiceSettingsService } from './settings/customer-service-settings.service';
+import { CustomerServiceReportsController } from './reports/customer-service-reports.controller';
+import { CustomerServiceReportsService } from './reports/customer-service-reports.service';
+import { CustomerServiceCommunicationController } from './communication/customer-service-communication.controller';
+import { CustomerServiceCommunicationService } from './communication/customer-service-communication.service';
 
 @Module({
   imports: [
@@ -95,6 +103,9 @@ import { CustomerServiceSettingsService } from './settings/customer-service-sett
       CsMaintenanceRequest,
       CsOwnersAssociation,
       CsServiceWorkflowRule,
+      CsCommunicationLog,
+      CsSiteVisitAppointment,
+      CsCustomerFeedback,
       FlatLandBooking,
       FlatLand,
       CrSaleAgreement,
@@ -103,6 +114,7 @@ import { CustomerServiceSettingsService } from './settings/customer-service-sett
       Project,
       SysNotification,
       SysOrganization,
+      SysUser,
     ]),
   ],
   controllers: [
@@ -119,6 +131,8 @@ import { CustomerServiceSettingsService } from './settings/customer-service-sett
     CustomerServiceTicketsController,
     CustomerServicePropertyCareController,
     CustomerServiceSettingsController,
+    CustomerServiceReportsController,
+    CustomerServiceCommunicationController,
   ],
   providers: [
     CustomerServiceTenantGuard,
@@ -135,6 +149,8 @@ import { CustomerServiceSettingsService } from './settings/customer-service-sett
     CustomerServiceTicketsService,
     CustomerServicePropertyCareService,
     CustomerServiceSettingsService,
+    CustomerServiceReportsService,
+    CustomerServiceCommunicationService,
   ],
   exports: [
     CustomerServiceTenantGuard,
@@ -151,6 +167,8 @@ import { CustomerServiceSettingsService } from './settings/customer-service-sett
     CustomerServiceTicketsService,
     CustomerServicePropertyCareService,
     CustomerServiceSettingsService,
+    CustomerServiceReportsService,
+    CustomerServiceCommunicationService,
   ],
 })
 export class CustomerServiceModule {}

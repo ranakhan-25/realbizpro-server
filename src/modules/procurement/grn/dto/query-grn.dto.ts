@@ -19,6 +19,8 @@ export class QueryGrnDto {
   @IsOptional() @IsEnum(ProcurementGrnApprovalLayer) approval_layer?: ProcurementGrnApprovalLayer;
   @IsOptional() @IsEnum(ProcurementGrnStatus) status?: ProcurementGrnStatus;
   @IsOptional() @IsBooleanString() already_billed?: string;
+  @IsOptional() withDeleted?: boolean | string;
+  @IsOptional() deleted_only?: boolean | string;
 
   @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
   @IsOptional()
@@ -27,5 +29,4 @@ export class QueryGrnDto {
   @ApiPropertyOptional({ description: 'Project UUID or ID' })
   @IsOptional()
   projectId?: string;
-
 }

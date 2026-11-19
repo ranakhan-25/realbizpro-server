@@ -19,28 +19,51 @@ const ACRONYMS: Record<string, string> = {
   and: '&',
 };
 
-export function slugToLabel(slug: string): string {
-  if (slug === 'sub-category') return 'Sub-Category';
+export function slugToLabel(
+  slug: string,
+): string {
+  if (slug === 'sub-category')
+    return 'Sub-Category';
   return slug
     .split('-')
-    .map((w) => ACRONYMS[w.toLowerCase()] ?? w.charAt(0).toUpperCase() + w.slice(1))
+    .map(
+      (w) =>
+        ACRONYMS[w.toLowerCase()] ??
+        w.charAt(0).toUpperCase() + w.slice(1),
+    )
     .join(' ');
 }
 
 function parseTree(text: string): MenuNode[] {
-  const lines = text.split('\n').filter((l) => l.trim().length > 0);
+  const lines = text
+    .split('\n')
+    .filter((l) => l.trim().length > 0);
   const root: MenuNode[] = [];
-  const stack: { depth: number; node: MenuNode }[] = [];
+  const stack: {
+    depth: number;
+    node: MenuNode;
+  }[] = [];
 
   for (const raw of lines) {
-    const depth = (raw.match(/^ */)?.[0].length ?? 0) / 2;
+    const depth =
+      (raw.match(/^ */)?.[0].length ?? 0) / 2;
     const slug = raw.trim();
-    while (stack.length && (stack[stack.length - 1]?.depth ?? -1) >= depth) {
+    while (
+      stack.length &&
+      (stack[stack.length - 1]?.depth ?? -1) >=
+        depth
+    ) {
       stack.pop();
     }
     const parent = stack[stack.length - 1]?.node;
-    const path = parent ? `${parent.path}/${slug}` : slug;
-    const node: MenuNode = { label: slugToLabel(slug), slug, path };
+    const path = parent
+      ? `${parent.path}/${slug}`
+      : slug;
+    const node: MenuNode = {
+      label: slugToLabel(slug),
+      slug,
+      path,
+    };
     if (parent) {
       if (!parent.children) parent.children = [];
       parent.children.push(node);
@@ -416,7 +439,7 @@ reports
 const customerService = `
 dashboard
 customers
-  customer-360
+  customer-entry
   change-requests
 documents
   center
@@ -464,9 +487,12 @@ export const RAW_MENUS: Record<string, string> = {
   customer_service: customerService,
 };
 
-const CACHED_TREES: Record<string, MenuNode[]> = {};
+const CACHED_TREES: Record<string, MenuNode[]> =
+  {};
 
-export function getFullMenuTree(moduleKey: string): MenuNode[] {
+export function getFullMenuTree(
+  moduleKey: string,
+): MenuNode[] {
   const normKey = moduleKey.toLowerCase().trim();
   if (CACHED_TREES[normKey]) {
     return CACHED_TREES[normKey];
@@ -478,11 +504,18 @@ export function getFullMenuTree(moduleKey: string): MenuNode[] {
   return parsed;
 }
 
-function pruneTree(nodes: MenuNode[], allowedPaths: Set<string>): MenuNode[] {
+function pruneTree(
+  nodes: MenuNode[],
+  allowedPaths: Set<string>,
+): MenuNode[] {
   const out: MenuNode[] = [];
   for (const n of nodes) {
-    const kids = n.children ? pruneTree(n.children, allowedPaths) : undefined;
-    const cleanPath = n.path.toLowerCase().replace(/^\/+|\/+$/g, '');
+    const kids = n.children
+      ? pruneTree(n.children, allowedPaths)
+      : undefined;
+    const cleanPath = n.path
+      .toLowerCase()
+      .replace(/^\/+|\/+$/g, '');
     const selfAllowed =
       allowedPaths.has('*') ||
       allowedPaths.has(cleanPath) ||
@@ -490,7 +523,8 @@ function pruneTree(nodes: MenuNode[], allowedPaths: Set<string>): MenuNode[] {
 
     // A node is included if it has visible children, or if it is a leaf node that is allowed
     const hasKids = kids && kids.length > 0;
-    const isLeaf = !n.children || n.children.length === 0;
+    const isLeaf =
+      !n.children || n.children.length === 0;
 
     if (hasKids) {
       out.push({
@@ -506,13 +540,21 @@ function pruneTree(nodes: MenuNode[], allowedPaths: Set<string>): MenuNode[] {
   return out;
 }
 
-export function getModuleMenuTree(moduleKey: string, allowedRoutes?: string[]): MenuNode[] {
+export function getModuleMenuTree(
+  moduleKey: string,
+  allowedRoutes?: string[],
+): MenuNode[] {
   const fullTree = getFullMenuTree(moduleKey);
-  if (!allowedRoutes || allowedRoutes.includes('*')) {
+  if (
+    !allowedRoutes ||
+    allowedRoutes.includes('*')
+  ) {
     return fullTree;
   }
   const allowedSet = new Set(
-    allowedRoutes.map((r) => r.toLowerCase().replace(/^\/+|\/+$/g, ''))
+    allowedRoutes.map((r) =>
+      r.toLowerCase().replace(/^\/+|\/+$/g, ''),
+    ),
   );
   return pruneTree(fullTree, allowedSet);
 }

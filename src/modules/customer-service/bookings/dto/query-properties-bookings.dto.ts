@@ -103,6 +103,14 @@ export class QueryPropertiesBookingsDto {
   @IsString()
   sort_order?: 'ASC' | 'DESC' = 'DESC';
 
+  @ApiPropertyOptional({ description: 'Filter soft-deleted bookings' })
+  @IsOptional()
+  is_deleted?: boolean;
+
+  @ApiPropertyOptional({ description: 'CamelCase alias' })
+  @IsOptional()
+  isDeleted?: boolean;
+
   getOffset(): number {
     return (
       (Math.max(1, this.page || 1) - 1) *
