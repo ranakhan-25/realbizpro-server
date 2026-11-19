@@ -107,6 +107,21 @@ export class CreateCrRecoveryLogDto {
   @IsOptional()
   legal_notice_ref?: string;
 
+  @ApiPropertyOptional({ example: '23.8103, 90.4125', description: 'GPS coordinates of field visit' })
+  @IsString()
+  @IsOptional()
+  geo_location?: string;
+
+  @ApiPropertyOptional({ example: 'https://cdn.realbiz.com/photos/visit1.jpg', description: 'Photo evidence URLs or JSON string' })
+  @IsString()
+  @IsOptional()
+  visit_photos?: string;
+
+  @ApiPropertyOptional({ example: 'contact_made', enum: ['contact_made', 'customer_absent', 'premises_closed', 'disputed_refusal', 'partial_collected'] })
+  @IsString()
+  @IsOptional()
+  visit_outcome?: string;
+
   @ApiPropertyOptional({ example: 'PRJ-101' })
   @IsString()
   @IsOptional()

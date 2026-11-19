@@ -39,9 +39,9 @@ export class ChartOfGroupService {
     const offset = (pageNum - 1) * limitNum;
 
     const where: any = {};
-    const effectiveOrgId = (query as any)?.orgId ?? currentUser?.orgId;
+    const effectiveOrgId = currentUser?.orgId ?? (query as any)?.orgId;
     if (effectiveOrgId) where.orgId = effectiveOrgId;
-    const effectiveProjectId = (query as any)?.projectId ?? currentUser?.projectId;
+    const effectiveProjectId = currentUser?.projectId ?? (query as any)?.projectId;
     if (effectiveProjectId) where.projectId = effectiveProjectId;
     Object.keys(filters).forEach((k) => {
       if (filters[k] !== undefined && filters[k] !== null && filters[k] !== '') {

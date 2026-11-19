@@ -109,8 +109,11 @@ export class TeamService {
 
   async userDropdown(currentUser?: any) {
     const where: any = { isActive: true };
-    if (currentUser?.orgId) where.orgId = currentUser.orgId;
-    return this.users.findAll({ where, attributes: ['uuid', 'name'], order: [['name', 'ASC']] });
+    if (currentUser?.orgId) {
+      const orgUsers = await this.users.findAll({ where: { isActive: true, orgId: currentUser.orgId }, attributes: ['uuid', 'name'], order: [['name', 'ASC']] });
+      if (orgUsers.length > 0) return orgUsers;
+    }
+    return this.users.findAll({ where, attributes: ['uuid', 'name'], order: [['name', 'ASC']], limit: 50 });
   }
 
   private async getActive(uuid: string, transaction?: Transaction) {

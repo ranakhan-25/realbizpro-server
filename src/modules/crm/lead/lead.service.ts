@@ -40,6 +40,7 @@ export class LeadService {
     @InjectModel(LeadTransferLog) private readonly transferLogs: typeof LeadTransferLog,
     @InjectModel(SysUser) private readonly users: typeof SysUser,
     @InjectModel(Project) private readonly projects: typeof Project,
+    @InjectModel(LeadPropertyInterest) private readonly propertyInterests: typeof LeadPropertyInterest,
   ) {}
 
   async create(dto: CreateLeadDto, userId?: number, currentUser?: any) {
@@ -57,7 +58,7 @@ export class LeadService {
       createdBy: actor,
     } as any);
     if (projectName) {
-      await LeadPropertyInterest.create({
+      await this.propertyInterests.create({
         leadId: row.id,
         projectName,
         projectId: row.projectId,
@@ -197,6 +198,18 @@ export class LeadService {
   }
 
   async transferLeadListDropdown(currentUser?: any) {
+    if (currentUser?.authType === 'share-user') {
+      const shareUserModel = this.leads.sequelize?.model('ShareUser');
+      if (shareUserModel) {
+        const shareUsers = await shareUserModel.findAll({
+          where: { status: 'active' },
+          attributes: ['uuid', 'name', 'email'],
+          order: [['name', 'ASC']],
+        });
+        const options = shareUsers.map((u: any) => ({ uuid: u.uuid, name: u.name || u.email }));
+        return { fromUsers: options, toUsers: options };
+      }
+    }
     const users = await this.users.findAll({
       where: { isActive: true },
       attributes: ['uuid', 'name'],
@@ -338,10 +351,10 @@ export class LeadService {
     if (dto.orgId !== undefined) changes.orgId = dto.orgId;
     await row.update(changes);
     if (projectName !== undefined) {
-      const current = await LeadPropertyInterest.findOne({ where: { leadId: row.id }, order: [['createdAt', 'DESC']] });
+      const current = await this.propertyInterests.findOne({ where: { leadId: row.id }, order: [['createdAt', 'DESC']] });
       if (projectName.trim()) {
         if (current) await current.update({ projectName, projectId: dto.projectId ?? row.projectId, ...(userId ? { updatedBy: String(userId) } : {}) });
-        else await LeadPropertyInterest.create({ leadId: row.id, projectName, projectId: dto.projectId ?? row.projectId, orgId: row.orgId, createdBy: userId ? String(userId) : null } as any);
+        else await this.propertyInterests.create({ leadId: row.id, projectName, projectId: dto.projectId ?? row.projectId, orgId: row.orgId, createdBy: userId ? String(userId) : null } as any);
       } else if (current) await current.destroy();
     }
     return this.findOne(uuid, currentUser);
@@ -377,7 +390,27 @@ export class LeadService {
       case 'area': case 'areas': return this.areas.findAll({ attributes: ['id', 'name', 'city', 'zone'], order: [['name', 'ASC']] });
       case 'price-range': case 'price-ranges': return this.priceRanges.findAll({ attributes: ['id', 'name', 'minPrice', 'maxPrice'], order: [['name', 'ASC']] });
       case 'team': case 'teams': return this.teams.findAll({ where: active, attributes: ['id', 'name'], order: [['name', 'ASC']] });
-      case 'user': case 'users': return this.users.findAll({ where: { isActive: true }, attributes: ['uuid', 'name', 'designationName', 'userType'], order: [['name', 'ASC']] });
+      case 'user': case 'users': {
+        if (currentUser?.authType === 'share-user') {
+          const shareUserModel = this.leads.sequelize?.model('ShareUser');
+          if (shareUserModel) {
+            const shareUsers = await shareUserModel.findAll({
+              where: { status: 'active' },
+              attributes: ['uuid', 'name', 'email', 'phone', 'role'],
+              order: [['name', 'ASC']],
+            });
+            return shareUsers.map((u: any) => ({
+              uuid: u.uuid,
+              name: u.name || u.email,
+              email: u.email,
+              phone: u.phone,
+              designationName: u.role || 'Share User',
+              userType: 'share-user',
+            }));
+          }
+        }
+        return this.users.findAll({ where: { isActive: true }, attributes: ['uuid', 'name', 'designationName', 'userType'], order: [['name', 'ASC']] });
+      }
       case 'project': case 'projects': return this.projects.findAll({ attributes: ['uuid', 'name'], order: [['name', 'ASC']] });
       case 'communication-status': case 'communication-statuses': return this.communicationStatuses.findAll({ where: { status: CommunicationStatusState.ACTIVE }, attributes: ['uuid', 'name'], order: [['name', 'ASC']] });
       case 'lead-type': return [{ value: 'new', label: 'New' }, { value: 'prospect', label: 'Prospect' }, { value: 'priority', label: 'Priority' }];
@@ -488,7 +521,7 @@ export class LeadService {
           createdBy: actor,
         } as any, { transaction });
         if (projectName) {
-          await LeadPropertyInterest.create({
+          await this.propertyInterests.create({
             leadId: row.id,
             projectName,
             projectId: row.projectId,
@@ -553,7 +586,15 @@ export class LeadService {
     const uuids = [...new Set(ids.filter((id): id is string => typeof id === 'string' && uuidPattern.test(id)))];
     if (!uuids.length) return new Map<string, { uuid: string; name: string }>();
     const users = await this.users.findAll({ where: { uuid: { [Op.in]: uuids } }, attributes: ['uuid', 'name'], paranoid: false });
-    return new Map(users.map(user => [user.uuid, { uuid: user.uuid, name: user.name }]));
+    const shareUserModel = this.leads.sequelize?.model('ShareUser');
+    let shareUsers: any[] = [];
+    if (shareUserModel) {
+      shareUsers = await shareUserModel.findAll({ where: { uuid: { [Op.in]: uuids } }, attributes: ['uuid', 'name', 'email'], paranoid: false });
+    }
+    const map = new Map<string, { uuid: string; name: string }>();
+    users.forEach(user => map.set(user.uuid, { uuid: user.uuid, name: user.name }));
+    shareUsers.forEach((u: any) => map.set(u.uuid, { uuid: u.uuid, name: u.name || u.email }));
+    return map;
   }
 
   private toPublic(row: Lead) {

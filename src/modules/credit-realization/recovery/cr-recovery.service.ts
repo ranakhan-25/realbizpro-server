@@ -16,17 +16,27 @@ export class CrRecoveryService {
     private readonly agreementModel: typeof CrSaleAgreement,
   ) {}
 
-  async create(createDto: CreateCrRecoveryLogDto) {
+  async create(createDto: CreateCrRecoveryLogDto, orgId?: string, userEmail?: string) {
     let saleAgreementId = createDto.sale_agreement_id;
     if (saleAgreementId) {
-      const existing = await this.agreementModel.findByPk(saleAgreementId);
+      const existing = await this.agreementModel.findOne({
+        where: {
+          id: saleAgreementId,
+          ...(orgId ? { org_id: orgId } : {}),
+        },
+      });
       if (!existing) {
         saleAgreementId = undefined;
       }
     }
 
     if (!saleAgreementId) {
-      let agreement = await this.agreementModel.findOne({ order: [['id', 'ASC']] });
+      let agreement = await this.agreementModel.findOne({
+        where: {
+          ...(orgId ? { org_id: orgId } : {}),
+        },
+        order: [['id', 'ASC']],
+      });
       if (!agreement) {
         agreement = await this.agreementModel.create({
           agreement_number: `AGR-${Date.now().toString().slice(-6)}`,
@@ -35,6 +45,8 @@ export class CrRecoveryService {
           total_price: 5000000,
           down_payment: 1000000,
           status: 'active',
+          ...(orgId ? { org_id: orgId } : {}),
+          ...(userEmail ? { createdBy: userEmail } : {}),
         } as any);
       }
       saleAgreementId = Number(agreement.id);
@@ -49,29 +61,42 @@ export class CrRecoveryService {
       outcome: createDto.outcome || createDto.outcome_status || 'in_progress',
       next_action_date: createDto.next_action_date || createDto.next_followup_date || null,
       customer_response: createDto.customer_response || createDto.remarks || null,
+      ...(orgId ? { org_id: orgId } : {}),
+      ...(userEmail ? { createdBy: userEmail } : {}),
     };
 
     return await this.recoveryModel.create(payload);
   }
 
-  async findAll() {
+  async findAll(orgId?: string) {
     return await this.recoveryModel.findAll({
+      where: {
+        ...(orgId ? { org_id: orgId } : {}),
+      },
       include: [{ model: this.agreementModel, as: 'sale_agreement' }],
       order: [['action_date', 'DESC']],
     });
   }
 
-  async findOne(uuid: string) {
+  async findOne(uuid: string, orgId?: string) {
     const item = await this.recoveryModel.findOne({
-      where: { uuid },
+      where: {
+        uuid,
+        ...(orgId ? { org_id: orgId } : {}),
+      },
       include: [{ model: this.agreementModel, as: 'sale_agreement' }],
     });
     if (!item) throw new NotFoundException('Recovery log not found');
     return item;
   }
 
-  async update(uuid: string, updateDto: UpdateCrRecoveryLogDto) {
-    const item = await this.findOne(uuid);
+  async update(
+    uuid: string,
+    updateDto: UpdateCrRecoveryLogDto,
+    orgId?: string,
+    userEmail?: string,
+  ) {
+    const item = await this.findOne(uuid, orgId);
     const payload: any = { ...updateDto };
 
     if (updateDto.outcome || updateDto.outcome_status) {
@@ -83,13 +108,19 @@ export class CrRecoveryService {
     if (updateDto.customer_response || updateDto.remarks) {
       payload.customer_response = updateDto.customer_response || updateDto.remarks;
     }
+    if (userEmail) {
+      payload.updatedBy = userEmail;
+    }
 
     await item.update(payload);
     return item;
   }
 
-  async remove(uuid: string) {
-    const item = await this.findOne(uuid);
+  async remove(uuid: string, orgId?: string, userEmail?: string) {
+    const item = await this.findOne(uuid, orgId);
+    if (userEmail) {
+      await item.update({ deletedBy: userEmail } as any);
+    }
     await item.destroy();
     return { success: true, message: 'Recovery log deleted successfully' };
   }

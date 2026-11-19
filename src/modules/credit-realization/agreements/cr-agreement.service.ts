@@ -4,6 +4,7 @@ import { CrSaleAgreement } from '../../../database/models/credit-realization/cr_
 import { CrInstallmentPlan } from '../../../database/models/credit-realization/cr_installment_plan.model';
 import { CrPlotDistribution } from '../../../database/models/credit-realization/cr_plot_distribution.model';
 import { CrRecoveryLog } from '../../../database/models/credit-realization/cr_recovery_log.model';
+import { CrInstallmentPayment } from '../../../database/models/credit-realization/cr_installment_payment.model';
 import {
   CreateCrSaleAgreementDto,
   UpdateCrSaleAgreementDto,
@@ -21,11 +22,21 @@ export class CrAgreementService {
     private readonly plotModel: typeof CrPlotDistribution,
     @InjectModel(CrRecoveryLog)
     private readonly recoveryModel: typeof CrRecoveryLog,
+    @InjectModel(CrInstallmentPayment)
+    private readonly paymentModel: typeof CrInstallmentPayment,
   ) {}
 
-  async create(createDto: CreateCrSaleAgreementDto): Promise<CrSaleAgreement> {
+  async create(
+    createDto: CreateCrSaleAgreementDto,
+    orgId?: string,
+    userEmail?: string,
+  ): Promise<CrSaleAgreement> {
     const { number_of_installments, ...agreementData } = createDto;
-    const agreement = await this.agreementModel.create(agreementData as any);
+    const agreement = await this.agreementModel.create({
+      ...agreementData,
+      ...(orgId ? { org_id: orgId } : {}),
+      ...(userEmail ? { createdBy: userEmail } : {}),
+    } as any);
 
     // Auto-generate installment schedule if number_of_installments is provided
     if (number_of_installments && number_of_installments > 0) {
@@ -59,31 +70,43 @@ export class CrAgreementService {
           penalty_amount: 0,
           penalty_waived: 0,
           status: 'unpaid',
-          org_id: agreement.org_id,
+          org_id: agreement.org_id || orgId,
+          ...(userEmail ? { createdBy: userEmail } : {}),
         } as any);
       }
     }
 
-    return this.findOne(agreement.uuid);
+    return this.findOne(agreement.uuid, orgId);
   }
 
-  async findAll(): Promise<CrSaleAgreement[]> {
+  async findAll(orgId?: string): Promise<CrSaleAgreement[]> {
     return await this.agreementModel.findAll({
+      where: {
+        ...(orgId ? { org_id: orgId } : {}),
+      },
       include: [
-        { model: this.planModel, as: 'installment_plans' },
+        {
+          model: this.planModel,
+          as: 'installment_plans',
+          include: [{ model: this.paymentModel, as: 'payments' }],
+        },
         { model: this.plotModel, as: 'plot_distributions' },
       ],
       order: [['createdAt', 'DESC']],
     });
   }
 
-  async findOne(uuid: string): Promise<CrSaleAgreement> {
+  async findOne(uuid: string, orgId?: string): Promise<CrSaleAgreement> {
     const agreement = await this.agreementModel.findOne({
-      where: { uuid },
+      where: {
+        uuid,
+        ...(orgId ? { org_id: orgId } : {}),
+      },
       include: [
         {
           model: this.planModel,
           as: 'installment_plans',
+          include: [{ model: this.paymentModel, as: 'payments' }],
           order: [['installment_no', 'ASC']],
         },
         { model: this.plotModel, as: 'plot_distributions' },
@@ -94,24 +117,43 @@ export class CrAgreementService {
     return agreement;
   }
 
-  async update(uuid: string, updateDto: UpdateCrSaleAgreementDto): Promise<CrSaleAgreement> {
-    const agreement = await this.findOne(uuid);
-    await agreement.update(updateDto as any);
-    return this.findOne(uuid);
+  async update(
+    uuid: string,
+    updateDto: UpdateCrSaleAgreementDto,
+    orgId?: string,
+    userEmail?: string,
+  ): Promise<CrSaleAgreement> {
+    const agreement = await this.findOne(uuid, orgId);
+    await agreement.update({
+      ...(updateDto as any),
+      ...(userEmail ? { updatedBy: userEmail } : {}),
+    });
+    return this.findOne(uuid, orgId);
   }
 
-  async remove(uuid: string): Promise<{ success: boolean; message: string }> {
-    const agreement = await this.findOne(uuid);
+  async remove(
+    uuid: string,
+    orgId?: string,
+    userEmail?: string,
+  ): Promise<{ success: boolean; message: string }> {
+    const agreement = await this.findOne(uuid, orgId);
+    if (userEmail) {
+      await agreement.update({ deletedBy: userEmail } as any);
+    }
     await agreement.destroy();
     return { success: true, message: 'Sale Agreement deleted' };
   }
 
-  async addPlotDistribution(uuid: string, dto: CreateCrPlotDistributionDto) {
-    const agreement = await this.findOne(uuid);
+  async addPlotDistribution(
+    uuid: string,
+    dto: CreateCrPlotDistributionDto,
+    orgId?: string,
+  ) {
+    const agreement = await this.findOne(uuid, orgId);
     return await this.plotModel.create({
       ...dto,
       sale_agreement_id: agreement.id,
-      org_id: agreement.org_id,
+      org_id: agreement.org_id || orgId,
     } as any);
   }
 }

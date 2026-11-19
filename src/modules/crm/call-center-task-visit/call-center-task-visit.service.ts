@@ -21,14 +21,14 @@ export class CallCenterTaskVisitService {
   ) {}
 
   async dropdowns(currentUser?: any) {
-    const whereActive: any = { isActive: true };
+    const whereOrg: any = {};
     if (currentUser?.orgId) {
-      whereActive.orgId = currentUser.orgId;
+      whereOrg.orgId = currentUser.orgId;
     }
     const [users, places, statuses, salesPossibilities] = await Promise.all([
       this.users.findAll({ where: { isActive: true }, attributes: ['uuid', 'userCode', 'name'], order: [['name', 'ASC']] }),
-      this.places.findAll({ where: whereActive, attributes: ['id', 'uuid', 'name', 'address'], order: [['name', 'ASC']] }),
-      this.statuses.findAll({ attributes: ['id', 'uuid', 'name', 'color'], order: [['name', 'ASC']] }),
+      this.places.findAll({ where: whereOrg, attributes: ['id', 'uuid', 'name', 'address'], order: [['name', 'ASC']] }),
+      this.statuses.findAll({ where: whereOrg, attributes: ['id', 'uuid', 'name', 'color'], order: [['name', 'ASC']] }),
       this.stages.findAll({ where: { isActive: true }, attributes: ['id', 'uuid', 'name', 'color', 'sortOrder'], order: [['sortOrder', 'ASC'], ['name', 'ASC']] }),
     ]);
     return { users: users.map(user => ({ uuid: user.uuid, userCode: user.userCode ?? null, name: user.name })), statuses, places, taskTypes: activityTypes, salesPossibilities: salesPossibilities.map(stage => ({ id: stage.id, uuid: stage.uuid, name: stage.name, color: stage.color ?? null })) };
