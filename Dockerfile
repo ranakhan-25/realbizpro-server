@@ -1,35 +1,42 @@
 # Build stage
-FROM node:20-alpine AS builder
+FROM node:20-slim AS builder
 
 WORKDIR /app
 
-# Install build dependencies for native modules (argon2, sharp, etc.)
-RUN apk add --no-cache python3 make g++ vips-dev
+# Install build tools in case native compilation is needed
+RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
 
 COPY package.json ./
-RUN npm install --legacy-peer-deps
+# Install ALL dependencies without triggering lifecycle scripts prematurely
+RUN npm install --legacy-peer-deps --ignore-scripts
 
 COPY . .
+# Build the application (runs prebuild -> build -> postbuild)
 RUN npm run build
 
+# Prune devDependencies to keep only production modules
+RUN npm prune --omit=dev --legacy-peer-deps --ignore-scripts
+
 # Production stage
-FROM node:20-alpine AS production
+FROM node:20-slim AS production
 
 WORKDIR /app
 
-RUN apk add --no-cache vips chromium nss freetype harfbuzz ca-certificates ttf-freefont
+# Install chromium and fonts for Puppeteer
+RUN apt-get update && apt-get install -y \
+    chromium \
+    fonts-freefont-ttf \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
-# Puppeteer - use system chromium
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 COPY package.json ./
-RUN npm install --only=production --legacy-peer-deps
-
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/scripts ./scripts
 
-# Copy firebase service account if exists
 RUN mkdir -p dist/modules
 
 EXPOSE 10000
