@@ -88,14 +88,14 @@ export class Project
   implements ProjectAttributes
 {
   @Column({
-    type: DataType.UUID,
+    type: DataType.STRING,
     allowNull: false,
     unique: true,
   })
   declare code: string;
 
   @Column({
-    type: DataType.UUID,
+    type: DataType.STRING,
     allowNull: false,
   })
   declare name: string;
@@ -112,7 +112,7 @@ export class Project
 
   @ForeignKey(() => LeadArea)
   @Column({
-    type: DataType.UUID,
+    type: DataType.STRING,
     allowNull: true,
   })
   declare areaCategory?: string;
@@ -170,7 +170,7 @@ export class Project
 
   @ForeignKey(() => SysUser)
   @Column({
-    type: DataType.UUID,
+    type: DataType.STRING,
     allowNull: true,
   })
   declare projectManager?: string;

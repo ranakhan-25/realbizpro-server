@@ -33,7 +33,7 @@ abstract class LeadMasterModel extends BaseModel {
   declare organization?: SysOrganization;
 
   @Column({
-    type: DataType.UUID,
+    type: DataType.STRING,
     allowNull: true,
     field: 'created_by',
     defaultValue: null,
@@ -320,7 +320,7 @@ export class LeadTeam extends LeadMasterModel {
   })
   declare name: string;
   @Column({
-    type: DataType.UUID,
+    type: DataType.STRING,
     allowNull: true,
     field: 'leader_id',
   })

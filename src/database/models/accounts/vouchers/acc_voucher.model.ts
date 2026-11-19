@@ -25,7 +25,7 @@ export class Voucher extends Model<Voucher> {
   @Column(DataType.UUID)
   declare uuid: string;
 
-  @Column({ type: DataType.UUID, unique: true })
+  @Column({ type: DataType.STRING, unique: true })
   declare voucherNo: string;
 
   @Column({ type: DataType.STRING, allowNull: false })
@@ -37,7 +37,7 @@ export class Voucher extends Model<Voucher> {
   @Column({ type: DataType.STRING, allowNull: true })
   declare projectType: string;
 
-  @Column({ type: DataType.UUID, allowNull: true })
+  @Column({ type: DataType.STRING, allowNull: true })
   declare projectId: string;
 
   @Column({ type: DataType.STRING, allowNull: true })

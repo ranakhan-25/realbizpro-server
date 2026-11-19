@@ -10,8 +10,8 @@ import type { LeadCallAssignmentAttributes, LeadCallAssignmentCreationAttributes
 export class LeadCallAssignment extends BaseModel<LeadCallAssignmentAttributes, LeadCallAssignmentCreationAttributes> {
   @ForeignKey(() => Lead)
   @Column({ type: DataType.BIGINT, allowNull: false, field: 'lead_id' }) declare leadId: number;
-  @Column({ type: DataType.UUID, allowNull: false, field: 'assigned_from' }) declare assignedFrom: string;
-  @Column({ type: DataType.UUID, allowNull: false, field: 'assigned_to' }) declare assignedTo: string;
+  @Column({ type: DataType.STRING, allowNull: false, field: 'assigned_from' }) declare assignedFrom: string;
+  @Column({ type: DataType.STRING, allowNull: false, field: 'assigned_to' }) declare assignedTo: string;
   @Column({ type: DataType.DATE, allowNull: false, field: 'assignment_date' }) declare assignmentDate: Date;
   @Column({ type: DataType.DATE, allowNull: true, field: 'due_date' }) declare dueDate?: Date;
   @Column({ type: DataType.STRING(50), allowNull: true }) declare priority?: string;

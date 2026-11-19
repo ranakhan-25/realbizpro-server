@@ -23,7 +23,7 @@ export class VoucherEntry extends Model<VoucherEntry> {
   @Column(DataType.UUID)
   declare voucherId: string;
 
-  @Column({ type: DataType.UUID, allowNull: true })
+  @Column({ type: DataType.STRING, allowNull: true })
   declare projectId: string;
 
   @Column({ type: DataType.STRING, allowNull: true })
