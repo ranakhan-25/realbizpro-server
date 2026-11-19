@@ -5,8 +5,6 @@
 /reports
 /.pnpm-store
 /pnpm-lock.yaml
-src/database/types
-src/database/types/*
 
 # Logs
 logs

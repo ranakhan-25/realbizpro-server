@@ -1,5 +1,5 @@
 // Auto-generated types for FundRequisition
-// Source: src\database\models\projects\fund-requisition\pr_fund_requisition.model.ts
+// Source: src/database/models/projects/fund-requisition/pr_fund_requisition.model.ts
 
 import { ApproveStatus } from '../models/projects/fund-requisition/pr_fund_requisition.model';
 import { PaymentStatus } from '../models/projects/fund-requisition/pr_fund_requisition.model';

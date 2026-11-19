@@ -1,5 +1,5 @@
 // Auto-generated types for Details
-// Source: src\database\models\projects\details\pr_details.model.ts
+// Source: src/database/models/projects/details/pr_details.model.ts
 
 import type { SysOrganization } from '../models/system/sys_organization.model';
 import type { Project } from '../models/projects/project/pr_project.model';

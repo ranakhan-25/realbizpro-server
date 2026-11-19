@@ -1,5 +1,5 @@
 // Auto-generated types for CrInstallmentSetup
-// Source: src\database\models\credit-realization\cr_installment_setup.model.ts
+// Source: src/database/models/credit-realization/cr_installment_setup.model.ts
 
 export interface CrInstallmentSetupAttributes {
   id: number;

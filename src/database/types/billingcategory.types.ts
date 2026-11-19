@@ -1,5 +1,5 @@
 // Auto-generated types for BillingCategory
-// Source: src\database\models\projects\billing\pr_category.model.ts
+// Source: src/database/models/projects/billing/pr_category.model.ts
 
 import { CategoryType } from '../models/projects/billing/pr_category.model';
 

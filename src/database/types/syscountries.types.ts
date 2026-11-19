@@ -1,5 +1,5 @@
 // Auto-generated types for SysCountries
-// Source: src\database\models\system\sys_countries.model.ts
+// Source: src/database/models/system/sys_countries.model.ts
 
 import type { SysUser } from '../models/system/sys_user.model';
 
