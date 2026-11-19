@@ -19,7 +19,7 @@ import { SysOrganization } from "src/database/models/system/sys_organization.mod
   paranoid: true,
   underscored: false,
   indexes: [
-    { name: 'pr_flat_land_offer_project_id_idx', fields: ['projectId'] },
+    { name: 'pr_flat_land_offer_project_id_idx', fields: ['project_id'] },
     { name: 'pr_flat_land_offer_flat_land_id_idx', fields: ['flatLandId'] },
   ],
 })

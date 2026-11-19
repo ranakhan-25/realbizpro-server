@@ -19,7 +19,7 @@ import { SysOrganization } from "src/database/models/system/sys_organization.mod
   indexes: [
     {
       name: 'project_document_project_id_idx',
-      fields: ['projectId'],
+      fields: ['project_id'],
     },
   ],
 })

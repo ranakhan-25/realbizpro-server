@@ -153,5 +153,7 @@ export function setupGlobalConfig(
   });
 
   // Global prefix
-  app.setGlobalPrefix(`realbizpro/${apiPrefix}`);
+  app.setGlobalPrefix(`realbizpro/${apiPrefix}`, {
+    exclude: ['/'],
+  });
 }
