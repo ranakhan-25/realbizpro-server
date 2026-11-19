@@ -1,3 +1,17 @@
+// Guard against running heavy AST scanning in CI/Production builds
+if (
+  process.env.CI ||
+  process.env.VERCEL ||
+  process.env.RENDER ||
+  process.env.NODE_ENV === 'production' ||
+  process.env.SKIP_MODEL_TYPES
+) {
+  console.log(
+    '⚡ CI/Production build detected. Skipping AST model type generation as types are already committed.',
+  );
+  process.exit(0);
+}
+
 let Project, SyntaxKind;
 try {
   const tsMorph = require('ts-morph');

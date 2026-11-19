@@ -7,7 +7,6 @@
   "license": "UNLICENSED",
   "scripts": {
     "generate-types": "node scripts/generate-model-types.js",
-    "prebuild": "node scripts/generate-model-types.js",
     "build": "nest build",
     "postbuild": "node -e \"const fs=require('fs'); if(fs.existsSync('firebase-service-account.json')){ fs.mkdirSync('dist/modules', {recursive: true}); fs.copyFileSync('firebase-service-account.json', 'dist/modules/firebase-service-account.json'); }\"",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
