@@ -266,6 +266,7 @@ export class CustomerServiceDocumentsService {
       pendingVetting,
       signedExecuted,
       verified,
+      deletedCount,
     ] = await Promise.all([
       this.docModel.count({ where }),
       this.docModel.count({
@@ -286,6 +287,13 @@ export class CustomerServiceDocumentsService {
           verificationStatus: 'Verified',
         },
       }),
+      this.docModel.count({
+        where: {
+          ...where,
+          deletedAt: { [Op.ne]: null },
+        },
+        paranoid: false,
+      }),
     ]);
 
     return {
@@ -296,6 +304,7 @@ export class CustomerServiceDocumentsService {
       all_count: totalArchived,
       pending_count: pendingVetting,
       executed_count: signedExecuted,
+      deleted_count: deletedCount,
     };
   }
 
@@ -363,11 +372,22 @@ export class CustomerServiceDocumentsService {
       ];
     }
 
+    const isDeleted =
+      query.is_deleted === true ||
+      String(query.is_deleted) === 'true' ||
+      query.isDeleted === true ||
+      String(query.isDeleted) === 'true';
+
+    if (isDeleted) {
+      where.deletedAt = { [Op.ne]: null };
+    }
+
     const { rows, count } =
       await this.docModel.findAndCountAll({
         where,
         limit,
         offset,
+        paranoid: !isDeleted,
         order: [['created_at', 'DESC']],
         include: [
           {
@@ -626,6 +646,7 @@ export class CustomerServiceDocumentsService {
       totalPipeline,
       appointmentsScheduled,
       deedsDelivered,
+      deletedCount,
     ] = await Promise.all([
       this.regModel.count({ where }),
       this.regModel.count({
@@ -640,6 +661,13 @@ export class CustomerServiceDocumentsService {
           status: 'Original Deed Delivered',
         },
       }),
+      this.regModel.count({
+        where: {
+          ...where,
+          deletedAt: { [Op.ne]: null },
+        },
+        paranoid: false,
+      }),
     ]);
 
     return {
@@ -651,6 +679,7 @@ export class CustomerServiceDocumentsService {
       pending_count:
         totalPipeline - deedsDelivered,
       delivered_count: deedsDelivered,
+      deleted_count: deletedCount,
     };
   }
 
@@ -724,11 +753,22 @@ export class CustomerServiceDocumentsService {
       ];
     }
 
+    const isDeleted =
+      query.is_deleted === true ||
+      String(query.is_deleted) === 'true' ||
+      query.isDeleted === true ||
+      String(query.isDeleted) === 'true';
+
+    if (isDeleted) {
+      where.deletedAt = { [Op.ne]: null };
+    }
+
     const { rows, count } =
       await this.regModel.findAndCountAll({
         where,
         limit,
         offset,
+        paranoid: !isDeleted,
         order: [['created_at', 'DESC']],
         include: [
           {
@@ -1008,6 +1048,7 @@ export class CustomerServiceDocumentsService {
       hearingsScheduled,
       khatianApproved,
       kanungoInquiry,
+      deletedCount,
     ] = await Promise.all([
       this.mutModel.count({ where }),
       this.mutModel.count({
@@ -1029,6 +1070,13 @@ export class CustomerServiceDocumentsService {
             'Kanungo/Surveyor Inquiry',
         },
       }),
+      this.mutModel.count({
+        where: {
+          ...where,
+          deletedAt: { [Op.ne]: null },
+        },
+        paranoid: false,
+      }),
     ]);
 
     return {
@@ -1040,6 +1088,7 @@ export class CustomerServiceDocumentsService {
       hearing_count: hearingsScheduled,
       inquiry_count: kanungoInquiry,
       approved_count: khatianApproved,
+      deleted_count: deletedCount,
     };
   }
 
@@ -1119,11 +1168,22 @@ export class CustomerServiceDocumentsService {
       ];
     }
 
+    const isDeleted =
+      query.is_deleted === true ||
+      String(query.is_deleted) === 'true' ||
+      query.isDeleted === true ||
+      String(query.isDeleted) === 'true';
+
+    if (isDeleted) {
+      where.deletedAt = { [Op.ne]: null };
+    }
+
     const { rows, count } =
       await this.mutModel.findAndCountAll({
         where,
         limit,
         offset,
+        paranoid: !isDeleted,
         order: [['created_at', 'DESC']],
         include: [
           {

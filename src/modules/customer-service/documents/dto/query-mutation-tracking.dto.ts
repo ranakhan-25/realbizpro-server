@@ -36,4 +36,12 @@ export class QueryMutationTrackingDto {
   @IsOptional()
   @IsString()
   tab?: string;
+
+  @ApiPropertyOptional({ description: 'Filter soft-deleted records only' })
+  @IsOptional()
+  is_deleted?: boolean;
+
+  @ApiPropertyOptional({ description: 'CamelCase alias' })
+  @IsOptional()
+  isDeleted?: boolean;
 }

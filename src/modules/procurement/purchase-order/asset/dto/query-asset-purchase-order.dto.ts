@@ -16,6 +16,7 @@ export class QueryAssetPurchaseOrderDto {
   @IsOptional() @Type(() => Number) @IsInt() added_by_id?: number;
   @IsOptional() @IsEnum(ProcurementAssetPurchaseOrderApprovalLayer) approval_layer?: ProcurementAssetPurchaseOrderApprovalLayer;
   @IsOptional() @IsEnum(ProcurementAssetPurchaseOrderStatus) status?: ProcurementAssetPurchaseOrderStatus;
+  @IsOptional() withDeleted?: boolean | string;
 
   @ApiPropertyOptional({ description: 'Organization ID', example: 1 })
   @IsOptional()
@@ -24,5 +25,4 @@ export class QueryAssetPurchaseOrderDto {
   @ApiPropertyOptional({ description: 'Project UUID or ID' })
   @IsOptional()
   projectId?: string;
-
 }

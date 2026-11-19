@@ -215,12 +215,18 @@ export class CustomerServiceHandoverService {
       else scheduled++;
     }
 
+    const deletedCount = await this.handoverModel.count({
+      where: { ...where, deletedAt: { [Op.ne]: null } },
+      paranoid: false,
+    });
+
     return {
       scheduled_count: scheduled,
       ready_count: ready,
       snags_count: snags,
       completed_count: completed,
       all_count: all.length,
+      deleted_count: deletedCount,
     };
   }
 
@@ -269,10 +275,16 @@ export class CustomerServiceHandoverService {
       ];
     }
 
+    const isDeleted = Boolean((query as any).is_deleted ?? (query as any).isDeleted);
+    if (isDeleted) {
+      where.deletedAt = { [Op.ne]: null };
+    }
+
     const { rows, count } = await this.handoverModel.findAndCountAll({
       where,
       limit,
       offset,
+      paranoid: !isDeleted,
       order: [['created_at', 'DESC']],
       include: [
         {
@@ -442,12 +454,18 @@ export class CustomerServiceHandoverService {
       }
     }
 
+    const deletedCount = await this.snagModel.count({
+      where: { ...where, deletedAt: { [Op.ne]: null } },
+      paranoid: false,
+    });
+
     return {
       active_snags: all.length,
       pending_contractor: pending,
       quality_signed_off: resolved,
       critical_count: critical,
       all_count: all.length,
+      deleted_count: deletedCount,
     };
   }
 
@@ -494,10 +512,16 @@ export class CustomerServiceHandoverService {
       ];
     }
 
+    const isDeleted = Boolean((query as any).is_deleted ?? (query as any).isDeleted);
+    if (isDeleted) {
+      where.deletedAt = { [Op.ne]: null };
+    }
+
     const { rows, count } = await this.snagModel.findAndCountAll({
       where,
       limit,
       offset,
+      paranoid: !isDeleted,
       order: [['created_at', 'DESC']],
     });
 
@@ -677,11 +701,17 @@ export class CustomerServiceHandoverService {
       }
     }
 
+    const deletedCount = await this.handoverModel.count({
+      where: { ...where, deletedAt: { [Op.ne]: null } },
+      paranoid: false,
+    });
+
     return {
       certs_issued: records.length,
       active_dlp: activeDlp,
       keys_signed: keysSigned,
       all_count: records.length,
+      deleted_count: deletedCount,
     };
   }
 
@@ -723,10 +753,16 @@ export class CustomerServiceHandoverService {
       ];
     }
 
+    const isDeleted = Boolean((query as any).is_deleted ?? (query as any).isDeleted);
+    if (isDeleted) {
+      where.deletedAt = { [Op.ne]: null };
+    }
+
     const { rows, count } = await this.handoverModel.findAndCountAll({
       where,
       limit,
       offset,
+      paranoid: !isDeleted,
       order: [['created_at', 'DESC']],
       include: [
         {

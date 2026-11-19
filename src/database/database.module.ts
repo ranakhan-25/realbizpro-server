@@ -92,6 +92,9 @@ import { CsWarrantyDlpClaim } from './models/customer-service/cs_warranty_dlp_cl
 import { CsMaintenanceRequest } from './models/customer-service/cs_maintenance_request.model';
 import { CsOwnersAssociation } from './models/customer-service/cs_owners_association.model';
 import { CsServiceWorkflowRule } from './models/customer-service/cs_service_workflow_rule.model';
+import { CsCommunicationLog } from './models/customer-service/cs_communication_log.model';
+import { CsSiteVisitAppointment } from './models/customer-service/cs_site_visit_appointment.model';
+import { CsCustomerFeedback } from './models/customer-service/cs_customer_feedback.model';
 import { BookingAgreement } from './models/sales_management/sm_booking_agreement.model';
 import { BookingCancellation } from './models/sales_management/sm_booking_cancellation.model';
 import { BookingCommission } from './models/sales_management/sm_booking_commission.model';
@@ -107,6 +110,15 @@ import { MainBooking } from './models/sales_management/sm_main_booking.model';
 import { InstallmentPlan, Installment } from './models/sales_management/sm_pay_installsment_model';
 import { Commission } from './models/sales_management/sm_commission_form_model';
 import { BookingDetails } from './models/sales_management/sm_booking_details_model';
+import { CrInstallmentSetup } from './models/credit-realization/cr_installment_setup.model';
+import { CrSaleAgreement } from './models/credit-realization/cr_sale_agreement.model';
+import { CrInstallmentPlan } from './models/credit-realization/cr_installment_plan.model';
+import { CrInstallmentPayment } from './models/credit-realization/cr_installment_payment.model';
+import { CrPlotDistribution } from './models/credit-realization/cr_plot_distribution.model';
+import { CrRecoveryLog } from './models/credit-realization/cr_recovery_log.model';
+import { CrOfficerAssignment } from './models/credit-realization/cr_officer_assignment.model';
+import { CrFinancialAdjustment } from './models/credit-realization/cr_financial_adjustment.model';
+import { CrWaiverRequest } from './models/credit-realization/cr_waiver_request.model';
 
 @Module({
   imports: [
@@ -203,6 +215,9 @@ import { BookingDetails } from './models/sales_management/sm_booking_details_mod
       CsMaintenanceRequest,
       CsOwnersAssociation,
       CsServiceWorkflowRule,
+      CsCommunicationLog,
+      CsSiteVisitAppointment,
+      CsCustomerFeedback,
       ShareProjectStatusHistory, 
       BookingAgreement,
       BookingCancellation,
@@ -220,7 +235,15 @@ import { BookingDetails } from './models/sales_management/sm_booking_details_mod
       Commission,
       BookingDetails,
       BookingCreate,
-       
+      CrInstallmentSetup,
+      CrSaleAgreement,
+      CrInstallmentPlan,
+      CrInstallmentPayment,
+      CrPlotDistribution,
+      CrRecoveryLog,
+      CrOfficerAssignment,
+      CrFinancialAdjustment,
+      CrWaiverRequest,
     ]),
   ],
   providers: [

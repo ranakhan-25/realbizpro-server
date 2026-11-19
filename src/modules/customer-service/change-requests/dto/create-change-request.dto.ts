@@ -65,11 +65,18 @@ export class CreateChangeRequestDto {
   project?: string;
 
   @ApiPropertyOptional({
-    description: 'Project UUID reference',
+    description: 'Project UUID or ID reference',
   })
   @IsOptional()
-  @IsUUID()
+  @IsString()
   project_id?: string;
+
+  @ApiPropertyOptional({
+    description: 'Project UUID or ID reference (camelCase alias)',
+  })
+  @IsOptional()
+  @IsString()
+  projectId?: string;
 
   @ApiPropertyOptional({
     description:

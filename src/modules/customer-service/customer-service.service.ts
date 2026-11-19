@@ -215,13 +215,16 @@ export class CustomerServiceService {
       where.organizationId = ctx.orgId;
     }
 
-    if (query.project_id) {
-      let pUuid = query.project_id.trim();
+    const rawProjectId = query.project_id || query.projectId;
+    if (rawProjectId && rawProjectId !== 'all') {
+      let pUuid = rawProjectId.trim();
       if (!/^[0-9a-fA-F-]{36}$/.test(pUuid) && !isNaN(Number(pUuid))) {
         const proj = await this.projectModel.findByPk(Number(pUuid), {
           attributes: ['uuid'],
         });
-        if (proj) pUuid = proj.uuid;
+        pUuid = proj ? proj.uuid : '00000000-0000-0000-0000-000000000000';
+      } else if (!/^[0-9a-fA-F-]{36}$/.test(pUuid)) {
+        pUuid = '00000000-0000-0000-0000-000000000000';
       }
       where.projectId = pUuid;
     }
@@ -400,12 +403,16 @@ export class CustomerServiceService {
         extraFilters.push(`AND "organization_id" = :orgId`);
         replacements.orgId = ctx.orgId;
       }
-      let pUuid = projectId ? projectId.trim() : null;
-      if (pUuid && !/^[0-9a-fA-F-]{36}$/.test(pUuid) && !isNaN(Number(pUuid))) {
-        const proj = await this.projectModel.findByPk(Number(pUuid), {
-          attributes: ['uuid'],
-        });
-        if (proj) pUuid = proj.uuid;
+      let pUuid = projectId && projectId !== 'all' ? projectId.trim() : null;
+      if (pUuid) {
+        if (!/^[0-9a-fA-F-]{36}$/.test(pUuid) && !isNaN(Number(pUuid))) {
+          const proj = await this.projectModel.findByPk(Number(pUuid), {
+            attributes: ['uuid'],
+          });
+          pUuid = proj ? proj.uuid : '00000000-0000-0000-0000-000000000000';
+        } else if (!/^[0-9a-fA-F-]{36}$/.test(pUuid)) {
+          pUuid = '00000000-0000-0000-0000-000000000000';
+        }
       }
       if (pUuid) {
         extraFilters.push(`AND "project_id" = :projectId`);
@@ -654,7 +661,7 @@ export class CustomerServiceService {
         customerAccountId:
           dto.customer_account_id,
         organizationId: ctx.orgId || undefined,
-        projectId: dto.project_id || undefined,
+        projectId: dto.project_id || dto.projectId || undefined,
         createdBy: ctx.userId,
       });
 
@@ -748,8 +755,8 @@ export class CustomerServiceService {
     if (dto.customer_account_id !== undefined)
       updateData.customerAccountId =
         dto.customer_account_id;
-    if (dto.project_id !== undefined)
-      updateData.projectId = dto.project_id;
+    if (dto.project_id !== undefined || dto.projectId !== undefined)
+      updateData.projectId = dto.project_id || dto.projectId;
     updateData.updatedBy = ctx.userId;
 
     await profile.update(updateData);
