@@ -1,7 +1,12 @@
-const {
-  Project,
-  SyntaxKind,
-} = require('ts-morph');
+let Project, SyntaxKind;
+try {
+  const tsMorph = require('ts-morph');
+  Project = tsMorph.Project;
+  SyntaxKind = tsMorph.SyntaxKind;
+} catch (e) {
+  console.warn('⚠️ ts-morph is not installed (production/CI mode). Skipping model types generation as types are already committed.');
+  process.exit(0);
+}
 const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
