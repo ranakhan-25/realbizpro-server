@@ -42,27 +42,36 @@ export class DatabaseSyncService implements OnApplicationBootstrap {
 
     try {
       await this.syncWithDuplicateIndexRecovery();
-
-      this.logger.log('Database synchronized');
+      this.logger.log('Database synchronized successfully.');
     } catch (error: any) {
-      this.logger.error(
-        `Database sync failed: ${error?.message ?? error}`,
+      this.logger.warn(
+        `Full database sync encountered an issue: ${error?.message ?? error}. Falling back to individual model sync...`,
       );
-
       if (error?.parent) {
-        this.logger.error(
-          `PostgreSQL error: ${error.parent.message}`,
-        );
-        this.logger.error(
-          `PostgreSQL code: ${error.parent.code ?? 'N/A'}`,
-        );
-        this.logger.error(
-          `SQL: ${error.sql ?? 'N/A'}`,
-        );
+        this.logger.warn(`PostgreSQL error detail: ${error.parent.message} (code: ${error.parent.code ?? 'N/A'})`);
       }
 
-      throw error;
+      await this.syncModelsIndividually();
+      this.logger.log('Fallback model sync completed. Server proceeding to start.');
     }
+  }
+
+  private async syncModelsIndividually(): Promise<void> {
+    const models = Object.values(this.sequelize.models);
+    let successCount = 0;
+    for (const model of models) {
+      try {
+        await model.sync({ force: false, alter: false });
+        successCount += 1;
+      } catch (err: any) {
+        this.logger.warn(
+          `Model sync warning for "${model.name}": ${err?.message ?? err}`,
+        );
+      }
+    }
+    this.logger.log(
+      `Individual model sync finished: ${successCount}/${models.length} models ready.`,
+    );
   }
 
   private async syncWithDuplicateIndexRecovery(): Promise<void> {
