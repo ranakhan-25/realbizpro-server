@@ -139,7 +139,7 @@ export class CustomerServiceTicketsService {
       where.projectId = projectId;
     }
 
-    const [totalTickets, openTickets, inProgress, escalated, resolved, overdue] = await Promise.all([
+    const [totalTickets, openTickets, inProgress, escalated, resolved, overdue, deletedTickets] = await Promise.all([
       this.ticketModel.count({ where }),
       this.ticketModel.count({ where: { ...where, status: TicketStatus.OPEN } }),
       this.ticketModel.count({ where: { ...where, status: TicketStatus.IN_PROGRESS } }),
@@ -157,6 +157,13 @@ export class CustomerServiceTicketsService {
           ],
         },
       }),
+      this.ticketModel.count({
+        where: {
+          ...where,
+          deletedAt: { [Op.ne]: null },
+        },
+        paranoid: false,
+      }),
     ]);
 
     const resolvedRate = totalTickets > 0 ? Math.round((resolved / totalTickets) * 100) : 0;
@@ -170,6 +177,8 @@ export class CustomerServiceTicketsService {
       overdue_tickets: overdue,
       resolved_rate: resolvedRate,
       all_count: totalTickets,
+      deleted_tickets: deletedTickets,
+      deleted_count: deletedTickets,
     };
   }
 
@@ -248,11 +257,23 @@ export class CustomerServiceTicketsService {
       ];
     }
 
+    const isDeleted =
+      query.is_deleted === true ||
+      String(query.is_deleted) === 'true' ||
+      query.isDeleted === true ||
+      String(query.isDeleted) === 'true' ||
+      query.tab === 'deleted';
+
+    if (isDeleted) {
+      where.deletedAt = { [Op.ne]: null };
+    }
+
     const { rows, count } = await this.ticketModel.findAndCountAll({
       where,
       limit,
       offset,
       order: [['created_at', 'DESC']],
+      paranoid: !isDeleted,
       include: [
         {
           model: this.projectModel,

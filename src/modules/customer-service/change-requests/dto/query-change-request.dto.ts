@@ -57,6 +57,13 @@ export class QueryChangeRequestDto {
   project_id?: string;
 
   @ApiPropertyOptional({
+    description: 'Filter by Project UUID or ID (camelCase alias)',
+  })
+  @IsOptional()
+  @IsString()
+  projectId?: string;
+
+  @ApiPropertyOptional({
     description:
       'Search across request code, customer name, unit, new buyer name, or project',
   })

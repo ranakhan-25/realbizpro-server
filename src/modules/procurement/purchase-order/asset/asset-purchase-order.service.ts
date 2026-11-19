@@ -21,7 +21,7 @@ import { UpdateAssetPurchaseOrderDto } from './dto/update-asset-purchase-order.d
 
 const includes = [
   { association: 'company', attributes: ['uuid', 'name'], required: false },
-  { association: 'supplier', attributes: ['uuid', 'supplierCode', 'supplierName'] },
+  { association: 'supplier', attributes: ['uuid', 'supplierCode', 'supplierName'], required: false },
   { association: 'projectType', attributes: ['uuid', 'code', 'name'], required: false },
   { association: 'project', attributes: ['uuid', 'code', 'name'], required: false },
   { association: 'titleOfWork', attributes: ['uuid', 'code', 'name'], required: false },
@@ -33,7 +33,7 @@ const includes = [
   { association: 'items', include: [
     { association: 'item', attributes: ['uuid', 'item_code', 'name'], required: false },
     { association: 'unitRelation', attributes: ['uuid', 'code', 'name'], required: false },
-  ] },
+  ], required: false },
 ];
 
 @Injectable()
@@ -112,8 +112,9 @@ export class AssetPurchaseOrderService {
     });
   }
 
-  async findAll(query: QueryAssetPurchaseOrderDto) {
-    const { page = 1, limit = 10, search, date_from, date_to, ...filters } = query;
+  async findAll(query: QueryAssetPurchaseOrderDto & { withDeleted?: boolean | string }) {
+    const { page = 1, limit = 10, search, date_from, date_to, withDeleted = false, ...filters } = query as any;
+    const isWithDeleted = String(withDeleted) === 'true' || withDeleted === true;
     const where: any = {};
     if ((query as any)?.orgId) where.orgId = (query as any).orgId;
     if ((query as any)?.projectId) where.projectId = (query as any).projectId;
@@ -122,7 +123,7 @@ export class AssetPurchaseOrderService {
     else if (date_from) where.date = { [Op.gte]: date_from };
     else if (date_to) where.date = { [Op.lte]: date_to };
     if (search) where[Op.or] = [{ code: { [Op.like]: `%${search}%` } }, { reference: { [Op.like]: `%${search}%` } }];
-    const { rows, count } = await this.orderModel.findAndCountAll({ where, include: includes, distinct: true, limit, offset: (page - 1) * limit, order: [['createdAt', 'DESC']] });
+    const { rows, count } = await this.orderModel.findAndCountAll({ where, include: includes, distinct: true, limit, offset: (page - 1) * limit, order: [['createdAt', 'DESC']], paranoid: !isWithDeleted });
     return { data: rows, meta: { total: count, page, limit, totalPages: Math.ceil(count / limit) || 1 } };
   }
 

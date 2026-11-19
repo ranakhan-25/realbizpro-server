@@ -44,4 +44,12 @@ export class QueryDlpClaimDto {
   @IsOptional()
   @IsEnum(DlpClaimStatus)
   status?: DlpClaimStatus;
+
+  @ApiPropertyOptional({ description: 'Filter soft-deleted DLP claims' })
+  @IsOptional()
+  is_deleted?: boolean;
+
+  @ApiPropertyOptional({ description: 'CamelCase alias' })
+  @IsOptional()
+  isDeleted?: boolean;
 }

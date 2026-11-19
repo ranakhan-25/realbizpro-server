@@ -26,7 +26,14 @@ export class ProcurementSubcontractPackageService {
       { name: { [Op.iLike]: `%${query.search}%` } },
       { unit: { [Op.iLike]: `%${query.search}%` } },
     ];
-    const { rows, count } = await this.model.findAndCountAll({ where, limit, offset: (page - 1) * limit, order: [['name', 'ASC']] });
+    let paranoid = true;
+    if (query.deleted_only === 'true' || query.deleted_only === true) {
+      where.deletedAt = { [Op.ne]: null };
+      paranoid = false;
+    } else if (query.withDeleted === 'true' || query.withDeleted === true) {
+      paranoid = false;
+    }
+    const { rows, count } = await this.model.findAndCountAll({ where, paranoid, limit, offset: (page - 1) * limit, order: [['name', 'ASC']] });
     return { data: rows, meta: { page, limit, total: count, totalPages: Math.ceil(count / limit) } };
   }
 

@@ -30,4 +30,12 @@ export class QueryOwnersAssociationDto {
   @IsOptional()
   @IsEnum(AssociationGovernanceStatus)
   handover_status?: AssociationGovernanceStatus;
+
+  @ApiPropertyOptional({ description: 'Filter soft-deleted association records' })
+  @IsOptional()
+  is_deleted?: boolean;
+
+  @ApiPropertyOptional({ description: 'CamelCase alias' })
+  @IsOptional()
+  isDeleted?: boolean;
 }

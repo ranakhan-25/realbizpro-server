@@ -113,6 +113,13 @@ export class CreateCustomerProfileDto {
   project_id?: string;
 
   @ApiPropertyOptional({
+    description: 'Project UUID reference (camelCase alias)',
+  })
+  @IsOptional()
+  @IsString()
+  projectId?: string;
+
+  @ApiPropertyOptional({
     description:
       'Optional CRM Party ID reference',
   })

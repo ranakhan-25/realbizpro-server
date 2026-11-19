@@ -12,6 +12,7 @@ export interface BookingStatsData {
   total_collected_amount_formatted: string;
   total_outstanding_due: number;
   total_outstanding_due_formatted: string;
+  deleted_count?: number;
 }
 
 export interface BookingListItem {

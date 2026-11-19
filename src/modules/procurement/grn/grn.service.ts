@@ -22,7 +22,7 @@ import { UpdateGrnDto, UpdateGrnItemDto } from './dto/update-grn.dto';
 
 const includes = [
   { association: 'company', attributes: ['uuid', 'name'], required: false },
-  { association: 'supplier', attributes: ['uuid', 'supplierCode', 'supplierName'] },
+  { association: 'supplier', attributes: ['uuid', 'supplierCode', 'supplierName'], required: false },
   { association: 'projectType', attributes: ['uuid', 'code', 'name'], required: false },
   { association: 'project', attributes: ['uuid', 'code', 'name'], required: false },
   { association: 'titleOfWork', attributes: ['uuid', 'code', 'name'], required: false },
@@ -36,7 +36,7 @@ const includes = [
     { association: 'item', attributes: ['uuid', 'item_code', 'name'], required: false },
     { association: 'unitRelation', attributes: ['uuid', 'code', 'name'], required: false },
     { association: 'purchaseOrderItem', attributes: ['uuid', 'item_code', 'quantity', 'rate'], required: false },
-  ] },
+  ], required: false },
 ];
 
 @Injectable()
@@ -106,7 +106,7 @@ export class GrnService {
   }
 
   async findAll(query: QueryGrnDto) {
-    const { page = 1, limit = 10, search, date_from, date_to, already_billed, ...filters } = query;
+    const { page = 1, limit = 10, search, date_from, date_to, already_billed, withDeleted, deleted_only, ...filters } = query as any;
     const where: any = {};
     if ((query as any)?.orgId) where.orgId = (query as any).orgId;
     if ((query as any)?.projectId) where.projectId = (query as any).projectId;
@@ -114,9 +114,18 @@ export class GrnService {
     if (date_from && date_to) where.date = { [Op.between]: [date_from, date_to] };
     else if (date_from) where.date = { [Op.gte]: date_from };
     else if (date_to) where.date = { [Op.lte]: date_to };
-    if (already_billed !== undefined) where.already_billed = already_billed === 'true';
+    if (already_billed !== undefined) where.already_billed = already_billed === 'true' || already_billed === true;
     if (search) where[Op.or] = [{ code: { [Op.like]: `%${search}%` } }, { reference: { [Op.like]: `%${search}%` } }];
-    const { rows, count } = await this.grnModel.findAndCountAll({ where, include: includes, distinct: true, limit, offset: (page - 1) * limit, order: [['createdAt', 'DESC']] });
+
+    let paranoid = true;
+    if (deleted_only === 'true' || deleted_only === true) {
+      where.deletedAt = { [Op.ne]: null };
+      paranoid = false;
+    } else if (withDeleted === 'true' || withDeleted === true) {
+      paranoid = false;
+    }
+
+    const { rows, count } = await this.grnModel.findAndCountAll({ where, paranoid, include: includes, distinct: true, limit, offset: (page - 1) * limit, order: [['createdAt', 'DESC']] });
     return { data: rows, meta: { total: count, page, limit, totalPages: Math.ceil(count / limit) || 1 } };
   }
 

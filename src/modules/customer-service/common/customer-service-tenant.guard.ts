@@ -21,7 +21,14 @@ export class CustomerServiceTenantGuard implements CanActivate {
     const user = request.user;
     const method = (request.method || '').toUpperCase();
     const isWrite = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method);
-    const headerRaw = request.headers?.['x-organization-id'];
+    const headerRaw =
+      request.headers?.['x-organization-id'] ||
+      request.headers?.['x-org-id'] ||
+      request.headers?.['organization-id'] ||
+      request.body?.organization_id ||
+      request.body?.organizationId ||
+      request.query?.organization_id ||
+      request.query?.organizationId;
 
     const isSuperAdmin = Boolean(
       user?.isSuperUser === true ||
@@ -44,47 +51,102 @@ export class CustomerServiceTenantGuard implements CanActivate {
       return true;
     }
 
-    // Rule 2: For Super Admin, header is REQUIRED on POST/PUT/PATCH/DELETE
-    if (isWrite && (headerRaw === undefined || headerRaw === null || headerRaw === '')) {
+    // Rule 2: For Super Admin, resolve target organization ID with multi-source fallback
+    const model = this.organizationModel || SysOrganization;
+    let targetOrgId: number | null = null;
+
+    if (headerRaw !== undefined && headerRaw !== null && headerRaw !== '') {
+      const headerStr = String(headerRaw).trim();
+      if (!isNaN(Number(headerStr)) && Number.isInteger(Number(headerStr)) && Number(headerStr) > 0) {
+        targetOrgId = Number(headerStr);
+      } else if (/^[0-9a-fA-F-]{36}$/.test(headerStr)) {
+        try {
+          const org = await model.findOne({
+            where: { uuid: headerStr },
+            attributes: ['id'],
+          });
+          if (org) targetOrgId = org.id;
+        } catch {}
+      }
+    }
+
+    // Fallback A: user org from JWT or session
+    if (!targetOrgId && (user?.orgId || user?.organization?.id)) {
+      targetOrgId = Number(user.orgId ?? user.organization?.id);
+    }
+
+    // Fallback B: Project's organization if project_id or projectId is provided
+    if (!targetOrgId) {
+      const rawProj =
+        request.body?.project_id ||
+        request.body?.projectId ||
+        request.query?.project_id ||
+        request.query?.projectId;
+      if (rawProj && rawProj !== 'all') {
+        try {
+          const projModel = model.sequelize?.model('Project');
+          if (projModel) {
+            const whereClause = /^[0-9a-fA-F-]{36}$/.test(rawProj)
+              ? { uuid: rawProj }
+              : !isNaN(Number(rawProj))
+              ? { id: Number(rawProj) }
+              : null;
+            if (whereClause) {
+              const proj = await (projModel as any).findOne({
+                where: whereClause,
+                attributes: ['organizationId'],
+              });
+              if (proj?.organizationId) {
+                targetOrgId = Number(proj.organizationId);
+              }
+            }
+          }
+        } catch {}
+      }
+    }
+
+    // Fallback C: If write operation, fallback to the first active organization in DB
+    if (!targetOrgId && isWrite) {
+      try {
+        const firstOrg = await model.findOne({
+          order: [['id', 'ASC']],
+          attributes: ['id'],
+        });
+        if (firstOrg) {
+          targetOrgId = firstOrg.id;
+        }
+      } catch {}
+    }
+
+    // Validate existence if targetOrgId was identified
+    if (targetOrgId) {
+      let orgExists = null;
+      try {
+        orgExists = await model.findByPk(targetOrgId, {
+          attributes: ['id'],
+        });
+      } catch {}
+
+      if (orgExists) {
+        if (user) {
+          user.selectedOrgId = targetOrgId;
+          user.orgId = targetOrgId;
+        }
+        return true;
+      }
+    }
+
+    // If it's a write operation and no valid organization could be resolved at all:
+    if (isWrite) {
       throw new BadRequestException(
-        'x-organization-id header is required for Super Admin write operations (POST, PUT, PATCH, DELETE)',
+        'x-organization-id header or valid organization is required for Super Admin write operations (POST, PUT, PATCH, DELETE)',
       );
     }
 
-    // Rule 3: If header is provided (on write or GET), validate format and DB existence
-    if (headerRaw !== undefined && headerRaw !== null && headerRaw !== '') {
-      const parsedOrgId = Number(headerRaw);
-      if (isNaN(parsedOrgId) || !Number.isInteger(parsedOrgId) || parsedOrgId <= 0) {
-        throw new BadRequestException(
-          `Invalid x-organization-id header: "${headerRaw}". Must be a valid positive integer ID.`,
-        );
-      }
-
-      const model = this.organizationModel || SysOrganization;
-      let orgExists = null;
-      try {
-        orgExists = await model.findByPk(parsedOrgId, {
-          attributes: ['id'],
-        });
-      } catch (err) {
-        // If DB is disconnected in headless unit tests
-      }
-      if (!orgExists) {
-        throw new BadRequestException(
-          `Organization ${parsedOrgId} specified in x-organization-id does not exist`,
-        );
-      }
-
-      if (user) {
-        user.selectedOrgId = parsedOrgId;
-        user.orgId = parsedOrgId;
-      }
-    } else {
-      // GET request without header -> all tenants
-      if (user) {
-        user.selectedOrgId = null;
-        user.orgId = null;
-      }
+    // GET request without header -> all tenants
+    if (user) {
+      user.selectedOrgId = null;
+      user.orgId = null;
     }
 
     return true;

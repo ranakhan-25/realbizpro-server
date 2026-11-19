@@ -40,4 +40,12 @@ export class QueryServiceTicketDto {
   @IsOptional()
   @IsEnum(TicketStatus)
   status?: TicketStatus;
+
+  @ApiPropertyOptional({ description: 'Filter soft-deleted tickets only' })
+  @IsOptional()
+  is_deleted?: boolean;
+
+  @ApiPropertyOptional({ description: 'CamelCase alias' })
+  @IsOptional()
+  isDeleted?: boolean;
 }

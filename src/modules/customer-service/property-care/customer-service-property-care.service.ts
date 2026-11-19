@@ -256,11 +256,18 @@ export class CustomerServicePropertyCareService {
       },
     });
 
+    const deletedCount = await this.dlpClaimModel.count({
+      where: { ...where, deletedAt: { [Op.ne]: null } },
+      paranoid: false,
+    });
+
     return {
       totalClaims,
       inProgressClaims,
       resolvedClaims,
       criticalClaims,
+      deletedClaims: deletedCount,
+      deleted_count: deletedCount,
     };
   }
 
@@ -305,10 +312,16 @@ export class CustomerServicePropertyCareService {
       ];
     }
 
+    const isDeleted = Boolean((query as any).is_deleted ?? (query as any).isDeleted);
+    if (isDeleted) {
+      where.deletedAt = { [Op.ne]: null };
+    }
+
     const { count, rows } = await this.dlpClaimModel.findAndCountAll({
       where,
       limit,
       offset,
+      paranoid: !isDeleted,
       order: [['created_at', 'DESC']],
       include: [
         {
@@ -516,11 +529,18 @@ export class CustomerServicePropertyCareService {
 
     const totalCostSum = (await this.maintenanceModel.sum('costEstimate', { where })) || 0;
 
+    const deletedCount = await this.maintenanceModel.count({
+      where: { ...where, deletedAt: { [Op.ne]: null } },
+      paranoid: false,
+    });
+
     return {
       totalScheduled,
       inProgress,
       completed,
       totalCostEstimate: totalCostSum,
+      deletedRequests: deletedCount,
+      deleted_count: deletedCount,
     };
   }
 
@@ -561,10 +581,16 @@ export class CustomerServicePropertyCareService {
       ];
     }
 
+    const isDeleted = Boolean((query as any).is_deleted ?? (query as any).isDeleted);
+    if (isDeleted) {
+      where.deletedAt = { [Op.ne]: null };
+    }
+
     const { count, rows } = await this.maintenanceModel.findAndCountAll({
       where,
       limit,
       offset,
+      paranoid: !isDeleted,
       order: [['created_at', 'DESC']],
       include: [
         {
@@ -763,12 +789,19 @@ export class CustomerServicePropertyCareService {
 
     const avgServiceCharge = Math.round(Number(avgChargeResult[0]?.avg_charge) || 0);
 
+    const deletedCount = await this.ownersAssociationModel.count({
+      where: { ...where, deletedAt: { [Op.ne]: null } },
+      paranoid: false,
+    });
+
     return {
       totalAssociations,
       handedOverCount,
       developerManagingCount,
       adHocCount,
       avgServiceCharge,
+      deletedAssociations: deletedCount,
+      deleted_count: deletedCount,
     };
   }
 
@@ -806,10 +839,16 @@ export class CustomerServicePropertyCareService {
       ];
     }
 
+    const isDeleted = Boolean((query as any).is_deleted ?? (query as any).isDeleted);
+    if (isDeleted) {
+      where.deletedAt = { [Op.ne]: null };
+    }
+
     const { count, rows } = await this.ownersAssociationModel.findAndCountAll({
       where,
       limit,
       offset,
+      paranoid: !isDeleted,
       order: [['created_at', 'DESC']],
       include: [
         {

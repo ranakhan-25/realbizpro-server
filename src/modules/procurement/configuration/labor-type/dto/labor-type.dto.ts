@@ -24,4 +24,6 @@ export class QueryLaborTypeDto {
   @ApiPropertyOptional({ enum: LaborTypeStatus }) @IsOptional() @IsEnum(LaborTypeStatus) status?: LaborTypeStatus;
   @ApiPropertyOptional({ default: 1 }) @IsOptional() @Type(() => Number) page?: number;
   @ApiPropertyOptional({ default: 10 }) @IsOptional() @Type(() => Number) limit?: number;
+  @ApiPropertyOptional() @IsOptional() withDeleted?: boolean | string;
+  @ApiPropertyOptional() @IsOptional() deleted_only?: boolean | string;
 }
