@@ -33,13 +33,13 @@ export class LeadTransferLog extends BaseModel<
   })
   declare leadId: number;
   @Column({
-    type: DataType.STRING,
+    type: DataType.UUID,
     allowNull: false,
     field: 'transferred_from',
   })
   declare transferredFrom: string;
   @Column({
-    type: DataType.STRING,
+    type: DataType.UUID,
     allowNull: false,
     field: 'transferred_to',
   })
@@ -57,7 +57,7 @@ export class LeadTransferLog extends BaseModel<
   })
   declare transferDate: Date;
   @Column({
-    type: DataType.STRING,
+    type: DataType.UUID,
     allowNull: true,
     field: 'approved_by',
   })

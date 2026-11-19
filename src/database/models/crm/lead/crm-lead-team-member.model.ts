@@ -12,7 +12,7 @@ export class LeadTeamMember extends BaseModel<LeadTeamMemberAttributes, LeadTeam
   @Column({ type: DataType.BIGINT, allowNull: false, field: 'team_id' }) declare teamId: number;
 
   @ForeignKey(() => SysUser)
-  @Column({ type: DataType.STRING, allowNull: false, field: 'user_id' }) declare userId: string;
+  @Column({ type: DataType.UUID, allowNull: false, field: 'user_id' }) declare userId: string;
 
   @Column({ type: DataType.STRING(100), allowNull: true, field: 'role_in_team' }) declare roleInTeam?: string;
   @Column({ type: DataType.BOOLEAN, allowNull: true, defaultValue: true, field: 'is_active' }) declare isActive?: boolean;

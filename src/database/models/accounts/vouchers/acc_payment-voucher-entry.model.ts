@@ -24,7 +24,7 @@ export class PaymentVoucherEntry extends Model<PaymentVoucherEntry> {
   declare paymentVoucherId: string;
 
   // ================= Table Data =================
-  @Column({ type: DataType.STRING, allowNull: true })
+  @Column({ type: DataType.UUID, allowNull: true })
   declare projectId: string;
 
   @Column({ type: DataType.STRING, allowNull: true })

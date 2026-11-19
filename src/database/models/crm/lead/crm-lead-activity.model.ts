@@ -11,7 +11,7 @@ import type { LeadActivityAttributes, LeadActivityCreationAttributes } from '../
 export class LeadActivity extends BaseModel<LeadActivityAttributes, LeadActivityCreationAttributes> {
   @ForeignKey(() => Lead)
   @Column({ type: DataType.BIGINT, allowNull: false, field: 'lead_id' }) declare leadId: number;
-  @Column({ type: DataType.STRING(50), allowNull: false, field: 'activity_type' }) declare activityType: string;
+  @Column({ type: DataType.UUID(50), allowNull: false, field: 'activity_type' }) declare activityType: string;
   @Column({ type: DataType.DATE, allowNull: false, field: 'activity_date' }) declare activityDate: Date;
   @Column({ type: DataType.TEXT, allowNull: false }) declare summary: string;
   @Column({ type: DataType.TEXT, allowNull: true, field: 'discussion_points' }) declare discussionPoints?: string;
@@ -21,7 +21,7 @@ export class LeadActivity extends BaseModel<LeadActivityAttributes, LeadActivity
   @ForeignKey(() => LeadVisitStatus)
   @Column({ type: DataType.BIGINT, allowNull: true, field: 'visit_status_id' }) declare visitStatusId?: number;
   @Column({ type: DataType.TEXT, allowNull: true }) declare feedback?: string;
-  @Column({ type: DataType.STRING, allowNull: true, field: 'conducted_by' }) declare conductedBy?: string;
+  @Column({ type: DataType.UUID, allowNull: true, field: 'conducted_by' }) declare conductedBy?: string;
   @ForeignKey(() => SysOrganization)
   @Column({
     type: DataType.BIGINT,

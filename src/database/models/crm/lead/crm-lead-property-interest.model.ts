@@ -12,7 +12,7 @@ export class LeadPropertyInterest extends BaseModel<LeadPropertyInterestAttribut
   @Column({ type: DataType.BIGINT, allowNull: false, field: 'lead_id' }) declare leadId: number;
   @Column({ type: DataType.STRING(255), allowNull: true, field: 'project_name' }) declare projectName?: string;
   @ForeignKey(() => Project)
-  @Column({ type: DataType.STRING, allowNull: true, field: 'project_id' }) declare projectId?: string;
+  @Column({ type: DataType.UUID, allowNull: true, field: 'project_id' }) declare projectId?: string;
   @Column({ type: DataType.STRING(150), allowNull: true, field: 'plot_flat_no' }) declare plotFlatNo?: string;
   @Column({ type: DataType.STRING(100), allowNull: true }) declare size?: string;
   @Column({ type: DataType.DECIMAL(15, 2), allowNull: true, field: 'quoted_price' }) declare quotedPrice?: number;

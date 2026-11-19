@@ -37,7 +37,7 @@ export class ServiceWorkRequisitionItem
 
   @ForeignKey(() => ServiceWorkRequisition)
   @Column({
-    type: DataType.STRING,
+    type: DataType.UUID,
     allowNull: false,
   })
   declare serviceWorkRequisitionId: string;

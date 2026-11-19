@@ -32,13 +32,13 @@ import type { LeadAttributes, LeadCreationAttributes } from '../../../types/lead
 
 @Table({ tableName: 'crm_leads', timestamps: true, paranoid: true, underscored: true })
 export class Lead extends BaseModel<LeadAttributes, LeadCreationAttributes> {
-  @Column({ type: DataType.STRING(50), allowNull: false, field: 'lead_code' })
+  @Column({ type: DataType.UUID(50), allowNull: false, field: 'lead_code' })
   declare leadCode: string;
 
-  @Column({ type: DataType.STRING(255), allowNull: false, field: 'client_name' })
+  @Column({ type: DataType.UUID(255), allowNull: false, field: 'client_name' })
   declare clientName: string;
 
-  @Column({ type: DataType.STRING(30), allowNull: false })
+  @Column({ type: DataType.UUID(30), allowNull: false })
   declare phone: string;
 
   @Column({ type: DataType.STRING(30), allowNull: true, field: 'alternate_phone' })
@@ -83,7 +83,7 @@ export class Lead extends BaseModel<LeadAttributes, LeadCreationAttributes> {
   @Column({ type: DataType.TEXT, allowNull: true, field: 'permanent_address' })
   declare permanentAddress?: string;
 
-  @Column({ type: DataType.STRING, allowNull: true, field: 'assigned_to' })
+  @Column({ type: DataType.UUID, allowNull: true, field: 'assigned_to' })
   declare assignedTo?: string;
 
   @Column({ type: DataType.STRING, allowNull: true })
@@ -101,7 +101,7 @@ export class Lead extends BaseModel<LeadAttributes, LeadCreationAttributes> {
   @Column({ type: DataType.DATEONLY, allowNull: false, field: 'lead_date' })
   declare leadDate: string;
 
-  @Column({ type: DataType.STRING, allowNull: true, field: 'credit_officer_id' })
+  @Column({ type: DataType.UUID, allowNull: true, field: 'credit_officer_id' })
   declare creditOfficerId?: string;
 
   @Column({ type: DataType.DATEONLY, allowNull: true, field: 'birth_date' })
@@ -153,7 +153,7 @@ export class Lead extends BaseModel<LeadAttributes, LeadCreationAttributes> {
   declare deletedBy?: string | null;
 
   @ForeignKey(() => Project)
-  @Column({ type: DataType.STRING, allowNull: true, field: 'project_id' })
+  @Column({ type: DataType.UUID, allowNull: true, field: 'project_id' })
   declare projectId?: string;
 
   @BelongsTo(() => LeadCategory, { foreignKey: 'leadCategoryId', targetKey: 'id', as: 'category' })
