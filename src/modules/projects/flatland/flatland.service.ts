@@ -55,7 +55,7 @@ export class FlatLandService {
       if (!project) {
         project = await this.projectModel.create(
           {
-            code: 'PRJ-MAIN',
+            code: 'PRJ-' + Math.floor(100000 + Math.random() * 900000),
             name: dto.projectName || 'Main Real Estate Project',
             status: 'ACTIVE',
           } as any,
