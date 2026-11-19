@@ -40,6 +40,15 @@ export class CrRecoveryLog extends BaseModel<CrRecoveryLogAttributes, CrRecovery
   @Column({ type: DataType.DATEONLY, allowNull: true })
   next_action_date?: string;
 
+  @Column({ type: DataType.STRING, allowNull: true })
+  geo_location?: string;
+
+  @Column({ type: DataType.TEXT, allowNull: true })
+  visit_photos?: string;
+
+  @Column({ type: DataType.STRING, allowNull: true })
+  visit_outcome?: string;
+
   @Column({ type: DataType.STRING, allowNull: true, field: 'created_by' })
   declare createdBy?: string;
 

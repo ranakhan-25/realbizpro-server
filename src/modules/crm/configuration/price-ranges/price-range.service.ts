@@ -55,13 +55,10 @@ export class PriceRangeService {
   async findOne(uuid: string, currentUser?: any) {
     const where: any = { uuid };
     if (currentUser?.orgId) where.orgId = currentUser.orgId;
-    const row = await this.ranges.findOne({
-      where,
-      include: [{ association: 'leads', attributes: ['uuid', 'leadCode', 'clientName'], required: false }],
-    });
+    const row = await this.ranges.findOne({ where });
     if (!row) throw new NotFoundException(`Price range ${uuid} not found`);
     const data = this.toPublicRange(row);
-    data.leads = (row.leads ?? []).map(lead => ({ uuid: lead.uuid, leadCode: lead.leadCode, clientName: lead.clientName }));
+    data.leads = [];
     return data;
   }
 

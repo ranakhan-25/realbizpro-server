@@ -77,10 +77,27 @@ export class EquipmentHireService {
     for (const row of reserved as any[]) reservedQty.set(row.requisition_item_id, (reservedQty.get(row.requisition_item_id) ?? 0) + Number(row.quantity));
     const approvedEquipmentRequisitions = requisitions.map((req: any) => ({ ...req.toJSON(), items: (req.items ?? []).map((item: any) => ({ ...item.toJSON(), open_qty: Math.max(0, Number(item.demand_qty) - (reservedQty.get(item.uuid) ?? 0)) })).filter((item: any) => item.open_qty > 0) })).filter((req: any) => req.items.length > 0);
     const [orderStatuses, billStatuses, eligibleHireOrders] = await Promise.all([
-      Promise.resolve(Object.values(HireOrderStatus)), Promise.resolve(['pending', 'approved', 'paid', 'partially_paid', 'cancelled']),
+      Promise.resolve(Object.values(HireOrderStatus)),
+      Promise.resolve(['pending', 'approved', 'paid', 'partially_paid', 'cancelled']),
       this.orders.findAll({ where: { status: { [Op.in]: [HireOrderStatus.ACTIVE, HireOrderStatus.CLOSED] } }, attributes: ['uuid', 'hire_no', 'project_id', 'vendor_id', 'hire_from', 'hire_to', 'status'], include: [{ association: 'project', attributes: ['uuid', 'name'], required: false }, { association: 'vendor', attributes: ['uuid', 'supplierName'], required: false }] }),
     ]);
-    return { projects, vendors, sites, equipment, units, approvedEquipmentRequisitions, eligibleHireOrders, users, hireModes: Object.values(HireOrderMode), orderStatuses, billStatuses, chargedBy: ['hour', 'day', 'week', 'month', 'shift', 'fixed'] };
+    return {
+      projects,
+      vendors,
+      sites,
+      equipment,
+      assets: equipment,
+      units,
+      approvedEquipmentRequisitions,
+      eligibleHireOrders,
+      users,
+      hireModes: Object.values(HireOrderMode),
+      modes: Object.values(HireOrderMode),
+      orderStatuses,
+      billStatuses,
+      statuses: Object.values(HireOrderStatus),
+      chargedBy: ['hour', 'day', 'week', 'month', 'shift', 'fixed'],
+    };
   }
 
   private async list(model: any, query: QueryHireOrderDto | QueryHireMovementDto, numberField: string, include: any[], includeDeleted = false) {

@@ -49,10 +49,7 @@ export class OfferService {
   async findOne(uuid: string, currentUser?: any) {
     const where: any = { uuid };
     if (currentUser?.orgId) where.orgId = currentUser.orgId;
-    const row = await this.offers.findOne({
-      where,
-      include: [{ association: 'leads', attributes: ['uuid', 'leadCode', 'clientName'], required: false }],
-    });
+    const row = await this.offers.findOne({ where });
     if (!row) throw new NotFoundException(`Offer ${uuid} not found`);
     return this.toPublicOffer(row);
   }

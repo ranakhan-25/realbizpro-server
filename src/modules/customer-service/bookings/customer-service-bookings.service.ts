@@ -224,7 +224,7 @@ export class CustomerServiceBookingsService {
         if (resolved.uuid) {
           replacements.projUuid = resolved.uuid;
           conds.push(
-            'b."projectId"::text = :projUuid',
+            'b.project_id::text = :projUuid',
           );
           conds.push(
             'h.project_id::text = :projUuid',
@@ -258,7 +258,8 @@ export class CustomerServiceBookingsService {
           COUNT(*) FILTER (WHERE COALESCE(h.handover_status, 'Under Construction') = 'Under Construction')::int AS under_construction,
           COALESCE(SUM(b."grandTotal"), 0)::numeric AS total_portfolio_valuation,
           COALESCE(SUM(b."paid"), 0)::numeric AS total_collected_amount,
-          COALESCE(SUM(b."due"), 0)::numeric AS total_outstanding_due
+          COALESCE(SUM(b."due"), 0)::numeric AS total_outstanding_due,
+          (SELECT COUNT(*)::int FROM "pr_flat_land_bookings" WHERE deleted_at IS NOT NULL) AS deleted_count
         FROM "pr_flat_land_bookings" b
         LEFT JOIN "cs_booking_handovers" h
           ON b.uuid = h.booking_id AND h.deleted_at IS NULL
@@ -306,6 +307,9 @@ export class CustomerServiceBookingsService {
         total_outstanding_due: totalDue,
         total_outstanding_due_formatted:
           formatBdtCurrency(totalDue),
+        deleted_count: Number(
+          rawStats?.deleted_count || 0,
+        ),
       };
 
       return {
@@ -349,8 +353,14 @@ export class CustomerServiceBookingsService {
         query.customer_id?.trim();
 
       // Base conditions for filtering (shared by list and tab_counts)
+      const isDeleted = Boolean(
+        (query as any).is_deleted ??
+        (query as any).isDeleted,
+      );
       const baseConditions: string[] = [
-        'b.deleted_at IS NULL',
+        isDeleted
+          ? 'b.deleted_at IS NOT NULL'
+          : 'b.deleted_at IS NULL',
       ];
       const replacements: Record<string, any> = {
         limit,
@@ -387,7 +397,7 @@ export class CustomerServiceBookingsService {
         if (resolved.uuid) {
           replacements.projUuid = resolved.uuid;
           conds.push(
-            'b."projectId"::text = :projUuid',
+            'b.project_id::text = :projUuid',
           );
           conds.push('p.uuid::text = :projUuid');
           conds.push(
@@ -430,7 +440,7 @@ export class CustomerServiceBookingsService {
           COUNT(*) FILTER (WHERE COALESCE(h.handover_status, 'Under Construction') = 'Under Construction')::int AS "under_construction"
         FROM "pr_flat_land_bookings" b
         LEFT JOIN "cs_booking_handovers" h ON b.uuid = h.booking_id AND h.deleted_at IS NULL
-        LEFT JOIN "project" p ON b."projectId" = p.uuid AND p.deleted_at IS NULL
+        LEFT JOIN "project" p ON b.project_id = p.uuid AND p.deleted_at IS NULL
         LEFT JOIN "pr_flat_land" fl ON b."flatLandId" = fl.uuid AND fl.deleted_at IS NULL
         LEFT JOIN "cs_customer_profiles" c ON LOWER(TRIM(b."customerName")) = LOWER(TRIM(c.customer_name)) AND c.deleted_at IS NULL
         ${baseWhereSql};
@@ -555,7 +565,7 @@ export class CustomerServiceBookingsService {
             COALESCE(h.total_snags_resolved, 0)::int AS "total_snags_resolved"
           FROM "pr_flat_land_bookings" b
           LEFT JOIN "cs_booking_handovers" h ON b.uuid = h.booking_id AND h.deleted_at IS NULL
-          LEFT JOIN "project" p ON b."projectId" = p.uuid AND p.deleted_at IS NULL
+          LEFT JOIN "project" p ON b.project_id = p.uuid AND p.deleted_at IS NULL
           LEFT JOIN "pr_flat_land" fl ON b."flatLandId" = fl.uuid AND fl.deleted_at IS NULL
           LEFT JOIN "cs_customer_profiles" c ON LOWER(TRIM(b."customerName")) = LOWER(TRIM(c.customer_name)) AND c.deleted_at IS NULL
           ${listWhereSql}
@@ -572,7 +582,7 @@ export class CustomerServiceBookingsService {
           SELECT COUNT(*)::int AS total
           FROM "pr_flat_land_bookings" b
           LEFT JOIN "cs_booking_handovers" h ON b.uuid = h.booking_id AND h.deleted_at IS NULL
-          LEFT JOIN "project" p ON b."projectId" = p.uuid AND p.deleted_at IS NULL
+          LEFT JOIN "project" p ON b.project_id = p.uuid AND p.deleted_at IS NULL
           LEFT JOIN "pr_flat_land" fl ON b."flatLandId" = fl.uuid AND fl.deleted_at IS NULL
           LEFT JOIN "cs_customer_profiles" c ON LOWER(TRIM(b."customerName")) = LOWER(TRIM(c.customer_name)) AND c.deleted_at IS NULL
           ${listWhereSql};
@@ -847,13 +857,19 @@ export class CustomerServiceBookingsService {
     }
 
     if (!ctx.isSuperAdmin && ctx.orgId) {
-      const [creatorUser] = await this.sequelize.query<{ id: string }>(
-        `SELECT id FROM sys_users WHERE id::text = :createdBy AND org_id = :orgId`,
-        {
-          replacements: { createdBy: booking.createdBy, orgId: ctx.orgId },
-          type: QueryTypes.SELECT,
-        },
-      );
+      const [creatorUser] =
+        await this.sequelize.query<{
+          id: string;
+        }>(
+          `SELECT id FROM sys_users WHERE id::text = :createdBy AND org_id = :orgId`,
+          {
+            replacements: {
+              createdBy: booking.createdBy,
+              orgId: ctx.orgId,
+            },
+            type: QueryTypes.SELECT,
+          },
+        );
       if (!creatorUser) {
         throw new NotFoundException(
           `Booking with UUID "${uuid}" not found`,
@@ -1443,13 +1459,19 @@ export class CustomerServiceBookingsService {
     }
 
     if (!ctx.isSuperAdmin && ctx.orgId) {
-      const [creatorUser] = await this.sequelize.query<{ id: string }>(
-        `SELECT id FROM sys_users WHERE id::text = :createdBy AND org_id = :orgId`,
-        {
-          replacements: { createdBy: booking.createdBy, orgId: ctx.orgId },
-          type: QueryTypes.SELECT,
-        },
-      );
+      const [creatorUser] =
+        await this.sequelize.query<{
+          id: string;
+        }>(
+          `SELECT id FROM sys_users WHERE id::text = :createdBy AND org_id = :orgId`,
+          {
+            replacements: {
+              createdBy: booking.createdBy,
+              orgId: ctx.orgId,
+            },
+            type: QueryTypes.SELECT,
+          },
+        );
       if (!creatorUser) {
         throw new NotFoundException(
           `Booking with UUID "${uuid}" not found`,

@@ -45,13 +45,10 @@ export class AreaService {
   async findOne(uuid: string, currentUser?: any) {
     const where: any = { uuid };
     if (currentUser?.orgId) where.orgId = currentUser.orgId;
-    const row = await this.areas.findOne({
-      where,
-      include: [{ association: 'leads', attributes: ['uuid', 'leadCode', 'clientName'], required: false }],
-    });
+    const row = await this.areas.findOne({ where });
     if (!row) throw new NotFoundException(`Area ${uuid} not found`);
     const data = this.toPublicArea(row);
-    data.leads = (row.leads ?? []).map(lead => ({ uuid: lead.uuid, leadCode: lead.leadCode, clientName: lead.clientName }));
+    data.leads = [];
     return data;
   }
 

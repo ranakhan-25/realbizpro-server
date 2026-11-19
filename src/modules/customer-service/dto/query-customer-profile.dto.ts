@@ -89,6 +89,13 @@ export class QueryCustomerProfileDto {
   project_id?: string;
 
   @ApiPropertyOptional({
+    description: 'Filter by Project UUID or ID (camelCase alias)',
+  })
+  @IsOptional()
+  @IsString()
+  projectId?: string;
+
+  @ApiPropertyOptional({
     description: 'Sort by field',
     default: 'created_at',
   })

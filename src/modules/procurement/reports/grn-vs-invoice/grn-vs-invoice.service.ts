@@ -52,35 +52,73 @@ export class GrnVsInvoiceService {
         ...(query.search ? { [Op.or]: [{ item_name: { [Op.iLike]: `%${query.search}%` } }, { item_code: { [Op.iLike]: `%${query.search}%` } }] } : {}),
       },
       include: [
-        { association: 'grn', where: grnWhere, required: true, include: [
-          { association: 'purchaseOrder', attributes: ['uuid', 'code'], required: false },
-          { association: 'supplier', attributes: ['uuid', 'supplierCode', 'supplierName'], required: false },
-          { association: 'project', attributes: ['uuid', 'code', 'name'], required: false },
-          { association: 'projectType', attributes: ['uuid', 'code', 'name'], required: false },
-          { association: 'purchaseBills', through: { attributes: [] }, attributes: ['uuid', 'code', 'date', 'grand_total'], required: false },
-        ] },
-        { association: 'item', attributes: ['uuid', 'item_code', 'name', 'category_id'], where: Object.keys(itemWhere).length ? itemWhere : undefined, required: Object.keys(itemWhere).length > 0 },
+        {
+          association: 'grn',
+          where: grnWhere,
+          required: true,
+          include: [
+            { association: 'purchaseOrder', attributes: ['uuid', 'code'], required: false },
+            { association: 'supplier', attributes: ['uuid', 'supplierCode', 'supplierName'], required: false },
+            { association: 'project', attributes: ['uuid', 'code', 'name'], required: false },
+            { association: 'projectType', attributes: ['uuid', 'code', 'name'], required: false },
+            { association: 'purchaseBills', through: { attributes: [] }, attributes: ['uuid', 'code', 'date', 'grand_total'], required: false },
+          ],
+        },
+        {
+          association: 'item',
+          attributes: ['uuid', 'item_code', 'name', 'category_id'],
+          where: Object.keys(itemWhere).length ? itemWhere : undefined,
+          required: Object.keys(itemWhere).length > 0,
+        },
       ],
       order: [['id', 'ASC']],
     });
+
     const all = rows.flatMap((line: any) => {
-      const grn = line.grn; const bills: any[] = grn?.purchaseBills ?? [];
+      const grn = line.grn;
+      const bills: any[] = grn?.purchaseBills ?? [];
       const matched = query.bill_id ? bills.filter(bill => bill.uuid === query.bill_id) : bills;
       if (query.bill_id && matched.length === 0) return [];
       const invoiced = matched.length > 0;
       return [{
-        id: line.id, date: grn?.date, purchase_order_no: grn?.purchaseOrder?.code ?? '', grn_no: grn?.code,
-        bill_no: matched.map(bill => bill.code).join(', '), supplier: grn?.supplier, project: grn?.project, project_type: grn?.projectType,
-        item_code: line.item_code, item_name: line.item?.name ?? line.item_name, category_id: line.item?.category_id ?? grn?.category_id,
-        grn_qty: Number(line.quantity), already_bill_qty: invoiced ? Number(line.quantity) : 0,
-        grn_total: Number(line.amount), bill_total: invoiced ? Number(line.amount) : 0,
+        id: line.id,
+        date: grn?.date,
+        purchase_order_no: grn?.purchaseOrder?.code ?? '',
+        grn_no: grn?.code,
+        bill_no: matched.map(bill => bill.code).join(', '),
+        supplier: grn?.supplier,
+        project: grn?.project,
+        project_type: grn?.projectType,
+        item_code: line.item_code,
+        item_name: line.item?.name ?? line.item_name,
+        category_id: line.item?.category_id ?? grn?.category_id,
+        grn_qty: Number(line.quantity),
+        already_bill_qty: invoiced ? Number(line.quantity) : 0,
+        grn_total: Number(line.amount),
+        bill_total: invoiced ? Number(line.amount) : 0,
       }];
     });
-    const page = Math.max(1, Number(query.page) || 1); const limit = Math.min(200, Math.max(1, Number(query.limit) || 10));
-    const offset = (page - 1) * limit; const data = all.slice(offset, offset + limit);
+
+    const page = Math.max(1, Number(query.page) || 1);
+    const limit = Math.min(200, Math.max(1, Number(query.limit) || 10));
+    const offset = (page - 1) * limit;
+    const data = all.slice(offset, offset + limit);
+
     return {
-      data, total: all.length, page, limit, totalPages: Math.ceil(all.length / limit),
-      totals: all.reduce((sum, row) => ({ grn_qty: sum.grn_qty + row.grn_qty, already_bill_qty: sum.already_bill_qty + row.already_bill_qty, grn_total: sum.grn_total + row.grn_total, bill_total: sum.bill_total + row.bill_total }), { grn_qty: 0, already_bill_qty: 0, grn_total: 0, bill_total: 0 }),
+      data,
+      total: all.length,
+      page,
+      limit,
+      totalPages: Math.ceil(all.length / limit),
+      totals: all.reduce(
+        (sum, row) => ({
+          grn_qty: sum.grn_qty + row.grn_qty,
+          already_bill_qty: sum.already_bill_qty + row.already_bill_qty,
+          grn_total: sum.grn_total + row.grn_total,
+          bill_total: sum.bill_total + row.bill_total,
+        }),
+        { grn_qty: 0, already_bill_qty: 0, grn_total: 0, bill_total: 0 },
+      ),
     };
   }
 }

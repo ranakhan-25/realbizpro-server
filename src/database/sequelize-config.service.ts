@@ -39,7 +39,9 @@ export class SequelizeConfigService implements SequelizeOptionsFactory {
       database: databaseConfig.database,
       synchronize: false,
       autoLoadModels:
-        databaseConfig.autoLoadModels,
+        databaseConfig.autoLoadModels !== undefined
+          ? databaseConfig.autoLoadModels
+          : true,
       repositoryMode: true,
       models: [],
       logging: databaseConfig.logging

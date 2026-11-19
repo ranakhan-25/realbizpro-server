@@ -3,6 +3,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op, QueryTypes, WhereOptions } from 'sequelize';
@@ -121,6 +122,9 @@ export class CustomerServiceChangeRequestsService {
     private readonly changeRequestModel: typeof CsChangeRequest,
     @InjectModel(CsCustomerProfile)
     private readonly customerProfileModel: typeof CsCustomerProfile,
+    @Optional()
+    @InjectModel(Project)
+    private readonly projectModel?: typeof Project,
   ) {}
 
   /**
@@ -133,8 +137,20 @@ export class CustomerServiceChangeRequestsService {
       if (!ctx.isSuperAdmin && ctx.orgId) {
         (baseScope as any).organizationId = ctx.orgId;
       }
-      if (projectId) {
-        (baseScope as any).projectId = projectId;
+      let pUuid = projectId && projectId !== 'all' ? projectId.trim() : null;
+      if (pUuid) {
+        if (!/^[0-9a-fA-F-]{36}$/.test(pUuid) && !isNaN(Number(pUuid))) {
+          const proj = await (this.projectModel || Project).findByPk(
+            Number(pUuid),
+            {
+              attributes: ['uuid'],
+            },
+          );
+          pUuid = proj ? proj.uuid : '00000000-0000-0000-0000-000000000000';
+        } else if (!/^[0-9a-fA-F-]{36}$/.test(pUuid)) {
+          pUuid = '00000000-0000-0000-0000-000000000000';
+        }
+        (baseScope as any).projectId = pUuid;
       }
 
       // 1. Active (non-deleted) counts and sum
@@ -283,8 +299,21 @@ export class CustomerServiceChangeRequestsService {
         (where as any).organizationId = ctx.orgId;
       }
 
-      if (query.project_id) {
-        (where as any).projectId = query.project_id;
+      const rawProjectId = query.project_id || query.projectId;
+      if (rawProjectId && rawProjectId !== 'all') {
+        let pUuid = rawProjectId.trim();
+        if (!/^[0-9a-fA-F-]{36}$/.test(pUuid) && !isNaN(Number(pUuid))) {
+          const proj = await (this.projectModel || Project).findByPk(
+            Number(pUuid),
+            {
+              attributes: ['uuid'],
+            },
+          );
+          pUuid = proj ? proj.uuid : '00000000-0000-0000-0000-000000000000';
+        } else if (!/^[0-9a-fA-F-]{36}$/.test(pUuid)) {
+          pUuid = '00000000-0000-0000-0000-000000000000';
+        }
+        (where as any).projectId = pUuid;
       }
 
       // 1. Soft-delete condition
@@ -442,8 +471,22 @@ export class CustomerServiceChangeRequestsService {
   ) {
     const ctx = extractUserContext(user);
     try {
-      // Resolve project_id if booking_id was provided
-      let resolvedProjectId = dto.project_id || null;
+      // Resolve project_id if booking_id or project was provided
+      const rawProj = dto.project_id || dto.projectId;
+      let resolvedProjectId: string | null = null;
+      if (rawProj && rawProj !== 'all') {
+        let pUuid = rawProj.trim();
+        if (!/^[0-9a-fA-F-]{36}$/.test(pUuid) && !isNaN(Number(pUuid))) {
+          const proj = await (this.projectModel || Project).findByPk(
+            Number(pUuid),
+            {
+              attributes: ['uuid'],
+            },
+          );
+          pUuid = proj ? proj.uuid : null;
+        }
+        resolvedProjectId = pUuid;
+      }
       if (!resolvedProjectId && dto.booking_id) {
         const booking = await this.changeRequestModel.sequelize?.query(
           `SELECT "projectId" FROM pr_flat_land_bookings WHERE uuid = :bookingId LIMIT 1`,
@@ -584,8 +627,24 @@ export class CustomerServiceChangeRequestsService {
         dto.customer_profile_id;
     if (dto.project !== undefined)
       updatePayload.project = dto.project;
-    if (dto.project_id !== undefined)
-      updatePayload.projectId = dto.project_id;
+    const rawProj = dto.project_id !== undefined ? dto.project_id : dto.projectId;
+    if (rawProj !== undefined) {
+      if (rawProj && rawProj !== 'all') {
+        let pUuid = rawProj.trim();
+        if (!/^[0-9a-fA-F-]{36}$/.test(pUuid) && !isNaN(Number(pUuid))) {
+          const proj = await (this.projectModel || Project).findByPk(
+            Number(pUuid),
+            {
+              attributes: ['uuid'],
+            },
+          );
+          pUuid = proj ? proj.uuid : null;
+        }
+        updatePayload.projectId = pUuid;
+      } else {
+        updatePayload.projectId = null;
+      }
+    }
     if (dto.booking_id !== undefined)
       updatePayload.bookingId = dto.booking_id;
     if (dto.reason !== undefined)

@@ -48,10 +48,7 @@ export class ProfessionService {
   async findOne(uuid: string, currentUser?: any) {
     const where: any = { uuid };
     if (currentUser?.orgId) where.orgId = currentUser.orgId;
-    const row = await this.professions.findOne({
-      where,
-      include: [{ association: 'leads', attributes: ['uuid', 'leadCode', 'clientName'], required: false }],
-    });
+    const row = await this.professions.findOne({ where });
     if (!row) throw new NotFoundException(`Profession ${uuid} not found`);
     return this.toPublicProfession(row);
   }
