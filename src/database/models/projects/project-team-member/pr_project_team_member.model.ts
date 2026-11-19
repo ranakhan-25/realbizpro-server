@@ -24,7 +24,7 @@ import { SysOrganization } from "src/database/models/system/sys_organization.mod
       name: 'ProjectTeamMember_projectId_email_idx',
       unique: true,
       fields: ['project_id', 'email'],
-      where: { deletedAt: null },
+      where: { deleted_at: null },
     },
   ],
 })
