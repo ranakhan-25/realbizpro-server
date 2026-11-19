@@ -1,17 +1,15 @@
-import { Controller, Get, VERSION_NEUTRAL } from '@nestjs/common';
-import { Public } from './common/decorators/public.decorator';
+/* eslint-disable prettier/prettier */
+import { Controller, Get } from '@nestjs/common';
+import { AppService } from './app.service';
 
 @Controller()
 export class AppController {
-  @Get({ version: VERSION_NEUTRAL })
-  @Public()
-  getRoot() {
-    return {
-      status: 'ok',
-      service: 'RealBiz Pro API',
-      message: 'Server is running successfully on Render!',
-      health: '/realbizpro/api/v1/health',
-      timestamp: new Date().toISOString(),
-    };
+  constructor(
+    private readonly appService: AppService,
+  ) {}
+
+  @Get()
+  getHello(): string {
+    return this.appService.getHello();
   }
 }
