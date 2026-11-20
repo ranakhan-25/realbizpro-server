@@ -65,7 +65,6 @@ export function securitySetup(
     // PRODUCTION - Full security enabled
     const productionOrigins = [
       'http://217.217.248.182',
-      'http://217.217.248.182',
       'http://192.168.150.90',
       'http://192.168.150.86',
       'http://192.168.150.45',
@@ -79,6 +78,8 @@ export function securitySetup(
       'http://192.168.150.22',
       'https://easysofts.net',
       'https://api.easysofts.net',
+      'https://realbiz-pro-frontend-8e6a.onrender.com',
+      ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
     ];
 
     // Helmet with full security
@@ -90,6 +91,7 @@ export function securitySetup(
             connectSrc: [
               "'self'",
               ...productionOrigins,
+              'https://*.onrender.com',
             ],
             scriptSrc: ["'self'"],
             styleSrc: [
@@ -124,9 +126,8 @@ export function securitySetup(
           : undefined;
 
         if (
-          productionOrigins.includes(
-            originwithoutport,
-          )
+          (originwithoutport && productionOrigins.includes(originwithoutport)) ||
+          (originwithoutport && originwithoutport.endsWith('.onrender.com'))
         ) {
           callback(null, true);
         } else {
@@ -153,6 +154,8 @@ export function securitySetup(
         'Authorization',
         'X-API-KEY',
         'X-CSRF-Token',
+        'x-organization-id',
+        'X-Organization-Id',
       ],
       exposedHeaders: securityConfig?.cors
         ?.exposedHeaders || [
